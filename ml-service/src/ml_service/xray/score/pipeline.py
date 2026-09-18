@@ -29,22 +29,30 @@ class ScoreEngine:
     def fit(cls, panel: pl.DataFrame, cross_validate: bool = True) -> ScoreEngine:
         """Fit normaliser + forward models on a training panel."""
         normalizer = QuantileNormalizer().fit(panel)
-        prepared = add_targets(composite_score(pillar_scores(normalizer.transform(panel))))
+        prepared = add_targets(
+            composite_score(pillar_scores(normalizer.transform(panel)))
+        )
         models = ForwardModels()
         if cross_validate:
             models.cross_validate(prepared)
         models.fit(prepared)
         engine = cls(normalizer=normalizer, models=models)
-        engine.calibration = fit_calibration(final_scores(models.predict(prepared))["score_raw"].to_numpy())
+        engine.calibration = fit_calibration(
+            final_scores(models.predict(prepared))["score_raw"].to_numpy()
+        )
         return engine
 
     def prepare(self, panel: pl.DataFrame) -> pl.DataFrame:
         """Normalise, build pillars/composite and targets (targets only where future exists)."""
-        return add_targets(composite_score(pillar_scores(self.normalizer.transform(panel))))
+        return add_targets(
+            composite_score(pillar_scores(self.normalizer.transform(panel)))
+        )
 
     def score(self, panel: pl.DataFrame) -> pl.DataFrame:
         """Score a panel (train or unseen companies)."""
-        scored = final_scores(self.models.predict(self.prepare(panel)), self.calibration)
+        scored = final_scores(
+            self.models.predict(self.prepare(panel)), self.calibration
+        )
         return add_regimes(scored)
 
     def save(self, folder: Path = MODELS_DIR) -> None:
@@ -57,4 +65,8 @@ class ScoreEngine:
     def load(cls, folder: Path = MODELS_DIR) -> ScoreEngine:
         """Load a persisted engine."""
         calibration = json.loads((folder / "calibration.json").read_text())
-        return cls(QuantileNormalizer.load(folder / "normalizer.json"), ForwardModels.load(folder), calibration)
+        return cls(
+            QuantileNormalizer.load(folder / "normalizer.json"),
+            ForwardModels.load(folder),
+            calibration,
+        )

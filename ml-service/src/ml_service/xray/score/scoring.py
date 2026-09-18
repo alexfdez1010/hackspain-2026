@@ -13,11 +13,15 @@ SMOOTH_ALPHA = 0.6
 TREND_WINDOW = 6
 
 
-def _pdo_scale(prob_bad: np.ndarray, pdo: float = 12.0, base_score: float = 60.0) -> np.ndarray:
+def _pdo_scale(
+    prob_bad: np.ndarray, pdo: float = 12.0, base_score: float = 60.0
+) -> np.ndarray:
     """Scorecard scaling: score = base + factor * ln(odds_good), clipped to 0-100."""
     p = np.clip(prob_bad, 1e-4, 1 - 1e-4)
     factor = pdo / np.log(2)
-    return np.clip(base_score + factor * np.log((1 - p) / p) - factor * np.log(3.0), 0, 100)
+    return np.clip(
+        base_score + factor * np.log((1 - p) / p) - factor * np.log(3.0), 0, 100
+    )
 
 
 def _theil_sen(values: np.ndarray) -> float:
@@ -39,7 +43,9 @@ def calibrate(score_raw: np.ndarray, grid: list[float]) -> np.ndarray:
     return np.clip(3 + 94 * pct, 0, 100)
 
 
-def final_scores(panel: pl.DataFrame, calibration: list[float] | None = None) -> pl.DataFrame:
+def final_scores(
+    panel: pl.DataFrame, calibration: list[float] | None = None
+) -> pl.DataFrame:
     """Add ``score_raw``, ``score`` (smoothed), ``trend_6m`` and ``direction``.
 
     score_raw blends: current pillar composite (level), model view of the
@@ -57,9 +63,14 @@ def final_scores(panel: pl.DataFrame, calibration: list[float] | None = None) ->
     raw = np.clip(raw, 0, 100)
     if calibration is not None:
         raw = calibrate(raw, calibration)
-    panel = panel.with_columns(pl.Series("score_raw", raw), pl.Series("stress_points", stress_pts))
     panel = panel.with_columns(
-        pl.col("score_raw").ewm_mean(alpha=SMOOTH_ALPHA, adjust=True).over("company_id").alias("score")
+        pl.Series("score_raw", raw), pl.Series("stress_points", stress_pts)
+    )
+    panel = panel.with_columns(
+        pl.col("score_raw")
+        .ewm_mean(alpha=SMOOTH_ALPHA, adjust=True)
+        .over("company_id")
+        .alias("score")
     )
     slopes = []
     for _, g in panel.group_by("company_id", maintain_order=True):
@@ -75,5 +86,7 @@ def final_scores(panel: pl.DataFrame, calibration: list[float] | None = None) ->
         .then(pl.lit("deteriorating"))
         .otherwise(pl.lit("stable"))
         .alias("direction"),
-        (pl.col("score") - pl.col("score").shift(1).over("company_id")).alias("score_delta_1m"),
+        (pl.col("score") - pl.col("score").shift(1).over("company_id")).alias(
+            "score_delta_1m"
+        ),
     )

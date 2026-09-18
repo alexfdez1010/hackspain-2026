@@ -23,13 +23,19 @@ MODEL_FEATURES: tuple[str, ...] = tuple(s.name for s in FEATURE_SPECS) + (
     "pillar_activity",
 )
 MONOTONE = {s.name: s.direction for s in FEATURE_SPECS}
-MONOTONE.update({c: 1 for c in MODEL_FEATURES if c.startswith(("composite", "pillar_"))})
+MONOTONE.update(
+    {c: 1 for c in MODEL_FEATURES if c.startswith(("composite", "pillar_"))}
+)
 MONOTONE["months_observed"] = 0
 # Growth / margin signals mean-revert, so the future-composite regressor is left
 # free on them; the stress classifier keeps every constraint for explainability.
 FREE_FOR_FUTURE = {c for c in MODEL_FEATURES if "growth" in c} | {
-    "net_margin", "net_margin_3m", "inflow_volatility", "customer_concentration",
-    "pillar_cashflow", "pillar_activity",
+    "net_margin",
+    "net_margin_3m",
+    "inflow_volatility",
+    "customer_concentration",
+    "pillar_cashflow",
+    "pillar_activity",
 }
 
 BASE_PARAMS = {
@@ -70,7 +76,9 @@ class ForwardModels:
         rows = train.filter(pl.col("has_future"))
         x = _matrix(rows)
         self.stress = lgb.train(
-            _params("binary", -1), lgb.Dataset(x, rows["y_stress"].cast(pl.Int32).to_numpy()), N_ROUNDS
+            _params("binary", -1),
+            lgb.Dataset(x, rows["y_stress"].cast(pl.Int32).to_numpy()),
+            N_ROUNDS,
         )
         self.future = lgb.train(
             _params("regression", 1, FREE_FOR_FUTURE),
@@ -98,7 +106,10 @@ class ForwardModels:
             x = _matrix(rows[va])
             p_stress[va] = fold.stress.predict(x)
             p_future[va] = fold.future.predict(x)
-        self.oof = rows.with_columns(pl.Series("p_stress", p_stress), pl.Series("pred_future_composite", p_future))
+        self.oof = rows.with_columns(
+            pl.Series("p_stress", p_stress),
+            pl.Series("pred_future_composite", p_future),
+        )
         return self
 
     def save(self, folder: Path) -> None:

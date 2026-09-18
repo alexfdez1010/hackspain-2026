@@ -31,7 +31,9 @@ RAW_TABLES = (
 )
 
 CASH_ACCOUNT_TYPES = ("checking", "saving", "wallet", "expensesPlatform")
-INTERCOMPANY_REGEX = r"(?i)traspaso|intercompany|transfer(encia)? (a|desde|entre) (cta|cuenta)"
+INTERCOMPANY_REGEX = (
+    r"(?i)traspaso|intercompany|transfer(encia)? (a|desde|entre) (cta|cuenta)"
+)
 
 # Narrative regexes for stress events found in bank descriptions (Spanish banks).
 STRESS_REGEX = {
@@ -73,13 +75,23 @@ FEATURE_SPECS: tuple[FeatureSpec, ...] = (
     FeatureSpec("inflow_volatility", "cashflow", -1, "Volatilidad de cobros"),
     FeatureSpec("net_positive_share_6m", "cashflow", 1, "Meses con caja neta positiva"),
     FeatureSpec("returned_debit_rate", "payments", -1, "Recibos devueltos"),
-    FeatureSpec("stress_event_rate", "payments", -1, "Descubiertos, demoras y embargos"),
-    FeatureSpec("supplier_delay_days", "payments", -1, "Retraso medio pagando proveedores"),
-    FeatureSpec("payables_overdue_share", "payments", -1, "Facturas a proveedor vencidas"),
+    FeatureSpec(
+        "stress_event_rate", "payments", -1, "Descubiertos, demoras y embargos"
+    ),
+    FeatureSpec(
+        "supplier_delay_days", "payments", -1, "Retraso medio pagando proveedores"
+    ),
+    FeatureSpec(
+        "payables_overdue_share", "payments", -1, "Facturas a proveedor vencidas"
+    ),
     FeatureSpec("tax_regularity", "payments", 1, "Regularidad con Hacienda y TGSS"),
     FeatureSpec("dso_days", "receivables", -1, "Retraso medio de cobro (DSO)"),
-    FeatureSpec("receivables_overdue_share", "receivables", -1, "Facturas a cliente vencidas"),
-    FeatureSpec("customer_concentration", "receivables", -1, "Concentración de clientes"),
+    FeatureSpec(
+        "receivables_overdue_share", "receivables", -1, "Facturas a cliente vencidas"
+    ),
+    FeatureSpec(
+        "customer_concentration", "receivables", -1, "Concentración de clientes"
+    ),
     FeatureSpec("collection_growth_3m", "receivables", 1, "Crecimiento de facturación"),
     FeatureSpec("loc_utilization", "debt", -1, "Uso de líneas de crédito"),
     FeatureSpec("debt_service_ratio", "debt", -1, "Servicio de deuda sobre cobros"),
@@ -91,7 +103,14 @@ FEATURE_SPECS: tuple[FeatureSpec, ...] = (
     FeatureSpec("counterparty_growth_3m", "activity", 1, "Crecimiento de contrapartes"),
 )
 
-PILLARS: tuple[str, ...] = ("liquidity", "cashflow", "payments", "receivables", "debt", "activity")
+PILLARS: tuple[str, ...] = (
+    "liquidity",
+    "cashflow",
+    "payments",
+    "receivables",
+    "debt",
+    "activity",
+)
 PILLAR_LABELS_ES = {
     "liquidity": "Liquidez",
     "cashflow": "Flujo de caja",

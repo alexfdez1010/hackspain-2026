@@ -19,7 +19,9 @@ def _changepoints(series: np.ndarray) -> list[int]:
     return [b for b in algo.predict(pen=PEN) if b < len(series)]
 
 
-def _label_row(scores: np.ndarray, i: int, cps: list[int]) -> tuple[str, float, int | None]:
+def _label_row(
+    scores: np.ndarray, i: int, cps: list[int]
+) -> tuple[str, float, int | None]:
     """Regime label at position i using only scores[: i + 1] (point-in-time)."""
     past = [c for c in cps if c <= i]
     last_cp = past[-1] if past else None
@@ -36,9 +38,15 @@ def _label_row(scores: np.ndarray, i: int, cps: list[int]) -> tuple[str, float, 
     if i >= LOOKBACK:
         ref = scores[i - LOOKBACK]
         window = scores[i - LOOKBACK + 1 : i + 1]
-        if window.min() <= ref - SHIFT_POINTS and abs(scores[i] - ref) < SHIFT_POINTS / 2:
+        if (
+            window.min() <= ref - SHIFT_POINTS
+            and abs(scores[i] - ref) < SHIFT_POINTS / 2
+        ):
             return "transient_dip", float(window.min() - ref), last_cp
-        if window.max() >= ref + SHIFT_POINTS and abs(scores[i] - ref) < SHIFT_POINTS / 2:
+        if (
+            window.max() >= ref + SHIFT_POINTS
+            and abs(scores[i] - ref) < SHIFT_POINTS / 2
+        ):
             return "transient_spike", float(window.max() - ref), last_cp
     return "steady", shift, last_cp
 

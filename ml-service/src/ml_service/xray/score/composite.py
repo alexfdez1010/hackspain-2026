@@ -33,11 +33,22 @@ def pillar_scores(normed: pl.DataFrame) -> pl.DataFrame:
     for pillar in PILLARS:
         specs = [s for s in FEATURE_SPECS if s.pillar == pillar]
         num = sum(
-            pl.col(f"{s.name}__norm") * pl.col(f"{s.name}__known").cast(pl.Float64) * FEATURE_WEIGHTS.get(s.name, 1.0)
+            pl.col(f"{s.name}__norm")
+            * pl.col(f"{s.name}__known").cast(pl.Float64)
+            * FEATURE_WEIGHTS.get(s.name, 1.0)
             for s in specs
         )
-        den = sum(pl.col(f"{s.name}__known").cast(pl.Float64) * FEATURE_WEIGHTS.get(s.name, 1.0) for s in specs)
-        exprs.append(pl.when(den > 0).then(num / den * 100).otherwise(None).alias(f"pillar_{pillar}"))
+        den = sum(
+            pl.col(f"{s.name}__known").cast(pl.Float64)
+            * FEATURE_WEIGHTS.get(s.name, 1.0)
+            for s in specs
+        )
+        exprs.append(
+            pl.when(den > 0)
+            .then(num / den * 100)
+            .otherwise(None)
+            .alias(f"pillar_{pillar}")
+        )
         exprs.append((den > 0).alias(f"pillar_{pillar}__known"))
     return normed.with_columns(exprs)
 
@@ -45,8 +56,13 @@ def pillar_scores(normed: pl.DataFrame) -> pl.DataFrame:
 def composite_score(scored: pl.DataFrame) -> pl.DataFrame:
     """Add ``composite`` (0-100): pillar-weighted mean over pillars with data."""
     num = sum(
-        pl.col(f"pillar_{p}").fill_null(0.0) * pl.col(f"pillar_{p}__known").cast(pl.Float64) * w
+        pl.col(f"pillar_{p}").fill_null(0.0)
+        * pl.col(f"pillar_{p}__known").cast(pl.Float64)
+        * w
         for p, w in PILLAR_WEIGHTS.items()
     )
-    den = sum(pl.col(f"pillar_{p}__known").cast(pl.Float64) * w for p, w in PILLAR_WEIGHTS.items())
+    den = sum(
+        pl.col(f"pillar_{p}__known").cast(pl.Float64) * w
+        for p, w in PILLAR_WEIGHTS.items()
+    )
     return scored.with_columns((num / den).alias("composite"))

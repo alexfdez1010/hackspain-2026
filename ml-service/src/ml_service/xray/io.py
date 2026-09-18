@@ -32,7 +32,9 @@ class Dataset:
             csv = self.raw_dir / f"{name}.csv"
             if not csv.exists():
                 return pl.DataFrame()
-            df = pl.read_csv(csv, infer_schema_length=100_000, try_parse_dates=True, null_values=[""])
+            df = pl.read_csv(
+                csv, infer_schema_length=100_000, try_parse_dates=True, null_values=[""]
+            )
             df.write_parquet(cached)
         return pl.read_parquet(cached)
 
@@ -41,6 +43,8 @@ class Dataset:
         bp = self.table("banking_products")
         dp = self.table("debt_products")
         frames = [t.select("product_id", "type") for t in (bp, dp) if t.height]
-        return pl.concat(frames).unique("product_id") if frames else pl.DataFrame(
-            schema={"product_id": pl.String, "type": pl.String}
+        return (
+            pl.concat(frames).unique("product_id")
+            if frames
+            else pl.DataFrame(schema={"product_id": pl.String, "type": pl.String})
         )
