@@ -5,11 +5,26 @@ description = "HackSpain 2026 service for domain logic and ML-based analysis"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "duckdb>=1.5.5",
+    "fastapi>=0.141.1",
+    "lightgbm>=4.7.0",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.3",
+    "pandas>=3.0.6",
+    "polars>=1.44.2",
+    "pyarrow>=25.0.1",
+    "pydantic>=2.13.5",
     "python-dotenv>=1.1.1",
+    "python-multipart>=0.0.32",
+    "ruptures>=1.1.10",
+    "scikit-learn>=1.9.1",
+    "shap>=0.52.0",
+    "uvicorn>=0.53.0",
 ]
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pytest>=8.4.2",
     "ruff>=0.13.0",
 ]

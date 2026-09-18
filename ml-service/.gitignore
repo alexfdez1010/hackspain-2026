@@ -5,3 +5,13 @@
 __pycache__
 .ruff_cache
 .vscode
+# datasets and derived artefacts (large, local); trained models are versioned
+data/*
+!data/models/
+!data/output/
+data/output/*
+!data/output/web/
+data/output/web/*
+!data/output/web/summary.json
+!data/output/evaluation.json
+!data/output/anticipation.json
