@@ -49,3 +49,8 @@ addopts = "-v --capture=no"
 line-length = 88
 target-version = "py312"
 src = ["src", "tests"]
+
+[tool.ruff.lint]
+# Month columns in the panel are timezone-naive polars datetimes, so naive
+# `datetime` literals are intentional across the engine and its tests.
+ignore = ["DTZ001", "DTZ005"]

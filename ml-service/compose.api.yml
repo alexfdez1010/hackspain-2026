@@ -1,0 +1,25 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hackspain-xray-api:latest
+    container_name: xray-api
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      PORT: "8000"
+      XRAY_DATA_DIR: /app/data
+      XRAY_CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+      # XRAY_API_KEY: change-me   # guards POST /api/score and /api/score/path
+    # Uncomment to serve artefacts regenerated on the host instead of the baked
+    # ones (the image already ships data/models and data/output/web).
+    # volumes:
+    #   - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
