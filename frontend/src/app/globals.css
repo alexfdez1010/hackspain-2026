@@ -1,0 +1,61 @@
+@import 'tailwindcss';
+@import '@heroui/styles';
+
+/*
+ * Score scale. One token per band so that every chart, chip and cell in the
+ * product reads the same colour for the same score.
+ */
+:root {
+  --score-critical: oklch(0.6 0.21 26);
+  --score-fragile: oklch(0.72 0.15 72);
+  --score-neutral: oklch(0.62 0.03 262);
+  --score-solid: oklch(0.63 0.15 156);
+}
+
+/*
+ * HeroUI ships its dark palette behind `.dark` / `[data-theme="dark"]`. The app
+ * has no theme switch, so the system preference drives it: only the primitive
+ * tokens are redefined here and HeroUI's derived tokens (hover, soft, borders)
+ * recompute from them.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --background: oklch(12% 0.005 285.823);
+    --foreground: oklch(0.9911 0 0);
+    --surface: oklch(0.2103 0.0059 285.89);
+    --surface-secondary: oklch(0.257 0.0037 286.14);
+    --surface-tertiary: oklch(0.2721 0.0024 247.91);
+    --overlay: oklch(0.2103 0.0059 285.89);
+    --muted: oklch(70.5% 0.015 286.067);
+    --default: oklch(27.4% 0.006 286.033);
+    --default-foreground: oklch(0.9911 0 0);
+    --field-background: oklch(0.2103 0.0059 285.89);
+    --segment: oklch(0.3964 0.01 285.93);
+    --segment-foreground: oklch(0.9911 0 0);
+    --border: oklch(28% 0.006 286.033);
+    --separator: oklch(25% 0.006 286.033);
+    --backdrop: rgba(0, 0, 0, 0.6);
+
+    --score-critical: oklch(0.68 0.2 26);
+    --score-fragile: oklch(0.79 0.15 76);
+    --score-neutral: oklch(0.72 0.03 262);
+    --score-solid: oklch(0.74 0.16 157);
+  }
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-score-critical: var(--score-critical);
+  --color-score-fragile: var(--score-fragile);
+  --color-score-neutral: var(--score-neutral);
+  --color-score-solid: var(--score-solid);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}

@@ -4,8 +4,8 @@ Monorepo with two applications:
 
 | Path                          | What it is                                                   |
 | ----------------------------- | ------------------------------------------------------------ |
-| [`web/`](./web)               | Next.js 16 app (React 19, TailwindCSS 4, HeroUI v3, Prisma)  |
-| [`ml-service/`](./ml-service) | Python 3.12 service with the domain logic and ML analysis    |
+| [`frontend/`](./frontend)               | Next.js 16 app (React 19, TailwindCSS 4, HeroUI v3, Prisma)  |
+| [`backend/`](./backend) | Python 3.12 service with the domain logic and ML analysis    |
 
 Each app is self-contained: it has its own dependencies, tests, lint setup and
 README. Run commands from inside the app directory or through the root
@@ -15,13 +15,13 @@ README. Run commands from inside the app directory or through the root
 
 ```bash
 # Web (requires bun and docker)
-cd web
+cd frontend
 bun install
 cp .env.example .env
 bun run dev
 
 # ML service (requires uv)
-cd ml-service
+cd backend
 uv sync
 cp .env.example .env
 make main
@@ -31,8 +31,8 @@ make main
 
 ```
 .
-├── web/            # Next.js application       → web/README.md
-├── ml-service/     # Python ML service         → ml-service/README.md
+├── frontend/       # Next.js application       → frontend/README.md
+├── backend/        # Python ML service + API   → backend/README.md
 ├── .agents/        # Vendored agent skills (skills-lock.json at root)
 ├── .claude/        # Claude Code config and skill symlinks
 ├── .vscode/        # Shared editor settings
@@ -44,6 +44,6 @@ make main
 
 ```bash
 make pre-commit          # both apps
-cd web && bun run pre-commit
-cd ml-service && make pre-commit
+cd frontend && bun run pre-commit
+cd backend && make pre-commit
 ```
