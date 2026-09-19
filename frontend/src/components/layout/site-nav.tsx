@@ -5,6 +5,11 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { CompanySearch } from '@/components/layout/company-search';
+import { MobileNav } from '@/components/layout/mobile-nav';
+import {
+  NavSectionLinks,
+  type NavSection,
+} from '@/components/layout/nav-section-links';
 import { PulseWordmark } from '@/components/ui/wordmark';
 import type { CompanyOption } from '@/lib/company/options';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
@@ -14,18 +19,7 @@ import {
   companyRoutes,
   COMPANY_QUERY_KEY,
   sectionFromPath,
-  type CompanySection,
 } from '@/lib/routes';
-
-/** One destination of the navigation. */
-interface NavSection {
-  /** Section the entry opens, as {@link sectionFromPath} names it. */
-  key: CompanySection;
-  href: string;
-  label: string;
-  /** Route prefix owned by the entry. */
-  match: string;
-}
 
 interface SiteNavProps {
   /** Every company of the export, as the search lists them. */
@@ -122,15 +116,14 @@ export function resolveNavCompany(
  * every section keeps its own URL and can be opened in a new tab.
  *
  * Six tabs, a search and a mark do not fit one row below `lg`, so there the
- * bar takes two: the mark with the search filling the rest of the first one,
- * and the tabs on their own row with 40 px targets, scrolling sideways instead
- * of wrapping so the bar never grows a third row. The prototype's tagline is
- * left out: with the search beside the tabs it no longer fits the 1240 px
- * row, and the landing already carries it. The current tab is the section
+ * bar keeps only the mark and one menu button; the search and the sections
+ * move into the drawer of {@link MobileNav}. The prototype's tagline is left
+ * out: with the search beside the tabs it no longer fits the 1240 px row, and
+ * the landing already carries it. The current tab is the section
  * {@link sectionFromPath} names, so a variable page keeps PULSE current.
  *
  * @param props - The companies the search offers.
- * @returns The mark and tagline, the company search and the section links.
+ * @returns The mark, the company search and the section links, or the menu.
  */
 export function SiteNav({ companies }: SiteNavProps) {
   const pathname = usePathname();
@@ -147,7 +140,7 @@ export function SiteNav({ companies }: SiteNavProps) {
     <header className="sticky top-0 z-20 border-b border-hairline bg-page/85 backdrop-blur">
       <nav
         aria-label="Secciones"
-        className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-x-4 gap-y-1 px-4 pt-2 sm:px-8 lg:flex-nowrap lg:gap-x-6 lg:py-4"
+        className="mx-auto flex max-w-[1240px] items-center justify-between gap-x-4 px-4 py-2 sm:px-8 lg:gap-x-6 lg:py-4"
       >
         <Link
           href="/"
@@ -157,34 +150,27 @@ export function SiteNav({ companies }: SiteNavProps) {
           <Image src="/icon.svg" alt="" width={40} height={40} unoptimized />
           <PulseWordmark className="h-3.5" />
         </Link>
-        <div className="min-w-0 flex-1 lg:ml-auto lg:w-56 lg:flex-none xl:w-64">
-          <CompanySearch
-            key={companyId}
+        <div className="hidden min-w-0 items-center gap-x-6 lg:flex">
+          <div className="w-56 xl:w-64">
+            <CompanySearch
+              key={companyId}
+              companies={companies}
+              selectedId={companyId}
+              onSelect={switchCompany}
+            />
+          </div>
+          <NavSectionLinks sections={sections} current={current} layout="row" />
+        </div>
+        <div className="lg:hidden">
+          <MobileNav
             companies={companies}
-            selectedId={companyId}
-            onSelect={switchCompany}
+            companyId={companyId}
+            sections={sections}
+            current={current}
+            pathname={pathname}
+            onSelectCompany={switchCompany}
           />
         </div>
-        <ul className="-mx-3 flex basis-full items-center gap-0.5 overflow-x-auto [scrollbar-width:none] lg:mx-0 lg:basis-auto [&::-webkit-scrollbar]:hidden">
-          {sections.map((section) => {
-            const active = section.key === current;
-            return (
-              <li key={section.key} className="shrink-0">
-                <Link
-                  href={section.href}
-                  aria-current={active ? 'page' : undefined}
-                  className={`flex min-h-10 items-center rounded-lg px-3 py-[11px] text-[15px] font-medium leading-none whitespace-nowrap transition-colors ${
-                    active
-                      ? 'text-link-accent bg-brand-subtle'
-                      : 'text-ink-secondary hover:text-ink'
-                  }`}
-                >
-                  {section.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
       </nav>
     </header>
   );

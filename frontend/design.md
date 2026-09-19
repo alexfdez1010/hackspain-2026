@@ -287,9 +287,9 @@ Component rules:
   scrollan en horizontal dentro de su contenedor. El mapa de calor y el treemap
   del método se dibujan por columnas desde `md` y por filas (un pilar por fila,
   misma proporción de áreas) por debajo, sin scroll lateral. La navegación
-  ocupa dos filas en móvil: logotipo y buscador arriba, secciones abajo con
-  objetivos táctiles de 40 px; el buscador mantiene 16 px de fuente para que
-  iOS no haga zoom al enfocarlo.
+  ocupa una fila en móvil: logotipo y botón de menú; el buscador y las
+  secciones viven en el `Drawer` lateral con objetivos táctiles de 48 px; el
+  buscador mantiene 16 px de fuente para que iOS no haga zoom al enfocarlo.
 
 ## 5. Accessibility and content
 
@@ -322,9 +322,12 @@ Component rules:
   azul de enlace sobre `brand-subtle` y el resto en secundario sobre
   transparente; la actual es la sección que nombra `sectionFromPath`, así que
   una página de variable mantiene PULSE. El claim del mock no cabe junto al
-  buscador en 1240 px y se queda en la landing; bajo `lg` la barra son dos filas (marca y buscador arriba, pestañas debajo
-  con 40 px de alto) y la fila de pestañas se desplaza en horizontal sin
-  barra visible en vez de envolver, para no crecer a una tercera fila. En `lg` el
+  buscador en 1240 px y se queda en la landing; bajo `lg` la barra es una sola
+  fila de marca y botón de menú (44 px, tres hairlines), y un `Drawer` de HeroUI
+  desde la derecha (`min(360px, 88vw)`) contiene el buscador arriba y las seis
+  secciones en columna con objetivos de 48 px y 17/500; la actual va en azul
+  de enlace sobre `brand-subtle`; elegir sección o empresa cierra el menú
+  porque cambia la ruta; Escape cierra y el foco vuelve al botón. En `lg` el
   hero es 50/50 y el pie ocupa el cuadrante derecho; por debajo de `lg`,
   wordmark, accesos y pie se apilan dentro de los gutters.
 - Mobile-first exceptions: las tablas mes a mes y de variables mantienen su
@@ -410,6 +413,7 @@ patterns.
 | 2026-09-19 | El treemap del mapa de calor se sustituye por un mosaico por pilar: ancho de columna = peso del pilar, alto de celda = 13 px por punto de peso, color sólo en el punto de 8 px | El área como peso no se leía con 11 celdas; el alto conserva el orden y la superficie queda lisa, así la banda se gasta una vez por celda | Equipo Pulse |
 | 2026-09-19 | Elegir una variable abre una tira de detalle bajo el mosaico en vez de navegar; la página de la variable queda a un «Ver la variable →» | El lector compara varias variables de un mes antes de profundizar en una; navegar en cada clic hacía perder el mapa | Equipo Pulse |
 | 2026-09-19 | La trayectoria ajusta el dominio vertical a los datos, conteniendo siempre 35 y 65, en lugar de la escala fija 0-100 | Una empresa entre 38 y 48 era una línea plana en 0-100; las guías de banda siguen en pantalla y el zoom no engaña | Equipo Pulse |
+| 2026-09-19 | Bajo `lg` la barra pasa de dos filas (buscador + pestañas con scroll lateral) a una fila con botón de menú y `Drawer` lateral con buscador y secciones en columna | Seis pestañas desplazándose bajo el buscador se leían como ruido y ocultaban las últimas; una fila limpia y un menú con objetivos de 48 px es el patrón que el lector espera en el móvil | Equipo Pulse |
 | 2026-09-19 | La cabecera de empresa cambia «Tensión a 6 meses» por «Salud de los clientes»: media de la salud de pago de sus clientes (1 − parte de facturas tarde en 6 m) ponderada por facturación, sobre 100, con la banda y el número de clientes debajo | La tensión ya la cobra el precio y la nombran las acciones; qué tal pagan los clientes es lo que un director financiero pregunta al abrir la empresa, y el dataset no tiene un PULSE por cliente porque los clientes no son empresas del panel | Equipo Pulse |
 | 2026-09-19 | Las celdas del mosaico y las cards de pilar de Diagnóstico llevan el lavado de su banda (`bandSurfaceStyle`: borde al 30 % y fondo al 8 % del color de la banda, mezclados con los tokens neutros, como la alerta de señal); las celdas sin datos siguen grises | La gravedad debe leerse de un vistazo en toda la página, no sólo en un punto de 8 px; la misma mezcla en alerta, celdas y cards hace que «color» signifique siempre «gravedad» | Equipo Pulse |
 | 2026-09-19 | `PulseCompanyLinks` desaparece de la página de empresa; cada ruta se enlaza junto a la cifra que la motiva (acciones, alerta, detalle del mosaico, ficha del modelo) | El mock no tiene aside y un enlace suelto no dice por qué ir | Equipo Pulse |
