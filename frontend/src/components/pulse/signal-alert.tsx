@@ -63,7 +63,7 @@ export function PulseSignalAlert({ company, href }: PulseSignalAlertProps) {
           href={href}
           className="group mt-2 inline-flex w-fit items-center gap-1.5 text-[15px] font-medium leading-[1.2] text-ink"
         >
-          Ver todas las señales
+          Ver todas las alertas
           <i
             aria-hidden
             className="not-italic transition-transform group-hover:translate-x-1"

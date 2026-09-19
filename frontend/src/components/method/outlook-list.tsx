@@ -50,7 +50,7 @@ export function MethodOutlookList({
     },
     {
       key: 'senales',
-      title: 'Señales',
+      title: 'Alertas',
       text: `Cuando la nota se aleja 6 puntos o más de su media de los tres meses anteriores y dos pilares se mueven a la vez, la página levanta la mano. Con lo que se sabe ese mes dice si será un bache que pasa o una caída que dura, y tres meses después cuenta qué fue.${early ? ` ${early}` : ''}`,
     },
     {

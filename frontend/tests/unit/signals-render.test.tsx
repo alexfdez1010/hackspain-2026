@@ -108,7 +108,7 @@ describe('the company signals page', () => {
         params: Promise.resolve({ id: 'COMP_0001' }),
       }),
     );
-    expect(markup).toContain('Señales de Atresmedia Labs');
+    expect(markup).toContain('Alertas de Atresmedia Labs');
     expect(markup).toContain(
       'Una alerta abierta hasta ago 2026; la nota se movió de verdad en 2 meses.',
     );
@@ -122,7 +122,7 @@ describe('the company signals page', () => {
     const metadata = await generateMetadata({
       params: Promise.resolve({ id: 'COMP_0001' }),
     });
-    expect(metadata.title).toBe('Atresmedia Labs — Señales · Embat Pulse');
+    expect(metadata.title).toBe('Atresmedia Labs — Alertas · Embat Pulse');
     await expect(
       CompanySignalsPage({ params: Promise.resolve({ id: 'COMP_9999' }) }),
     ).rejects.toThrow();

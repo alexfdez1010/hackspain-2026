@@ -13,7 +13,7 @@ describe('NavSectionLinks', () => {
     );
     expect(markup.match(/<a /g)).toHaveLength(6);
     expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
-    expect(markup).toMatch(/<a[^>]*aria-current="page"[^>]*>Señales</);
+    expect(markup).toMatch(/<a[^>]*aria-current="page"[^>]*>Alertas</);
     expect(markup).toContain('href="/company/COMP_0001/signals"');
     expect(markup).toContain('href="/method?company=COMP_0001"');
   });

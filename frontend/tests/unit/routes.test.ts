@@ -104,7 +104,7 @@ describe('navigation', () => {
       'PULSE',
       'Diagnóstico',
       'Detalle',
-      'Señales',
+      'Alertas',
       'Financiación',
       'Método',
     ]);

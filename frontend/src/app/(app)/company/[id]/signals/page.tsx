@@ -28,7 +28,7 @@ export async function generateMetadata({
   params,
 }: SignalsPageProps): Promise<Metadata> {
   const { id } = await params;
-  return { title: `${companyName(id)} — Señales · Embat Pulse` };
+  return { title: `${companyName(id)} — Alertas · Embat Pulse` };
 }
 
 /**
@@ -70,7 +70,7 @@ export default async function CompanySignalsPage({ params }: SignalsPageProps) {
 
   return (
     <PageShell
-      title={`Señales de ${companyName(company.companyId)}`}
+      title={`Alertas de ${companyName(company.companyId)}`}
       lead={buildLead(view.open.length, company.signals.length, company.month)}
       aside={<PulseSignalKindLegend />}
     >

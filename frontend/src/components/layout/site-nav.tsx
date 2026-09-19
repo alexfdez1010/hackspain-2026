@@ -65,7 +65,7 @@ export function companySections(companyId: string): NavSection[] {
     {
       key: 'signals',
       href: routes.signals,
-      label: 'Señales',
+      label: 'Alertas',
       match: routes.signals,
     },
     {

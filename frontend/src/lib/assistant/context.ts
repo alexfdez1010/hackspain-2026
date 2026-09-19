@@ -85,7 +85,7 @@ export async function getAssistantContext(
         label: `PULSE · ${companyName(company.companyId)}`,
         href: routes.pulse,
       },
-      { label: 'Señales', href: routes.signals },
+      { label: 'Alertas', href: routes.signals },
       { label: 'Financiación', href: routes.advisor },
     );
   }
