@@ -44,7 +44,7 @@ export const METHOD_PIPELINE: readonly MethodPipelineStep[] = [
     number: 5,
     title: 'Pesos fijos',
     detail:
-      'pulse_raw es la media ponderada de las variables conocidas con los pesos renormalizados: una variable sin datos ni suma ni resta.',
+      'PULSE es la media ponderada de las variables conocidas con los pesos renormalizados: una variable sin datos ni suma ni resta.',
     illustrated: true,
   },
   {
@@ -56,14 +56,8 @@ export const METHOD_PIPELINE: readonly MethodPipelineStep[] = [
   },
   {
     number: 7,
-    title: 'Calibración',
-    detail:
-      'PULSE es el percentil de pulse_raw en la población: un 80 está más sano que el 80 % de las empresas.',
-  },
-  {
-    number: 8,
     title: 'Contribuciones',
     detail:
-      'Puntos de pulse_raw que aporta cada variable. Suman pulse_raw exactamente, así que el score se reconstruye a mano.',
+      'Puntos de PULSE que aporta cada variable. Suman el score exactamente, así que se reconstruye a mano.',
   },
 ];

@@ -1,4 +1,4 @@
-"""One horizon = three LightGBM boosters (point, p10, p90) on the change of pulse_raw."""
+"""One horizon = three LightGBM boosters (point, p10, p90) on the change of pulse."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def train_booster(
 
 @dataclass
 class HorizonModel:
-    """Predicts ``pulse_raw(t+h) - pulse_raw(t)`` with a central estimate and a p10-p90 band."""
+    """Predicts ``pulse(t+h) - pulse(t)`` with a central estimate and a p10-p90 band."""
 
     horizon: int
     features: list[str]

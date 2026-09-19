@@ -94,7 +94,7 @@ espejo en el consumidor):
 | Método y ruta                              | Respuesta esperada                                                                                                                                                                                                                                                       |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `GET /api/pulse/summary`                   | `score_name`, `score_expansion`, `horizons`, `last_month`, `pillars[{key,label,weight}]`, `variables[{key,number,label,pillar,weight,raw,unit}]`, `contribution_keys`, `evaluation{score,forecast{horizons},risk}`, `companies[...]` (solo se usan los identificadores). |
-| `GET /api/pulse/companies/{id}`            | Empresa con `series[]` (por mes: `pulse`, `pulse_raw`, `confidence`, `pillars`, `variables`, `contributions`, `cash_end`) y `forecast[]` (`horizon`, `target_month`, `pulse_pred`, `pulse_p10`, `pulse_p90`, `delta_raw`, `contributions`).                              |
+| `GET /api/pulse/companies/{id}`            | Empresa con `series[]` (por mes: `pulse`, `confidence`, `pillars`, `variables`, `contributions`, `cash_end`) y `forecast[]` (`horizon`, `target_month`, `pulse_pred`, `pulse_p10`, `pulse_p90`, `delta_raw`, `contributions`).                                           |
 | `GET /api/pulse/recommendations/catalogue` | `reference_rate`, `pricing_parameters`, `products[]`, `risk_model`.                                                                                                                                                                                                      |
 | `GET /api/pulse/recommendations/{id}`      | `summary`, `risk`, `recommendations[]` (con `reasons`, `sizing`, `pricing`, `levers`), `declined[]`, `improvement_plan`, `inputs`, `disclaimer`. Admite `?euribor=`.                                                                                                     |
 
@@ -102,7 +102,7 @@ Las respuestas se parsean con parsers tolerantes: claves desconocidas se
 ignoran, las ausentes quedan a `null` y un fallo de red degrada la página a su
 estado vacío. Una variable sin evidencia llega con `known: false` y se muestra
 como «sin datos», nunca como un cero. Los pesos suman 100 puntos y las
-contribuciones de cada horizonte suman exactamente `delta_raw`; ambas
+contribuciones de cada horizonte suman exactamente `delta`; ambas
 invariantes se comprueban en `tests/unit/pulse-source.test.ts` y
 `tests/unit/pulse-company-view.test.ts`. En el Advisor, los componentes del
 precio suman el diferencial (`tests/unit/advisor-source.test.ts`).

@@ -26,7 +26,7 @@ _PILLAR_SHARES = {
     for p in PILLARS
 }
 _ALL_SHARES = {v.key: v.weight / 100.0 for v in VARIABLES}
-_PULSE_FEATURES = ("pulse", "pulse_raw")
+_PULSE_FEATURES = ("pulse",)
 
 
 def shares_of_feature(name: str) -> dict[str, float]:

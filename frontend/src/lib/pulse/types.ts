@@ -141,13 +141,12 @@ export interface PulseSummary {
 /** One observed month of a company. */
 export interface PulseSeriesPoint {
   month: string;
+  /** Weighted mean of the known variables, 0-100. */
   pulse: number | null;
-  /** Score before the confidence shrinkage towards the neutral level. */
-  pulseRaw: number | null;
   confidence: number | null;
   pillars: PulsePillars;
   variables: Record<string, PulseVariableValue>;
-  /** Points each variable adds to `pulseRaw` this month. */
+  /** Points each variable adds to `pulse` this month; they sum to it. */
   contributions: PulseContributions;
   /** Cash balance at the end of the month, in euros. */
   cashEnd: number | null;
@@ -159,8 +158,8 @@ export interface PulseForecastPoint extends PulseForecastBand {
   horizon: number;
   /** Month the forecast refers to, as `YYYY-MM`. */
   targetMonth: string;
-  /** Predicted change of `pulseRaw`; the contributions sum to it. */
-  deltaRaw: number | null;
+  /** Predicted change of PULSE; the contributions sum to it. */
+  delta: number | null;
   contributions: PulseContributions;
 }
 

@@ -16,7 +16,7 @@ export interface MethodExampleRow {
   weight: number;
   /** 0-100 score of the variable that month. */
   score: number | null;
-  /** Points of `pulse_raw` the variable added that month. */
+  /** Points of PULSE the variable added that month. */
   contribution: number;
 }
 
@@ -26,10 +26,8 @@ export interface MethodExample {
   month: string;
   /** Variables with evidence, largest contribution first. */
   rows: MethodExampleRow[];
-  /** Sum of the contributions, which must equal `pulseRaw`. */
+  /** Sum of the contributions, which must equal `pulse`. */
   contributionSum: number;
-  pulseRaw: number | null;
-  /** Calibrated score: the percentile of `pulseRaw` in the population. */
   pulse: number | null;
   confidence: number | null;
   /** Labels of the variables without evidence that month. */
@@ -42,7 +40,7 @@ export interface MethodExample {
  * Reads the last closed month of a company as the worked example of the page.
  *
  * Only the variables with evidence are listed, because they are the ones whose
- * contributions add up to `pulse_raw`; the rest are named in a sentence so the
+ * contributions add up to PULSE; the rest are named in a sentence so the
  * reader knows the sum is complete and not truncated.
  *
  * @param company - Company to read; `null` when the export has none.
@@ -78,7 +76,6 @@ export function buildMethodExample(
     month: point.month,
     rows,
     contributionSum: rows.reduce((sum, row) => sum + row.contribution, 0),
-    pulseRaw: point.pulseRaw,
     pulse: point.pulse,
     confidence: point.confidence,
     unknownLabels: all.filter((row) => !row.known).map((row) => row.label),

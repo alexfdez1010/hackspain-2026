@@ -30,7 +30,7 @@ export function MethodExampleTable({ rows }: MethodExampleTableProps) {
             <Table.Column id="pillar">Pilar</Table.Column>
             <Table.Column id="weight">Peso</Table.Column>
             <Table.Column id="score">Score 0-100</Table.Column>
-            <Table.Column id="contribution">Aporte a pulse_raw</Table.Column>
+            <Table.Column id="contribution">Aporte a PULSE</Table.Column>
           </Table.Header>
           <Table.Body items={rows}>
             {(row) => (

@@ -90,13 +90,14 @@ describe('the method page renders on the server with the real export', () => {
     expect(bar).toContain('no cuenta, y tampoco resta como un cero');
   });
 
-  it('works one month out to pulse_raw and to PULSE', () => {
+  it('works one month out to the PULSE of the month', () => {
     expect(example).not.toBeNull();
     const markup = renderToStaticMarkup(
       <MethodExamplePanel example={example!} />,
     );
     expect(markup).toContain('45,64');
-    expect(markup).toContain('32,8');
+    expect(markup).toContain('45,6');
+    expect(markup).not.toContain('percentil');
     expect(markup).toContain('Utilización de líneas');
     expect(markup).toContain('/company/COMP_0001');
   });
@@ -159,9 +160,9 @@ describe('the method page renders on the server with the real export', () => {
       />,
     );
     expect(markup).toContain('+6 m');
-    expect(markup).toContain('10,33');
+    expect(markup).toContain('10,34');
     expect(markup).toContain('12,35');
-    expect(markup).toContain('16,4 %');
+    expect(markup).toContain('16,3 %');
   });
 
   it('stacks the price and publishes the catalogue', () => {

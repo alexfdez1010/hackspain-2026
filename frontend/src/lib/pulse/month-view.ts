@@ -64,7 +64,7 @@ export function sortByContribution(
  * Adds up the points the known variables put into the raw score.
  *
  * @param rows - Variable rows of one month.
- * @returns The sum of the contributions, which matches `pulse_raw`.
+ * @returns The sum of the contributions, which matches the PULSE of the month.
  */
 export function sumVariableContributions(
   rows: readonly PulseVariableRow[],

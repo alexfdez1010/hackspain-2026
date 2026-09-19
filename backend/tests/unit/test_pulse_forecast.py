@@ -14,7 +14,6 @@ from ml_service.pulse.forecast.attribution import (
 from ml_service.pulse.forecast.config import HORIZONS
 from ml_service.pulse.forecast.engine import ForecastEngine
 from ml_service.pulse.forecast.features import add_targets, feature_columns
-from ml_service.pulse.score import Calibration
 from ml_service.pulse.variables import VARIABLES
 
 FAST_PARAMS = {
@@ -36,11 +35,11 @@ def test_shares_map_features_to_their_variable():
         set(pillar) == {"cash_days", "cash_min"}
         and abs(sum(pillar.values()) - 1) < 1e-9
     )
-    assert abs(sum(shares_of_feature("pulse_raw_d6").values()) - 1) < 1e-9
+    assert abs(sum(shares_of_feature("pulse_d6").values()) - 1) < 1e-9
 
 
 def test_aggregate_is_exact_decomposition():
-    features = ["cash_days", "pillar_deuda", "pulse_raw", "inflow"]
+    features = ["cash_days", "pillar_deuda", "pulse", "inflow"]
     contrib = np.array([[1.0, 2.0, 3.0, 4.0, 0.5], [-1.0, 0.0, 0.0, 0.0, 0.25]])
     parts = aggregate(contrib, features)
     total = sum(parts.values())
@@ -55,7 +54,7 @@ def test_targets_are_future_change_and_null_at_the_edge():
         {
             "company_id": ["C"] * 8,
             "month": months,
-            "pulse_raw": [float(10 * i) for i in range(8)],
+            "pulse": [float(10 * i) for i in range(8)],
         }
     )
     out = add_targets(df)
@@ -78,7 +77,6 @@ def _synthetic_frame(n_companies: int = 30, n_months: int = 14) -> pl.DataFrame:
                         month=1 + m % 12, year=2025 + m // 12
                     ),
                     "pulse": level,
-                    "pulse_raw": level,
                     "cash_days": rng.uniform(0, 365),
                     "pillar_liquidez": rng.uniform(0, 100),
                 }
@@ -88,8 +86,7 @@ def _synthetic_frame(n_companies: int = 30, n_months: int = 14) -> pl.DataFrame:
 
 def test_engine_fits_predicts_and_decomposes():
     frame = _synthetic_frame()
-    cal = Calibration().fit(frame["pulse_raw"].to_numpy())
-    engine = ForecastEngine.fit(frame, cal, FAST_PARAMS)
+    engine = ForecastEngine.fit(frame, FAST_PARAMS)
     out = engine.predict(frame, latest_only=True)
     assert out["horizon"].unique().sort().to_list() == list(HORIZONS)
     assert out["company_id"].n_unique() == 30 and out.shape[0] == 30 * len(HORIZONS)
@@ -101,7 +98,7 @@ def test_engine_fits_predicts_and_decomposes():
         f"contrib_{BASE}",
     ]
     total = out.select(pl.sum_horizontal(contribs).alias("s"))["s"].to_numpy()
-    assert np.allclose(total, out["delta_raw"].to_numpy())
+    assert np.allclose(total, out["delta"].to_numpy())
     assert "y_1" not in feature_columns(frame) and "group_id" not in feature_columns(
         frame
     )

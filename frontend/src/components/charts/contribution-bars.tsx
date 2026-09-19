@@ -11,7 +11,7 @@ interface ContributionBarsProps {
 }
 
 /**
- * Shows how many points of `pulse_raw` each variable carries in one month.
+ * Shows how many points of PULSE each variable carries in one month.
  *
  * The bars start at zero and are scaled against the largest contribution of
  * the month, so their length reads as points, not as a score: a variable with

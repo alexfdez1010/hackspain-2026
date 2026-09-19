@@ -10,8 +10,6 @@ export interface PulseMonthRow {
   pulse: number | null;
   /** Change against the previous observed month; `null` for the first one. */
   change: number | null;
-  /** Weighted mean of the known variables, before the confidence shrinkage. */
-  pulseRaw: number | null;
   confidence: number | null;
   pillars: PulsePillars;
   /** Cash balance at the end of the month, in euros. */
@@ -29,8 +27,8 @@ export interface PulseForecastRow {
   pulseP90: number | null;
   /** Change the horizon implies against the last observed score. */
   change: number | null;
-  /** Predicted change of `pulseRaw`, which the decomposition sums to. */
-  deltaRaw: number | null;
+  /** Predicted change of PULSE, which the decomposition sums to. */
+  delta: number | null;
 }
 
 /**
@@ -66,7 +64,6 @@ export function buildMonthRows(
           point.pulse === null || previous === null
             ? null
             : point.pulse - previous,
-        pulseRaw: point.pulseRaw,
         confidence: point.confidence,
         pillars: point.pillars,
         cashEnd: point.cashEnd,
@@ -97,6 +94,6 @@ export function buildForecastRows(
       point.pulsePred === null || pulseNow === null
         ? null
         : point.pulsePred - pulseNow,
-    deltaRaw: point.deltaRaw,
+    delta: point.delta,
   }));
 }

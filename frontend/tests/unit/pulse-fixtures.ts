@@ -39,7 +39,6 @@ export function makeSeriesPoint(
   return {
     month: '2026-08',
     pulse: 40,
-    pulseRaw: 45,
     confidence: 0.8,
     pillars: { liquidez: 40, deuda: 40, cobro: 40, pago: 40 },
     variables: {
@@ -53,7 +52,7 @@ export function makeSeriesPoint(
 }
 
 /**
- * Builds a forecast horizon whose contributions sum to `deltaRaw`.
+ * Builds a forecast horizon whose contributions sum to `delta`.
  *
  * @param overrides - Fields to replace.
  * @returns One forecast horizon.
@@ -67,7 +66,7 @@ export function makeForecastPoint(
     pulsePred: 38,
     pulseP10: 20,
     pulseP90: 55,
-    deltaRaw: -1.5,
+    delta: -1.5,
     contributions: { cash_days: 0.5, loc_util: -0.4, contexto: -0.6, base: -1 },
     ...overrides,
   };

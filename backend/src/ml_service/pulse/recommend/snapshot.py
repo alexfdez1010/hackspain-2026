@@ -65,7 +65,6 @@ class CompanySnapshot:
     company_id: str
     month: str
     pulse: float
-    pulse_raw: float
     confidence: float
     months_observed: int
     pillars: dict[str, float | None]
@@ -74,7 +73,7 @@ class CompanySnapshot:
     monthly_outflow: float
     monthly_collections: float
     service_3m: float
-    pulse_raw_d3: float | None
+    pulse_d3: float | None
     holdings: Holdings = field(default_factory=Holdings)
     invoices: InvoiceBook = field(default_factory=InvoiceBook)
     outlook: Outlook = field(default_factory=Outlook)

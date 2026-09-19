@@ -51,7 +51,6 @@ def snapshot(**overrides) -> CompanySnapshot:
         "company_id": "C1",
         "month": "2026-08",
         "pulse": 55.0,
-        "pulse_raw": 50.0,
         "confidence": 0.7,
         "months_observed": 12,
         "pillars": dict(PILLARS_OK),
@@ -60,7 +59,7 @@ def snapshot(**overrides) -> CompanySnapshot:
         "monthly_outflow": 100_000.0,
         "monthly_collections": 110_000.0,
         "service_3m": 0.0,
-        "pulse_raw_d3": 0.0,
+        "pulse_d3": 0.0,
     }
     base.update(overrides)
     return CompanySnapshot(**base)
@@ -302,7 +301,7 @@ def test_snapshot_round_trips_through_json():
 
 
 def test_engine_explains_a_company_with_no_offer():
-    payload = Recommender(model()).recommend(snapshot(pulse=10.0, pulse_raw=20.0))
+    payload = Recommender(model()).recommend(snapshot(pulse=10.0))
     assert payload["recommendations"] == []
     assert "no hay hoy un producto" in payload["summary"]
     assert any("Línea de crédito" in u for u in payload["improvement_plan"]["unlocks"])

@@ -6,7 +6,7 @@ const LIMITS: readonly { key: string; text: string }[] = [
   },
   {
     key: 'pd',
-    text: 'No es una probabilidad de impago. Es un percentil de salud financiera; la probabilidad la estima aparte el modelo de estrés que fija la prima de riesgo.',
+    text: 'No es una probabilidad de impago. Es una media ponderada de once variables de salud financiera; la probabilidad la estima aparte el modelo de estrés que fija la prima de riesgo.',
   },
   {
     key: 'precio',

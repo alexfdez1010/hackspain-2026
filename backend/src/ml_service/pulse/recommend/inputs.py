@@ -51,11 +51,11 @@ def _variables(row: dict) -> dict[str, VariableReading]:
 
 
 def latest_rows(scored: pl.DataFrame) -> pl.DataFrame:
-    """Last scored month of every company, with the 3-month change of ``pulse_raw``."""
+    """Last scored month of every company, with the 3-month change of ``pulse``."""
     ordered = scored.filter(pl.col("pulse").is_not_null()).sort("company_id", "month")
     with_d3 = ordered.with_columns(
-        (pl.col("pulse_raw") - pl.col("pulse_raw").shift(3).over("company_id")).alias(
-            "pulse_raw_d3"
+        (pl.col("pulse") - pl.col("pulse").shift(3).over("company_id")).alias(
+            "pulse_d3"
         )
     )
     return with_d3.group_by("company_id", maintain_order=True).last()
@@ -77,7 +77,6 @@ def build_snapshots(
                 company_id=cid,
                 month=r["month"].strftime("%Y-%m"),
                 pulse=float(r["pulse"]),
-                pulse_raw=float(r["pulse_raw"]),
                 confidence=float(r["confidence"]),
                 months_observed=int(r["months_observed"]),
                 pillars={p: _num(r.get(f"pillar_{p}")) for p in PILLARS},
@@ -86,7 +85,7 @@ def build_snapshots(
                 monthly_outflow=float(r.get("outflow_3m") or 0.0) / 3.0,
                 monthly_collections=float(r.get("bank_collections_3m") or 0.0) / 3.0,
                 service_3m=float(r.get("service_3m") or 0.0),
-                pulse_raw_d3=_num(r.get("pulse_raw_d3")),
+                pulse_d3=_num(r.get("pulse_d3")),
                 holdings=holdings.get(cid, Holdings()),
                 invoices=books.get(cid, InvoiceBook()),
                 outlook=outlooks.get(cid, Outlook()),

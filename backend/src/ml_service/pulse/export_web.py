@@ -148,7 +148,6 @@ def _series_row(r: dict) -> dict:
     return {
         "month": r["month"].strftime("%Y-%m"),
         "pulse": _num(r["pulse"]),
-        "pulse_raw": _num(r["pulse_raw"]),
         "confidence": _num(r["confidence"]),
         "pillars": {p: _num(r[f"pillar_{p}"]) for p in PILLARS},
         "variables": {
@@ -171,7 +170,7 @@ def _forecast_row(r: dict) -> dict:
         "pulse_pred": _num(r["pulse_pred"]),
         "pulse_p10": _num(r["pulse_p10"]),
         "pulse_p90": _num(r["pulse_p90"]),
-        "delta_raw": _num(r["delta_raw"]),
+        "delta": _num(r["delta"]),
         "contributions": {k: _num(r[f"contrib_{k}"]) for k in CONTRIB_KEYS},
     }
 
@@ -234,9 +233,22 @@ def write_all(work_dir: Path, mirror_dir: Path | None = None) -> Path:
     }
     (web / "summary.json").write_text(json.dumps(summary, ensure_ascii=False))
     if mirror_dir is not None:
-        shutil.rmtree(mirror_dir, ignore_errors=True)
-        shutil.copytree(web, mirror_dir)
+        mirror(web, mirror_dir)
     return web
+
+
+def mirror(web: Path, mirror_dir: Path) -> Path:
+    """Copy ``summary.json`` and ``companies/`` into the frontend data folder.
+
+    Only the two PULSE artefacts are replaced: the ``recommendations/`` folder
+    the advisor mirrors next to them is left untouched, whatever the order the
+    two exports run in.
+    """
+    mirror_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy(web / "summary.json", mirror_dir / "summary.json")
+    shutil.rmtree(mirror_dir / "companies", ignore_errors=True)
+    shutil.copytree(web / "companies", mirror_dir / "companies")
+    return mirror_dir
 
 
 if __name__ == "__main__":

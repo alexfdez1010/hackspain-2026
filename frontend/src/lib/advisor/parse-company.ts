@@ -88,7 +88,7 @@ export function parseInputs(value: unknown): AdvisorInputs {
     monthlyOutflow: toNumberOrNull(record.monthly_outflow),
     monthlyCollections: toNumberOrNull(record.monthly_collections),
     service3m: toNumberOrNull(record.service_3m),
-    pulseRawD3: toNumberOrNull(record.pulse_raw_d3),
+    pulseD3: toNumberOrNull(record.pulse_d3),
     holdings: {
       types: toStringList(holdings.types),
       lineLimit: toNumberOrNull(holdings.line_limit),

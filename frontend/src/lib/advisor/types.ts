@@ -134,7 +134,8 @@ export interface AdvisorInputs {
   monthlyOutflow: number | null;
   monthlyCollections: number | null;
   service3m: number | null;
-  pulseRawD3: number | null;
+  /** Change of PULSE over the last three months. */
+  pulseD3: number | null;
   holdings: AdvisorHoldings;
   invoices: AdvisorInvoices;
   /** Six-month forecast the trend adjustment reads. */

@@ -94,7 +94,7 @@ describe('PULSE views render on the server', () => {
     expect(markup).toContain('20,0-55,0');
     expect(markup).toContain('Base del modelo');
     expect(markup).toContain('las 4 suman −1,50');
-    expect(markup).toContain('<code>delta_raw</code> de −1,50');
+    expect(markup).toContain('previsto de −1,50');
   });
 });
 

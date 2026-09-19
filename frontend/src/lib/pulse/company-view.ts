@@ -112,7 +112,7 @@ export const EXTRA_CONTRIBUTION_LABELS: Record<string, string> = {
 export interface PulseContributionItem {
   key: string;
   label: string;
-  /** Points of `pulse_raw` the driver adds at this horizon. */
+  /** Points of PULSE the driver adds at this horizon. */
   value: number;
 }
 

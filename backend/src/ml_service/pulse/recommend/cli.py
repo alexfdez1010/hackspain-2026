@@ -31,8 +31,8 @@ MODEL_FILE = ("models", "risk_model.json")
 
 def _with_d3(scored: pl.DataFrame) -> pl.DataFrame:
     return scored.sort("company_id", "month").with_columns(
-        (pl.col("pulse_raw") - pl.col("pulse_raw").shift(3).over("company_id")).alias(
-            "pulse_raw_d3"
+        (pl.col("pulse") - pl.col("pulse").shift(3).over("company_id")).alias(
+            "pulse_d3"
         )
     )
 
@@ -42,7 +42,7 @@ def fit(work_dir: Path) -> RiskModel:
     scored = pl.read_parquet(work_dir / "scored_panel.parquet")
     tx = pl.read_parquet(work_dir / "clean_transactions.parquet")
     df = stress_label(_with_d3(scored), tx).filter(
-        pl.col("has_future") & pl.col("pulse_raw").is_not_null()
+        pl.col("has_future") & pl.col("pulse").is_not_null()
     )
     x = feature_frame(df).to_numpy().astype(float)
     y = df["y_stress"].to_numpy().astype(int)

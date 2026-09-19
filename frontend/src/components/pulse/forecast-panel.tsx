@@ -102,10 +102,9 @@ export function PulseForecastPanel({
       />
 
       <p className="max-w-3xl text-sm text-muted">
-        Cada barra son puntos de <code>pulse_raw</code>; las{' '}
-        {formatNumber(items.length)} suman{' '}
+        Cada barra son puntos de PULSE; las {formatNumber(items.length)} suman{' '}
         {formatSigned(sumContributions(point), 2)}, que es exactamente el cambio
-        previsto <code>delta_raw</code> de {formatSigned(point.deltaRaw, 2)}.
+        previsto de {formatSigned(point.delta, 2)}.
       </p>
     </div>
   );

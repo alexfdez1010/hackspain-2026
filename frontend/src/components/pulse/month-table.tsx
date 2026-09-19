@@ -51,7 +51,6 @@ export function PulseMonthTable({ rows, pillars }: PulseMonthTableProps) {
             </Table.Column>
             <Table.Column id="pulse">PULSE</Table.Column>
             <Table.Column id="change">Δ mes</Table.Column>
-            <Table.Column id="raw">pulse_raw</Table.Column>
             <Table.Column id="confidence">Confianza</Table.Column>
             {columns.map((pillar) => (
               <Table.Column key={pillar.key} id={pillar.key}>
@@ -75,9 +74,6 @@ export function PulseMonthTable({ rows, pillars }: PulseMonthTableProps) {
                   ) : (
                     formatSigned(row.change)
                   )}
-                </Table.Cell>
-                <Table.Cell className="tabular-nums">
-                  {formatNumber(row.pulseRaw, 1)}
                 </Table.Cell>
                 <Table.Cell className="tabular-nums">
                   {formatConfidence(row.confidence)}

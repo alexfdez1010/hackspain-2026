@@ -57,7 +57,7 @@ describe('the advisor header', () => {
   it('opens with the score, its coverage, the stress risk and the reference', async () => {
     const company = await load('COMP_0001');
     const markup = renderToStaticMarkup(<AdvisorHeader company={company} />);
-    expect(markup).toContain('32,8');
+    expect(markup).toContain('45,6');
     expect(markup).toContain('82 %');
     expect(markup).toContain('82 de 100 puntos con datos');
     expect(markup).toContain('28 %');
@@ -75,12 +75,12 @@ describe('an offer card', () => {
     expect(markup).toContain('Recomendación 1');
     expect(markup).toContain('Línea de crédito');
     expect(markup).toContain('Circulante');
-    expect(markup).toContain('25.000 €');
+    expect(markup).toContain('45.000 €');
     expect(markup).toContain('12 meses');
     expect(markup).toContain('Tipo anual');
     expect(markup).toContain('9,17 %');
     expect(markup).toContain('+707 pb sobre Euríbor 12 m');
-    expect(markup).toContain('75/100');
+    expect(markup).toContain('85/100');
     expect(markup).toContain('Se ofrece desde 40');
     expect(markup).not.toContain('NaN');
   });
@@ -88,18 +88,17 @@ describe('an offer card', () => {
   it('ties every reason to its variable, its figure and its points', async () => {
     const markup = renderOffer(await load('COMP_0001'));
     expect(markup).toContain('A favor');
-    expect(markup).toContain('En contra');
+    expect(markup).not.toContain('En contra');
     expect(markup).toContain('+25 puntos de encaje');
-    expect(markup).toContain('−10 puntos de encaje');
+    expect(markup).toContain('+20 puntos de encaje');
     expect(markup).toContain('Días de caja: 14,0 días');
-    expect(markup).toContain('32,8 PULSE');
   });
 
   it('shows the formula of the amount with every input it reads', async () => {
     const markup = renderOffer(await load('COMP_0001'));
     expect(markup).toContain('redondeado a 5.000');
     expect(markup).toContain('Meses de pagos cubiertos');
-    expect(markup).toContain('0,35 meses');
+    expect(markup).toContain('0,60 meses');
     expect(markup).toContain('Pagos operativos al mes');
     expect(markup).toContain('79.094 €');
     expect(markup).toContain('Disponible en líneas');
@@ -132,7 +131,7 @@ describe('an offer card', () => {
   it('prints the instalment of an amortising product', async () => {
     const markup = renderOffer(await load('COMP_0004'));
     expect(markup).toContain('Cuota mensual');
-    expect(markup).toContain('16.714 €');
+    expect(markup).toContain('16.617 €');
     expect(markup).toContain('60 meses');
   });
 
@@ -211,7 +210,7 @@ describe('a company with no offer', () => {
     );
     expect(markup).toContain('4.150.001 €');
     expect(markup).toContain('24 préstamos');
-    expect(markup).toContain('Banda p10-p90 13,6-62,8');
+    expect(markup).toContain('Banda p10-p90 34,8-61,2');
     expect(markup).toContain('sin datos');
   });
 });

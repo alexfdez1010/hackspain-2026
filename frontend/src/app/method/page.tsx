@@ -64,7 +64,7 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
   return (
     <PageShell
       title="Método"
-      lead={`${meta.scoreName} —${meta.scoreExpansion}— es un percentil mensual de salud financiera de 0 a 100: ${formatNumber(meta.variables.length)} variables repartidas en ${formatNumber(meta.pillars.length)} pilares, calculadas con extractos bancarios, facturas del ERP y productos de deuda.`}
+      lead={`${meta.scoreName} —${meta.scoreExpansion}— es una media mensual de salud financiera de 0 a 100: ${formatNumber(meta.variables.length)} variables repartidas en ${formatNumber(meta.pillars.length)} pilares, calculadas con extractos bancarios, facturas del ERP y productos de deuda.`}
       aside={
         <Link
           className="text-sm text-accent underline-offset-4 hover:underline"
@@ -78,7 +78,7 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
     >
       <Section
         title="La escala"
-        note="Un punto es un percentil de la población"
+        note="Media ponderada de once variables, cada una de 0 a 100"
       >
         <MethodScoreScale
           caption={`Bandas fijas del producto, idénticas en tabla, gráfico y oferta. Último cierre publicado: ${formatMonth(meta.lastMonth)}.`}
@@ -143,14 +143,13 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
       >
         <div className="flex flex-col gap-5">
           <p className="max-w-3xl text-sm text-muted">
-            Un modelo por horizonte predice el cambio de <code>pulse_raw</code>{' '}
-            —el punto de partida es que el score se quede donde está— y dos
-            modelos de cuantiles dibujan la banda p10-p90. Las contribuciones
-            del modelo se reparten entre las{' '}
-            {formatNumber(meta.variables.length)} variables más «contexto» y
-            «base», de forma que las partes suman exactamente el cambio
-            previsto, y el resultado vuelve a la escala 0-100 con la calibración
-            congelada.
+            Un modelo por horizonte predice el cambio del PULSE —el punto de
+            partida es que el score se quede donde está— y dos modelos de
+            cuantiles dibujan la banda p10-p90. Las contribuciones del modelo se
+            reparten entre las {formatNumber(meta.variables.length)} variables
+            más «contexto» y «base», de forma que las partes suman exactamente
+            el cambio previsto; el resultado es el PULSE actual más ese cambio,
+            acotado a 0-100.
           </p>
           <MethodForecastTable
             horizons={meta.evaluation.forecast}

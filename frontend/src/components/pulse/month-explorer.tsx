@@ -84,8 +84,7 @@ export function PulseMonthExplorer({
             <ScoreBadge score={point.pulse} />
           </span>
           <span className="text-sm text-muted">
-            PULSE de {formatMonth(point.month)} · pulse_raw{' '}
-            {formatNumber(point.pulseRaw, 2)}
+            PULSE de {formatMonth(point.month)}
           </span>
         </div>
         <div className="flex flex-col gap-0.5">
@@ -115,7 +114,7 @@ export function PulseMonthExplorer({
           />
           <p className="text-sm text-muted">
             Los aportes suman {formatNumber(sumVariableContributions(rows), 2)},
-            que es el <code>pulse_raw</code> de {formatMonth(point.month)}.
+            que es el PULSE de {formatMonth(point.month)}.
           </p>
         </div>
       </div>

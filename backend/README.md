@@ -78,7 +78,7 @@ layer and feature code, because the raw dataset is deliberately corrupted
 
 ```bash
 uv run python -m ml_service.pulse.cli build     # clean + panel -> data/pulse/{panel.parquet,cleaning_report.md}
-uv run python -m ml_service.pulse.cli fit       # freeze normaliser + calibration -> data/pulse/models/
+uv run python -m ml_service.pulse.cli fit       # freeze normaliser -> data/pulse/models/
 uv run python -m ml_service.pulse.cli evaluate  # self-supervised anticipation check -> data/pulse/evaluation.json
 uv run python -m ml_service.pulse.cli score --raw-dir /path/to/hidden [--out FILE]   # hidden test
 ```
@@ -105,15 +105,16 @@ source of truth; the weights must sum to 100 (asserted at import).
 **Scoring.** Every component is mapped to its empirical percentile on the
 training panel (1,001-point grid, mid-rank ties, sign-aligned so higher is
 healthier; an exact 0 on #10 is the optimum). A variable is the mean of its known
-components; `pulse_raw` is the weighted mean of the known variables with the
+components; `pulse` is the weighted mean of the known variables with the
 weights renormalised, so an unknown variable neither helps nor hurts. `confidence`
 is the share of the 100 points backed by data (a proxy-backed variable counts
 only part of its weight, see below; `confidence_from_proxies` is the share that
 comes from proxies and `var_<key>__source` says `primary`, `proxy` or null).
-`pulse` is the percentile of
-`pulse_raw` in the training population (frozen grid), so it spans 0-100 and a
-PULSE of 80 reads "healthier than 80 % of the fitted portfolio". `contrib_<key>`
-splits `pulse_raw` into the points each variable is responsible for. Everything
+No further calibration is applied: PULSE reads directly in the 0-100 scale of
+the variables, so 80 means the known variables average a score of 80 (the
+distribution is concentrated: half the companies sit between 41 and 64).
+`contrib_<key>` splits `pulse` into the points each variable is responsible for.
+Everything
 after `build` is per company, so a hidden folder is scored exactly as the
 training one.
 
@@ -205,7 +206,7 @@ uv run python -m ml_service.pulse.export_web              # -> data/pulse/web/ (
 # summary.json also carries an `evaluation` block (score, forecast and risk figures) read by the web app's method page
 ```
 
-**Design.** One LightGBM model per horizon predicts the *change* of `pulse_raw`
+**Design.** One LightGBM model per horizon predicts the *change* of `pulse`
 (`objective=huber`), plus two quantile boosters (α = 0.1 / 0.9) for the band, so
 persistence is the starting point and the model only learns deviations. Inputs
 (162 columns, `forecast/features.py`): the 11 variables and their percentiles,
@@ -218,11 +219,11 @@ observation length. The per-feature contributions returned by LightGBM
 component-derived features go to their variable, pillar-level features are split
 by weight inside the pillar, PULSE-level features across all variables by weight,
 and everything else is reported as `contexto`; the bias is `base`. The parts sum
-to `delta_raw` to 1e-14. Forecasts are expressed on the 0-100 PULSE scale through
-the frozen calibration.
+to `delta` to 1e-14. The forecast is PULSE now plus `delta`, clipped to 0-100, and
+the band is built the same way from the two quantile boosters.
 
 **Evaluation** (`data/pulse/forecast_evaluation.json`, GroupKFold(5) on
-`group_id`, MAE in points of `pulse_raw`). "Reversion" is a one-parameter
+`group_id`, MAE in points of PULSE). "Reversion" is a one-parameter
 mean-reversion baseline fitted out of fold; anything that does not beat it is
 just percentiles drifting back to the middle.
 

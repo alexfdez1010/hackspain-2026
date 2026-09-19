@@ -51,7 +51,7 @@ export function PulseForecastTable({
             <Table.Column id="change">
               Δ vs {formatMonth(baseMonth)}
             </Table.Column>
-            <Table.Column id="delta">Δ pulse_raw</Table.Column>
+            <Table.Column id="delta">Δ previsto</Table.Column>
           </Table.Header>
           <Table.Body items={rows}>
             {(row) => (
@@ -73,7 +73,7 @@ export function PulseForecastTable({
                   {formatSigned(row.change)}
                 </Table.Cell>
                 <Table.Cell className="tabular-nums">
-                  {formatSigned(row.deltaRaw, 2)}
+                  {formatSigned(row.delta, 2)}
                 </Table.Cell>
               </Table.Row>
             )}

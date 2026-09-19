@@ -27,11 +27,10 @@ const SERIES = [
   makeSeriesPoint({
     month: '2026-06',
     pulse: 20,
-    pulseRaw: 30,
     pillars: { liquidez: 20, deuda: null, cobro: 25, pago: 30 },
   }),
-  makeSeriesPoint({ month: '2026-07', pulse: 30, pulseRaw: 40 }),
-  makeSeriesPoint({ month: '2026-08', pulse: 32.77, pulseRaw: 45.64 }),
+  makeSeriesPoint({ month: '2026-07', pulse: 30 }),
+  makeSeriesPoint({ month: '2026-08', pulse: 32.77 }),
 ];
 
 describe('buildMonthRows', () => {
@@ -51,7 +50,6 @@ describe('buildMonthRows', () => {
     const rows = buildMonthRows(SERIES);
     expect(rows[0].unknownCount).toBe(1);
     expect(rows[0].cashEnd).toBe(36_982.49);
-    expect(rows[0].pulseRaw).toBe(45.64);
   });
 
   it('keeps the change unknown when a score is missing', () => {
@@ -83,7 +81,7 @@ describe('buildForecastRows', () => {
     expect(rows.map((row) => row.horizon)).toEqual([1, 6]);
     expect(rows[0].change).toBeCloseTo(-0.3, 5);
     expect(rows[1].change).toBeCloseTo(-1.7, 5);
-    expect(rows[1].deltaRaw).toBe(-1.5);
+    expect(rows[1].delta).toBe(-1.5);
   });
 
   it('keeps the change unknown without a base score', () => {

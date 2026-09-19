@@ -30,7 +30,6 @@ function parseSeriesPoint(value: unknown): PulseSeriesPoint | null {
   return {
     month,
     pulse: toNumberOrNull(record.pulse),
-    pulseRaw: toNumberOrNull(record.pulse_raw),
     confidence: toNumberOrNull(record.confidence),
     pillars: toPulsePillars(record.pillars),
     variables: toPulseVariables(record.variables),
@@ -58,7 +57,7 @@ function parseForecastPoint(value: unknown): PulseForecastPoint | null {
     ...band,
     horizon: toNumber(record.horizon),
     targetMonth,
-    deltaRaw: toNumberOrNull(record.delta_raw),
+    delta: toNumberOrNull(record.delta),
     contributions: toPulseContributions(record.contributions),
   };
 }

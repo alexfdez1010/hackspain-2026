@@ -149,7 +149,7 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
 
       <Section
         title="Previsión desglosada"
-        note="Aportes en puntos de pulse_raw, positivos a la derecha"
+        note="Aportes en puntos de PULSE, positivos a la derecha"
       >
         <PulseForecastPanel
           forecast={company.forecast}

@@ -75,7 +75,7 @@ def evaluate_horizon(
         rows[f"{TARGET_PREFIX}{h}"].to_numpy().astype(float),
     )
     cur, groups, months = (
-        rows["pulse_raw"].to_numpy().astype(float),
+        rows["pulse"].to_numpy().astype(float),
         rows["group_id"].to_numpy(),
         rows["month"].to_numpy(),
     )

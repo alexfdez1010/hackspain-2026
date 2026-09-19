@@ -41,8 +41,8 @@ export function InputsPanel({ inputs }: InputsPanelProps) {
     },
     {
       key: 'trend',
-      label: 'PULSE bruto: cambio en 3 meses',
-      value: formatSigned(inputs.pulseRawD3, 1),
+      label: 'PULSE: cambio en 3 meses',
+      value: formatSigned(inputs.pulseD3, 1),
       hint: 'Ajuste de tendencia del precio',
     },
   ];

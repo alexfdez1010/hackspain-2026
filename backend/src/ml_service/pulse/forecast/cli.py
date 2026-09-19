@@ -39,9 +39,7 @@ def _frame(raw_dir: Path, work_dir: Path, cache_name: str) -> pl.DataFrame:
 def fit(work_dir: Path) -> None:
     frame = _frame(RAW_DIR, work_dir, "")
     frame.write_parquet(work_dir / "forecast_frame.parquet")
-    engine = ForecastEngine.fit(
-        frame, PulseEngine.load(work_dir / "models").calibration
-    )
+    engine = ForecastEngine.fit(frame)
     engine.save(work_dir / FORECAST_MODELS)
     print(
         f"fitted {len(engine.models)} horizon models on {frame.shape[0]:,} company-months"
@@ -66,9 +64,7 @@ def predict(raw_dir: Path | None, work_dir: Path, out: Path, all_months: bool) -
         frame = pl.read_parquet(work_dir / "forecast_frame.parquet")
     else:
         frame = _frame(raw_dir, work_dir, raw_dir.name)
-    engine = ForecastEngine.load(
-        work_dir / FORECAST_MODELS, PulseEngine.load(work_dir / "models").calibration
-    )
+    engine = ForecastEngine.load(work_dir / FORECAST_MODELS)
     forecast = engine.predict(frame, latest_only=not all_months)
     forecast.write_parquet(out.with_suffix(".parquet"))
     forecast.with_columns(

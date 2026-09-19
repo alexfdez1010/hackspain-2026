@@ -28,7 +28,7 @@ DYNAMIC_LEVELS = [
     for c in v.components
     if not c.name.endswith(("_d3", "_d6"))
 ]
-DYNAMIC_LEVELS += [f"pillar_{p}" for p in PILLARS] + ["pulse_raw"]
+DYNAMIC_LEVELS += [f"pillar_{p}" for p in PILLARS] + ["pulse"]
 
 
 def _dynamics(df: pl.DataFrame) -> pl.DataFrame:
@@ -51,18 +51,18 @@ def _dynamics(df: pl.DataFrame) -> pl.DataFrame:
 
 def _group_context(df: pl.DataFrame) -> pl.DataFrame:
     grp = df.group_by(["group_id", "month"]).agg(
-        pl.col("pulse_raw").mean().alias("group_pulse"), pl.len().alias("group_n")
+        pl.col("pulse").mean().alias("group_pulse"), pl.len().alias("group_n")
     )
     return df.join(grp, on=["group_id", "month"], how="left")
 
 
 def add_targets(df: pl.DataFrame) -> pl.DataFrame:
-    """``y_<h>`` = change of ``pulse_raw`` between month t and t+h (null when unobservable)."""
+    """``y_<h>`` = change of ``pulse`` between month t and t+h (null when unobservable)."""
     return df.with_columns(
         [
-            (
-                pl.col("pulse_raw").shift(-h).over("company_id") - pl.col("pulse_raw")
-            ).alias(f"{TARGET_PREFIX}{h}")
+            (pl.col("pulse").shift(-h).over("company_id") - pl.col("pulse")).alias(
+                f"{TARGET_PREFIX}{h}"
+            )
             for h in HORIZONS
         ]
     )

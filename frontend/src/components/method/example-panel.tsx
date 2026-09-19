@@ -13,7 +13,7 @@ interface MethodExamplePanelProps {
 
 /**
  * Reads one real month end to end: the contributions of the variables with
- * evidence, their sum, and the calibration that turns it into PULSE.
+ * evidence and their sum, which is the PULSE of the month.
  *
  * Working the example on published figures is the point: the reader can repeat
  * the addition and land on the same score the company page shows.
@@ -22,7 +22,7 @@ interface MethodExamplePanelProps {
  * @returns The table of contributions and the two sentences that close it.
  */
 export function MethodExamplePanel({ example }: MethodExamplePanelProps) {
-  const { rows, pulse, pulseRaw, contributionSum, unknownLabels } = example;
+  const { rows, pulse, contributionSum, unknownLabels } = example;
   return (
     <div className="flex flex-col gap-4">
       <MethodExampleTable rows={rows} />
@@ -32,13 +32,12 @@ export function MethodExamplePanel({ example }: MethodExamplePanelProps) {
           <span className="font-medium tabular-nums">
             {formatNumber(contributionSum, 2)}
           </span>
-          , que es <code>pulse_raw</code> ({formatNumber(pulseRaw, 2)}). La
-          calibración lo lleva a su percentil en la población: PULSE{' '}
+          , que es el PULSE del mes:{' '}
           <span className="font-medium tabular-nums">
             {formatNumber(pulse, 1)}
           </span>
-          , más sano que el {formatNumber(pulse, 0)} % de las empresas del
-          conjunto.
+          . No hay ninguna transformación después: el score es la media
+          ponderada de las variables con datos.
         </p>
         {unknownLabels.length > 0 && (
           <p className="text-muted">

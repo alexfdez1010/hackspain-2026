@@ -137,15 +137,14 @@ Historia mensual del PULSE de una empresa, con el desglose por variable y contri
   "series": [
     {
       "month": "2026-01",
-      "pulse": 69.93,               // percentil en la población de entrenamiento
-      "pulse_raw": 64.81,           // media ponderada de variables antes de calibrar
+      "pulse": 64.81,               // media ponderada de las variables con datos, 0-100
       "confidence": 0.68,
       "pillars": {"liquidez": 78.3, "deuda": 100.0, "pago": 71.5, "cobro": 32.4},
       "variables": {                // una entrada por variable
         "cash_days": {"score": 78.0, "raw": 160.4, "known": true},
         "loc_util":  {"score": null, "raw": null, "known": false}   // sin datos: no suma ni resta
       },
-      "contributions": {"cash_days": 13.8, "cash_min": 16.2, "...": 0},  // puntos de pulse_raw por variable
+      "contributions": {"cash_days": 13.8, "cash_min": 16.2, "...": 0},  // puntos de PULSE por variable; suman pulse
       "cash_end": 35234.07
     }
   ],
@@ -154,7 +153,7 @@ Historia mensual del PULSE de una empresa, con el desglose por variable y contri
       "horizon": 1,                 // meses hacia delante
       "target_month": "2026-09",
       "pulse_pred": 32.47, "pulse_p10": 19.18, "pulse_p90": 46.85,   // predicción y banda 10-90
-      "delta_raw": -0.17,           // cambio previsto de pulse_raw
+      "delta": -0.17,               // cambio previsto de PULSE; las contribuciones suman delta
       "contributions": {"cash_days": 0.37, "...": 0, "contexto": -0.41, "base": -0.64}
     }
     // ... horizontes 2 a 6
@@ -325,7 +324,7 @@ Recomendación completa y explicable de una empresa: riesgo, productos ofrecidos
 
   "inputs": {                                // magnitudes usadas por las reglas
     "cash_end": 36982.49, "monthly_outflow": 79093.67, "monthly_collections": 69331.21,
-    "service_3m": 30.0, "pulse_raw_d3": -1.83,
+    "service_3m": 30.0, "pulse_d3": -1.83,
     "holdings": {"types": [], "line_limit": 0.0, "line_drawn": 0.0,
                  "loan_outstanding": 0.0, "n_loans": 0, "current_rate": null},
     "invoices": {"has_erp": true, "open_ar": 156000.46, "eligible_ar": 154880.0,

@@ -127,7 +127,7 @@ class Recommender:
                 "monthly_outflow": round(s.monthly_outflow, 2),
                 "monthly_collections": round(s.monthly_collections, 2),
                 "service_3m": round(s.service_3m, 2),
-                "pulse_raw_d3": s.pulse_raw_d3,
+                "pulse_d3": s.pulse_d3,
                 "holdings": asdict(s.holdings),
                 "invoices": asdict(s.invoices),
                 "outlook": asdict(s.outlook),
