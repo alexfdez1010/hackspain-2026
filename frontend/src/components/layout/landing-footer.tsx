@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { PulseFooterDither } from '@/components/layout/pulse-footer-dither';
 import { PulseFooterHeatmap } from '@/components/layout/pulse-footer-heatmap';
 import { PRODUCT_SECTIONS } from '@/lib/landing/product-sections';
 
@@ -41,7 +42,7 @@ function FooterLinkGroup({
 }
 
 /**
- * Full-viewport footer: Heatmap in the left pane, lists and legal on the right.
+ * Full-viewport footer: Heatmap in the left pane, dithered lists on the right.
  *
  * The left inner column is desktop-only. No product mark as a heading here.
  *
@@ -51,20 +52,26 @@ export function LandingFooter() {
   return (
     <footer
       aria-label="Pulse"
-      className="grid h-dvh snap-start snap-always grid-cols-[var(--site-gutter)_minmax(0,1fr)_var(--site-gutter)] lg:grid-cols-[var(--site-gutter)_minmax(0,1fr)_minmax(0,1fr)_var(--site-gutter)]"
+      className="landing-band-dark grid h-dvh snap-start snap-always grid-cols-[var(--site-gutter)_minmax(0,1fr)_var(--site-gutter)] lg:grid-cols-[var(--site-gutter)_minmax(0,1fr)_minmax(0,1fr)_var(--site-gutter)]"
     >
       <div className="col-start-1" />
       <div className="footer-heatmap relative col-start-2 hidden h-full min-h-0 overflow-hidden lg:block">
         <PulseFooterHeatmap />
       </div>
-      <div className="col-start-2 flex h-full flex-col px-6 py-10 sm:px-10 lg:col-start-3">
-        <nav aria-label="Pie" className="flex flex-1 items-center">
+      <div className="relative col-start-2 flex h-full flex-col px-6 py-10 sm:px-10 lg:col-start-3">
+        <div className="footer-dither pointer-events-none absolute inset-0 overflow-hidden">
+          <PulseFooterDither />
+        </div>
+        <nav
+          aria-label="Pie"
+          className="relative z-[1] flex flex-1 items-center"
+        >
           <div className="grid w-full grid-cols-2 gap-x-10">
             <FooterLinkGroup title="Platform" links={PLATFORM} />
             <FooterLinkGroup title="Docs" links={DOCS} />
           </div>
         </nav>
-        <p className="mt-auto flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted">
+        <p className="relative z-[1] mt-auto flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted">
           <span>© 2026 Pulse</span>
           <Link
             href="/condiciones"

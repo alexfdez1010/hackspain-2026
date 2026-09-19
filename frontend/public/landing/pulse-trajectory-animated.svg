@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" width="100%" height="280" role="img" aria-label="PULSE mensual desde ene 2026 hasta ago 2026 y previsión hasta ago 2027" font-family="DM Sans, sans-serif"><style>
+@keyframes pulse-draw{
+0%{stroke-dashoffset:1}
+20%,90%{stroke-dashoffset:0}
+100%{stroke-dashoffset:1}
+}
+@keyframes pulse-fade{
+0%,18%{opacity:0}
+35%,90%{opacity:1}
+100%{opacity:0}
+}
+@keyframes pulse-mark{
+0%,48%{transform:scale(1)}
+62%{transform:scale(1.18)}
+76%,90%{transform:scale(1)}
+100%{transform:scale(1)}
+}
+#pulse-observed{stroke-dasharray:1;stroke-dashoffset:1;animation:pulse-draw 7.2s cubic-bezier(.65,0,.35,1) infinite}
+#pulse-band,#pulse-forecast,#pulse-boundary{opacity:0;animation:pulse-fade 7.2s cubic-bezier(.65,0,.35,1) infinite}
+#pulse-close{transform-box:fill-box;transform-origin:center;animation:pulse-mark 7.2s cubic-bezier(.65,0,.35,1) infinite}
+@media (prefers-reduced-motion:reduce){
+#pulse-observed,#pulse-forecast,#pulse-band,#pulse-boundary,#pulse-close{animation:none;opacity:1;stroke-dashoffset:0;transform:none}
+}
+</style>
+<g id="pulse-guides" aria-hidden="true"><g><line x1="44" x2="668" y1="167.4" y2="167.4" stroke="#d2d2db" stroke-width="1"/><text x="0" y="170.4" fill="#6e707c" font-size="10">35</text></g><g><line x1="44" x2="668" y1="138" y2="138" stroke="#d2d2db" stroke-width="1"/><text x="0" y="141" fill="#6e707c" font-size="10">50</text></g><g><line x1="44" x2="668" y1="108.6" y2="108.6" stroke="#d2d2db" stroke-width="1"/><text x="0" y="111.6" fill="#6e707c" font-size="10">65</text></g></g>
+<path id="pulse-band" d="M273.89473684210526 146.54559999999998 L306.7368421052632 131.1988 L339.57894736842104 126.1224 L372.42105263157896 121.88880000000002 L405.2631578947368 120.654 L438.10526315789474 119.57600000000001 L470.94736842105266 118.73320000000001 L503.7894736842105 117.7924 L536.6315789473684 116.4204 L569.4736842105264 115.46000000000001 L602.3157894736842 114.98959999999998 L635.1578947368421 113.75480000000002 L668 112.9316 L668 185.2948 L635.1578947368421 185.3536 L602.3157894736842 184.4128 L569.4736842105264 183.6484 L536.6315789473684 182.80559999999997 L503.7894736842105 181.9432 L470.94736842105266 180.39479999999998 L438.10526315789474 178.5132 L405.2631578947368 176.4748 L372.42105263157896 174.9656 L339.57894736842104 171.3004 L306.7368421052632 164.1268 L273.89473684210526 146.54559999999998 Z" fill="oklch(0.72 0.15 72)" fill-opacity="0.16"/>
+<path id="pulse-observed" pathLength="1" d="M44 109 L76.8 131.9 L109.7 152.2 L142.5 144.1 L175.4 143 L208.2 153.5 L241.1 161.3 L273.9 146.5" fill="none" stroke="oklch(0.72 0.15 72)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<path id="pulse-forecast" d="M273.9 146.5 L306.7 147.6 L339.6 147.9 L372.4 147.8 L405.3 147.7 L438.1 147.7 L470.9 147.7 L503.8 147.7 L536.6 147.7 L569.5 147.7 L602.3 147.7 L635.2 147.7 L668 147.7" fill="none" stroke="oklch(0.72 0.15 72)" stroke-width="2" stroke-dasharray="6 4" stroke-linejoin="round" stroke-linecap="round"/>
+<line id="pulse-boundary" x1="273.9" x2="273.9" y1="40" y2="236" stroke="#050b2c" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.45"/>
+<text x="279.9" y="30" fill="#6e707c" font-size="11">previsión</text>
+<g id="pulse-close">
+<circle cx="273.9" cy="146.5" r="5" fill="oklch(0.72 0.15 72)"/>
+<text x="265.9" y="134.5" text-anchor="end" fill="oklch(0.72 0.15 72)" font-size="13" font-weight="600">45,6</text>
+</g>
+<circle cx="668" cy="147.7" r="3.2" fill="oklch(0.72 0.15 72)"/>
+<text x="44" y="270" text-anchor="middle" fill="#6e707c" font-size="11">ene</text><text x="273.9" y="270" text-anchor="middle" fill="#6e707c" font-size="11">ago</text><text x="668" y="270" text-anchor="middle" fill="#6e707c" font-size="11">ago</text>
+</svg>

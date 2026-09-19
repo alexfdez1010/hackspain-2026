@@ -66,9 +66,16 @@ unresolved placeholders. Keep them when completing or updating this document.
 - Site frame: cuatro columnas (`gutter | 1fr | 1fr | gutter`). El gutter es
   `clamp(1rem, 6vw, 4.5rem)` (`--site-gutter`). Líneas de `--separator` a todo
   el alto: interior de cada gutter y, en la landing, el eje central (oculto
-  bajo `lg`). La landing son tres bandas `h-dvh` (hero / cuerpo / pie); el pie
-  llena la tercera banda: columna izquierda reservada; Platform / Docs y
-  franja legal en el cuadrante derecho, con aire a eje y gutter.
+  bajo `lg`). La landing son tres bandas `h-dvh` (hero / features / pie). La
+  banda 1 (clara) parte el recuadro: título y trayectoria a la izquierda, 2×2
+  de superficies a la derecha. El plus es una cruz de 1px de gutter a gutter
+  (brazo horizontal a media banda; el vertical es el eje del marco). El 2×2
+  sólo añade el corte interior vertical. El marco ya cierra el recuadro, no se
+  dibuja una segunda caja. El hero llena la
+  primera banda: dither Paper de destellos a la izquierda (`fit: contain`);
+  `HeroAccess` a la derecha, sobre fondo plano. El pie llena la
+  tercera: heatmap a la izquierda; grano dither detrás de Platform / Docs y
+  legal a la derecha, con aire a eje y gutter.
 - `/` es marketing. El producto empieza en `/radar`.
 
 ## 3. Foundations
@@ -82,8 +89,11 @@ Los primitivos nombran el papel del color; los tokens de HeroUI v3
 escrito sigue funcionando. El tema oscuro se activa con `prefers-color-scheme`
 redefiniendo únicamente los primitivos en `globals.css`; lo derivado se
 recalcula solo. En la landing el esquema no sigue al sistema: banda 0 (hero) y
-2 (pie) fuerzan oscuro; la banda 1 (medio) fuerza claro, vía `data-band-theme`
-en el scroller.
+2 (pie) fuerzan oscuro; la banda 1 (medio) fuerza claro. `data-band-theme` en
+el scroller sólo tintea el chrome de página (`body`, líneas del `SiteFrame`)
+para que interpolen con el paging; cada banda redefine los mismos primitivos
+en `.landing-band-dark` / `.landing-band-light` para que el 2×2 no herede
+navy a media transición.
 
 | Token                    | Light     | Dark        | Tailwind                 | Uso                                     |
 | ------------------------ | --------- | ----------- | ------------------------ | --------------------------------------- |
@@ -149,9 +159,9 @@ llevan etiqueta de severidad además de color.
 - Marca: en producto, icono de pulso (`src/app/icon.svg`, 40 px) con el
   wordmark `PulseWordmark` (`ui/wordmark`, 14 px) a su derecha, y a
   continuación un hairline vertical y el claim «La inteligencia que impulsa tu
-  tesorería» (oculto bajo `md`). En el hero de `/`, `PulseHeroMark` SVG a
-  escala de columna. El enlace de la nav se llama «Embat Pulse, inicio»; el
-  `h1` de la landing es «Embat Pulse» y el SVG es presentacional.
+  tesorería» (oculto bajo `md`). En el hero de `/` no hay lockup a escala de
+  columna: el `h1` es «Embat Pulse» y es `sr-only`. El enlace de la nav se
+  llama «Embat Pulse, inicio».
 - Line-height rules: 1,55 en texto corrido; 1,1-1,2 en titulares y cifras.
 - Maximum readable line length: 70-75 caracteres (720 px).
 
@@ -183,46 +193,61 @@ llevan etiqueta de severidad además de color.
   como mascota animada, es la excepción: respiración lenta, parpadeo y
   expresiones según el estado del chat; nunca altera ni anima las cifras.
   La landing pagina una banda por gesto con un tween `ease-in-out` cúbico; el
-  snap nativo queda como respaldo antes de hidratar. El lienzo cambia de
-  esquema a la vez que la banda. Un pulso de 12 s recorre la línea derecha del
+  snap nativo queda como respaldo antes de hidratar. Cada banda pinta su
+  paleta; el chrome de página interpola con `data-band-theme`. Un pulso de 12 s
+  recorre la línea derecha del
   `SiteFrame`. El subrayado de `HeroAccess` se oculta de izquierda a derecha y
-  se vuelve a dibujar (500 ms). Ninguno usa score ni `accent`.
+  se vuelve a dibujar (500 ms). El dither del hero es estático; el Heatmap
+  del pie recorre a 1,36; el dither de las listas del pie espera a la banda 2.
+  El preview PULSE de la banda 1 dibuja la línea
+  observada, revela la banda p10-p90 y el forecast, y pulsa el último cierre
+  (loop 7,2 s). El dither, el heatmap y el gutter no usan score ni `accent`;
+  los strokes del preview PULSE son el color honesto del último cierre.
 - Duration scale: 120 ms para hover y color; 200 ms para overlays; 500 ms para
   el recorte del subrayado del hero; 900 ms para el cambio de banda en
-  marketing; 12 s para el pulso del gutter.
+  marketing; 7,2 s para el loop del preview PULSE; 12 s para el pulso del gutter.
 - Easing curves: las de HeroUI (`ease-out` a la entrada, `ease-in` a la salida)
-  en producto; `ease-in-out` cúbico en el paging de la landing, el pulso y el
-  subrayado del hero.
+  en producto; `ease-in-out` cúbico en el paging de la landing, el pulso, el
+  subrayado del hero y el loop del preview PULSE.
 - Reduced-motion behavior: se respeta `prefers-reduced-motion`; el paging de la
   landing salta sin tween, el pulso del gutter no recorre, el subrayado del
-  hero queda estático y Nexo deja de moverse. Las expresiones de Nexo siguen
-  identificando el estado, acompañado siempre por texto accesible.
+  hero queda estático, el Heatmap del pie se congela (`speed={0}`), el dither
+  de cada celda del 2×2 no anima uniforms (`speed={0}`), el dither del pie
+  tampoco, el preview PULSE se
+  queda en el fotograma final y Nexo deja de
+  moverse. Las expresiones de Nexo siguen identificando el estado, acompañado
+  siempre por texto accesible.
 
 ## 4. Component system
 
 Use HeroUI v3 components first. Document any wrapper or new primitive before
 adding it to the codebase.
 
-| Component/pattern | HeroUI primitive                       | Approved variants               | Usage guidance                                                                                    |
-| ----------------- | -------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Button            | `Button`                               | `secondary`, `tertiary`         | Sólo acciones de la propia vista (cambiar mes u horizonte).                                       |
-| Link              | `Link` / `next/link`                   | por defecto                     | `next/link` para navegación interna; `Link` de HeroUI cuando lleva icono.                         |
-| Card              | `Card`                                 | `secondary`                     | Una tarjeta por producto recomendado, que agrupa oferta, precio y motivos.                        |
-| Form field        | `ComboBox`, `Select` + `ListBox`       | por defecto                     | Selector de empresa en la nav; mes y horizonte en la empresa. Cada control lleva `aria-label`.    |
-| Feedback          | `Chip`                                 | `soft` con `color` semántico    | Familia de producto, tipo de razón y estado de un producto descartado.                            |
-| Data              | `Table` vía `DataTable`                | por defecto                     | Toda tabla usa `DataTable`: cabeceras ordenables en ambos sentidos, «sin datos» siempre al final. |
-| Panel             | `Panel` (`ui/panel`)                   | `padding` `default` / `none`    | Contenedor único: hairline, radio 12 e inset 24. `none` cuando el contenido pone su propio inset. |
-| KPI               | `StatGrid` (`ui/stat-grid`)            | 3, 4 o 5 columnas               | Tira de cifras de cabecera: un panel con hairline entre celdas, valor 32 y etiqueta debajo.       |
-| Estado del score  | `ScoreBadge` (`ui/score-badge`)        | `score` (def.), `pill`, `lg`    | `score` es punto + cifra en tinta; `pill` es la píldora con el nombre de la banda.                |
-| Pie de producto   | `SiteFooter` (`layout/site-footer`)    | por defecto                     | Hairline superior, 13 px secundario; lo que mide Pulse a la izquierda y la firma a la derecha.    |
-| Asistente Nexo    | `Modal`, `Button`, `TextArea`          | `primary`, `secondary`, `ghost` | Diálogo lateral de 440 px; hoja inferior en móvil. Solo en rutas de producto.                     |
-| Icono de marca    | SVG estático (`src/app/icon.svg`)      | paleta de Nexo                  | Nav de producto; el enlace lleva `aria-label="Embat Pulse, inicio"` y apunta a `/`.               |
-| Hero mark         | SVG propio (`PulseHeroMark`)           | tokens de score + accent        | Solo en `/`. El `h1` es «Embat Pulse»; el SVG es `aria-hidden`.                                   |
-| Site frame        | `SiteFrame`                            | `split`, `pulse`                | Gutters y eje; `pulse` solo en `/`, sobre la línea derecha existente.                             |
-| Landing scroll    | `LandingScroll`                        | paging 900 ms                   | Un gesto, una banda; tween propio, no snap nativo.                                                |
-| Landing footer    | `LandingFooter`                        | cuadrante derecho               | Platform (PULSE, Recomendaciones) y Docs (Método); copyright y legal abajo.                       |
-| Footer heatmap    | Paper `Heatmap` (`PulseFooterHeatmap`) | rampa Embat                     | Columna izquierda, solo `lg+`; `aria-hidden`; `speed={0}` con reduced motion.                     |
-| Hero access       | `HeroAccess`                           | cuadrícula 2 columnas           | PULSE, Recomendaciones, Método (`HERO_SECTIONS`); subrayado animado.                              |
+| Component/pattern | HeroUI primitive                              | Approved variants               | Usage guidance                                                                                                     |
+| ----------------- | --------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Button            | `Button`                                      | `secondary`, `tertiary`         | Sólo acciones de la propia vista (cambiar mes u horizonte).                                                        |
+| Link              | `Link` / `next/link`                          | por defecto                     | `next/link` para navegación interna; `Link` de HeroUI cuando lleva icono.                                          |
+| Card              | `Card`                                        | `secondary`                     | Una tarjeta por producto recomendado, que agrupa oferta, precio y motivos.                                         |
+| Form field        | `ComboBox`, `Select` + `ListBox`              | por defecto                     | Selector de empresa en la nav; mes y horizonte en la empresa. Cada control lleva `aria-label`.                     |
+| Feedback          | `Chip`                                        | `soft` con `color` semántico    | Familia de producto, tipo de razón y estado de un producto descartado.                                             |
+| Data              | `Table` vía `DataTable`                       | por defecto                     | Toda tabla usa `DataTable`: cabeceras ordenables en ambos sentidos, «sin datos» siempre al final.                  |
+| Panel             | `Panel` (`ui/panel`)                          | `padding` `default` / `none`    | Contenedor único: hairline, radio 12 e inset 24. `none` cuando el contenido pone su propio inset.                  |
+| KPI               | `StatGrid` (`ui/stat-grid`)                   | 3, 4 o 5 columnas               | Tira de cifras de cabecera: un panel con hairline entre celdas, valor 32 y etiqueta debajo.                        |
+| Estado del score  | `ScoreBadge` (`ui/score-badge`)               | `score` (def.), `pill`, `lg`    | `score` es punto + cifra en tinta; `pill` es la píldora con el nombre de la banda.                                 |
+| Pie de producto   | `SiteFooter` (`layout/site-footer`)           | por defecto                     | Hairline superior, 13 px secundario; lo que mide Pulse a la izquierda y la firma a la derecha.                     |
+| Asistente Nexo    | `Modal`, `Button`, `TextArea`                 | `primary`, `secondary`, `ghost` | Diálogo lateral de 440 px; hoja inferior en móvil. Solo en rutas de producto.                                      |
+| Icono de marca    | SVG estático (`src/app/icon.svg`)             | paleta de Nexo                  | Nav de producto; el enlace lleva `aria-label="Embat Pulse, inicio"` y apunta a `/`.                                |
+| Hero dither       | Paper `ImageDithering` (`PulseHeroDither`)    | destellos locales, `contain`    | Columna izquierda de `/`; webp propio; `preload` RSC; fade `data-ready`; `maxPixelCount` 480 000; no `next/image`. |
+| Hero mark         | SVG propio (`PulseHeroMark`)                  | tokens de score + accent        | Geometría compartida; no se monta en `/`. El `h1` de la landing es «Embat Pulse» y es `sr-only`.                   |
+| Site frame        | `SiteFrame`                                   | `split`, `pulse`                | Gutters y eje; `pulse` solo en `/`, sobre la línea derecha existente.                                              |
+| Landing scroll    | `LandingScroll`                               | paging 900 ms                   | Un gesto, una banda; tween propio, no snap nativo.                                                                 |
+| Landing footer    | `LandingFooter`                               | cuadrante derecho               | Platform / Docs y legal; grano dither detrás de las listas; heatmap a la izquierda en `lg+`.                       |
+| Footer heatmap    | Paper `Heatmap` (`PulseFooterHeatmap`)        | rampa Embat                     | Columna izquierda, solo `lg+`; `aria-hidden`; `speed={0}` con reduced motion.                                      |
+| Footer dither     | Paper `ImageDithering` (`PulseFooterDither`)  | recorte rotado detrás de listas | Mismo `/hero-dither.webp`; `scale` 2.4, origin 0.68/0.32, 28°; tinta `#afafbb` a 0.22 `screen`; no Heatmap.        |
+| Hero access       | `HeroAccess`                                  | cuadrícula 2 columnas           | PULSE, Recomendaciones, Método (`HERO_SECTIONS`); subrayado animado.                                               |
+| Landing showcase  | `LandingShowcase`                             | 2×2 + trayectoria               | Banda 1: plus gutter a gutter; 2×2 sin `gap`; PULSE anima `COMP_0001`; el resto usa el gráfico de producto.        |
+| Feature dither    | Paper `ImageDithering` (`PulseFeatureDither`) | un campo detrás del 2×2         | Mismo `/hero-dither.webp`; tinta `#050b2c` a 0.32; hover/selected por tipo, no `--accent`; no Heatmap.             |
+| Showcase PULSE    | SVG vendido (`PulseShowcaseAnimation`)        | loop 7,2 s                      | Inline; `COMP_0001`; Arrow 2 animate no disponible en el plan; motion CSS local; freeze con reduced-motion.        |
 
 ### Icono de marca
 
@@ -317,7 +342,7 @@ Component rules:
 - Navigation behavior by breakpoint: en `/` no hay `SiteNav`; el acceso es
   `HeroAccess`. En producto, barra superior fija con hairline inferior: marca
   (a `/`), el buscador de empresa y seis pestañas
-  —PULSE, Diagnóstico, Detalle, Señales, Financiación, Método—. Las pestañas
+  —PULSE, Diagnóstico, Detalle, Alertas, Financiación, Método—. Las pestañas
   son enlaces con aspecto de tab: 15/500, padding 11/12, radio 8, la actual en
   azul de enlace sobre `brand-subtle` y el resto en secundario sobre
   transparente; la actual es la sección que nombra `sectionFromPath`, así que
@@ -329,7 +354,8 @@ Component rules:
   de enlace sobre `brand-subtle`; elegir sección o empresa cierra el menú
   porque cambia la ruta; Escape cierra y el foco vuelve al botón. En `lg` el
   hero es 50/50 y el pie ocupa el cuadrante derecho; por debajo de `lg`,
-  wordmark, accesos y pie se apilan dentro de los gutters.
+  dither, accesos y pie se apilan dentro de los gutters. El dither no cubre
+  `HeroAccess`.
 - Mobile-first exceptions: las tablas mes a mes y de variables mantienen su
   ancho mínimo y scrollan; los SVG escalan con `viewBox`. El bloque oscuro
   (`.bg-gradient-hero`) baja a 28/20 de padding bajo `md`.
@@ -417,6 +443,21 @@ patterns.
 | 2026-09-19 | La cabecera de empresa cambia «Tensión a 6 meses» por «Salud de los clientes»: media de la salud de pago de sus clientes (1 − parte de facturas tarde en 6 m) ponderada por facturación, sobre 100, con la banda y el número de clientes debajo | La tensión ya la cobra el precio y la nombran las acciones; qué tal pagan los clientes es lo que un director financiero pregunta al abrir la empresa, y el dataset no tiene un PULSE por cliente porque los clientes no son empresas del panel | Equipo Pulse |
 | 2026-09-19 | Las celdas del mosaico y las cards de pilar de Diagnóstico llevan el lavado de su banda (`bandSurfaceStyle`: borde al 30 % y fondo al 8 % del color de la banda, mezclados con los tokens neutros, como la alerta de señal); las celdas sin datos siguen grises | La gravedad debe leerse de un vistazo en toda la página, no sólo en un punto de 8 px; la misma mezcla en alerta, celdas y cards hace que «color» signifique siempre «gravedad» | Equipo Pulse |
 | 2026-09-19 | `PulseCompanyLinks` desaparece de la página de empresa; cada ruta se enlaza junto a la cifra que la motiva (acciones, alerta, detalle del mosaico, ficha del modelo) | El mock no tiene aside y un enlace suelto no dice por qué ir | Equipo Pulse |
+| 2026-09-19 | Hero: `ImageDithering` de destellos (no wordmark) a la izquierda; sin SVG PULSE a escala de columna | El pie ya posee la silueta Pulse; el hero no es otro lockup ni un PNG fijo | Equipo Pulse |
+| 2026-09-19 | 2×2 de features con `gap-px`; el marco es el recuadro, no una Card | Un solo plus de 1px de borde a borde; no se apilan reglas sobre el eje | Equipo Pulse |
+| 2026-09-19 | Plus de la banda 1 de gutter a gutter; el eje del marco queda por encima del contenido | Las celdas opacas tapaban la cruz; el corte horizontal debe verse también a la izquierda | Equipo Pulse |
+| 2026-09-19 | Un solo gráfico PULSE como placeholder; el clic cambia título y `aria-pressed` | Layout primero; previews distintas por celda en un paso posterior | Equipo Pulse |
+| 2026-09-19 | Preview PULSE animado con la trayectoria de `COMP_0001`; Arrow 2 animate bloqueado por plan, motion CSS local | La celda PULSE deja de ser el gráfico de producto; el resto espera su preview | Equipo Pulse |
+| 2026-09-19 | Dither por cuadrante: siluetas locales, ImageDithering Paper en cada celda | El webp del hero es un 2×2; cada destello vive detrás de su superficie, sin Heatmap ni SDK en Next | Equipo Pulse |
+| 2026-09-19 | Feature dither: `cover` a la celda; hover CSS `--accent` multiply y transform por id | `contain` letterboxeaba respecto al plus; Paper no interpola `colorFront` | Equipo Pulse |
+| 2026-09-19 | Feature dither: el 2×2 recorta el webp del hero (origin + `scale` 2), no SVG propios | El destello del hero ya es un 2×2; cada celda muestra su cuadrante | Equipo Pulse |
+| 2026-09-19 | Un dither detrás del 2×2; cruz en overlays 1px; hover accent en la celda | Cuatro canvases partían el destello en la cruz; el campo debe continuar | Equipo Pulse |
+| 2026-09-19 | Feature dither: tinta `#050b2c` a opacidad 0.32 en la banda clara | `#6e707c` a 0.18 desaparecía sobre `#fbfbfc`; Paper no lee tokens | Equipo Pulse |
+| 2026-09-19 | Paleta local por banda (`.landing-band-light` / `dark`); `data-band-theme` sólo tintea el chrome | El 2×2 heredaba `--background` navy al paginar y destellaba azul a media transición | Equipo Pulse |
+| 2026-09-19 | 2×2: hover y selected por tipografía y velo de tinta 4%; sin `--accent` multiply | El pressed compartía el hover y PULSE parecía siempre azul; el color no decora | Equipo Pulse |
+| 2026-09-19 | Dither del pie detrás de Platform/Docs: tinta oscura `#afafbb` a 0.22 con `screen` | El 2×2 `#050b2c` desaparecería sobre navy; el heatmap se queda a la izquierda | Equipo Pulse |
+| 2026-09-19 | Dither del pie: recorte `scale` 2.4, origin 0.68/0.32, rotación 28° | El campo entero se leía como el 2×2 con la tinta invertida | Equipo Pulse |
+| 2026-09-19 | Hero dither: `preload` RSC del webp + fade al decode; `maxPixelCount` 480 000 | Paper no consume `next/image`; el destello no debe depender de que el archivo llegue tarde | Equipo Pulse |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce

@@ -103,8 +103,9 @@
 
 /*
  * Landing ignores the system scheme: hero and footer are dark, the middle
- * band is light. `html:has` wins over `:root` and the media query. Only the
- * primitives are switched; everything derived follows.
+ * band is light. `html:has` tints body and SiteFrame chrome as the scroller
+ * pages. Each band then redefines the same primitives locally so the 2×2
+ * does not snap to navy mid-tween. Score tokens stay on the product palette.
  */
 html:has([data-landing-snap]:not([data-band-theme='light'])) {
   color-scheme: dark;
@@ -149,6 +150,52 @@ html:has([data-landing-snap][data-band-theme='light']) {
   --surface-tertiary: #e4e7ee;
   --default: #eff1f5;
   --accent: #3878f6;
+}
+
+.landing-band-dark {
+  color-scheme: dark;
+  --background: #050b2c;
+  --foreground: #ffffff;
+  --surface: #232845;
+  --surface-secondary: #41465f;
+  --surface-tertiary: #373c56;
+  --overlay: #232845;
+  --muted: #afafbb;
+  --accent: #5c92fe;
+  --danger: #c2401f;
+  --default: #41465f;
+  --default-foreground: #ffffff;
+  --field-background: #232845;
+  --segment: #41465f;
+  --segment-foreground: #ffffff;
+  --border: #373c56;
+  --separator: #373c56;
+  --backdrop: #0e1431a6;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.landing-band-light {
+  color-scheme: light;
+  --background: #fbfbfc;
+  --foreground: #050b2c;
+  --surface: #ffffff;
+  --surface-secondary: #f3f4f6;
+  --surface-tertiary: #e8e8ed;
+  --overlay: #ffffff;
+  --muted: #6e707c;
+  --accent: #3878f6;
+  --danger: #c2401f;
+  --default: #e8e8ed;
+  --default-foreground: #050b2c;
+  --field-background: #ffffff;
+  --field-foreground: #050b2c;
+  --segment: #ffffff;
+  --segment-foreground: #050b2c;
+  --border: #d2d2db;
+  --separator: #d2d2db;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 @theme inline {
@@ -216,13 +263,60 @@ html:has([data-landing-snap]) .bg-separator {
 }
 
 /*
- * The Heatmap canvas does not tween with tokens. Keep it invisible until the
- * footer band is current, then fade with the page. The radial mask dissolves
- * the grain field into the band instead of a hard rectangle.
+ * Paper canvases do not tween with tokens. Hero dither is on by default
+ * (band 0 / first paint) and screens onto the dark band; the footer Heatmap
+ * and list dither wait for band 2. The Heatmap uses a radial mask so it is
+ * not a hard rectangle.
  */
+.hero-dither,
+.footer-heatmap,
+.footer-dither {
+  transition: opacity 900ms ease-in-out;
+}
+
+.hero-dither {
+  opacity: 1;
+  mix-blend-mode: screen;
+}
+
+.hero-dither-canvas {
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 500ms ease-out;
+}
+
+.hero-dither-canvas[data-ready] {
+  opacity: 1;
+}
+
+/*
+ * One dither field behind the 2×2. No `screen` blend: light-band ink on
+ * `#fbfbfc`. Hover and selected states are type, not an accent fill.
+ */
+.feature-dither {
+  opacity: 0.32;
+}
+
+.feature-cell {
+  transition: background-color 120ms ease-out;
+}
+
+.feature-cell:hover:not(:has([aria-pressed='true'])) {
+  background-color: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.feature-lead {
+  transition: color 120ms ease-out;
+}
+
+.feature-cell:hover .feature-lead,
+.feature-cell:has([aria-pressed='true']) .feature-lead {
+  color: var(--foreground);
+}
+
 .footer-heatmap {
   opacity: 0;
-  transition: opacity 900ms ease-in-out;
   mask-image: radial-gradient(
     ellipse 70% 55% at 50% 50%,
     #000 40%,
@@ -235,8 +329,22 @@ html:has([data-landing-snap]) .bg-separator {
   );
 }
 
+.footer-dither {
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+
+[data-landing-snap][data-band='1'] .hero-dither,
+[data-landing-snap][data-band='2'] .hero-dither {
+  opacity: 0;
+}
+
 [data-landing-snap][data-band='2'] .footer-heatmap {
   opacity: 1;
+}
+
+[data-landing-snap][data-band='2'] .footer-dither {
+  opacity: 0.22;
 }
 
 /*
@@ -313,7 +421,12 @@ html:has([data-landing-snap]) .bg-separator {
 
   html:has([data-landing-snap]) body,
   html:has([data-landing-snap]) .bg-separator,
-  .footer-heatmap {
+  .hero-dither,
+  .hero-dither-canvas,
+  .footer-heatmap,
+  .footer-dither,
+  .feature-cell,
+  .feature-lead {
     transition: none;
   }
 
@@ -329,5 +442,9 @@ html:has([data-landing-snap]) .bg-separator {
 
   .hero-access-link::after {
     transition: none;
+  }
+
+  .pulse-showcase-anim * {
+    animation: none !important;
   }
 }

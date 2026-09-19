@@ -13,6 +13,7 @@ describe('SiteFrame', () => {
     expect(html).toContain('aria-hidden');
     expect(html).toContain('gutter-pulse');
     expect(html).toContain('right-[var(--site-gutter)]');
+    expect(html).toContain('z-10');
   });
 
   it('omits the traveling tick when pulse is off', () => {
