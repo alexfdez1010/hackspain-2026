@@ -24,8 +24,15 @@ describe('formatNumber', () => {
 
 describe('formatEuro', () => {
   it('uses compact notation for large amounts', () => {
-    expect(formatEuro(2_000_000)).toContain('M');
-    expect(formatEuro(500)).toContain('500');
+    expect(formatEuro(2_000_000).replace(/\s/g, ' ')).toBe('2 M €');
+    expect(formatEuro(3_610_098.62).replace(/\s/g, ' ')).toBe('3,6 M €');
+    expect(formatEuro(36_982.49).replace(/\s/g, ' ')).toBe('37 mil €');
+    expect(formatEuro(500).replace(/\s/g, ' ')).toBe('500 €');
+    expect(formatEuro(-1_500_000).replace(/\s/g, ' ')).toBe('-1,5 M €');
+  });
+
+  it('keeps the euro sign on the same line as the amount', () => {
+    expect(formatEuro(1_200_000)).toBe('1,2\u00a0M\u00a0€');
   });
 
   it('renders an em dash without a value', () => {

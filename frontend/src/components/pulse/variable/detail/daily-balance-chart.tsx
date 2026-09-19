@@ -10,10 +10,15 @@ import {
   type ChartBox,
 } from '@/components/charts/geometry';
 import { useElementWidth } from '@/components/charts/use-element-width';
+import {
+  BalanceAxis,
+  BalanceGuideLine,
+  BalanceMark,
+  type BalanceGuide,
+} from '@/components/pulse/variable/detail/balance-marks';
 import { DetailNote } from '@/components/pulse/variable/detail/detail-note';
 import { formatEuro } from '@/lib/format';
 import type { DailyBalancePoint } from '@/lib/pulse/details/types';
-import { formatDay } from '@/lib/pulse/details/view';
 
 /** Fixed pixel geometry; the width is measured from the container. */
 const BASE: Omit<ChartBox, 'width'> = {
@@ -25,14 +30,6 @@ const BASE: Omit<ChartBox, 'width'> = {
 };
 /** Width assumed before the container is measured. */
 const FALLBACK_WIDTH = 960;
-
-/** A horizontal reference drawn across the plot. */
-export interface BalanceGuide {
-  /** Level of the reference, in euros. */
-  value: number;
-  /** What the reference stands for, printed on the line. */
-  label: string;
-}
 
 interface DailyBalanceChartProps {
   /** Close-of-day cash of the whole company, ascending. */
@@ -86,12 +83,10 @@ export function DailyBalanceChart({
   const last = placed[placed.length - 1];
   const lastDay = daily[count - 1];
   const markIndex = mark ? daily.findIndex((day) => day.day === mark.day) : -1;
-  const marked =
+  const markAt =
     mark && mark.balance !== null && markIndex >= 0
       ? { x: xAt(markIndex, count, box), y: yAt(mark.balance, min, max, box) }
       : null;
-  const guideY = guide ? yAt(guide.value, min, max, box) : null;
-  const right = box.width - box.padRight;
 
   return (
     <div ref={container} className="w-full">
@@ -103,32 +98,13 @@ export function DailyBalanceChart({
         role="img"
         aria-label={ariaLabel}
       >
-        <g aria-hidden="true">
-          <text
-            x={box.padLeft - 8}
-            y={box.padTop + 4}
-            textAnchor="end"
-            className="fill-muted text-[10px] tabular-nums"
-          >
-            {formatEuro(max)}
-          </text>
-          <text
-            x={box.padLeft - 8}
-            y={bottom + 4}
-            textAnchor="end"
-            className="fill-muted text-[10px] tabular-nums"
-          >
-            {formatEuro(min)}
-          </text>
-          <line
-            x1={box.padLeft}
-            x2={right}
-            y1={bottom}
-            y2={bottom}
-            stroke="var(--separator)"
-            strokeWidth={1}
-          />
-        </g>
+        <BalanceAxis
+          box={box}
+          max={max}
+          min={min}
+          bottom={bottom}
+          days={[daily[0].day, lastDay.day]}
+        />
         <path
           d={areaPath(placed, bottom)}
           fill="var(--foreground)"
@@ -141,71 +117,24 @@ export function DailyBalanceChart({
           strokeWidth={1.6}
           strokeLinejoin="round"
         />
-        {guide && guideY !== null && (
-          <g>
-            <line
-              x1={box.padLeft}
-              x2={right}
-              y1={guideY}
-              y2={guideY}
-              stroke="var(--foreground)"
-              strokeWidth={1}
-              strokeDasharray="5 4"
-              opacity={0.55}
-            />
-            <text
-              x={right}
-              y={guideY - 5}
-              textAnchor="end"
-              className="fill-muted text-[10px]"
-            >
-              {guide.label}: {formatEuro(guide.value)}
-            </text>
-          </g>
+        {guide && (
+          <BalanceGuideLine
+            box={box}
+            guide={guide}
+            y={yAt(guide.value, min, max, box)}
+          />
         )}
-        {marked && mark && (
-          <g>
-            <circle
-              cx={marked.x}
-              cy={marked.y}
-              r={3.6}
-              fill="var(--foreground)"
-            />
-            <text
-              x={marked.x + (marked.x > box.width / 2 ? -6 : 6)}
-              y={Math.min(marked.y + 15, bottom - 3)}
-              textAnchor={marked.x > box.width / 2 ? 'end' : 'start'}
-              className="fill-foreground text-[11px] font-medium tabular-nums"
-            >
-              mínimo: {formatDay(mark.day)}, {formatEuro(mark.balance)}
-            </text>
-          </g>
+        {mark && markAt && (
+          <BalanceMark box={box} point={mark} at={markAt} bottom={bottom} />
         )}
         <text
-          x={right}
+          x={box.width - box.padRight}
           y={Math.max(last.y - 8, box.padTop - 6)}
           textAnchor="end"
           className="fill-foreground text-[11px] font-medium tabular-nums"
         >
           {formatEuro(lastDay.balance)}
         </text>
-        <g aria-hidden="true">
-          <text
-            x={box.padLeft}
-            y={box.height - 8}
-            className="fill-muted text-[10px]"
-          >
-            {formatDay(daily[0].day)}
-          </text>
-          <text
-            x={right}
-            y={box.height - 8}
-            textAnchor="end"
-            className="fill-muted text-[10px]"
-          >
-            {formatDay(lastDay.day)}
-          </text>
-        </g>
       </svg>
     </div>
   );

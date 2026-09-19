@@ -19,7 +19,12 @@ export const AGING_BUCKETS: readonly AgingBucketView[] = [
     opacity: 1,
   },
   { key: '1_30', label: '1-30', color: 'var(--score-neutral)', opacity: 0.4 },
-  { key: '31_60', label: '31-60', color: 'var(--score-neutral)', opacity: 0.85 },
+  {
+    key: '31_60',
+    label: '31-60',
+    color: 'var(--score-neutral)',
+    opacity: 0.85,
+  },
   { key: '61_90', label: '61-90', color: 'var(--score-fragile)', opacity: 1 },
   {
     key: 'mas_90',

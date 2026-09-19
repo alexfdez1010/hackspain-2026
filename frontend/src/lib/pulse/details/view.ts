@@ -63,7 +63,10 @@ export function lateDaysHint(
 export function formatDay(day: string): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
   if (!match) return day;
-  return `${Number(match[3])} ${formatMonth(`${match[1]}-${match[2]}`)}`;
+  const key = `${match[1]}-${match[2]}`;
+  const month = formatMonth(key);
+  if (month === key) return day;
+  return `${Number(match[3])} ${month}`;
 }
 
 /**

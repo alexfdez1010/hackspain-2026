@@ -92,6 +92,13 @@ describe('the variable page', () => {
     expect(markup).not.toContain('NaN');
   });
 
+  it('drills into the counterparties behind the variable of the month', async () => {
+    const markup = await render('COMP_0001', 'network');
+    expect(markup).toContain('Salud de pago de los clientes');
+    expect(markup).toContain('Detalle del cierre de ago 2026');
+    expect(markup).not.toContain('COUNTERPARTY_03903<');
+  });
+
   it('answers 404 for an unknown variable, an unsafe key and an unknown company', async () => {
     await expect(render('COMP_0001', 'not_a_variable')).rejects.toThrow();
     await expect(render('COMP_0001', '../secret')).rejects.toThrow();

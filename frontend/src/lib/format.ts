@@ -33,18 +33,23 @@ export function formatNumber(value: number | null, digits = 0): string {
 /**
  * Formats an amount in euros, using compact notation above 10.000 €.
  *
+ * The number is formatted on its own and the euro sign appended by hand
+ * after a no-break space, as the currency style does:
+ * the ICU builds of Node and Chromium disagree on the space between a
+ * compact unit and the currency (`3,6 M €` against `3,6 M€`), and a page
+ * rendered on the server must hydrate byte for byte in the browser.
+ *
  * @param value - Amount in euros; `null` renders as an em dash.
- * @returns A localized currency string.
+ * @returns A localized string such as `2636 €`, `37 mil €` or `3,6 M €`.
  */
 export function formatEuro(value: number | null): string {
   if (value === null || !Number.isFinite(value)) return '—';
   const compact = Math.abs(value) >= 10_000;
-  return value.toLocaleString(LOCALE, {
-    style: 'currency',
-    currency: 'EUR',
+  const amount = value.toLocaleString(LOCALE, {
     notation: compact ? 'compact' : 'standard',
     maximumFractionDigits: compact ? 1 : 0,
   });
+  return `${amount}\u00a0€`;
 }
 
 /**

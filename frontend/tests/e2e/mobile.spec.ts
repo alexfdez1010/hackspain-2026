@@ -5,7 +5,7 @@ test.use({ ...devices['iPhone 13'] });
 test('fits a phone: two-row navigation, no sideways scroll and stacked maps', async ({
   page,
 }) => {
-  await page.goto('/company/COMP_0001');
+  await page.goto('/company/COMP_0001', { waitUntil: 'networkidle' });
   const nav = page.getByRole('navigation', { name: 'Secciones' });
   const search = nav.getByRole('combobox', { name: 'Empresa' });
   const home = nav.getByRole('link', { name: 'Embat Pulse, inicio' });
