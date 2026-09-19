@@ -32,7 +32,7 @@ function companyReply(company: ContextCompany): string {
   const unknown = company.unknownVariables.length
     ? `${formatNumber(company.unknownVariables.length)} de las once variables no tienen datos este mes, así que parte de los 100 puntos no está respaldada.`
     : 'Las once variables tienen datos este mes.';
-  return `**${company.id} · PULSE**\n\nScore observado de ${company.month}: **${company.pulse === null ? 'sin datos' : `${formatNumber(company.pulse, 1)}/100`}** (${change}). Confianza: ${company.confidence === null ? 'sin datos' : formatPercent(company.confidence, 0)}, con ${formatNumber(company.monthsObserved)} meses observados.\n\n${forecastLine(company)}\n\n${unknown} Revisa los pilares y las variables antes de interpretar el movimiento.`;
+  return `**${company.name} · PULSE**\n\nScore observado de ${company.month}: **${company.pulse === null ? 'sin datos' : `${formatNumber(company.pulse, 1)}/100`}** (${change}). Confianza: ${company.confidence === null ? 'sin datos' : formatPercent(company.confidence, 0)}, con ${formatNumber(company.monthsObserved)} meses observados.\n\n${forecastLine(company)}\n\n${unknown} Revisa los pilares y las variables antes de interpretar el movimiento.`;
 }
 
 /** Lists the recommended products of the company, or why there is none. */
@@ -76,7 +76,7 @@ export function getMockReply(
   }
   if (context.companyId) {
     if (!context.company) {
-      return `No hay datos de **${context.companyId}** en el export de PULSE. No puedo atribuirle un score, una previsión ni productos. Comprueba el identificador en la portada.`;
+      return `No hay datos de **${context.companyId}** en el export de PULSE. No puedo atribuirle un score, una previsión ni productos. Elige otra empresa en el selector de la cabecera.`;
     }
     if (
       /producto|recomend|credito|linea|factoring|confirming|prestamo|deposito|tipo|precio|financ/.test(
@@ -84,8 +84,8 @@ export function getMockReply(
       )
     ) {
       return context.advisor
-        ? advisorReply(context.company.id, context.advisor)
-        : `No hay recomendaciones publicadas para **${context.company.id}**. Solo puedo hablar de su score y de su previsión.`;
+        ? advisorReply(context.company.name, context.advisor)
+        : `No hay recomendaciones publicadas para **${context.company.name}**. Solo puedo hablar de su score y de su previsión.`;
     }
     return companyReply(context.company);
   }
@@ -97,7 +97,7 @@ export function getMockReply(
     return '**Las recomendaciones se calculan empresa a empresa.**\n\nSiete productos —línea de crédito, ampliación, factoring, confirming, préstamo a plazo, reestructuración y depósito— se evalúan con reglas ligadas a las variables del score; los que encajan se dimensionan y se les pone precio sobre el Euríbor a 12 meses.\n\nAbre una empresa y pregúntame por sus productos: te diré cuáles encajan, por cuánto y por qué.';
   }
   if (/empresa|cartera|resum|situacion|hola/.test(query)) {
-    return '**Esta aplicación muestra una empresa cada vez, nunca la cartera.**\n\nElige un identificador en la portada para abrir su PULSE mes a mes, su previsión a seis meses y los productos financieros que encajan. Cuando estés en una empresa, pregúntame «Resume esta empresa» o «¿Qué productos me recomiendas?».';
+    return '**Esta aplicación muestra una empresa cada vez, nunca la cartera.**\n\nElige una empresa en el selector de la cabecera para abrir su PULSE mes a mes, su previsión a seis meses y los productos financieros que encajan. Cuando estés en una empresa, pregúntame «Resume esta empresa» o «¿Qué productos me recomiendas?».';
   }
   return 'Estoy en **modo demostración**, con respuestas preparadas sobre la aplicación. Esta pregunta todavía no tiene una respuesta simulada.\n\nPuedes probar «Resume esta empresa», «¿Qué productos me recomiendas?», «Explícame el score» o «¿Cómo puede ayudarme la IA?». Con el asistente conectado podrás hacer preguntas abiertas y continuar la conversación.';
 }

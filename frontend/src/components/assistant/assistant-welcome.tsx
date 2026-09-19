@@ -12,7 +12,7 @@ export function AssistantWelcome({
   mood: NexoMood;
   onSelect: (text: string) => void;
 }) {
-  const company = /^\/empresa\/COMP_/.test(pathname);
+  const company = /^\/company\/COMP_/.test(pathname);
   const suggestions = company
     ? [
         {

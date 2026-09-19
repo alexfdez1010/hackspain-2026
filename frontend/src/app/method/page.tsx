@@ -12,6 +12,7 @@ import { MethodScoreEvaluation } from '@/components/method/score-evaluation';
 import { MethodScoreScale } from '@/components/method/score-scale';
 import { MethodWeightMap } from '@/components/method/weight-map';
 import { getAdvisorDataSource } from '@/lib/advisor/data';
+import { companyName } from '@/lib/company/names';
 import {
   buildConfidenceSegments,
   buildMethodExample,
@@ -29,8 +30,8 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 interface MethodPageProps {
-  /** Carries the company in context as `?empresa=COMP_0001`. */
-  searchParams: Promise<{ empresa?: string | string[] }>;
+  /** Carries the company in context as `?company=COMP_0001`. */
+  searchParams: Promise<{ company?: string | string[] }>;
 }
 
 /**
@@ -42,8 +43,8 @@ interface MethodPageProps {
  * @returns The method page.
  */
 export default async function MethodPage({ searchParams }: MethodPageProps) {
-  const { empresa } = await searchParams;
-  const contextId = companyIdFromQuery(empresa);
+  const { company: companyQuery } = await searchParams;
+  const contextId = companyIdFromQuery(companyQuery);
   const pulse = getPulseDataSource();
   const [{ meta }, requested, catalogue] = await Promise.all([
     pulse.getSummary(),
@@ -70,8 +71,8 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
           href={companyRoutes(contextId ?? PULSE_DEMO_COMPANY_ID).pulse}
         >
           {contextId
-            ? `Volver a ${contextId}`
-            : `Ver un PULSE: ${PULSE_DEMO_COMPANY_ID}`}
+            ? `Volver a ${companyName(contextId)}`
+            : `Ver un PULSE: ${companyName(PULSE_DEMO_COMPANY_ID)}`}
         </Link>
       }
     >
@@ -102,7 +103,7 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
             confidence={example?.confidence ?? null}
             caption={
               example
-                ? `Cobertura real de ${example.companyId} en ${formatMonth(example.month)}: una variable sin datos no cuenta como cero, reduce la base sobre la que se mide.`
+                ? `Cobertura real de ${companyName(example.companyId)} en ${formatMonth(example.month)}: una variable sin datos no cuenta como cero, reduce la base sobre la que se mide.`
                 : 'Sin mes observado para ilustrar la cobertura.'
             }
           />
@@ -113,7 +114,7 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
         title="Cómo se lee un mes"
         note={
           example
-            ? `${example.companyId} · cierre de ${formatMonth(example.month)}`
+            ? `${companyName(example.companyId)} · cierre de ${formatMonth(example.month)}`
             : 'Sin empresa de ejemplo'
         }
       >

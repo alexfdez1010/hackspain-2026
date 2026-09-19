@@ -4,32 +4,33 @@ import {
   companyIdFromPath,
   companyIdFromQuery,
   companyRoutes,
+  sectionFromPath,
 } from '@/lib/routes';
 import {
   companySections,
   isActive,
   resolveNavCompany,
 } from '@/components/layout/site-nav';
-import { filterCompanyIds } from '@/components/entry/company-picker';
+import { buildCompanyOptions } from '@/lib/company/options';
 
 describe('companyRoutes', () => {
   it('scopes every destination to the company', () => {
     expect(companyRoutes('COMP_0001')).toEqual({
-      pulse: '/empresa/COMP_0001',
-      advisor: '/empresa/COMP_0001/recomendaciones',
-      method: '/metodo?empresa=COMP_0001',
+      pulse: '/company/COMP_0001',
+      advisor: '/company/COMP_0001/recommendations',
+      method: '/method?company=COMP_0001',
     });
   });
 });
 
 describe('company identifiers in routes', () => {
   it('reads the company from company pages only', () => {
-    expect(companyIdFromPath('/empresa/COMP_0001')).toBe('COMP_0001');
-    expect(companyIdFromPath('/empresa/COMP_0001/recomendaciones')).toBe(
+    expect(companyIdFromPath('/company/COMP_0001')).toBe('COMP_0001');
+    expect(companyIdFromPath('/company/COMP_0001/recommendations')).toBe(
       'COMP_0001',
     );
-    expect(companyIdFromPath('/metodo')).toBeNull();
-    expect(companyIdFromPath('/empresa/..%2Fsecret')).toBeNull();
+    expect(companyIdFromPath('/method')).toBeNull();
+    expect(companyIdFromPath('/company/..%2Fsecret')).toBeNull();
   });
 
   it('validates the query parameter', () => {
@@ -42,10 +43,10 @@ describe('company identifiers in routes', () => {
 
 describe('navigation', () => {
   it('keeps the company from the path, then the query, then the demo', () => {
-    expect(resolveNavCompany('/empresa/COMP_0009', 'COMP_0001')).toBe(
+    expect(resolveNavCompany('/company/COMP_0009', 'COMP_0001')).toBe(
       'COMP_0009',
     );
-    expect(resolveNavCompany('/metodo', 'COMP_0007')).toBe('COMP_0007');
+    expect(resolveNavCompany('/method', 'COMP_0007')).toBe('COMP_0007');
     expect(resolveNavCompany('/', null)).toBe('COMP_0001');
   });
 
@@ -57,26 +58,39 @@ describe('navigation', () => {
       'Método',
     ]);
     expect(
-      isActive('/empresa/COMP_0001/recomendaciones', sections[1].match),
+      isActive('/company/COMP_0001/recommendations', sections[1].match),
     ).toBe(true);
-    expect(isActive('/metodo', '/metodo')).toBe(true);
-    expect(isActive('/metodo', '/')).toBe(false);
+    expect(isActive('/method', '/method')).toBe(true);
+    expect(isActive('/method', '/')).toBe(false);
   });
 });
 
-describe('filterCompanyIds', () => {
-  const ids = ['COMP_0001', 'COMP_0010', 'COMP_0100', 'COMP_1000'];
-
-  it('matches case-insensitively anywhere in the identifier', () => {
-    expect(filterCompanyIds(ids, 'comp_00')).toEqual([
-      'COMP_0001',
-      'COMP_0010',
-    ]);
-    expect(filterCompanyIds(ids, '1000')).toEqual(['COMP_1000']);
+describe('sectionFromPath', () => {
+  it('names the section so a company switch keeps the reader on it', () => {
+    expect(sectionFromPath('/company/COMP_0001')).toBe('pulse');
+    expect(sectionFromPath('/company/COMP_0001/recommendations')).toBe(
+      'advisor',
+    );
+    expect(sectionFromPath('/method')).toBe('method');
+    expect(sectionFromPath('/')).toBe('pulse');
+    expect(sectionFromPath('/other/recommendations')).toBe('pulse');
   });
+});
 
-  it('caps the list before anything is typed', () => {
-    const many = Array.from({ length: 100 }, (_, index) => `COMP_${index}`);
-    expect(filterCompanyIds(many, '')).toHaveLength(40);
+describe('buildCompanyOptions', () => {
+  it('names every company and sorts by name, then by identifier', () => {
+    const options = buildCompanyOptions([
+      'COMP_9999',
+      'COMP_0051',
+      'COMP_0001',
+    ]);
+    expect(options.map((option) => option.id)).toEqual([
+      'COMP_0001',
+      'COMP_9999',
+      'COMP_0051',
+    ]);
+    expect(options[0].name).toBe('Domino’s');
+    expect(options[1].name).toBe('Domino’s');
+    expect(options[2].name).toBe('Schneider Electric');
   });
 });

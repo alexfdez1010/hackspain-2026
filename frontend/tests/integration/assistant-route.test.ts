@@ -23,7 +23,7 @@ const context = {
   variables: [],
   company: null,
   advisor: null,
-  sources: [{ label: 'Método', href: '/metodo' }],
+  sources: [{ label: 'Método', href: '/method' }],
 };
 
 /** Builds a valid in-process HTTP request without an external service or API key. */

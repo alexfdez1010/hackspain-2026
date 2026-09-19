@@ -16,14 +16,19 @@ Producto de una sola empresa: cada pantalla muestra el PULSE de la empresa
 abierta y nunca una vista global de la cartera. Sin base de datos y sin backend
 obligatorio.
 
-| Ruta                             | Qué muestra                                                                                                                                                           |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                              | Portada: selector de empresa por identificador (sin cifras) y dos ejemplos.                                                                                           |
-| `/empresa/[id]`                  | PULSE de la empresa: score del mes, trayectoria con previsión +1..+6 m y banda p10-p90, mes a mes, evolución de pilares, explorador mensual de variables y desglose. |
-| `/empresa/[id]/recomendaciones`  | Advisor: productos financieros que encajan, importe, tipo y por qué; precio desglosado, palancas, descartados, plan de mejora, riesgo y datos usados.                 |
-| `/metodo?empresa=[id]`           | Método: anatomía de los 100 puntos, variables y pesos, pipeline, confianza, ejemplo real, evaluación del score y de la previsión, y cómo se pone precio a un producto. |
+| Ruta                            | Qué muestra                                                                                                                                                                                |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/`                             | Redirige a la empresa de demo. No hay portada: la empresa se cambia desde el selector de la cabecera, que mantiene la sección abierta.                                                     |
+| `/company/[id]`                 | PULSE de la empresa: score del mes, trayectoria con previsión +1..+6 m y banda p10-p90, mapa de calor de las 11 variables, mes a mes, evolución de pilares, explorador mensual y desglose. |
+| `/company/[id]/recommendations` | Advisor: productos financieros que encajan, importe, tipo y por qué; precio desglosado, palancas, descartados, plan de mejora, riesgo y datos usados.                                      |
+| `/method?company=[id]`          | Método: anatomía de los 100 puntos, variables y pesos, pipeline, confianza, ejemplo real, evaluación del score y de la previsión, y cómo se pone precio a un producto.                     |
 
-`/pulse` y `/pulse/[id]` redirigen a `/` y a `/empresa/[id]`.
+Las empresas y los grupos del export son anónimos (`COMP_0001`, `GROUP_0147`).
+La interfaz los muestra con el nombre de una empresa o grupo famoso elegido por
+un hash determinista del identificador (`src/lib/company/names.ts`, catálogos
+en `src/lib/company/catalogues.ts`): el mismo identificador da siempre el mismo
+nombre, dos identificadores pueden compartirlo y el identificador real sigue
+visible en las rutas, en el selector y en la entradilla de cada página.
 
 ### Arrancar la demo
 
@@ -79,19 +84,19 @@ contra la API— seleccionadas por entorno en un factory:
   `uv run python -m ml_service.pulse.recommend.cli build`); `ApiAdvisorSource`
   se activa con la misma variable.
 
-| Variable        | Obligatoria | Descripción                                                                                                                       |
-| --------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Variable        | Obligatoria | Descripción                                                                                                                              |
+| --------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `PULSE_API_URL` | No          | URL raíz del servicio FastAPI, p. ej. `http://localhost:8000`. Sin ella se leen los JSON del repositorio. `XRAY_API_URL` sigue valiendo. |
 
 Contrato consumido (el servicio es el dueño de cada endpoint; este listado es el
 espejo en el consumidor):
 
-| Método y ruta                                | Respuesta esperada                                                                                                                                                                                                                                                       |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /api/pulse/summary`                     | `score_name`, `score_expansion`, `horizons`, `last_month`, `pillars[{key,label,weight}]`, `variables[{key,number,label,pillar,weight,raw,unit}]`, `contribution_keys`, `evaluation{score,forecast{horizons},risk}`, `companies[...]` (solo se usan los identificadores). |
-| `GET /api/pulse/companies/{id}`              | Empresa con `series[]` (por mes: `pulse`, `pulse_raw`, `confidence`, `pillars`, `variables`, `contributions`, `cash_end`) y `forecast[]` (`horizon`, `target_month`, `pulse_pred`, `pulse_p10`, `pulse_p90`, `delta_raw`, `contributions`).                              |
-| `GET /api/pulse/recommendations/catalogue`   | `reference_rate`, `pricing_parameters`, `products[]`, `risk_model`.                                                                                                                                                                                                      |
-| `GET /api/pulse/recommendations/{id}`        | `summary`, `risk`, `recommendations[]` (con `reasons`, `sizing`, `pricing`, `levers`), `declined[]`, `improvement_plan`, `inputs`, `disclaimer`. Admite `?euribor=`.                                                                                                     |
+| Método y ruta                              | Respuesta esperada                                                                                                                                                                                                                                                       |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /api/pulse/summary`                   | `score_name`, `score_expansion`, `horizons`, `last_month`, `pillars[{key,label,weight}]`, `variables[{key,number,label,pillar,weight,raw,unit}]`, `contribution_keys`, `evaluation{score,forecast{horizons},risk}`, `companies[...]` (solo se usan los identificadores). |
+| `GET /api/pulse/companies/{id}`            | Empresa con `series[]` (por mes: `pulse`, `pulse_raw`, `confidence`, `pillars`, `variables`, `contributions`, `cash_end`) y `forecast[]` (`horizon`, `target_month`, `pulse_pred`, `pulse_p10`, `pulse_p90`, `delta_raw`, `contributions`).                              |
+| `GET /api/pulse/recommendations/catalogue` | `reference_rate`, `pricing_parameters`, `products[]`, `risk_model`.                                                                                                                                                                                                      |
+| `GET /api/pulse/recommendations/{id}`      | `summary`, `risk`, `recommendations[]` (con `reasons`, `sizing`, `pricing`, `levers`), `declined[]`, `improvement_plan`, `inputs`, `disclaimer`. Admite `?euribor=`.                                                                                                     |
 
 Las respuestas se parsean con parsers tolerantes: claves desconocidas se
 ignoran, las ausentes quedan a `null` y un fallo de red degrada la página a su
@@ -102,10 +107,10 @@ invariantes se comprueban en `tests/unit/pulse-source.test.ts` y
 `tests/unit/pulse-company-view.test.ts`. En el Advisor, los componentes del
 precio suman el diferencial (`tests/unit/advisor-source.test.ts`).
 
-Empresas de ejemplo: `/empresa/COMP_0001` (8 meses observados, 82 % de
-confianza, dos variables de líneas sin datos, tres productos recomendados) y
-`/empresa/COMP_0051` (24 meses y utilización de líneas conocida). Ambas están
-fijadas en `src/lib/pulse/demo.ts`.
+Empresas de ejemplo: `/company/COMP_0001` («Domino’s»: 8 meses observados,
+82 % de confianza, dos variables de líneas sin datos, tres productos
+recomendados) y `/company/COMP_0051` («Schneider Electric»: 24 meses y
+utilización de líneas conocida). Ambas están fijadas en `src/lib/pulse/demo.ts`.
 
 ## 🎯 Philosophy
 

@@ -13,7 +13,7 @@ async function openAssistant(page: Page) {
 test('streams a demo, preserves the conversation through navigation, and starts fresh', async ({
   page,
 }) => {
-  await page.goto('/empresa/COMP_0001');
+  await page.goto('/company/COMP_0001');
   await openAssistant(page);
   await page.getByRole('button', { name: /Resume esta empresa/ }).click();
   await expect(
@@ -29,11 +29,11 @@ test('streams a demo, preserves the conversation through navigation, and starts 
     .getByRole('dialog')
     .getByRole('link', { name: 'Recomendaciones' })
     .click();
-  await expect(page).toHaveURL('/empresa/COMP_0001/recomendaciones');
+  await expect(page).toHaveURL('/company/COMP_0001/recommendations');
   await openAssistant(page);
-  await expect(page.getByRole('log')).toContainText('COMP_0001 · PULSE');
+  await expect(page.getByRole('log')).toContainText('Domino’s · PULSE');
   await expect(page.getByRole('dialog')).toContainText(
-    'Viendo: Recomendaciones · COMP_0001',
+    'Viendo: Recomendaciones · Domino’s',
   );
   await page.getByRole('button', { name: 'Nueva conversación' }).click();
   await expect(
@@ -157,7 +157,7 @@ test('fits a short desktop viewport and traps focus in the dialog', async ({
 test('uses the current company page in the request and answers about its products', async ({
   page,
 }) => {
-  await page.goto('/empresa/COMP_0001/recomendaciones');
+  await page.goto('/company/COMP_0001/recommendations');
   await openAssistant(page);
   const request = page.waitForRequest((request) =>
     request.url().endsWith('/api/assistant'),
@@ -166,7 +166,7 @@ test('uses the current company page in the request and answers about its product
     .getByRole('button', { name: /Qué productos me recomiendas/ })
     .click();
   expect((await request).postDataJSON().pathname).toBe(
-    '/empresa/COMP_0001/recomendaciones',
+    '/company/COMP_0001/recommendations',
   );
   await expect(page.getByRole('log')).toContainText('productos recomendados');
   await expect(page.getByRole('log')).toContainText('Línea de crédito');

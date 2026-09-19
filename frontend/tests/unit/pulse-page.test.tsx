@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import CompanyPulsePage, { generateMetadata } from '@/app/empresa/[id]/page';
+import CompanyPulsePage, { generateMetadata } from '@/app/company/[id]/page';
 
 /**
  * Renders the company page for one identifier.
@@ -56,8 +56,8 @@ describe('the company PULSE page', () => {
 
   it('offers the recommendations and the method of the same company', async () => {
     const markup = await render('COMP_0001');
-    expect(markup).toContain('href="/empresa/COMP_0001/recomendaciones"');
-    expect(markup).toContain('href="/metodo?empresa=COMP_0001"');
+    expect(markup).toContain('href="/company/COMP_0001/recommendations"');
+    expect(markup).toContain('href="/method?company=COMP_0001"');
   });
 
   it('reads a company with two years of history and known credit lines', async () => {
@@ -71,7 +71,7 @@ describe('the company PULSE page', () => {
     const metadata = await generateMetadata({
       params: Promise.resolve({ id: 'COMP_0001' }),
     });
-    expect(metadata.title).toBe('COMP_0001 — PULSE · Embat Pulse');
+    expect(metadata.title).toBe('Domino’s — PULSE · Embat Pulse');
     await expect(render('COMP_9999')).rejects.toThrow();
   });
 });

@@ -6,12 +6,15 @@ import { PulseTrajectoryChart } from '@/components/charts/pulse-trajectory';
 import { PageShell, Section } from '@/components/layout/page-shell';
 import { PulseCompanyHeader } from '@/components/pulse/company-header';
 import { PulseCompanyLinks } from '@/components/pulse/company-links';
+import { PulseVariableHeatMap } from '@/components/pulse/variable-heat-map';
 import { PulseForecastPanel } from '@/components/pulse/forecast-panel';
 import { PulseForecastTable } from '@/components/pulse/forecast-table';
 import { PulseMonthExplorer } from '@/components/pulse/month-explorer';
 import { PulseMonthTable } from '@/components/pulse/month-table';
+import { companyName } from '@/lib/company/names';
 import { buildTrajectory } from '@/lib/pulse/company-view';
 import { getPulseDataSource } from '@/lib/pulse/data';
+import { buildVariableHeatMap } from '@/lib/pulse/heat-map';
 import { buildForecastRows, buildMonthRows } from '@/lib/pulse/history';
 import { buildPillarSeries } from '@/lib/pulse/pillar-series';
 import { formatMonth, formatNumber } from '@/lib/format';
@@ -21,7 +24,7 @@ interface CompanyPageProps {
 }
 
 /**
- * Builds the tab title from the company identifier.
+ * Builds the tab title from the company name.
  *
  * @param props - Route parameters.
  * @returns Page metadata.
@@ -30,23 +33,26 @@ export async function generateMetadata({
   params,
 }: CompanyPageProps): Promise<Metadata> {
   const { id } = await params;
-  return { title: `${id} — PULSE · Embat Pulse` };
+  return { title: `${companyName(id)} — PULSE · Embat Pulse` };
 }
 
 /**
- * Writes the lead sentence: what the page covers and how far it reaches.
+ * Writes the lead sentence: which company, what the page covers and how far
+ * it reaches.
  *
+ * @param companyId - Identifier behind the famous name shown as title.
  * @param months - Months with observed data.
  * @param lastMonth - Month of the last close.
  * @param horizonMonth - Farthest forecast month, or an empty string.
  * @returns One sentence naming the observed window and the forecast window.
  */
 function buildLead(
+  companyId: string,
   months: number,
   lastMonth: string,
   horizonMonth: string,
 ): string {
-  const observed = `${formatNumber(months)} meses observados hasta ${formatMonth(lastMonth)}`;
+  const observed = `${companyId}: ${formatNumber(months)} meses observados hasta ${formatMonth(lastMonth)}`;
   return horizonMonth
     ? `${observed}, con previsión mensual hasta ${formatMonth(horizonMonth)}.`
     : `${observed}. Sin previsión publicada.`;
@@ -79,11 +85,18 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
   const pillarSeries = buildPillarSeries(meta.pillars, company.series);
   const horizonMonth =
     company.forecast[company.forecast.length - 1]?.targetMonth ?? '';
+  const lastPoint = company.series[company.series.length - 1] ?? null;
+  const heatMap = buildVariableHeatMap(meta.pillars, meta.variables, lastPoint);
 
   return (
     <PageShell
-      title={company.companyId}
-      lead={buildLead(company.monthsObserved, company.month, horizonMonth)}
+      title={companyName(company.companyId)}
+      lead={buildLead(
+        company.companyId,
+        company.monthsObserved,
+        company.month,
+        horizonMonth,
+      )}
       aside={<PulseCompanyLinks companyId={company.companyId} />}
     >
       <PulseCompanyHeader company={company} />
@@ -93,6 +106,17 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
         note="Escala 0-100; 50 es el umbral de vigilancia"
       >
         <PulseTrajectoryChart points={points} boundaryIndex={boundaryIndex} />
+      </Section>
+
+      <Section
+        title="Mapa de calor"
+        note={
+          lastPoint
+            ? `Cierre de ${formatMonth(lastPoint.month)}; el área es el peso y el color, el score de cada variable`
+            : 'Sin mes observado'
+        }
+      >
+        <PulseVariableHeatMap map={heatMap} />
       </Section>
 
       <Section

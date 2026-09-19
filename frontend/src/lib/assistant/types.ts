@@ -1,5 +1,6 @@
 import type { UIMessage } from 'ai';
 
+import { companyName } from '@/lib/company/names';
 import { companyIdFromPath } from '@/lib/routes';
 
 /** The server selects the provider; the browser never receives credentials. */
@@ -38,12 +39,12 @@ export interface AssistantRequest {
 export function getPageLabel(pathname: string): string {
   const companyId = companyIdFromPath(pathname);
   if (companyId) {
-    return pathname.endsWith('/recomendaciones')
-      ? `Recomendaciones · ${companyId}`
-      : `PULSE · ${companyId}`;
+    const name = companyName(companyId);
+    return pathname.endsWith('/recommendations')
+      ? `Recomendaciones · ${name}`
+      : `PULSE · ${name}`;
   }
-  if (pathname === '/') return 'Elegir empresa';
-  if (pathname === '/metodo') return 'Método';
+  if (pathname === '/method') return 'Método';
   return 'Embat Pulse';
 }
 

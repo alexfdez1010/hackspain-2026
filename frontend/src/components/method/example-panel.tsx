@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { MethodExampleTable } from '@/components/method/example-table';
+import { companyName } from '@/lib/company/names';
 import type { MethodExample } from '@/lib/method/example';
 import { formatConfidence } from '@/lib/pulse/format';
 import { companyRoutes } from '@/lib/routes';
@@ -51,7 +52,7 @@ export function MethodExamplePanel({ example }: MethodExamplePanelProps) {
           className="w-fit text-accent underline-offset-4 hover:underline"
           href={companyRoutes(example.companyId).pulse}
         >
-          Ver el PULSE completo de {example.companyId}
+          Ver el PULSE completo de {companyName(example.companyId)}
         </Link>
       </div>
     </div>

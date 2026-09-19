@@ -32,7 +32,7 @@ export function MethodVariableDetail({
       : []),
   ];
   return (
-    <div className="flex flex-col gap-3" aria-live="polite">
+    <div className="flex max-w-3xl flex-col gap-3" aria-live="polite">
       <div className="flex flex-col gap-1">
         <h3 className="text-base font-semibold tracking-tight">
           <span className="mr-2 font-mono text-sm text-muted">
@@ -55,8 +55,6 @@ export function MethodVariableDetail({
             <dd>{value}</dd>
           </Fragment>
         ))}
-        <dt className="text-muted">Columna del export</dt>
-        <dd className="font-mono text-xs">{segment.raw}</dd>
       </dl>
     </div>
   );

@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import CompanyAdvisorPage from '@/app/empresa/[id]/recomendaciones/page';
+import CompanyAdvisorPage from '@/app/company/[id]/recommendations/page';
 import { AdvisorHeader } from '@/components/advisor/advisor-header';
 import { AdvisorLinks } from '@/components/advisor/advisor-links';
 import { DeclinedList } from '@/components/advisor/declined-list';
@@ -70,8 +70,8 @@ describe('the advisor header', () => {
 
   it('points back at the score and at the method of the same company', () => {
     const markup = renderToStaticMarkup(<AdvisorLinks companyId="COMP_0001" />);
-    expect(markup).toContain('href="/empresa/COMP_0001"');
-    expect(markup).toContain('href="/metodo?empresa=COMP_0001"');
+    expect(markup).toContain('href="/company/COMP_0001"');
+    expect(markup).toContain('href="/method?company=COMP_0001"');
     expect(markup).toContain('Ver el PULSE');
   });
 });

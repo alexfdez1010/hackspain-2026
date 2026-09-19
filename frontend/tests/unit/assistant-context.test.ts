@@ -78,12 +78,12 @@ describe('trusted assistant context', () => {
     const context = await getAssistantContext('/', 'Hola', pulse, advisor);
     expect(pulse.getCompany).not.toHaveBeenCalled();
     expect(advisor.getCompany).not.toHaveBeenCalled();
-    expect(context.page).toBe('Elegir empresa');
+    expect(context.page).toBe('Embat Pulse');
     expect(context.provenance).toBe('Dataset local PULSE');
     expect(context.company).toBeNull();
     expect(context.advisor).toBeNull();
     expect(context).not.toHaveProperty('stats');
-    expect(context.sources).toEqual([{ label: 'Método', href: '/metodo' }]);
+    expect(context.sources).toEqual([{ label: 'Método', href: '/method' }]);
     expect(getMockReply('Resume mi cartera', context)).toContain(
       'una empresa cada vez',
     );
@@ -93,7 +93,7 @@ describe('trusted assistant context', () => {
     const pulse = pulseSource();
     const advisor = advisorSource();
     await getAssistantContext(
-      '/empresa/COMP_0001',
+      '/company/COMP_0001',
       'Revisa comp_0002',
       pulse,
       advisor,
@@ -104,24 +104,25 @@ describe('trusted assistant context', () => {
 
   it('links the company pages only when the export has the company', async () => {
     const context = await getAssistantContext(
-      '/empresa/COMP_0001/recomendaciones',
+      '/company/COMP_0001/recommendations',
       'Resume esta empresa',
       pulseSource(company()),
       advisorSource(recommendation()),
     );
-    expect(context.page).toBe('Recomendaciones · COMP_0001');
+    expect(context.page).toBe('Recomendaciones · Domino’s');
+    expect(context.company?.name).toBe('Domino’s');
     expect(context.company?.change).toBe(5);
     expect(context.company?.unknownVariables).toEqual(['loc_util']);
     expect(context.advisor?.offers[0].label).toBe('Línea de crédito');
     expect(context.advisor?.leverStory).toEqual(['Si tu liquidez subiera…']);
     expect(context.sources.map((source) => source.href)).toEqual([
-      '/empresa/COMP_0001',
-      '/empresa/COMP_0001/recomendaciones',
-      '/metodo',
+      '/company/COMP_0001',
+      '/company/COMP_0001/recommendations',
+      '/method',
     ]);
 
     const missing = await getAssistantContext(
-      '/empresa/COMP_9999',
+      '/company/COMP_9999',
       'Resume esta empresa',
       pulseSource(),
       advisorSource(),
@@ -137,7 +138,7 @@ describe('trusted assistant context', () => {
 
   it('answers product questions from the recommendation of the company', async () => {
     const context = await getAssistantContext(
-      '/empresa/COMP_0001',
+      '/company/COMP_0001',
       '¿Qué productos me recomiendas?',
       pulseSource(company()),
       advisorSource(recommendation()),

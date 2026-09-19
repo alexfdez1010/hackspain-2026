@@ -131,7 +131,7 @@ export function MethodWeightTreemap({
       </div>
       <svg
         viewBox={`0 0 ${map.width} ${map.height}`}
-        className="h-64 w-full sm:h-72"
+        className="h-auto w-full"
         role="group"
         aria-label="Reparto de los 100 puntos entre pilares y variables"
       >

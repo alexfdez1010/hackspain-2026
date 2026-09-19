@@ -1,14 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { CompanySelect } from '@/components/layout/company-select';
+import type { CompanyOption } from '@/lib/company/options';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 import {
   companyIdFromPath,
   companyIdFromQuery,
   companyRoutes,
   COMPANY_QUERY_KEY,
+  sectionFromPath,
 } from '@/lib/routes';
 
 /** One destination of the navigation. */
@@ -17,6 +20,11 @@ interface NavSection {
   label: string;
   /** Route prefix owned by the entry. */
   match: string;
+}
+
+interface SiteNavProps {
+  /** Every company of the export, as the selector lists them. */
+  companies: readonly CompanyOption[];
 }
 
 /**
@@ -45,7 +53,7 @@ export function companySections(companyId: string): NavSection[] {
   return [
     { href: routes.pulse, label: 'PULSE', match: routes.pulse },
     { href: routes.advisor, label: 'Recomendaciones', match: routes.advisor },
-    { href: routes.method, label: 'Método', match: '/metodo' },
+    { href: routes.method, label: 'Método', match: '/method' },
   ];
 }
 
@@ -53,11 +61,11 @@ export function companySections(companyId: string): NavSection[] {
  * Resolves the company the navigation should point at.
  *
  * The company comes from the pathname on company pages and from the
- * `empresa` query parameter on the method page; otherwise the demo company
+ * `company` query parameter on the method page; otherwise the demo company
  * keeps every destination reachable.
  *
  * @param pathname - Current pathname.
- * @param query - Value of the `empresa` query parameter.
+ * @param query - Value of the `company` query parameter.
  * @returns A company identifier.
  */
 export function resolveNavCompany(
@@ -75,34 +83,37 @@ export function resolveNavCompany(
  * Renders the top navigation shared by every page.
  *
  * Every destination is scoped to one company: there is no portfolio view, so
- * the company in context is always visible next to the product name, with a
- * link to change it.
+ * the company in context is chosen right here, and switching it keeps the
+ * reader on the section they were reading.
  *
- * @returns The product name, the company in context and the section links.
+ * @param props - The companies the selector offers.
+ * @returns The product name, the company selector and the section links.
  */
-export function SiteNav() {
+export function SiteNav({ companies }: SiteNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const query = useSearchParams().get(COMPANY_QUERY_KEY);
   const companyId = resolveNavCompany(pathname, query);
   const sections = companySections(companyId);
   const advisorActive = isActive(pathname, sections[1].match);
+  const switchCompany = (nextId: string) => {
+    router.push(companyRoutes(nextId)[sectionFromPath(pathname)]);
+  };
 
   return (
     <header className="sticky top-0 z-20 bg-background/85 backdrop-blur">
       <nav
         aria-label="Secciones"
-        className="mx-auto flex max-w-7xl flex-wrap items-baseline gap-x-6 gap-y-2 px-5 py-4 sm:px-8"
+        className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 sm:px-8"
       >
         <Link href="/" className="text-base font-semibold tracking-tight">
           Embat Pulse
         </Link>
-        <Link
-          href="/"
-          className="font-mono text-sm text-muted transition-colors hover:text-foreground"
-          title="Cambiar de empresa"
-        >
-          {companyId}
-        </Link>
+        <CompanySelect
+          companies={companies}
+          selectedId={companyId}
+          onSelect={switchCompany}
+        />
         <ul className="flex flex-wrap items-baseline gap-x-5 gap-y-1 text-sm">
           {sections.map((section, index) => {
             const active =

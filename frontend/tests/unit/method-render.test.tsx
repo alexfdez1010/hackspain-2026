@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import MethodPage from '@/app/metodo/page';
+import MethodPage from '@/app/method/page';
 import { MethodConfidenceBar } from '@/components/method/confidence-bar';
 import { MethodExamplePanel } from '@/components/method/example-panel';
 import { MethodForecastTable } from '@/components/method/forecast-table';
@@ -29,13 +29,13 @@ const lastMonth = company?.series[company.series.length - 1] ?? null;
 /**
  * Renders the whole route for a query string.
  *
- * @param empresa - Company carried by `?empresa=`; omitted for no context.
+ * @param company - Company carried by `?company=`; omitted for no context.
  * @returns The static markup of the page.
  */
-async function renderPage(empresa?: string): Promise<string> {
+async function renderPage(company?: string): Promise<string> {
   return renderToStaticMarkup(
     await MethodPage({
-      searchParams: Promise.resolve(empresa ? { empresa } : {}),
+      searchParams: Promise.resolve(company ? { company } : {}),
     }),
   );
 }
@@ -98,7 +98,7 @@ describe('the method page renders on the server with the real export', () => {
     expect(markup).toContain('45,64');
     expect(markup).toContain('32,8');
     expect(markup).toContain('Utilización de líneas');
-    expect(markup).toContain('/empresa/COMP_0001');
+    expect(markup).toContain('/company/COMP_0001');
   });
 
   it('publishes the evaluation of the score with its caveat', () => {
@@ -192,20 +192,21 @@ describe('the method page renders on the server with the real export', () => {
     expect(markup).toContain('Previsión a 6 meses');
     expect(markup).toContain('De la puntuación al producto');
     expect(markup).toContain('Qué no hace PULSE');
-    expect(markup).toContain('Ver un PULSE: COMP_0001');
+    expect(markup).toContain('Ver un PULSE: Domino’s');
     expect(markup).not.toContain('NaN');
   });
 
   it('keeps the company of the query in context and works its month', async () => {
     const markup = await renderPage('COMP_0051');
-    expect(markup).toContain('Volver a COMP_0051');
-    expect(markup).toContain('href="/empresa/COMP_0051"');
-    expect(markup).toContain('Ver el PULSE completo de COMP_0051');
+    expect(markup).toContain('Volver a Schneider Electric');
+    expect(markup).toContain('href="/company/COMP_0051"');
+    expect(markup).toContain('Ver el PULSE completo de Schneider Electric');
   });
 
   it('falls back to the demo company when the query names an unknown one', async () => {
     const markup = await renderPage('COMP_9999');
-    expect(markup).toContain('Volver a COMP_9999');
-    expect(markup).toContain('Ver el PULSE completo de COMP_0001');
+    expect(markup).toContain('href="/company/COMP_9999"');
+    expect(markup).toContain('Ver el PULSE completo de Domino’s');
+    expect(markup).toContain('href="/company/COMP_0001"');
   });
 });

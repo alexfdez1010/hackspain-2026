@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { MethodVariableDetail } from '@/components/method/variable-detail';
 import { MethodWeightTreemap } from '@/components/method/weight-treemap';
 import { buildWeightMap } from '@/lib/method/weights';
+import { HEAT_MAP_SIZE } from '@/lib/pulse/heat-map';
 import type { PulsePillarMeta, PulseVariableMeta } from '@/lib/pulse/types';
 
 interface MethodWeightMapProps {
@@ -20,17 +21,11 @@ interface MethodWeightMapProps {
  * contradict the specification the backend applies.
  *
  * @param props - Pillar and variable metadata from the export.
- * @returns The treemap next to its detail panel.
+ * @returns The treemap over its detail panel.
  */
 export function MethodWeightMap({ pillars, variables }: MethodWeightMapProps) {
   const map = useMemo(
-    () =>
-      buildWeightMap(pillars, variables, {
-        width: 720,
-        height: 300,
-        columnGap: 6,
-        rowGap: 4,
-      }),
+    () => buildWeightMap(pillars, variables, HEAT_MAP_SIZE),
     [pillars, variables],
   );
   const [selected, setSelected] = useState(map.segments[0]?.key ?? '');
@@ -48,9 +43,9 @@ export function MethodWeightMap({ pillars, variables }: MethodWeightMapProps) {
   }
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:gap-10">
+    <div className="flex flex-col gap-6">
       <div className="overflow-x-auto">
-        <div className="min-w-[32rem]">
+        <div className="min-w-[48rem] lg:min-w-0">
           <MethodWeightTreemap
             map={map}
             selectedKey={active.key}

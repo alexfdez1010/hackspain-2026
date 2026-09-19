@@ -10,23 +10,18 @@ function trackErrors(page: import('@playwright/test').Page): string[] {
   return errors;
 }
 
-test('opens a company from the entry page without browser errors', async ({
-  page,
-}) => {
+test('lands on the demo company without browser errors', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto('/');
-  await expect(page).toHaveTitle(/Embat Pulse/);
+  await expect(page).toHaveURL('/company/COMP_0001');
+  await expect(page).toHaveTitle(/Domino’s — PULSE/);
   await expect(
-    page.getByRole('heading', { name: 'Tu empresa, mes a mes' }),
+    page.getByRole('heading', { level: 1, name: 'Domino’s' }),
   ).toBeVisible();
-  await expect(page.getByRole('grid')).toHaveCount(0);
-  await page
-    .getByRole('main')
-    .getByRole('link', { name: 'COMP_0001', exact: true })
-    .click();
-  await expect(page).toHaveURL('/empresa/COMP_0001');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'COMP_0001' }),
+    page.getByRole('group', {
+      name: 'Score de cada variable en el último cierre',
+    }),
   ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Abrir Nexo, asistente de Pulse' }),
@@ -34,42 +29,42 @@ test('opens a company from the entry page without browser errors', async ({
   expect(errors).toEqual([]);
 });
 
-test('finds a company by typing its identifier', async ({ page }) => {
-  await page.goto('/');
-  const input = page.getByRole('combobox', {
-    name: 'Identificador de la empresa',
-  });
-  await input.fill('COMP_0051');
-  await page.getByRole('option', { name: 'COMP_0051' }).click();
-  await expect(page).toHaveURL('/empresa/COMP_0051');
+test('switches company from the navigation and stays on the section', async ({
+  page,
+}) => {
+  await page.goto('/company/COMP_0001/recommendations');
+  const nav = page.getByRole('navigation', { name: 'Secciones' });
+  await nav.getByRole('button', { name: /Domino’s/ }).click();
+  await page.getByRole('option', { name: /COMP_0051/ }).click();
+  await expect(page).toHaveURL('/company/COMP_0051/recommendations');
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Schneider Electric' }),
+  ).toBeVisible();
+  await expect(
+    nav.getByRole('button', { name: /Schneider Electric/ }),
+  ).toBeVisible();
 });
 
 test('keeps the company in the navigation across its pages', async ({
   page,
 }) => {
   const errors = trackErrors(page);
-  await page.goto('/empresa/COMP_0001');
+  await page.goto('/company/COMP_0001');
   const nav = page.getByRole('navigation', { name: 'Secciones' });
   await nav.getByRole('link', { name: 'Recomendaciones', exact: true }).click();
-  await expect(page).toHaveURL('/empresa/COMP_0001/recomendaciones');
-  await expect(
-    nav.getByRole('link', { name: 'COMP_0001', exact: true }),
-  ).toBeVisible();
+  await expect(page).toHaveURL('/company/COMP_0001/recommendations');
+  await expect(nav.getByRole('button', { name: /Domino’s/ })).toBeVisible();
   await nav.getByRole('link', { name: 'Método', exact: true }).click();
-  await expect(page).toHaveURL('/metodo?empresa=COMP_0001');
+  await expect(page).toHaveURL('/method?company=COMP_0001');
   await expect(
     page.getByRole('heading', { level: 1, name: /Método|PULSE/ }),
   ).toBeVisible();
   await nav.getByRole('link', { name: 'PULSE', exact: true }).click();
-  await expect(page).toHaveURL('/empresa/COMP_0001');
+  await expect(page).toHaveURL('/company/COMP_0001');
   expect(errors).toEqual([]);
 });
 
-test('redirects the legacy routes and answers 404 for an unknown company', async ({
-  page,
-}) => {
-  await page.goto('/pulse/COMP_0001');
-  await expect(page).toHaveURL('/empresa/COMP_0001');
-  const response = await page.goto('/empresa/COMP_9999');
+test('answers 404 for an unknown company', async ({ page }) => {
+  const response = await page.goto('/company/COMP_9999');
   expect(response?.status()).toBe(404);
 });

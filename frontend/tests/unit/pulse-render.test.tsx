@@ -173,8 +173,8 @@ describe('the month-by-month view renders on the server', () => {
     const markup = renderToStaticMarkup(
       <PulseCompanyLinks companyId="COMP_0001" />,
     );
-    expect(markup).toContain('href="/empresa/COMP_0001/recomendaciones"');
-    expect(markup).toContain('href="/metodo?empresa=COMP_0001"');
+    expect(markup).toContain('href="/company/COMP_0001/recommendations"');
+    expect(markup).toContain('href="/method?company=COMP_0001"');
     expect(markup).toContain('Ver productos recomendados');
   });
 });

@@ -1,5 +1,6 @@
 import { ScoreBadge } from '@/components/ui/score-badge';
 import { StatGrid, type StatItem } from '@/components/ui/stat-grid';
+import { groupName } from '@/lib/company/names';
 import { formatConfidence, formatConfidencePoints } from '@/lib/pulse/format';
 import type { PulseCompany } from '@/lib/pulse/types';
 import { formatMonth, formatNumber, formatSigned } from '@/lib/format';
@@ -52,8 +53,10 @@ export function PulseCompanyHeader({ company }: PulseCompanyHeaderProps) {
     {
       key: 'group',
       label: 'Grupo',
-      value: company.groupId || '—',
-      hint: 'Unidad de validación cruzada del modelo',
+      value: company.groupId ? groupName(company.groupId) : '—',
+      hint: company.groupId
+        ? `${company.groupId} · unidad de validación cruzada`
+        : 'Unidad de validación cruzada del modelo',
     },
   ];
 

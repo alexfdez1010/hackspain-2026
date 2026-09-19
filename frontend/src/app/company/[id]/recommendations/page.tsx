@@ -10,6 +10,7 @@ import { OfferCard } from '@/components/advisor/offer-card';
 import { RiskPanel } from '@/components/advisor/risk-panel';
 import { PageShell, Section } from '@/components/layout/page-shell';
 import { getAdvisorDataSource } from '@/lib/advisor/data';
+import { companyName } from '@/lib/company/names';
 import { formatMonth, formatNumber } from '@/lib/format';
 import { getPulseDataSource } from '@/lib/pulse/data';
 
@@ -21,7 +22,7 @@ interface AdvisorPageProps {
 export const dynamic = 'force-dynamic';
 
 /**
- * Builds the tab title from the company identifier.
+ * Builds the tab title from the company name.
  *
  * @param props - Route parameters.
  * @returns Page metadata.
@@ -30,7 +31,7 @@ export async function generateMetadata({
   params,
 }: AdvisorPageProps): Promise<Metadata> {
   const { id } = await params;
-  return { title: `${id} — Recomendaciones · Embat Pulse` };
+  return { title: `${companyName(id)} — Recomendaciones · Embat Pulse` };
 }
 
 /**
@@ -59,8 +60,8 @@ export default async function CompanyAdvisorPage({ params }: AdvisorPageProps) {
 
   return (
     <PageShell
-      title={company.companyId}
-      lead={company.summary}
+      title={companyName(company.companyId)}
+      lead={`${company.companyId}: ${company.summary}`}
       aside={<AdvisorLinks companyId={company.companyId} />}
     >
       <AdvisorHeader company={company} />
