@@ -4,14 +4,10 @@ import Link from 'next/link';
 import { PageShell, Section } from '@/components/layout/page-shell';
 import { MethodConfidenceBar } from '@/components/method/confidence-bar';
 import { MethodExamplePanel } from '@/components/method/example-panel';
-import { MethodForecastTable } from '@/components/method/forecast-table';
+import { MethodOutlookList } from '@/components/method/outlook-list';
 import { MethodPipelineFlow } from '@/components/method/pipeline-flow';
-import { MethodPricingPanel } from '@/components/method/pricing-panel';
-import { MethodScopeList } from '@/components/method/scope-list';
-import { MethodScoreEvaluation } from '@/components/method/score-evaluation';
 import { MethodScoreScale } from '@/components/method/score-scale';
 import { MethodWeightMap } from '@/components/method/weight-map';
-import { getAdvisorDataSource } from '@/lib/advisor/data';
 import { companyName } from '@/lib/company/names';
 import {
   buildConfidenceSegments,
@@ -35,9 +31,9 @@ interface MethodPageProps {
 }
 
 /**
- * How PULSE is built: the 100 points, the pipeline, a worked month, what the
- * score anticipates, how the forecast is validated and how a score becomes a
- * price.
+ * How the PULSE of a month is built, in plain words: the scale, the 100
+ * points, the four steps of the calculation, a real month added by hand, and
+ * three sentences on what the score does beyond the month.
  *
  * @param props - Query parameters of the route.
  * @returns The method page.
@@ -46,10 +42,9 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
   const { company: companyQuery } = await searchParams;
   const contextId = companyIdFromQuery(companyQuery);
   const pulse = getPulseDataSource();
-  const [{ meta }, requested, catalogue] = await Promise.all([
+  const [{ meta }, requested] = await Promise.all([
     pulse.getSummary(),
     pulse.getCompany(contextId ?? PULSE_DEMO_COMPANY_ID),
-    getAdvisorDataSource().getCatalogue(),
   ]);
   const company =
     requested ??
@@ -64,7 +59,7 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
   return (
     <PageShell
       title="Método"
-      lead={`${meta.scoreName} —${meta.scoreExpansion}— es una media mensual de salud financiera de 0 a 100: ${formatNumber(meta.variables.length)} variables repartidas en ${formatNumber(meta.pillars.length)} pilares, calculadas con extractos bancarios, facturas del ERP y productos de deuda.`}
+      lead={`${meta.scoreName} (${meta.scoreExpansion}) es una nota de 0 a 100 de la salud financiera de una empresa. Cada mes se miran ${formatNumber(meta.variables.length)} variables agrupadas en ${formatNumber(meta.pillars.length)} pilares —cobrar a tiempo, tener caja, deber poco y pagar bien—, cada una recibe su nota y cada nota vale unos puntos. La suma es el PULSE.`}
       aside={
         <Link
           className="text-sm text-accent underline-offset-4 hover:underline"
@@ -78,24 +73,21 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
     >
       <Section
         title="La escala"
-        note="Media ponderada de once variables, cada una de 0 a 100"
+        note="Cuatro bandas, las mismas en toda la aplicación"
       >
         <MethodScoreScale
-          caption={`Bandas fijas del producto, idénticas en tabla, gráfico y oferta. Último cierre publicado: ${formatMonth(meta.lastMonth)}.`}
+          caption={`Último cierre publicado: ${formatMonth(meta.lastMonth)}.`}
         />
       </Section>
 
       <Section
-        title="Anatomía de los 100 puntos"
-        note="El área de cada celda son sus puntos"
+        title="Los 100 puntos"
+        note="El tamaño de cada celda son sus puntos; pulsa una para ver qué mide"
       >
         <MethodWeightMap pillars={meta.pillars} variables={meta.variables} />
       </Section>
 
-      <Section
-        title="Del extracto al score"
-        note="En el orden en que se ejecuta"
-      >
+      <Section title="Cómo se calcula" note="Cuatro pasos, cada mes">
         <div className="flex flex-col gap-8">
           <MethodPipelineFlow />
           <MethodConfidenceBar
@@ -103,7 +95,7 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
             confidence={example?.confidence ?? null}
             caption={
               example
-                ? `Cobertura real de ${companyName(example.companyId)} en ${formatMonth(example.month)}: una variable sin datos no cuenta como cero, reduce la base sobre la que se mide.`
+                ? `Datos de ${companyName(example.companyId)} en ${formatMonth(example.month)}: una variable sin datos no baja la nota, deja de contar.`
                 : 'Sin mes observado para ilustrar la cobertura.'
             }
           />
@@ -111,7 +103,7 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
       </Section>
 
       <Section
-        title="Cómo se lee un mes"
+        title="Un mes real, sumado a mano"
         note={
           example
             ? `${companyName(example.companyId)} · cierre de ${formatMonth(example.month)}`
@@ -128,56 +120,13 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
       </Section>
 
       <Section
-        title="Qué anticipa el score"
-        note="Objetivo: episodio de estrés en los seis meses siguientes"
+        title="Previsión, precio y límites"
+        note="Lo demás, en tres frases"
       >
-        <MethodScoreEvaluation
-          score={meta.evaluation.score}
-          variables={meta.variables}
+        <MethodOutlookList
+          forecast={meta.evaluation.forecast}
+          lastHorizon={lastHorizon}
         />
-      </Section>
-
-      <Section
-        title={`Previsión a ${formatNumber(lastHorizon)} meses`}
-        note="Validación por grupo de empresa, fuera de muestra"
-      >
-        <div className="flex flex-col gap-5">
-          <p className="max-w-3xl text-sm text-muted">
-            Un único modelo predice el cambio del PULSE a cualquier horizonte de
-            +1 a +{formatNumber(lastHorizon)} meses: el horizonte es una entrada
-            más, así que ampliar la previsión no exige entrenar modelos nuevos.
-            El punto de partida es que el score se quede donde está, y la banda
-            p10-p90 se calibra con los errores fuera de muestra de cada
-            horizonte. Las contribuciones del modelo se reparten entre las{' '}
-            {formatNumber(meta.variables.length)} variables más «contexto» y
-            «base», de forma que las partes suman exactamente el cambio
-            previsto; el resultado es el PULSE actual más ese cambio, acotado a
-            0-100.
-          </p>
-          <MethodForecastTable
-            horizons={meta.evaluation.forecast}
-            emptyText="El export no publica la validación de la previsión."
-          />
-          <p className="max-w-3xl text-sm text-muted">
-            El MAE está en puntos de PULSE y la ganancia se mide contra
-            persistencia. «Dirección» es el acierto del signo en los movimientos
-            de más de 15 puntos, y las dos columnas siguientes, la parte de esas
-            caídas y de esas mejoras que el modelo vio venir. Las caídas se
-            anticipan mucho mejor que las recuperaciones: léelo como un aviso
-            temprano, no como un pronóstico simétrico.
-          </p>
-        </div>
-      </Section>
-
-      <Section
-        title="De la puntuación al producto"
-        note={`Referencia ${catalogue.referenceRate.label}`}
-      >
-        <MethodPricingPanel catalogue={catalogue} />
-      </Section>
-
-      <Section title="Qué no hace PULSE" note="Límites declarados">
-        <MethodScopeList />
       </Section>
     </PageShell>
   );

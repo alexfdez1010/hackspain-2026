@@ -258,6 +258,8 @@ patterns.
 
 | 2026-09-19 | Todas las tablas sobre `DataTable`: columnas declaradas como datos, orden por cualquier cabecera y filas sin valor siempre al final | Una sola implementación de tabla; el lector elige el criterio y una ausencia de dato nunca se cuela como extremo | Equipo Pulse |
 
+| 2026-09-19 | Método centrado en el cálculo del PULSE del mes, en palabras llanas; AUROC, tabla de precisión, pila de precio y catálogo retirados; previsión, precio y límites en tres frases | La página debe entenderse sin saber estadística; el detalle de validación vive en el backend y en su README | Equipo Pulse |
+
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce
   them through the main agent instructions to prevent visual and content clutter.

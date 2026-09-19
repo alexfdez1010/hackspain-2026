@@ -36,15 +36,14 @@ export function MethodExamplePanel({ example }: MethodExamplePanelProps) {
           <span className="font-medium tabular-nums">
             {formatNumber(pulse, 1)}
           </span>
-          . No hay ninguna transformación después: el score es la media
-          ponderada de las variables con datos.
+          . No hay nada más que sumar.
         </p>
         {unknownLabels.length > 0 && (
           <p className="text-muted">
             Sin datos en {formatMonth(example.month)}:{' '}
             {unknownLabels.join(', ')} — {formatNumber(example.unknownWeight)}{' '}
-            puntos que no entran en la media ni como cero, de ahí una confianza
-            del {formatConfidence(example.confidence)}.
+            puntos que se quedan fuera de la cuenta, sin sumar ni restar; por
+            eso la confianza es del {formatConfidence(example.confidence)}.
           </p>
         )}
         <Link

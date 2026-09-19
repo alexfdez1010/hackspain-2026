@@ -5,14 +5,8 @@ import {
   buildConfidenceSegments,
   buildMethodExample,
 } from '@/lib/method/example';
-import { buildPriceSteps } from '@/lib/method/pricing';
 import { charsPerLine, wrapLabel } from '@/lib/method/text';
 import { buildWeightMap } from '@/lib/method/weights';
-import type {
-  AdvisorPricingParameters,
-  AdvisorProduct,
-  AdvisorReferenceRate,
-} from '@/lib/advisor/types';
 import type {
   PulseCompany,
   PulsePillarMeta,
@@ -62,60 +56,6 @@ const COMPANY: PulseCompany = {
   series: [makeSeriesPoint()],
   forecast: [],
 };
-
-const PRICING: AdvisorPricingParameters = {
-  maxRiskPremiumBps: 900,
-  maxDataUncertaintyBps: 75,
-  stressToDefault: 0.25,
-  trendDeclineBps: 25,
-  trendImproveBps: -15,
-  minConfidenceForCredit: 0.25,
-};
-
-const REFERENCE: AdvisorReferenceRate = {
-  label: 'Euríbor 12 m',
-  value: 0.021,
-  source: 'default',
-};
-
-const PRODUCTS: AdvisorProduct[] = [
-  {
-    key: 'credit_line',
-    label: 'Línea de crédito',
-    family: 'circulante',
-    what: 'Póliza de la que dispones cuando la caja lo necesita.',
-    rateKind: 'cost',
-    baseSpreadBps: 150,
-    lgd: 0.45,
-    minSpreadBps: 40,
-    maxSpreadBps: 990,
-    tenorMonths: 12,
-  },
-  {
-    key: 'confirming',
-    label: 'Confirming de proveedores',
-    family: 'pagos',
-    what: 'El banco paga a tus proveedores y tú liquidas más tarde.',
-    rateKind: 'cost',
-    baseSpreadBps: 90,
-    lgd: 0.3,
-    minSpreadBps: 0,
-    maxSpreadBps: 690,
-    tenorMonths: 12,
-  },
-  {
-    key: 'treasury_deposit',
-    label: 'Depósito de excedentes',
-    family: 'tesoreria',
-    what: 'Remunera la caja que no vas a necesitar.',
-    rateKind: 'yield',
-    baseSpreadBps: -60,
-    lgd: 0,
-    minSpreadBps: -100,
-    maxSpreadBps: 0,
-    tenorMonths: 6,
-  },
-];
 
 describe('treemap of the 100 points', () => {
   it('gives every cell an area proportional to its weight', () => {
@@ -272,30 +212,5 @@ describe('worked example of one month', () => {
         (segment) => segment.coverage === 'unknown',
       ),
     ).toBe(true);
-  });
-});
-
-describe('price stack', () => {
-  it('quotes the published constants and the margin band', () => {
-    const steps = buildPriceSteps(PRICING, REFERENCE, PRODUCTS);
-    expect(steps.map((step) => step.key)).toEqual([
-      'referencia',
-      'margen',
-      'riesgo',
-      'datos',
-      'tendencia',
-      'total',
-    ]);
-    expect(steps[0].amount).toContain('2,10');
-    expect(steps[1].amount).toBe('90 a 150 pb');
-    expect(steps[2].detail).toContain('900 pb');
-    expect(steps[3].amount).toContain('75 pb');
-    expect(steps[4].amount).toBe('+25 o −15 pb');
-    expect(steps[5].role).toBe('total');
-  });
-
-  it('survives an empty catalogue', () => {
-    const steps = buildPriceSteps(PRICING, REFERENCE, []);
-    expect(steps[1].amount).toBe('fijo por producto');
   });
 });

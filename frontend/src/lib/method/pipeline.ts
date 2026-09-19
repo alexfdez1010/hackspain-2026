@@ -1,63 +1,39 @@
-/** One step of the pipeline that turns raw files into a published score. */
+/** One step of the calculation that turns raw files into a published score. */
 export interface MethodPipelineStep {
   /** Position of the step, printed as its marker. */
   number: number;
   title: string;
-  /** What the step does, in one or two sentences. */
+  /** What the step does, in plain words. */
   detail: string;
-  /** `true` on the step the confidence illustration expands. */
-  illustrated?: boolean;
 }
 
 /**
- * The eight steps between a bank statement and a published PULSE.
- *
- * The order is the order of execution in the backend, so a figure of the page
- * can always be traced back to the step that produced it.
+ * The four steps between the data a company shares and its PULSE of the month,
+ * in the order the backend runs them and in words that need no finance.
  */
 export const METHOD_PIPELINE: readonly MethodPipelineStep[] = [
   {
     number: 1,
-    title: 'Datos',
+    title: 'Reunimos los datos',
     detail:
-      'Extractos bancarios, facturas del ERP y productos de deuda de cada empresa, mes a mes.',
+      'Lo que la empresa ya comparte con Embat: movimientos del banco, facturas y deudas, mes a mes.',
   },
   {
     number: 2,
-    title: 'Limpieza',
+    title: 'Cada variable recibe una nota',
     detail:
-      'Divisas con tabla fija, duplicados, importes centinela y fechas imposibles. Cada corrección queda en un registro de auditoría.',
+      'De 0 a 100, comparando a la empresa con el resto: 100 es lo mejor que se ha visto y 0 lo peor. Más alto siempre es más sano.',
   },
   {
     number: 3,
-    title: 'Componentes mensuales',
+    title: 'Cada nota vale sus puntos',
     detail:
-      'Cada componente se calcula por empresa y mes sobre ventanas de 3 y 6 meses, con su variación.',
+      'Una variable de 12 puntos con nota 50 aporta 6. Se suman los aportes de las variables con datos y esa suma es el PULSE.',
   },
   {
     number: 4,
-    title: 'Normalización',
+    title: 'Contamos con qué datos se ha hecho',
     detail:
-      'Cada componente pasa a su percentil empírico 0-100 en la población de entrenamiento, orientado a «más alto, más sano». Una variable es la media de sus componentes conocidos.',
-  },
-  {
-    number: 5,
-    title: 'Pesos fijos',
-    detail:
-      'PULSE es la media ponderada de las variables conocidas con los pesos renormalizados: una variable sin datos ni suma ni resta.',
-    illustrated: true,
-  },
-  {
-    number: 6,
-    title: 'Confianza',
-    detail:
-      'Puntos de los 100 respaldados por datos. Una variable cubierta solo por proxy bancario cuenta 0,5 × la cobertura de su peso; por debajo del 5 % de cobertura queda «sin datos».',
-    illustrated: true,
-  },
-  {
-    number: 7,
-    title: 'Contribuciones',
-    detail:
-      'Puntos de PULSE que aporta cada variable. Suman el score exactamente, así que se reconstruye a mano.',
+      'La confianza dice cuántos de los 100 puntos tienen datos detrás. Una variable sin datos no baja la nota: simplemente no cuenta.',
   },
 ];

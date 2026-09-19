@@ -21,7 +21,7 @@ obligatorio.
 | `/`                             | Redirige a la empresa de demo. No hay portada: la empresa se cambia desde el selector de la cabecera, que mantiene la sección abierta.                                                      |
 | `/company/[id]`                 | PULSE de la empresa: score del mes, trayectoria con previsión +1..+12 m y banda p10-p90, mapa de calor de las 11 variables, mes a mes, evolución de pilares, explorador mensual y desglose. |
 | `/company/[id]/recommendations` | Advisor: productos financieros que encajan, importe, tipo y por qué; precio desglosado, palancas, descartados, plan de mejora, riesgo y datos usados.                                       |
-| `/method?company=[id]`          | Método: anatomía de los 100 puntos, variables y pesos, pipeline, confianza, ejemplo real, evaluación del score y de la previsión, y cómo se pone precio a un producto.                      |
+| `/method?company=[id]`          | Método: cómo se calcula el PULSE del mes en palabras llanas (escala, 100 puntos, cuatro pasos, confianza y un mes real sumado a mano); previsión, precio y límites en tres frases.          |
 
 Las empresas y los grupos del export son anónimos (`COMP_0001`, `GROUP_0147`).
 La interfaz los muestra con el nombre de una empresa o grupo famoso elegido por
@@ -296,9 +296,8 @@ const COLUMNS: readonly DataTableColumn<Row>[] = [
 
 La ordenación es pura (`sortRows` en `src/lib/table/sort.ts`, con colación
 española) y ocurre en el cliente sobre filas ya calculadas en el servidor; el
-componente no accede a la fuente de datos. Las seis tablas del producto (mes a
-mes, previsión, variables, ejemplo, precisión de la previsión y catálogo) la
-usan.
+componente no accede a la fuente de datos. Las cuatro tablas del producto (mes a
+mes, previsión, variables y ejemplo del método) la usan.
 
 ## 📜 Available Scripts
 
