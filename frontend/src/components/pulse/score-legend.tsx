@@ -26,7 +26,7 @@ export function ScoreLegend({ pillars, variables }: ScoreLegendProps) {
           .sort((a, b) => b.weight - a.weight || a.number - b.number);
         return (
           <section key={pillar.key} className="flex flex-col gap-2">
-            <h3 className="flex items-baseline justify-between gap-3 text-sm font-semibold">
+            <h3 className="flex items-baseline justify-between gap-3 text-sm font-medium">
               <span>{pillar.label}</span>
               <span className="tabular-nums text-muted">
                 {formatNumber(pillar.weight)} pts
@@ -39,7 +39,7 @@ export function ScoreLegend({ pillars, variables }: ScoreLegendProps) {
                   className="flex items-baseline justify-between gap-3"
                 >
                   <span className="min-w-0">
-                    <span className="mr-1.5 font-mono text-xs text-muted">
+                    <span className="mr-1.5 text-xs tabular-nums text-muted">
                       {formatNumber(variable.number)}
                     </span>
                     {variable.label}

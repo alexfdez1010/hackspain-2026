@@ -3,33 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { DEMO_COMPANY_ID } from '@/lib/xray/demo';
-
-/** Sections of Embat Pulse, in the order the demo walks through them. */
-const SECTIONS = [
-  { href: '/', label: 'Radar', match: '/' },
-  {
-    href: `/empresa/${DEMO_COMPANY_ID}`,
-    label: 'Radiografía',
-    match: '/empresa',
-  },
-  { href: '/pulse', label: 'PULSE', match: '/pulse' },
-  { href: '/capital', label: 'Capital', match: '/capital' },
-  { href: '/monitor', label: 'Monitor', match: '/monitor' },
-  { href: '/metodo', label: 'Método', match: '/metodo' },
-] as const;
-
-/**
- * Decides whether a navigation entry matches the current route.
- *
- * @param pathname - Current pathname.
- * @param match - Route prefix owned by the entry.
- * @returns `true` when the entry should be marked as current.
- */
-export function isActive(pathname: string, match: string): boolean {
-  if (match === '/') return pathname === '/';
-  return pathname === match || pathname.startsWith(`${match}/`);
-}
+import { PulseWordmark } from '@/components/layout/pulse-wordmark';
+import { isActive } from '@/components/layout/nav-match';
+import { PRODUCT_SECTIONS } from '@/lib/landing/product-sections';
 
 /**
  * Renders the top navigation shared by every page.
@@ -37,7 +13,7 @@ export function isActive(pathname: string, match: string): boolean {
  * The "Radiografía" entry points at a company with a structural decline, so the
  * demo always has a meaningful example one click away.
  *
- * @returns The product name and the six section links.
+ * @returns The wordmark and the six section links.
  */
 export function SiteNav() {
   const pathname = usePathname();
@@ -45,13 +21,13 @@ export function SiteNav() {
     <header className="sticky top-0 z-20 bg-background/85 backdrop-blur">
       <nav
         aria-label="Secciones"
-        className="mx-auto flex max-w-7xl flex-wrap items-baseline gap-x-6 gap-y-2 px-5 py-4 sm:px-8"
+        className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-5 py-4 sm:px-8"
       >
-        <Link href="/" className="text-base font-semibold tracking-tight">
-          Embat Pulse
+        <Link href="/" aria-label="Embat Pulse" className="text-foreground">
+          <PulseWordmark />
         </Link>
-        <ul className="flex flex-wrap items-baseline gap-x-5 gap-y-1 text-sm">
-          {SECTIONS.map((section) => {
+        <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+          {PRODUCT_SECTIONS.map((section) => {
             const active = isActive(pathname, section.match);
             return (
               <li key={section.href}>

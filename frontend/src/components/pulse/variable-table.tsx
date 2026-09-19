@@ -42,7 +42,7 @@ export function PulseVariableTable({ rows }: PulseVariableTableProps) {
             {(row) => (
               <Table.Row id={row.key}>
                 <Table.Cell>
-                  <span className="mr-1.5 font-mono text-xs text-muted">
+                  <span className="mr-1.5 text-xs tabular-nums text-muted">
                     {formatNumber(row.number)}
                   </span>
                   {row.label}

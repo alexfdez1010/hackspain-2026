@@ -22,7 +22,7 @@ export function PageShell({ title, lead, aside, children }: PageShellProps) {
     <main className="mx-auto flex max-w-7xl flex-col gap-10 px-5 pb-20 pt-6 sm:px-8">
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
         <div className="flex max-w-2xl flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
             {title}
           </h1>
           <p className="text-muted">{lead}</p>
@@ -54,7 +54,9 @@ export function Section({ title, note, action, children }: SectionProps) {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <h2 className="font-display text-lg font-bold tracking-tight">
+          {title}
+        </h2>
         {note && <p className="text-sm text-muted">{note}</p>}
         {action}
       </div>

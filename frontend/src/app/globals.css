@@ -6,10 +6,31 @@
  * product reads the same colour for the same score.
  */
 :root {
+  color-scheme: light;
+  --site-gutter: clamp(1rem, 6vw, 4.5rem);
   --score-critical: oklch(0.6 0.21 26);
   --score-fragile: oklch(0.72 0.15 72);
   --score-neutral: oklch(0.62 0.03 262);
   --score-solid: oklch(0.63 0.15 156);
+
+  /* Embat marketing tokens (embat.io/es, Jul 2026). Score bands stay separate. */
+  --background: #fbfbfc;
+  --foreground: #050b2c;
+  --surface: #ffffff;
+  --surface-secondary: #f3f4f6;
+  --surface-tertiary: #e8e8ed;
+  --overlay: #ffffff;
+  --muted: #6e707c;
+  --accent: #3878f6;
+  --danger: #c2401f;
+  --default: #e8e8ed;
+  --default-foreground: #050b2c;
+  --field-background: #ffffff;
+  --field-foreground: #050b2c;
+  --segment: #ffffff;
+  --segment-foreground: #050b2c;
+  --border: #d2d2db;
+  --separator: #d2d2db;
 }
 
 /*
@@ -22,21 +43,23 @@
   :root {
     color-scheme: dark;
 
-    --background: oklch(12% 0.005 285.823);
-    --foreground: oklch(0.9911 0 0);
-    --surface: oklch(0.2103 0.0059 285.89);
-    --surface-secondary: oklch(0.257 0.0037 286.14);
-    --surface-tertiary: oklch(0.2721 0.0024 247.91);
-    --overlay: oklch(0.2103 0.0059 285.89);
-    --muted: oklch(70.5% 0.015 286.067);
-    --default: oklch(27.4% 0.006 286.033);
-    --default-foreground: oklch(0.9911 0 0);
-    --field-background: oklch(0.2103 0.0059 285.89);
-    --segment: oklch(0.3964 0.01 285.93);
-    --segment-foreground: oklch(0.9911 0 0);
-    --border: oklch(28% 0.006 286.033);
-    --separator: oklch(25% 0.006 286.033);
-    --backdrop: rgba(0, 0, 0, 0.6);
+    --background: #050b2c;
+    --foreground: #ffffff;
+    --surface: #232845;
+    --surface-secondary: #41465f;
+    --surface-tertiary: #373c56;
+    --overlay: #232845;
+    --muted: #afafbb;
+    --accent: #5c92fe;
+    --danger: #c2401f;
+    --default: #41465f;
+    --default-foreground: #ffffff;
+    --field-background: #232845;
+    --segment: #41465f;
+    --segment-foreground: #ffffff;
+    --border: #373c56;
+    --separator: #373c56;
+    --backdrop: #0e1431a6;
 
     --score-critical: oklch(0.68 0.2 26);
     --score-fragile: oklch(0.79 0.15 76);
@@ -45,9 +68,56 @@
   }
 }
 
+/*
+ * Landing ignores the system scheme: hero and footer are dark, the middle
+ * band is light. `html:has` wins over `:root` and the media query. Score
+ * tokens stay on the product palette.
+ */
+html:has([data-landing-snap]:not([data-band-theme='light'])) {
+  color-scheme: dark;
+  --background: #050b2c;
+  --foreground: #ffffff;
+  --surface: #232845;
+  --surface-secondary: #41465f;
+  --surface-tertiary: #373c56;
+  --overlay: #232845;
+  --muted: #afafbb;
+  --accent: #5c92fe;
+  --danger: #c2401f;
+  --default: #41465f;
+  --default-foreground: #ffffff;
+  --field-background: #232845;
+  --segment: #41465f;
+  --segment-foreground: #ffffff;
+  --border: #373c56;
+  --separator: #373c56;
+  --backdrop: #0e1431a6;
+}
+
+html:has([data-landing-snap][data-band-theme='light']) {
+  color-scheme: light;
+  --background: #fbfbfc;
+  --foreground: #050b2c;
+  --surface: #ffffff;
+  --surface-secondary: #f3f4f6;
+  --surface-tertiary: #e8e8ed;
+  --overlay: #ffffff;
+  --muted: #6e707c;
+  --accent: #3878f6;
+  --danger: #c2401f;
+  --default: #e8e8ed;
+  --default-foreground: #050b2c;
+  --field-background: #ffffff;
+  --field-foreground: #050b2c;
+  --segment: #ffffff;
+  --segment-foreground: #050b2c;
+  --border: #d2d2db;
+  --separator: #d2d2db;
+}
+
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-aktiv);
   --color-score-critical: var(--score-critical);
   --color-score-fragile: var(--score-fragile);
   --color-score-neutral: var(--score-neutral);
@@ -57,5 +127,154 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-weight: 400;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-aktiv), var(--font-dm-sans), sans-serif;
+}
+
+h1,
+h2 {
+  font-weight: 700;
+}
+
+h3 {
+  font-weight: 500;
+}
+
+html:has([data-landing-snap]),
+html:has([data-landing-snap]) body {
+  height: 100%;
+  overflow: hidden;
+}
+
+html:has([data-landing-snap]) body {
+  transition:
+    background-color 900ms ease-in-out,
+    color 900ms ease-in-out;
+}
+
+html:has([data-landing-snap]) .bg-separator {
+  transition: background-color 900ms ease-in-out;
+}
+
+/*
+ * The Heatmap canvas does not tween with tokens. Keep it invisible until the
+ * footer band is current, then fade with the page. The radial mask dissolves
+ * the grain field into the band instead of a hard rectangle.
+ */
+.footer-heatmap {
+  opacity: 0;
+  transition: opacity 900ms ease-in-out;
+  mask-image: radial-gradient(
+    ellipse 70% 55% at 50% 50%,
+    #000 40%,
+    transparent 75%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 55% at 50% 50%,
+    #000 40%,
+    transparent 75%
+  );
+}
+
+[data-landing-snap][data-band='2'] .footer-heatmap {
+  opacity: 1;
+}
+
+/*
+ * Before JS hydrates, CSS snap still pages. Once `data-paged` is set the
+ * scroller owns the tween (ease-in-out, ~900 ms) so native snap cannot yank.
+ */
+[data-landing-snap]:not([data-paged]) {
+  scroll-snap-type: y mandatory;
+}
+
+[data-landing-snap][data-paged] {
+  overflow-y: hidden;
+  scroll-snap-type: none;
+  touch-action: none;
+}
+
+@keyframes gutter-pulse {
+  from {
+    top: -4rem;
+  }
+  to {
+    top: 100%;
+  }
+}
+
+.gutter-pulse {
+  animation: gutter-pulse 12s ease-in-out infinite;
+}
+
+/*
+ * Hide the underline in place from left to right, then draw it back from the
+ * left. clip-path clips the line; the link itself does not translate.
+ */
+@keyframes hero-underline {
+  0% {
+    clip-path: inset(0 0 0 0);
+  }
+  50% {
+    clip-path: inset(0 0 0 100%);
+  }
+  50.01% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.hero-access-link {
+  position: relative;
+  display: inline-block;
+}
+
+.hero-access-link::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0.08em;
+  height: 1px;
+  background-color: currentColor;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 120ms ease-out;
+}
+
+.hero-access-link:hover::after,
+.hero-access-link:focus-visible::after {
+  animation: hero-underline 500ms ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-landing-snap]:not([data-paged]) {
+    scroll-snap-type: y proximity;
+  }
+
+  html:has([data-landing-snap]) body,
+  html:has([data-landing-snap]) .bg-separator,
+  .footer-heatmap {
+    transition: none;
+  }
+
+  .gutter-pulse {
+    animation: none;
+    visibility: hidden;
+  }
+
+  .hero-access-link:hover::after,
+  .hero-access-link:focus-visible::after {
+    animation: none;
+  }
+
+  .hero-access-link::after {
+    transition: none;
+  }
 }
