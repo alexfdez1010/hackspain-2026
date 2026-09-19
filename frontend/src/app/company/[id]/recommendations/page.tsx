@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { AdvisorHeader } from '@/components/advisor/advisor-header';
-import { AdvisorLinks } from '@/components/advisor/advisor-links';
 import { DeclinedList } from '@/components/advisor/declined-list';
 import { ImprovementPlanPanel } from '@/components/advisor/improvement-plan';
 import { InputsPanel } from '@/components/advisor/inputs-panel';
@@ -35,6 +34,29 @@ export async function generateMetadata({
 }
 
 /**
+ * Writes the lead sentence from the counts, so it never repeats the score and
+ * the confidence the header already shows.
+ *
+ * @param fitting - Products that fit.
+ * @param declined - Products left out.
+ * @returns One sentence saying how many products fit today.
+ */
+function buildLead(fitting: number, declined: number): string {
+  if (fitting === 0) {
+    return 'Hoy ningún producto supera el encaje mínimo; el plan de mejora dice qué lo desbloquearía.';
+  }
+  const fit =
+    fitting === 1
+      ? 'Un producto encaja hoy con la situación de la empresa'
+      : `${formatNumber(fitting)} productos encajan hoy con la situación de la empresa`;
+  const out =
+    declined === 1
+      ? 'uno queda fuera por sus reglas.'
+      : `${formatNumber(declined)} quedan fuera por sus reglas.`;
+  return `${fit}; ${out}`;
+}
+
+/**
  * Financial products recommended for one company: which ones fit, how much,
  * at what price, what would make that price cheaper and which products were
  * left out.
@@ -61,8 +83,7 @@ export default async function CompanyAdvisorPage({ params }: AdvisorPageProps) {
   return (
     <PageShell
       title={companyName(company.companyId)}
-      lead={`${company.companyId}: ${company.summary}`}
-      aside={<AdvisorLinks companyId={company.companyId} />}
+      lead={buildLead(recommendations.length, declined.length)}
     >
       <AdvisorHeader company={company} />
       {recommendations.length > 0 && (

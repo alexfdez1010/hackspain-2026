@@ -23,6 +23,8 @@ test('lands on the demo company without browser errors', async ({ page }) => {
       name: 'Score de cada variable en el último cierre',
     }),
   ).toBeVisible();
+  await page.getByRole('img', { name: /PULSE mensual/ }).hover();
+  await expect(page.getByRole('status')).toContainText(/\d,\d/);
   await expect(
     page.getByRole('button', { name: 'Abrir Nexo, asistente de Pulse' }),
   ).toBeVisible();
@@ -34,8 +36,17 @@ test('switches company from the navigation and stays on the section', async ({
 }) => {
   await page.goto('/company/COMP_0001/recommendations');
   const nav = page.getByRole('navigation', { name: 'Secciones' });
+  const why = page.getByRole('button', { name: 'Por qué encaja' }).first();
+  await expect(why).toHaveAttribute('aria-expanded', 'false');
+  await why.click();
+  await expect(why).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByText('A favor').first()).toBeVisible();
   const search = nav.getByRole('combobox', { name: 'Empresa' });
   await expect(search).toHaveValue('Atresmedia Labs');
+  await search.fill('a');
+  const before = await page.getByRole('option').count();
+  await page.getByRole('button', { name: /Cargar más/ }).click();
+  expect(await page.getByRole('option').count()).toBeGreaterThan(before);
   await search.fill('atlassian glo');
   await page.getByRole('option', { name: 'Atlassian Global' }).click();
   await expect(page).toHaveURL('/company/COMP_0051/recommendations');

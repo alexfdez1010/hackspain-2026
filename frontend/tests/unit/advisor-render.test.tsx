@@ -3,7 +3,6 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import CompanyAdvisorPage from '@/app/company/[id]/recommendations/page';
 import { AdvisorHeader } from '@/components/advisor/advisor-header';
-import { AdvisorLinks } from '@/components/advisor/advisor-links';
 import { DeclinedList } from '@/components/advisor/declined-list';
 import { ImprovementPlanPanel } from '@/components/advisor/improvement-plan';
 import { InputsPanel } from '@/components/advisor/inputs-panel';
@@ -66,13 +65,6 @@ describe('the advisor header', () => {
     expect(markup).toContain('Euríbor 12 m');
     expect(markup).toContain('2,10 %');
     expect(markup).not.toContain('NaN');
-  });
-
-  it('points back at the score and at the method of the same company', () => {
-    const markup = renderToStaticMarkup(<AdvisorLinks companyId="COMP_0001" />);
-    expect(markup).toContain('href="/company/COMP_0001"');
-    expect(markup).toContain('href="/method?company=COMP_0001"');
-    expect(markup).toContain('Ver el PULSE');
   });
 });
 
@@ -268,8 +260,10 @@ describe('the advisor page', () => {
   it('opens COMP_0001 with its summary, three offers and every section', async () => {
     const markup = await renderPage('COMP_0001');
     expect(markup).toContain('<h1');
-    expect(markup).toContain('COMP_0001');
-    expect(markup).toContain('3 producto(s) encajan con tu situación');
+    expect(markup).toContain('3 productos encajan hoy');
+    expect(markup).toContain('4 quedan fuera');
+    expect(markup).not.toContain('cobertura de datos');
+    expect(markup).toContain('Por qué encaja');
     expect(markup).toContain('3 de 7 del catálogo, por orden de encaje');
     expect(markup).toContain('Línea de crédito');
     expect(markup).toContain('Anticipo de facturas');
@@ -284,7 +278,7 @@ describe('the advisor page', () => {
   it('leads a company with no offer with the plan instead of an empty list', async () => {
     const markup = await renderPage('COMP_0007');
     expect(markup).not.toContain('Productos recomendados');
-    expect(markup).toContain('no hay hoy un producto que encaje');
+    expect(markup).toContain('Hoy ningún producto supera el encaje mínimo');
     expect(markup).toContain(
       'Ningún producto supera el encaje mínimo de 40 con el PULSE de ago 2026',
     );

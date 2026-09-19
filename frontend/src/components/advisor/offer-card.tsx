@@ -1,11 +1,7 @@
 import { Card, Chip } from '@heroui/react';
 
-import { LabelledBlock } from '@/components/advisor/labelled-block';
-import { LeverList } from '@/components/advisor/lever-list';
+import { OfferDetails } from '@/components/advisor/offer-details';
 import { OfferFigures } from '@/components/advisor/offer-figures';
-import { OfferPrice } from '@/components/advisor/offer-price';
-import { OfferReasons } from '@/components/advisor/offer-reasons';
-import { OfferSizing } from '@/components/advisor/offer-sizing';
 import { FAMILY_LABELS } from '@/lib/advisor/format';
 import type { AdvisorOffer } from '@/lib/advisor/types';
 import { formatNumber } from '@/lib/format';
@@ -19,9 +15,9 @@ interface OfferCardProps {
 }
 
 /**
- * One recommended product with everything needed to argue it: the figures of
- * the offer, the rules that made it fit, how the amount was computed, what the
- * price pays for and what would make it cheaper.
+ * One recommended product: the figures of the offer at a glance and, folded
+ * under them, the rules that made it fit, how the amount was computed, what
+ * the price pays for and what would make it cheaper.
  *
  * @param props - The offer, the reference rate name and the variable labels.
  * @returns The card of one offer.
@@ -52,27 +48,9 @@ export function OfferCard({
         </Card.Description>
         <p className="max-w-3xl text-xs text-muted">{offer.what}</p>
       </Card.Header>
-      <Card.Content className="flex flex-col gap-6">
+      <Card.Content className="flex flex-col gap-5">
         <OfferFigures offer={offer} referenceLabel={referenceLabel} />
-        <LabelledBlock title="Por qué">
-          <OfferReasons
-            reasons={offer.reasons}
-            variableLabels={variableLabels}
-          />
-        </LabelledBlock>
-        <LabelledBlock title="Importe">
-          <OfferSizing sizing={offer.sizing} />
-        </LabelledBlock>
-        <LabelledBlock title="Precio">
-          <OfferPrice offer={offer} />
-        </LabelledBlock>
-        <LabelledBlock title="Palancas">
-          <LeverList
-            levers={offer.levers}
-            story={offer.leverStory}
-            emptyText="Ningún pilar por debajo de 60: el precio ya no tiene margen de mejora por riesgo."
-          />
-        </LabelledBlock>
+        <OfferDetails offer={offer} variableLabels={variableLabels} />
       </Card.Content>
     </Card>
   );

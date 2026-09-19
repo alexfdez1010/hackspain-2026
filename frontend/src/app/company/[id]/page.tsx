@@ -37,22 +37,19 @@ export async function generateMetadata({
 }
 
 /**
- * Writes the lead sentence: which company, what the page covers and how far
- * it reaches.
+ * Writes the lead sentence: what the page covers and how far it reaches.
  *
- * @param companyId - Identifier behind the famous name shown as title.
  * @param months - Months with observed data.
  * @param lastMonth - Month of the last close.
  * @param horizonMonth - Farthest forecast month, or an empty string.
  * @returns One sentence naming the observed window and the forecast window.
  */
 function buildLead(
-  companyId: string,
   months: number,
   lastMonth: string,
   horizonMonth: string,
 ): string {
-  const observed = `${companyId}: ${formatNumber(months)} meses observados hasta ${formatMonth(lastMonth)}`;
+  const observed = `${formatNumber(months)} meses observados hasta ${formatMonth(lastMonth)}`;
   return horizonMonth
     ? `${observed}, con previsión mensual hasta ${formatMonth(horizonMonth)}.`
     : `${observed}. Sin previsión publicada.`;
@@ -91,12 +88,7 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
   return (
     <PageShell
       title={companyName(company.companyId)}
-      lead={buildLead(
-        company.companyId,
-        company.monthsObserved,
-        company.month,
-        horizonMonth,
-      )}
+      lead={buildLead(company.monthsObserved, company.month, horizonMonth)}
       aside={<PulseCompanyLinks companyId={company.companyId} />}
     >
       <PulseCompanyHeader company={company} />
