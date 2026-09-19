@@ -133,7 +133,7 @@ describe('assistant request boundary', () => {
     const request = new Request('http://localhost/api/assistant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: 'á'.repeat(40_000),
+      body: 'á'.repeat(140_000),
     });
     await expect(readAssistantRequest(request)).rejects.toMatchObject({
       status: 413,

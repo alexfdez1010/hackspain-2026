@@ -15,7 +15,10 @@ test('streams a demo, preserves the conversation through navigation, and starts 
 }) => {
   await page.goto('/company/COMP_0001');
   await openAssistant(page);
-  await page.getByRole('button', { name: /Resume esta empresa/ }).click();
+  await page
+    .getByRole('textbox', { name: 'Tu pregunta para Nexo' })
+    .fill('Resume esta empresa');
+  await page.getByRole('button', { name: 'Enviar pregunta' }).click();
   await expect(
     page.getByRole('button', { name: 'Detener respuesta' }),
   ).toBeVisible();
@@ -114,7 +117,7 @@ test('fits mobile, respects reduced motion, and keeps the composer reachable', a
   expect(box!.width).toBeLessThanOrEqual(390);
   expect(box!.height).toBeLessThanOrEqual(844);
   await expect(
-    page.getByRole('button', { name: /Cómo puede ayudarme la IA/ }),
+    page.getByRole('button', { name: /Qué productos me recomiendas/ }),
   ).toBeInViewport({ ratio: 1 });
   await expect(
     page.getByRole('textbox', { name: 'Tu pregunta para Nexo' }),
@@ -138,7 +141,7 @@ test('fits a short desktop viewport and traps focus in the dialog', async ({
   await page.goto('/company/COMP_0001');
   await openAssistant(page);
   await expect(
-    page.getByRole('button', { name: /Cómo puede ayudarme la IA/ }),
+    page.getByRole('button', { name: /Qué productos me recomiendas/ }),
   ).toBeInViewport({ ratio: 1 });
   for (let i = 0; i < 10; i++) {
     await page.keyboard.press('Tab');
@@ -170,4 +173,57 @@ test('uses the current company page in the request and answers about its product
   );
   await expect(page.getByRole('log')).toContainText('productos recomendados');
   await expect(page.getByRole('log')).toContainText('Línea de crédito');
+});
+
+test('draws a real chart from the export inside the reply and links to the page', async ({
+  page,
+}) => {
+  await page.goto('/company/COMP_0001');
+  await openAssistant(page);
+  await page
+    .getByRole('button', { name: /Dibuja la trayectoria del PULSE/ })
+    .click();
+  const figure = page.getByRole('dialog').locator('figure[data-chart]');
+  await expect(figure).toHaveAttribute('data-chart', 'trayectoria');
+  await expect(figure).toContainText('Atresmedia Labs · ago 2026');
+  await expect(figure).toContainText('Trayectoria del PULSE');
+  await expect(
+    figure.getByRole('img', { name: /PULSE mensual desde ene 2026/ }),
+  ).toBeVisible();
+  await expect(page.getByRole('log')).toContainText('Trayectoria del PULSE.');
+  await expect(
+    page.getByRole('button', { name: 'Detener respuesta' }),
+  ).toBeHidden();
+  await page.screenshot({
+    path: 'test-results/nexo-chart.png',
+    animations: 'disabled',
+  });
+  const request = page.waitForRequest((request) =>
+    request.url().endsWith('/api/assistant'),
+  );
+  await page
+    .getByRole('textbox', { name: 'Tu pregunta para Nexo' })
+    .fill('¿Qué variables restan más puntos?');
+  await page.getByRole('button', { name: 'Enviar pregunta' }).click();
+  const history = (await request).postDataJSON().messages as {
+    role: string;
+    parts: { type: string; output?: { summary?: string; points?: unknown } }[];
+  }[];
+  const chart = history
+    .find((message) => message.role === 'assistant')
+    ?.parts.find((part) => part.type === 'tool-show_chart');
+  expect(chart?.output?.summary).toContain('PULSE de');
+  expect(chart?.output?.points).toBeUndefined();
+  await expect(
+    page.getByRole('dialog').locator('figure[data-chart="puntos"]'),
+  ).toContainText('Puntos ganados y perdidos');
+  await expect(
+    page.getByRole('button', { name: 'Detener respuesta' }),
+  ).toBeHidden();
+  await figure
+    .first()
+    .getByRole('link', { name: 'Abrir en la aplicación' })
+    .click();
+  await expect(page).toHaveURL('/company/COMP_0001');
+  await expect(page.getByRole('dialog')).toBeHidden();
 });

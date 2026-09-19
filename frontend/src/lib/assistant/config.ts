@@ -29,5 +29,11 @@ export const ASSISTANT_PROVIDER_OPTIONS: ProviderOptions = {
 /** Generous cap so long answers never stop mid-sentence; cost stays bounded per call. */
 export const ASSISTANT_MAX_OUTPUT_TOKENS = 10_000;
 
+/**
+ * Most model turns per reply: a reply may read three or four figures and draw
+ * up to three charts before it writes; more than that is a loop.
+ */
+export const ASSISTANT_MAX_STEPS = 6;
+
 /** Model deadline; must stay below the route's `maxDuration`. */
 export const ASSISTANT_TIMEOUT_MS = 55_000;

@@ -27,6 +27,10 @@ services:
     container_name: hackspain-web
     ports:
       - "${WEB_PORT:-3000}:3000"
+    # Nexo reads AI_GATEWAY_API_KEY from frontend/.env; without it the assistant runs its demo.
+    env_file:
+      - path: ./frontend/.env
+        required: false
     environment:
       # Server-side fetches go to the API container; the browser never calls it directly.
       PULSE_API_URL: http://api:8000

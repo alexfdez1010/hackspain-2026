@@ -64,6 +64,91 @@ congelado en una build sin clave si se configura Gateway al arrancar el servidor
 React y React DOM se actualizan sólo dentro de 19.1 (19.1.9 en los lockfiles)
 para satisfacer el peer dependency del SDK actual.
 
+## Herramientas y gráficos (2026-09-19)
+
+Nexo es un agente con herramientas de sólo lectura, definidas en
+`src/lib/assistant/tools` con `tool()` y `jsonSchema` de AI SDK 7 y pasadas a
+`streamText` con `stopWhen: stepCountIs(ASSISTANT_MAX_STEPS)` (seis pasos).
+Todas leen la empresa de la conversación a través de los mismos adaptadores
+que las páginas (`PulseDataSource`, `AdvisorDataSource`), memorizados por
+petición en `ToolRuntime`; ninguna escribe, sale a internet ni recibe la
+cartera. Las cifras se redondean antes de llegar al modelo.
+
+| Herramienta           | Qué lee                                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| `get_history`         | Score, confianza, caja al cierre y pilares de cada mes observado (últimos N)                    |
+| `get_month`           | Las once variables de un mes: score, cifra en bruto con unidad, peso y puntos aportados         |
+| `get_forecast`        | Horizontes +1…+6 con banda p10-p90 y los cuatro impulsores mayores de cada uno                  |
+| `get_signals`         | Señales con impulsores, probabilidad de que dure y desenlace; la alerta viva                    |
+| `get_financing`       | Ofertas con importe, tipo, componentes del precio y motivos; descartados, desbloqueos, palancas |
+| `get_variable`        | Historial de una variable, estadísticas y su peso en la previsión                               |
+| `get_variable_detail` | Rankings del detalle (clientes, proveedores, morosos, líneas, deuda, antigüedad) y caja diaria  |
+| `show_chart`          | Dibuja un gráfico interactivo en el chat                                                        |
+
+`show_chart` recibe `{ kind, variable?, variables?, horizon?, month?, ranking? }`
+con `kind` en `trayectoria`, `pilares`, `variables`, `puntos`, `variable`,
+`comparar`, `impulsores`, `caja` o `ranking`, y devuelve un `ChartSpec`
+(`src/lib/assistant/charts/types.ts`) construido en el servidor con los datos
+del export: el modelo elige el gráfico, nunca sus números. El navegador recibe
+la especificación completa en la parte `tool-show_chart` y la dibuja con
+`AssistantChart` (`src/components/assistant/charts`) reutilizando los SVG del
+producto (`PulseTrajectoryChart`, `PillarSpark`, `VariableScoreChart`,
+`DailyBalanceChart`) y cuatro listas de barras apiladas propias del panel
+(`ScoreBars`, `PointsBars`, `DriverBars`, `RankingBars`) más `CompareLines`. El
+modelo sólo recibe `{ shown, kind, title, summary }` (`toModelOutput`), y el
+navegador devuelve esa misma versión compacta en el historial
+(`compactMessage`), así que los puntos del gráfico nunca vuelven a pagarse en
+tokens. Cada figura enlaza a la página de la aplicación donde vive la misma
+lectura.
+
+El historial admite ahora partes de herramienta en los mensajes del asistente:
+sólo las de herramientas conocidas, en estado `output-available`, con entrada
+objeto y menos de 12.000 caracteres serializados; el resto se descarta sin
+error. El cuerpo admite 256 KiB y 32 partes por mensaje.
+
+En modo `mock`, `getMockChart` decide si la pregunta pide un gráfico
+(«dibuja», «trayectoria», «pilares», «restan puntos», «impulsores») y la ruta
+ejecuta el mismo constructor con los datos reales, emitiendo
+`tool-input-start`, `tool-input-available` y `tool-output-available` antes del
+texto. La demo dibuja gráficos verdaderos con prosa preparada.
+
+Comprobado el 19 de septiembre de 2026 con Gateway: «Dibuja la trayectoria del
+PULSE y dime qué variables restan más puntos» llama en paralelo a `show_chart`
+y `get_month` y escribe la lectura en 5 s; una pregunta con comparación y
+ranking encadena `get_month`, `get_variable_detail` y dos `show_chart` en 6 s.
+Pruebas: 481 unitarias (herramientas, constructores, renderizado, historial),
+7 de integración (ruta con herramientas y demo con gráfico) y 8 de navegador.
+
+Ejemplo de parte de gráfico en el stream:
+
+```json
+{
+  "type": "tool-output-available",
+  "toolCallId": "c1",
+  "output": {
+    "kind": "puntos",
+    "company": "Atresmedia Labs",
+    "month": "2026-08",
+    "title": "Puntos ganados y perdidos en ago 2026",
+    "summary": "PULSE 45,6 de 100. Mínimo intramensual de caja pierde 8,8 de 14; …",
+    "href": "/company/COMP_0001/detail",
+    "pulse": 45.64,
+    "rows": [
+      {
+        "key": "cash_min",
+        "label": "Mínimo intramensual de caja",
+        "score": 30.1,
+        "weight": 14,
+        "contribution": 5.2,
+        "known": true,
+        "rawText": "0,11 x salidas mensuales",
+        "pillarLabel": "Liquidez"
+      }
+    ]
+  }
+}
+```
+
 ## Diseño y decisiones conservadas
 
 2026-09-19: se toma de Quitapón la separación entre ilustración inmutable,

@@ -4,8 +4,21 @@ import { NexoMascot, type NexoMood } from '@/components/assistant/nexo-mascot';
 import type { AssistantController } from '@/components/assistant/use-assistant';
 import { getPageLabel, type AssistantMode } from '@/lib/assistant/types';
 
-/** Puts the character's expression into words so the state never relies on the drawing alone. */
-export function statusLabel(mood: NexoMood, mode: AssistantMode): string {
+/**
+ * Puts the character's expression into words so the state never relies on
+ * the drawing alone.
+ *
+ * @param mood - Expression of the character.
+ * @param mode - Whether replies are simulated or come from the model.
+ * @param working - `true` while a reply is reading data or drawing a chart.
+ * @returns The status sentence.
+ */
+export function statusLabel(
+  mood: NexoMood,
+  mode: AssistantMode,
+  working = false,
+): string {
+  if (working) return 'Consultando los datos y preparando gráficos…';
   switch (mood) {
     case 'error':
       return 'Algo ha fallado. Podemos reintentarlo.';
@@ -18,7 +31,7 @@ export function statusLabel(mood: NexoMood, mode: AssistantMode): string {
     default:
       return mode === 'mock'
         ? 'Demo · respuestas simuladas con datos de la app.'
-        : 'Pregúntame por tu empresa, sus productos o el score.';
+        : 'Pregúntame por tu empresa o pídeme un gráfico.';
   }
 }
 
@@ -41,7 +54,7 @@ export function AssistantHeader({
             Nexo
           </Modal.Heading>
           <p role="status" className="mt-0.5 truncate text-xs text-muted">
-            {statusLabel(mood, mode)}
+            {statusLabel(mood, mode, chat.working)}
           </p>
         </div>
         <Button

@@ -16,17 +16,20 @@ export function AssistantWelcome({
   const suggestions = company
     ? [
         {
-          title: 'Resume esta empresa',
-          detail: 'Score, confianza y previsión',
+          title: 'Dibuja la trayectoria del PULSE',
+          detail: 'Gráfico con historia, previsión y señales',
+        },
+        {
+          title: '¿Qué variables restan más puntos?',
+          detail: 'Gráfico de puntos ganados y perdidos',
+        },
+        {
+          title: 'Muestra los pilares en gráficos',
+          detail: 'Cuatro sparklines comparables',
         },
         {
           title: '¿Qué productos me recomiendas?',
           detail: 'Importe, tipo y por qué',
-        },
-        { title: 'Explícame el score', detail: 'Qué mide y qué no' },
-        {
-          title: '¿Cómo puede ayudarme la IA?',
-          detail: 'Del dato a la explicación',
         },
       ]
     : [
@@ -52,7 +55,7 @@ export function AssistantWelcome({
             Hola, soy Nexo.
           </h3>
           <p className="mt-2 max-w-52 text-sm leading-relaxed text-muted">
-            Te ayudo a interpretar el PULSE de tu empresa y sus productos.
+            Leo las cifras de tu empresa y las dibujo cuando me lo pides.
           </p>
         </div>
         <NexoMascot mood={mood} className="-mb-2 size-28 sm:size-32" />

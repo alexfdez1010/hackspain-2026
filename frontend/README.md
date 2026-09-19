@@ -47,6 +47,17 @@ flotante o `Ctrl/Cmd+J`. Funciona sin clave con respuestas simuladas, streaming,
 contexto de la página, cancelación, reintento y enlaces a los datos originales.
 La conversación permanece en memoria al navegar y se elimina al recargar.
 
+Nexo es un agente: dispone de siete herramientas de sólo lectura sobre la
+empresa de la conversación (historial, mes, previsión, alertas, financiación,
+variable y detalle de contrapartes) y de `show_chart`, que dibuja gráficos
+interactivos dentro del chat con los datos reales del export: trayectoria con
+previsión y señales, pilares, las once variables, puntos ganados y perdidos,
+una variable mes a mes, comparación de variables, impulsores de la previsión,
+caja diaria y rankings de clientes, proveedores, morosos, líneas o deuda. El
+modelo elige el gráfico y comenta la lectura; los números los pone el servidor.
+Pídele «Dibuja la trayectoria del PULSE», «¿Qué variables restan más puntos?»
+o «Compara días de caja y DSO, y un ranking de morosidad».
+
 Para conectar Vercel AI Gateway, define `AI_GATEWAY_API_KEY` en `.env` (o
 `.env.local`) y reinicia Next.js; el servidor la lee al arrancar y el SDK la
 toma del entorno. El modelo está fijado como `ASSISTANT_MODEL =
@@ -58,8 +69,11 @@ Nunca se envía la clave al cliente.
 
 El frontend es propietario de `POST /api/assistant` y `GET /api/actions/[id]`; no añade endpoints a FastAPI.
 Acepta `{ messages: UIMessage[], pathname: string }` y devuelve SSE con el protocolo
-UI Message Stream de AI SDK 7. Sólo acepta texto y roles `user`/`assistant`, hasta
-20 mensajes, 2.000 caracteres por pregunta y 64 KiB por petición. El transporte
+UI Message Stream de AI SDK 7, partes de herramienta (`tool-*`) incluidas. Acepta
+texto y, en las respuestas anteriores del asistente, partes de herramienta
+terminadas de las ocho herramientas conocidas; roles `user`/`assistant`, hasta
+20 mensajes, 32 partes por mensaje, 2.000 caracteres por pregunta y 256 KiB por
+petición. El transporte
 del navegador limita el historial a los últimos 20 mensajes. La respuesta incluye
 metadata `{ mode: 'mock' | 'gateway', sources: { label, href }[] }`.
 Errores antes del stream: JSON `{ error: string }`, códigos 400/403/413/415/503;

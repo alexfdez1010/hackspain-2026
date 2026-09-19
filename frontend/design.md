@@ -291,6 +291,19 @@ adding it to the codebase.
   error del proveedor por una respuesta simulada. El historial se mantiene sólo
   en memoria durante la navegación, sin localStorage ni persistencia en servidor.
 - Nexo no aparece en `/`: el layout de producto (`(app)`) es quien lo monta.
+- Nexo lee y dibuja: las respuestas pueden llevar una línea de estado por cada
+  lectura («Consultando variables del mes…», «Variables del mes consultado»)
+  y figuras (`ChartFrame`) con overline empresa · mes, título, el gráfico y el
+  enlace «Abrir en la aplicación», separadas por hairlines arriba y abajo, sin
+  fondo ni sombra. Los gráficos del chat reutilizan los SVG del producto y, para
+  las listas de barras, apilan etiqueta y cifra sobre la barra a ancho completo
+  (`BarRow`): a 440 px una rejilla lateral truncaba «Mínimo intramensual de
+  caja». El color sigue siendo sólo banda, dirección o previsión; la
+  comparación de variables distingue las series por tinta y trazo (azul o
+  tinta, continuo o discontinuo) con leyenda y cifra final, nunca por un cuarto
+  tono. La bienvenida ofrece dos ejemplos que dibujan («Dibuja la trayectoria
+  del PULSE», «¿Qué variables restan más puntos?») y el placeholder del editor
+  invita a pedir un gráfico.
 
 Component rules:
 
@@ -458,6 +471,8 @@ patterns.
 | 2026-09-19 | Dither del pie detrás de Platform/Docs: tinta oscura `#afafbb` a 0.22 con `screen` | El 2×2 `#050b2c` desaparecería sobre navy; el heatmap se queda a la izquierda | Equipo Pulse |
 | 2026-09-19 | Dither del pie: recorte `scale` 2.4, origin 0.68/0.32, rotación 28° | El campo entero se leía como el 2×2 con la tinta invertida | Equipo Pulse |
 | 2026-09-19 | Hero dither: `preload` RSC del webp + fade al decode; `maxPixelCount` 480 000 | Paper no consume `next/image`; el destello no debe depender de que el archivo llegue tarde | Equipo Pulse |
+| 2026-09-19 | Nexo pasa a agente con siete herramientas de lectura y `show_chart`; los gráficos del chat son figuras con overline, título, el SVG del producto y «Abrir en la aplicación», entre dos hairlines | El asistente responde con la cifra exacta y la dibuja en vez de describirla; reutilizar los gráficos del producto hace que el chat y la página digan lo mismo con el mismo trazo | Equipo Pulse |
+| 2026-09-19 | Las barras del chat (`BarRow`) apilan etiqueta y cifra sobre la barra a ancho completo; las series de la comparación se distinguen por tinta y trazo, con leyenda | A 440 px la rejilla lateral truncaba las etiquetas; el color sigue reservado a banda y dirección, así que la identidad de una serie va en el trazo | Equipo Pulse |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce

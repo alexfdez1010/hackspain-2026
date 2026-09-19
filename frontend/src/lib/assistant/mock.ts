@@ -1,3 +1,4 @@
+import type { ChartRequest } from '@/lib/assistant/charts/types';
 import type { AssistantContext } from '@/lib/assistant/context';
 import { formatRate } from '@/lib/advisor/format';
 import { formatEuro, formatNumber, formatPercent } from '@/lib/format';
@@ -56,14 +57,65 @@ function advisorReply(id: string, advisor: ContextAdvisor): string {
   return `**${id} · productos recomendados**\n\n${offers}\n\n${stress.trim()} Los tipos son orientativos sobre el ${advisor.referenceRate.label || 'tipo de referencia'} y quedan sujetos a la aprobación de la entidad.`;
 }
 
+/** Sentences that accompany each demo chart. */
+const CHART_TEXT: Record<ChartRequest['kind'], string> = {
+  trayectoria:
+    '**Trayectoria del PULSE.** La línea continua son los meses observados; la discontinua y su banda, la previsión a seis meses. Los triángulos marcan los meses con señal. Pasa el ratón o toca un mes para ver su valor.',
+  pilares:
+    '**Los cuatro pilares mes a mes.** Cada sparkline comparte la misma escala, así que la forma de uno se compara con la de otro; el color es la banda del último mes.',
+  puntos:
+    '**Puntos ganados y perdidos.** Cada variable dispone de los puntos de su peso; la parte coloreada es lo que aporta al PULSE y el resto, lo que pierde. Las primeras filas son las que más restan.',
+  variables:
+    '**Las once variables del mes.** Cada barra es el score de una variable sobre 100, con el color de su banda; las que no tienen datos aparecen sin barra.',
+  impulsores:
+    '**Qué mueve la previsión.** Cada barra es lo que un impulsor añade o resta al cambio previsto del PULSE a seis meses; la suma de todas es el cambio.',
+  variable: '**Una variable mes a mes**, frente a su pilar y al PULSE.',
+  comparar: '**Variables comparadas** sobre la misma escala de 0 a 100.',
+  caja: '**Caja diaria** de los dos últimos meses frente a un mes de salidas.',
+  ranking: '**Ranking** construido con el detalle publicado de la empresa.',
+};
+
+/**
+ * Decides whether a demo question deserves a chart and which one.
+ *
+ * @param question - Last user message.
+ * @param context - Server-owned snapshot.
+ * @returns The chart request, or `null` when the question is not visual.
+ */
+export function getMockChart(
+  question: string,
+  context: AssistantContext,
+): ChartRequest | null {
+  if (!context.company) return null;
+  const query = normalise(question);
+  if (
+    /pilar/.test(query) &&
+    /grafic|muestra|dibuja|compara|evoluci/.test(query)
+  )
+    return { kind: 'pilares' };
+  if (/resta|pierde|puntos ganados|puntos perdidos/.test(query))
+    return { kind: 'puntos' };
+  if (/impulsor|mueve la prevision/.test(query)) return { kind: 'impulsores' };
+  if (
+    /las once variables|variables del mes/.test(query) &&
+    /grafic|muestra|dibuja/.test(query)
+  )
+    return { kind: 'variables' };
+  if (/grafic|dibuja|trayectoria|evoluci|visualiza/.test(query))
+    return { kind: 'trayectoria' };
+  return null;
+}
+
 /** Produces deterministic demo answers grounded in the current dataset, never a fake model call. */
 export function getMockReply(
   question: string,
   context: AssistantContext,
 ): string {
   const query = normalise(question);
+  const chart = getMockChart(question, context);
+  if (chart) return CHART_TEXT[chart.kind];
   if (/\bia\b|inteligencia|machine learning|llm|prompt/.test(query)) {
-    return '**La IA puede ayudarte a pasar del dato a la explicación.**\n\nEn Pulse, puedes usarla para entender qué significa el score de tu empresa, por qué se te recomienda un producto y preparar preguntas antes de hablar con tu entidad.\n\nUn modelo de lenguaje redacta e interpreta; los cálculos y las previsiones los aporta el modelo financiero de la aplicación. Conviene contrastar siempre la explicación con esos datos.\n\nPrueba con: «Resume esta empresa» o «Explícame el score». Esta respuesta está preparada para la demostración.';
+    return '**La IA puede ayudarte a pasar del dato a la explicación.**\n\nEn Pulse, puedes usarla para entender qué significa el score de tu empresa, por qué se te recomienda un producto y preparar preguntas antes de hablar con tu entidad.\n\nUn modelo de lenguaje redacta e interpreta; los cálculos y las previsiones los aporta el modelo financiero de la aplicación. Conviene contrastar siempre la explicación con esos datos.\n\nPrueba con: «Resume esta empresa» o «Dibuja la trayectoria del PULSE». Esta respuesta está preparada para la demostración.';
   }
   if (/score|metod|significa|funciona|pilar|variable|confianza/.test(query)) {
     return '**PULSE resume la salud financiera en una escala de 0 a 100.** Cuanto mayor es, más sólida es la situación según el modelo. No es una probabilidad de impago.\n\n• Menos de 35: crítico.\n• De 35 a menos de 50: frágil.\n• De 50 a menos de 65: neutro.\n• Desde 65: sólido.\n\nLos 100 puntos se reparten entre once variables agrupadas en cuatro pilares, con pesos fijos y publicados. La confianza indica cuántos de esos puntos descansan en datos observados: cuando una variable no tiene evidencia, no cuenta como cero, simplemente no puntúa. La página Método lo explica pieza a pieza.';
@@ -97,7 +149,7 @@ export function getMockReply(
     return '**Las recomendaciones se calculan empresa a empresa.**\n\nSiete productos —línea de crédito, ampliación, factoring, confirming, préstamo a plazo, reestructuración y depósito— se evalúan con reglas ligadas a las variables del score; los que encajan se dimensionan y se les pone precio sobre el Euríbor a 12 meses.\n\nAbre una empresa y pregúntame por sus productos: te diré cuáles encajan, por cuánto y por qué.';
   }
   if (/empresa|cartera|resum|situacion|hola/.test(query)) {
-    return '**Esta aplicación muestra una empresa cada vez, nunca la cartera.**\n\nElige una empresa en el selector de la cabecera para abrir su PULSE mes a mes, su previsión a seis meses y los productos financieros que encajan. Cuando estés en una empresa, pregúntame «Resume esta empresa» o «¿Qué productos me recomiendas?».';
+    return '**Esta aplicación muestra una empresa cada vez, nunca la cartera.**\n\nElige una empresa en el selector de la cabecera para abrir su PULSE mes a mes, su previsión a seis meses y los productos financieros que encajan. Cuando estés en una empresa, pregúntame «Resume esta empresa», «Dibuja la trayectoria del PULSE» o «¿Qué productos me recomiendas?».';
   }
-  return 'Estoy en **modo demostración**, con respuestas preparadas sobre la aplicación. Esta pregunta todavía no tiene una respuesta simulada.\n\nPuedes probar «Resume esta empresa», «¿Qué productos me recomiendas?», «Explícame el score» o «¿Cómo puede ayudarme la IA?». Con el asistente conectado podrás hacer preguntas abiertas y continuar la conversación.';
+  return 'Estoy en **modo demostración**, con respuestas preparadas sobre la aplicación. Esta pregunta todavía no tiene una respuesta simulada.\n\nPuedes probar «Resume esta empresa», «Dibuja la trayectoria del PULSE», «¿Qué variables restan más puntos?» o «¿Qué productos me recomiendas?». Con el asistente conectado podrás hacer preguntas abiertas y continuar la conversación.';
 }

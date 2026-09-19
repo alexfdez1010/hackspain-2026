@@ -7,7 +7,9 @@ import { useEffect, useRef, useState } from 'react';
 import {
   MAX_HISTORY_MESSAGES,
   MAX_PROMPT_LENGTH,
-  messageText,
+  compactMessage,
+  hasContent,
+  hasPendingTool,
   type AssistantMessage,
 } from '@/lib/assistant/types';
 
@@ -25,7 +27,8 @@ export function useAssistant() {
           body: {
             ...body,
             messages: messages
-              .filter((message) => messageText(message).trim())
+              .filter(hasContent)
+              .map(compactMessage)
               .slice(-MAX_HISTORY_MESSAGES),
           },
         }),
@@ -33,6 +36,9 @@ export function useAssistant() {
   );
   const chat = useChat<AssistantMessage>({ transport });
   const busy = chat.status === 'submitted' || chat.status === 'streaming';
+  const last = chat.messages.at(-1);
+  /** `true` while the reply is reading data or drawing a chart. */
+  const working = busy && last?.role === 'assistant' && hasPendingTool(last);
   const sending = useRef(false);
 
   useEffect(() => {
@@ -97,6 +103,7 @@ export function useAssistant() {
     setInput,
     stopped,
     busy,
+    working,
     send,
     stop,
     retry,
