@@ -114,25 +114,32 @@ describe('filterCompanyOptions', () => {
       { id: 'A', name: 'Nestlé Iberia' },
       { id: 'B', name: 'Telefónica' },
     ];
-    expect(filterCompanyOptions(named, 'NESTLE', 'B')).toEqual([
-      named[1],
-      named[0],
-    ]);
-    expect(filterCompanyOptions(named, 'telefo', 'A')).toEqual([
+    expect(filterCompanyOptions(named, 'NESTLE', 'B')).toEqual({
+      items: [named[1], named[0]],
+      total: 1,
+    });
+    expect(filterCompanyOptions(named, 'telefo', 'A').items).toEqual([
       named[0],
       named[1],
     ]);
     expect(
-      filterCompanyOptions(options, 'comp_0051', 'COMP_0001').map((o) => o.id),
+      filterCompanyOptions(options, 'comp_0051', 'COMP_0001').items.map(
+        (o) => o.id,
+      ),
     ).toEqual(['COMP_0001', 'COMP_0051']);
   });
 
-  it('caps the list and keeps the company in context in it', () => {
-    const list = filterCompanyOptions(options, '', 'COMP_0200');
-    expect(list.length).toBeLessThanOrEqual(VISIBLE_LIMIT + 1);
-    expect(list.some((option) => option.id === 'COMP_0200')).toBe(true);
-    expect(filterCompanyOptions(options, 'zzz', 'COMP_0001')).toEqual([
-      options.find((option) => option.id === 'COMP_0001'),
-    ]);
+  it('pages the list, counts the whole match and keeps the context', () => {
+    const page = filterCompanyOptions(options, '', 'COMP_0200');
+    expect(page.items.length).toBe(VISIBLE_LIMIT + 1);
+    expect(page.total).toBe(200);
+    expect(page.items[0].id).toBe('COMP_0200');
+    const more = filterCompanyOptions(options, '', 'COMP_0001', 80);
+    expect(more.items.length).toBeLessThanOrEqual(81);
+    expect(more.items.length).toBeGreaterThan(VISIBLE_LIMIT);
+    expect(filterCompanyOptions(options, 'zzz', 'COMP_0001')).toEqual({
+      items: [options.find((option) => option.id === 'COMP_0001')],
+      total: 0,
+    });
   });
 });

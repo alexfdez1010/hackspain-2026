@@ -1,13 +1,15 @@
 'use client';
 
-import { ComboBox, Input, ListBox } from '@heroui/react';
+import { Button, ComboBox, Input, ListBox } from '@heroui/react';
 import { useMemo, useState } from 'react';
 import type { Key } from 'react-aria-components';
 
 import {
   filterCompanyOptions,
+  VISIBLE_LIMIT,
   type CompanyOption,
 } from '@/lib/company/options';
+import { formatNumber } from '@/lib/format';
 
 interface CompanySearchProps {
   /** Every company of the export, sorted by name. */
@@ -21,8 +23,9 @@ interface CompanySearchProps {
 /**
  * Lets the reader find and switch the company in context by typing its name.
  *
- * Only a capped slice of matches is rendered, so opening the list is cheap
- * even with the whole export loaded. Identifiers are matched but never shown.
+ * Only a page of matches is rendered, so opening the list is cheap even with
+ * the whole export loaded; «cargar más» appends the next page and the count
+ * says how many companies there are. Identifiers are matched but never shown.
  *
  * @param props - Options, selection and change handler.
  * @returns A searchable combo box.
@@ -35,10 +38,16 @@ export function CompanySearch({
   const selectedName =
     companies.find((company) => company.id === selectedId)?.name ?? '';
   const [query, setQuery] = useState(selectedName);
-  const items = useMemo(
-    () => filterCompanyOptions(companies, query, selectedId),
-    [companies, query, selectedId],
+  const [limit, setLimit] = useState(VISIBLE_LIMIT);
+  const { items, total } = useMemo(
+    () => filterCompanyOptions(companies, query, selectedId, limit),
+    [companies, query, selectedId, limit],
   );
+  const shown = Math.min(limit, total);
+  const changeQuery = (value: string) => {
+    setQuery(value);
+    setLimit(VISIBLE_LIMIT);
+  };
   const handleChange = (key: Key | null) => {
     if (key !== null && key !== selectedId) onSelect(String(key));
   };
@@ -48,7 +57,7 @@ export function CompanySearch({
       items={items}
       selectedKey={selectedId}
       inputValue={query}
-      onInputChange={setQuery}
+      onInputChange={changeQuery}
       onSelectionChange={handleChange}
       menuTrigger="focus"
       allowsEmptyCollection
@@ -76,6 +85,17 @@ export function CompanySearch({
             </ListBox.Item>
           )}
         </ListBox>
+        {shown < total && (
+          <Button
+            variant="ghost"
+            size="sm"
+            fullWidth
+            className="mt-1"
+            onPress={() => setLimit((current) => current + VISIBLE_LIMIT)}
+          >
+            Cargar más · {formatNumber(shown)} de {formatNumber(total)}
+          </Button>
+        )}
       </ComboBox.Popover>
     </ComboBox>
   );

@@ -1,7 +1,15 @@
 import { companyName } from '@/lib/company/names';
 
-/** Names shown by the search before the reader narrows them down. */
+/** Names the search shows per page; «cargar más» adds another page. */
 export const VISIBLE_LIMIT = 40;
+
+/** A page of search results with the size of the whole match. */
+export interface CompanyMatches {
+  /** Visible options, the company in context first when it had to be added. */
+  items: CompanyOption[];
+  /** How many options match the query in total. */
+  total: number;
+}
 
 /** One company as the navigation search lists it. */
 export interface CompanyOption {
@@ -49,24 +57,30 @@ export function fold(text: string): string {
  * @param options - Every option, sorted.
  * @param query - Text typed by the reader.
  * @param selectedId - Identifier of the company in context.
- * @returns At most {@link VISIBLE_LIMIT} matches, plus the selected company.
+ * @param limit - Matches to show; grows page by page with «cargar más».
+ * @returns The visible matches, plus the selected company, and the total.
  */
 export function filterCompanyOptions(
   options: readonly CompanyOption[],
   query: string,
   selectedId: string,
-): CompanyOption[] {
+  limit = VISIBLE_LIMIT,
+): CompanyMatches {
   const needle = fold(query.trim());
-  const matches = (
-    needle
-      ? options.filter(
-          (option) =>
-            fold(option.name).includes(needle) ||
-            fold(option.id).includes(needle),
-        )
-      : options
-  ).slice(0, VISIBLE_LIMIT);
-  if (matches.some((option) => option.id === selectedId)) return matches;
+  const matching = needle
+    ? options.filter(
+        (option) =>
+          fold(option.name).includes(needle) ||
+          fold(option.id).includes(needle),
+      )
+    : [...options];
+  const items = matching.slice(0, Math.max(limit, 0));
+  if (items.some((option) => option.id === selectedId)) {
+    return { items, total: matching.length };
+  }
   const selected = options.find((option) => option.id === selectedId);
-  return selected ? [selected, ...matches] : matches;
+  return {
+    items: selected ? [selected, ...items] : items,
+    total: matching.length,
+  };
 }
