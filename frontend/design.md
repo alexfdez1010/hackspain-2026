@@ -173,7 +173,7 @@ Component rules:
 - Container widths: `max-w-7xl` en páginas; `max-w-3xl` en texto corrido.
 - Breakpoints: los de Tailwind (`sm` 640, `lg` 1024).
 - Navigation behavior by breakpoint: barra superior fija que envuelve en varias
-  líneas en móvil; no hay menú colapsable porque son cinco destinos.
+  líneas en móvil; no hay menú colapsable porque son seis destinos.
 - Mobile-first exceptions: la tabla de cartera y el mapa de calor mantienen su
   ancho mínimo y scrollan.
 - Table/data-density strategy: 40 filas por lote con un botón para ampliar; el
@@ -185,12 +185,14 @@ Component rules:
 Record meaningful deviations from HeroUI defaults or previously approved
 patterns.
 
-| Date       | Decision                                                              | Reason                                                                                | Owner        |
-| ---------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------ |
-| 2026-09-18 | Gráficos SVG propios en lugar de una librería de charting             | Formas muy específicas (changepoint, waterfall, curva de evento) y bundle mínimo      | Equipo Pulse |
-| 2026-09-18 | Tema oscuro por `prefers-color-scheme` redefiniendo tokens primitivos | HeroUI expone su paleta oscura tras `.dark`; sin conmutador no hay estado que guardar | Equipo Pulse |
-| 2026-09-18 | Escala de color del score como único helper (`scoreBand`)             | Un mismo score debe tener el mismo color en tabla, gráfico, mapa de calor y oferta    | Equipo Pulse |
-| 2026-09-18 | Filtros de Monitor y Capital como enlaces con query string            | Vistas compartibles durante la demo y funcionales sin JavaScript                      | Equipo Pulse |
+| Date       | Decision                                                                              | Reason                                                                                         | Owner        |
+| ---------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------ |
+| 2026-09-18 | Gráficos SVG propios en lugar de una librería de charting                             | Formas muy específicas (changepoint, waterfall, curva de evento) y bundle mínimo               | Equipo Pulse |
+| 2026-09-18 | Tema oscuro por `prefers-color-scheme` redefiniendo tokens primitivos                 | HeroUI expone su paleta oscura tras `.dark`; sin conmutador no hay estado que guardar          | Equipo Pulse |
+| 2026-09-18 | Escala de color del score como único helper (`scoreBand`)                             | Un mismo score debe tener el mismo color en tabla, gráfico, mapa de calor y oferta             | Equipo Pulse |
+| 2026-09-18 | Filtros de Monitor y Capital como enlaces con query string                            | Vistas compartibles durante la demo y funcionales sin JavaScript                               | Equipo Pulse |
+| 2026-09-19 | Observado y previsión en un solo gráfico, con banda p10-p90 y marca del último cierre | Comparar nivel y horizonte en la misma escala; la incertidumbre no puede quedar en otra figura | Equipo Pulse |
+| 2026-09-19 | Variable sin datos como «sin datos» y nunca como cero, junto a la confianza en %      | Un cero es una medición; la ausencia de evidencia cambia la decisión y debe verse              | Equipo Pulse |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce

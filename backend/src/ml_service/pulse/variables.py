@@ -1,8 +1,11 @@
-"""The 11 PULSE variables: pillar, weight (% of the score), components and directions."""
+"""The 11 PULSE variables: pillar, weight (% of the score), components, directions and bank proxies."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+
+PROXY_CONFIDENCE = 0.5
+MIN_PROXY_COVERAGE = 0.05  # below this attributed share a proxy is treated as unknown
 
 
 @dataclass(frozen=True)
@@ -26,6 +29,10 @@ class Variable:
     pillar: str
     weight: float
     components: tuple[Component, ...]
+    proxies: tuple[Component, ...] = ()
+    """Bank-side substitutes used only when every primary component is unknown."""
+    proxy_confidence: float = PROXY_CONFIDENCE
+    """Fraction of the weight a proxy-backed value earns (times its coverage, if the panel has one)."""
 
 
 VARIABLES: tuple[Variable, ...] = (
@@ -80,6 +87,10 @@ VARIABLES: tuple[Variable, ...] = (
         "cobro",
         12,
         (Component("ar90_share", -1), Component("ar90_d3", -1)),
+        proxies=(
+            Component("returned_share", -1, zero_is_best=True),
+            Component("returned_d3", -1),
+        ),
     ),
     Variable(
         "top_client",
@@ -88,6 +99,7 @@ VARIABLES: tuple[Variable, ...] = (
         "cobro",
         8,
         (Component("top_client_growth", 1),),
+        proxies=(Component("top_client_growth_bank", 1),),
     ),
     Variable(
         "maturities",
@@ -104,7 +116,13 @@ VARIABLES: tuple[Variable, ...] = (
         "cobro",
         10,
         (Component("network_exposure", 1),),
+        proxies=(Component("network_exposure_bank", 1),),
     ),
 )
 PILLARS = ("liquidez", "deuda", "pago", "cobro")
 assert abs(sum(v.weight for v in VARIABLES) - 100) < 1e-9
+
+
+def coverage_column(v: Variable) -> str:
+    """Optional panel column in [0, 1] scaling the confidence of ``v``'s proxies."""
+    return f"{v.key}__proxy_coverage"

@@ -71,7 +71,7 @@ def receivables_features(inv: pl.DataFrame, grid: pl.DataFrame) -> pl.DataFrame:
         )
         .agg(pl.col("amount_eur").sum().alias("billed"))
     )
-    top = _top_client_growth(issued, grid)
+    top = top_client_growth(issued, grid)
     panel = (
         grid.join(dso, on=["company_id", "month"], how="left")
         .join(bucket, on=["company_id", "month"], how="left")
@@ -89,8 +89,12 @@ def receivables_features(inv: pl.DataFrame, grid: pl.DataFrame) -> pl.DataFrame:
     return panel.drop("dso_num", "dso_den", "ar_open", "ar_open_90")
 
 
-def _top_client_growth(issued: pl.DataFrame, grid: pl.DataFrame) -> pl.DataFrame:
-    """Growth of billing to the top customer (trailing 3m vs previous 3m), top chosen on trailing 12m."""
+def top_client_growth(issued: pl.DataFrame, grid: pl.DataFrame) -> pl.DataFrame:
+    """Growth of ``billed`` from the top customer (trailing 3m vs previous 3m), top chosen on trailing 12m.
+
+    ``issued`` has one row per (company_id, counterparty_id, month) with ``billed``;
+    invoices and bank collections both fit, so the bank proxy of #9 reuses this.
+    """
     dense = (
         grid.select("company_id", "month")
         .join(issued.select("company_id", "counterparty_id").unique(), on="company_id")

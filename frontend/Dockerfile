@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1
+# Embat Pulse web app (Next.js standalone). Reads PULSE/X-Ray data from the API
+# when XRAY_API_URL is set, otherwise from the JSON bundled under src/data.
+
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY prisma ./prisma
+RUN npm ci --ignore-scripts && npx prisma generate
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/generated ./generated
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    DATABASE_URL="postgresql://build:build@localhost:5432/build"
+RUN npx next build
+
+FROM node:22-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+# Bundled JSON fallback (used when XRAY_API_URL is unset).
+COPY --from=builder /app/src/data ./src/data
+EXPOSE 3000
+CMD ["node", "server.js"]

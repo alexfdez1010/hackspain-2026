@@ -13,16 +13,18 @@ A **production-grade Next.js template** engineered with enterprise-level best pr
 
 ## 🩻 Embat Pulse (HackSpain 2026, reto Embat X-Ray)
 
-Producto que se monta sobre el score X-Ray: cinco superficies navegables,
+Producto que se monta sobre el score X-Ray: siete superficies navegables,
 sin base de datos y sin backend obligatorio.
 
-| Ruta            | Qué muestra                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------------- |
-| `/`             | Radar de cartera: tabla filtrable de 1.286 pymes, distribución de scores, movers y mapa de calor. |
-| `/empresa/[id]` | Radiografía: 24 meses de score con changepoint y tendencia, pilares, SHAP, KPIs, alertas y línea. |
-| `/capital`      | Embat Capital: límite y precio por empresa, totales y evolución de 12 meses.                      |
-| `/monitor`      | Feed de alertas con facetas y panel de anticipación (lead time, detección, AUROC).                |
-| `/metodo`       | Cómo se construye el score, variables por pilar y cifras de evaluación.                           |
+| Ruta            | Qué muestra                                                                                          |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| `/`             | Radar de cartera: tabla filtrable de 1.286 pymes, distribución de scores, movers y mapa de calor.    |
+| `/empresa/[id]` | Radiografía: 24 meses de score con changepoint y tendencia, pilares, SHAP, KPIs, alertas y línea.    |
+| `/pulse`        | Cartera PULSE: score 0-100, variación mensual, confianza, previsión +6 m y reparto de los pesos.     |
+| `/pulse/[id]`   | Empresa PULSE: trayectoria con previsión +1..+6 m y banda p10-p90, pilares, 11 variables y desglose. |
+| `/capital`      | Embat Capital: límite y precio por empresa, totales y evolución de 12 meses.                         |
+| `/monitor`      | Feed de alertas con facetas y panel de anticipación (lead time, detección, AUROC).                   |
+| `/metodo`       | Cómo se construye el score, variables por pilar y cifras de evaluación.                              |
 
 ### Arrancar la demo
 
@@ -65,6 +67,29 @@ listado es el espejo en el consumidor):
 Las respuestas se parsean con parsers tolerantes: claves desconocidas se
 ignoran, las ausentes se derivan localmente con las mismas reglas puras que usa
 la fuente estática, y un fallo de red degrada la página a su estado vacío.
+
+#### PULSE
+
+PULSE tiene su propia capa (`src/lib/pulse/data.ts`, interfaz `PulseDataSource`)
+con el mismo patrón y la misma variable de entorno: `StaticPulseSource` lee
+`src/data/pulse/summary.json` y `src/data/pulse/companies/<id>.json` (1.285
+ficheros que reescribe `uv run python -m ml_service.pulse.export_web`);
+`ApiPulseSource` se activa con `XRAY_API_URL`.
+
+| Método y ruta                   | Respuesta esperada                                                                                                                                                                                                              |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/pulse/summary`        | `score_name`, `score_expansion`, `horizons`, `last_month`, `pillars[{key,label,weight}]`, `variables[{key,number,label,pillar,weight,raw,unit}]`, `contribution_keys`, `companies[...]`.                                        |
+| `GET /api/pulse/companies/{id}` | Empresa con `series[]` (por mes: `pulse`, `pulse_raw`, `confidence`, `pillars`, `variables`, `contributions`) y `forecast[]` (`horizon`, `target_month`, `pulse_pred`, `pulse_p10`, `pulse_p90`, `delta_raw`, `contributions`). |
+
+Empresas de ejemplo: `/pulse/COMP_0001` (8 meses observados, 82 % de confianza,
+dos variables de líneas sin datos) y `/pulse/COMP_0051` (24 meses y utilización
+de líneas conocida). Ambas están fijadas en `src/lib/pulse/demo.ts`.
+
+Los pesos suman 100 puntos y las contribuciones de cada horizonte suman
+exactamente `delta_raw`; ambas invariantes se comprueban en
+`tests/unit/pulse-source.test.ts` y `tests/unit/pulse-company-view.test.ts`.
+Una variable sin evidencia llega con `known: false` y se muestra como «sin
+datos», nunca como un cero.
 
 ## 🎯 Philosophy
 

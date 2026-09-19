@@ -24,8 +24,14 @@ RETURNED_DEBIT_REGEX = (
 )
 
 
-def stress_label(scored: pl.DataFrame, tx: pl.DataFrame) -> pl.DataFrame:
-    """Add ``stress_now`` and ``y_stress`` (+ ``has_future``) to the scored panel."""
+def stress_label(
+    scored: pl.DataFrame, tx: pl.DataFrame, include_returned: bool = True
+) -> pl.DataFrame:
+    """Add ``stress_now`` and ``y_stress`` (+ ``has_future``) to the scored panel.
+
+    ``include_returned=False`` labels stress on overdrafts only; use it to judge
+    the returned-collections proxy of #8 without the label sharing its source.
+    """
     returned = (
         tx.filter(
             pl.col("product_type").is_in(CASH_TYPES)
@@ -38,10 +44,11 @@ def stress_label(scored: pl.DataFrame, tx: pl.DataFrame) -> pl.DataFrame:
     df = scored.join(returned, on=["company_id", "month"], how="left").sort(
         "company_id", "month"
     )
-    stress = (
-        (pl.col("cash_min") < 0).fill_null(False)
-        | (pl.col("returned_n") >= 1).fill_null(False)
-    ).cast(pl.Int32)
+    overdraft = (pl.col("cash_min") < 0).fill_null(False)
+    returned_flag = (pl.col("returned_n") >= 1).fill_null(False)
+    stress = (overdraft | returned_flag if include_returned else overdraft).cast(
+        pl.Int32
+    )
     df = df.with_columns(stress.alias("stress_now"))
     future = pl.sum_horizontal(
         [
@@ -63,6 +70,46 @@ def _auc(y: np.ndarray, s: np.ndarray) -> float | None:
     return round(float(roc_auc_score(1 - y[m], s[m])), 4)
 
 
+def _signed(df: pl.DataFrame, comp) -> np.ndarray:
+    """Percentile of a component (already sign-aligned so higher is healthier)."""
+    return df[f"{comp.name}__pct"].to_numpy().astype(float)
+
+
+def _by_source(df: pl.DataFrame, y: np.ndarray) -> dict:
+    """AUROC of PULSE split by how the cobro variables with proxies were backed."""
+    out = {}
+    src = df["var_ar90__source"].to_numpy().astype(object)
+    for label, mask in (
+        ("primary", src == "primary"),
+        ("proxy", src == "proxy"),
+        ("none", np.array([x is None for x in src])),
+    ):
+        out[label] = {
+            "rows": int(mask.sum()),
+            "auroc": _auc(y[mask], df["pulse"].to_numpy().astype(float)[mask]),
+        }
+    return out
+
+
+def _overdraft_only(scored: pl.DataFrame, tx: pl.DataFrame) -> dict:
+    """PULSE AUROC when stress is defined by overdrafts alone (no returned-debit narratives)."""
+    df = stress_label(scored, tx, include_returned=False).filter(pl.col("has_future"))
+    y = df["y_stress"].to_numpy()
+    not_now = df["stress_now"].to_numpy() == 0
+    return {
+        "stress_rate": round(float(y.mean()), 4),
+        "auroc_pulse": _auc(y, df["pulse"].to_numpy().astype(float)),
+        "auroc_pulse_excluding_current_stress": _auc(
+            y[not_now], df["pulse"].to_numpy().astype(float)[not_now]
+        ),
+        "auroc_returned_share": _auc(
+            y, df["returned_share__pct"].to_numpy().astype(float)
+        )
+        if "returned_share__pct" in df.columns
+        else None,
+    }
+
+
 def evaluate(scored: pl.DataFrame, tx: pl.DataFrame) -> dict:
     """AUROC of PULSE and of each variable for 'no stress in the next 6 months'."""
     df = stress_label(scored, tx).filter(pl.col("has_future"))
@@ -79,6 +126,14 @@ def evaluate(scored: pl.DataFrame, tx: pl.DataFrame) -> dict:
             v.key: _auc(y, df[f"var_{v.key}"].to_numpy().astype(float))
             for v in VARIABLES
         },
+        "auroc_by_proxy_component": {
+            c.name: _auc(y, _signed(df, c))
+            for v in VARIABLES
+            for c in v.proxies
+            if f"{c.name}__pct" in df.columns
+        },
+        "auroc_pulse_by_cobro_source": _by_source(df, y),
+        "auroc_pulse_overdraft_only_label": _overdraft_only(scored, tx),
         "auroc_by_confidence": {},
         "auroc_by_months_observed": {},
         "auroc_temporal_from_2025_09": None,

@@ -27,6 +27,21 @@ cp .env.example .env
 make main
 ```
 
+## Full stack with Docker (PULSE demo)
+
+```bash
+make up          # builds and starts the API (:8000) and the web app (:3000)
+make down
+```
+
+Then open <http://localhost:3000/pulse> for the portfolio or
+<http://localhost:3000/pulse/COMP_0001> for an example company: monthly PULSE
+history, the 11 variables with their contributions, and the +1..+6 month
+forecast with bands. The API image ships the precomputed artefacts
+(`backend/data/pulse/web`); the web container reads them through
+`XRAY_API_URL=http://api:8000`. See `backend/README.md` (section PULSE) for how
+the artefacts are produced.
+
 ## Layout
 
 ```

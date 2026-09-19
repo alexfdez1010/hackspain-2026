@@ -13,6 +13,7 @@ const SECTIONS = [
     label: 'Radiografía',
     match: '/empresa',
   },
+  { href: '/pulse', label: 'PULSE', match: '/pulse' },
   { href: '/capital', label: 'Capital', match: '/capital' },
   { href: '/monitor', label: 'Monitor', match: '/monitor' },
   { href: '/metodo', label: 'Método', match: '/metodo' },
@@ -36,7 +37,7 @@ export function isActive(pathname: string, match: string): boolean {
  * The "Radiografía" entry points at a company with a structural decline, so the
  * demo always has a meaningful example one click away.
  *
- * @returns The product name and the five section links.
+ * @returns The product name and the six section links.
  */
 export function SiteNav() {
   const pathname = usePathname();

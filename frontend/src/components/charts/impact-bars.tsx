@@ -13,6 +13,8 @@ interface ImpactBarsProps {
   items: readonly ImpactItem[];
   /** Fallback rendered when the model returned no driver. */
   emptyText: string;
+  /** Fraction digits of the printed contribution. */
+  digits?: number;
 }
 
 /**
@@ -21,10 +23,11 @@ interface ImpactBarsProps {
  * Bars are scaled against the largest absolute contribution of the set, so the
  * relative weight of each driver is readable without an axis.
  *
- * @param props - Drivers and the text shown when there are none.
+ * @param props - Drivers, the text shown when there are none and the precision
+ * of the printed contribution.
  * @returns A diverging bar list.
  */
-export function ImpactBars({ items, emptyText }: ImpactBarsProps) {
+export function ImpactBars({ items, emptyText, digits = 1 }: ImpactBarsProps) {
   if (items.length === 0) {
     return <p className="text-sm text-muted">{emptyText}</p>;
   }
@@ -61,7 +64,7 @@ export function ImpactBars({ items, emptyText }: ImpactBarsProps) {
               />
             </span>
             <span className="text-right tabular-nums">
-              {formatSigned(item.value)}
+              {formatSigned(item.value, digits)}
             </span>
           </li>
         );

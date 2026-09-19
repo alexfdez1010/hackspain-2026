@@ -44,3 +44,10 @@ ml-format:
 pre-commit:
 	cd frontend && bun run pre-commit
 	$(MAKE) -C backend pre-commit
+
+.PHONY: up down
+up:
+	docker compose up --build
+
+down:
+	docker compose down

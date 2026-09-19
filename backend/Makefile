@@ -73,3 +73,12 @@ pulse-score:
 	uv run python -m ml_service.pulse.cli score --raw-dir $(RAW) $(if $(OUT),--out $(OUT),)
 
 pulse-all: pulse-build pulse-fit pulse-evaluate
+
+pulse-forecast-fit:
+	uv run python -m ml_service.pulse.forecast.cli fit
+
+pulse-forecast-evaluate:
+	uv run python -m ml_service.pulse.forecast.cli evaluate
+
+pulse-forecast:
+	uv run python -m ml_service.pulse.forecast.cli predict $(if $(RAW),--raw-dir $(RAW),) $(if $(OUT),--out $(OUT),)

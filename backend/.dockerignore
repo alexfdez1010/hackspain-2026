@@ -24,3 +24,5 @@ data/**
 !data/output/evaluation.json
 !data/output/anticipation.json
 !data/output/submission.csv
+!data/pulse/web/**
+!data/pulse/models/**

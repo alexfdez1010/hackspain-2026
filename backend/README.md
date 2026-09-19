@@ -598,9 +598,9 @@ uv run python -m ml_service.pulse.cli score --raw-dir /path/to/hidden [--out FIL
 | 2 | Mínimo intramensual de caja | liquidez | 14 | lowest daily consolidated cash / avg monthly outflow (+), clipped ±12 | transactions + balances |
 | 1 | Días de caja | liquidez | 12 | month-end cash / (90-day operating outflow / 90) (+), capped 365 | transactions + balances |
 | 3 | Utilización de líneas | deuda | 12 | drawn / limit (−), and its Δ3m (−) | debt_products + line transactions |
-| 8 | Tramo +90 días | cobro | 12 | open receivables > 90 d past due / open receivables (−), Δ3m (−) | invoices (AR) |
-| 12 | Exposición a contrapartes | cobro | 10 | Σ billing share × Δ3m of that customer's on-time share (+) | invoices (AR) |
-| 9 | Caída del cliente top | cobro | 8 | billing growth to the top-12m customer, 3m vs previous 3m (+), clipped ±1 | invoices (AR) |
+| 8 | Tramo +90 días | cobro | 12 | open receivables > 90 d past due / open receivables (−), Δ3m (−) | invoices (AR); bank proxy: returned collections |
+| 12 | Exposición a contrapartes | cobro | 10 | Σ billing share × Δ3m of that customer's on-time share (+) | invoices (AR); bank proxy: what the company's payers pay others |
+| 9 | Caída del cliente top | cobro | 8 | billing growth to the top-12m customer, 3m vs previous 3m (+), clipped ±1 | invoices (AR); bank proxy: attributed bank collections |
 | 10 | Vencimientos 6 m ÷ caja | deuda | 8 | 2 × trailing-3m debt service / month-end cash (−), 0 = best, capped 12 | transactions (debt_repayment, interest_charge) |
 | 4 | Aceleración de utilización | deuda | 6 | Δ3m of the utilisation Δ3m (−) | as #3 |
 | 5 | DPO real y su Δ | pago | 6 | payment − issuance on settled supplier invoices, value-weighted 3m (−), Δ3m (−) | invoices (AP) |
@@ -615,7 +615,10 @@ training panel (1,001-point grid, mid-rank ties, sign-aligned so higher is
 healthier; an exact 0 on #10 is the optimum). A variable is the mean of its known
 components; `pulse_raw` is the weighted mean of the known variables with the
 weights renormalised, so an unknown variable neither helps nor hurts. `confidence`
-is the share of the 100 points backed by data. `pulse` is the percentile of
+is the share of the 100 points backed by data (a proxy-backed variable counts
+only part of its weight, see below; `confidence_from_proxies` is the share that
+comes from proxies and `var_<key>__source` says `primary`, `proxy` or null).
+`pulse` is the percentile of
 `pulse_raw` in the training population (frozen grid), so it spans 0-100 and a
 PULSE of 80 reads "healthier than 80 % of the fitted portfolio". `contrib_<key>`
 splits `pulse_raw` into the points each variable is responsible for. Everything
@@ -633,13 +636,48 @@ training one.
 | `value_date` from 2022 to 2099 | Booking `date` is the only date used; `value_date` is replaced when > 30 days away. |
 | Invoice dates seeded with corruption | `due_date` kept only if 0 ≤ due − issuance ≤ 365 d (16,356 nulled). `payment_date` trusted only when `status = paid`, pending ≈ 0 and 0 ≤ payment − issuance ≤ 730 d (185 k "overdue" rows carry the due date as payment date; 30,552 settled rows had impossible dates). |
 | Document types | Only `invoice` and `invoiceGroup` (123,713 payment documents, notes, delivery notes dropped); `cancel` and zero amounts dropped. |
-| Sparse `counterparty_id` in transactions (90 % empty) | Customer variables (#7, #8, #9, #12) use invoice counterparties only (98.5 % populated). |
+| Sparse `counterparty_id` in transactions (90 % empty) | Customer variables (#7, #8, #9, #12) use invoice counterparties (98.5 % populated). Bank proxies use `counterparty_ref` = column, else the `COUNTERPARTY_xxxxx` token in the narrative (logged as a cleaning step). |
 | Pending / null status | Pending transactions dropped; null status kept (4 companies only have null-status rows). |
 
 Coverage after cleaning: 1,286 companies with transactions, 784 with invoices
-(718 with receivables). Median `confidence` is 0.52: a company without ERP data
-has only #1, #2 and #10 (34 points of evidence); one with a credit line and ERP
-reaches 1.0.
+(718 with receivables). Median `confidence` is 0.74 with ERP and 0.40 without:
+a company with neither ERP nor credit line has #1, #2 and #10 (34 points) plus
+whatever the bank proxies below add (median 6 more points); one with a credit
+line and ERP reaches 1.0.
+
+## Bank proxies for companies without ERP (`features/bank_proxies.py`)
+
+541 of the 1,286 companies have no ERP, so #5-#9 and #12 are unknown for them.
+Bank statements still say who pays the company: the `counterparty_id` column is
+filled in 1 % of their transactions, but the narrative carries the
+`COUNTERPARTY_xxxxx` token in 28 % of collections and payments, so the cleaning
+layer adds `counterparty_ref` = column, else token. Three variables get a
+bank-side substitute, computed for **every** company and used only when the
+invoice components are all missing:
+
+| # | Proxy component(s) | Definition | Coverage column |
+|---|---|---|---|
+| 8 | `returned_share` (−, 0 = best), `returned_d3` (−) | returned collections (`collection_refund`) / collections on cash accounts, trailing 3m | none (1.0) |
+| 9 | `top_client_growth_bank` (+) | same formula as #9 on collections attributed to a payer | `top_client__proxy_coverage`: attributed share of 12m collections |
+| 12 | `network_exposure_bank` (+) | Σ (payer's share of the company's 6m collections) × Δ3m of what that payer pays **other** companies of the portfolio, clipped ±1; payers seen in one company only are skipped | `network__proxy_coverage`: share of 6m collections from payers seen elsewhere |
+
+**Confidence.** A proxy-backed variable carries `proxy_confidence` (0.5) ×
+coverage of its weight in both the numerator and the denominator of the score,
+so it moves PULSE less than an ERP-backed one and `confidence` drops with it.
+A coverage below `MIN_PROXY_COVERAGE` (5 %) leaves the variable unknown. Both
+constants live in `variables.py`. Effect on the hackathon data: for company-months
+without ERP, #8 is proxy-backed in 76 %, #9 in 27 % and #12 in 30 % of the rows;
+the median attributed share of collections is 21 % for #9 and 0.3 % for #12
+(placeholders hide most payer names in this synthetic dataset; on real bank
+narratives attribution is far higher), so the proxies add a median of 6
+confidence points, not the 30 they would add at full confidence.
+
+**Agreement with the ERP truth** (company-months where both are known): Spearman
+0.17 between #9 and its proxy, 0.05 for #8, 0.00 for #12. **Anticipation:** the
+proxies score 0.46-0.53 AUROC on future stress, like the ERP variables they
+replace (see below), and the overall PULSE AUROC is unchanged (0.821). Note that
+returned collections are also part of the stress label; `evaluation.json` therefore
+carries `auroc_pulse_overdraft_only_label` (0.842), where the label ignores them.
 
 **Counterparty network.** In this dataset a customer ID never appears under two
 companies (1 shared ID out of 55,052), so #12 collapses to the company's own
@@ -655,6 +693,63 @@ with an observable future). AUROC of PULSE for "no stress ahead": **0.823**
 (0.810 on months ≥ 2025-09; 0.829 in a company's first three months). Restricted
 to companies **not** stressed today, 0.642 — the honest anticipation number.
 By variable: #2 0.870, #1 0.859, #10 0.633; every ERP-side variable (#5-#9,
-#12) and the credit-line pair sit at 0.47-0.51, i.e. in this synthetic dataset
-they carry no signal about future bank stress. The 36 points on *cobro* and 12
-on *pago* are therefore a design choice, not something these data support.
+#12), their bank proxies and the credit-line pair sit at 0.46-0.53, i.e. in this
+synthetic dataset they carry no signal about future bank stress. The 36 points
+on *cobro* and 12 on *pago* are therefore a design choice, not something these
+data support. `auroc_pulse_by_cobro_source` splits the PULSE AUROC by whether
+the cobro variables came from invoices (0.771), bank proxies (0.841) or nothing
+(0.901): the fewer ERP points dilute the liquidity signal, the higher the AUROC.
+
+## Forecast layer (`pulse/forecast/`)
+
+Monthly PULSE forecasts for +1..+6 months, each with a p10-p90 band and an
+exact decomposition of the predicted change into the 11 variables.
+
+```bash
+uv run python -m ml_service.pulse.forecast.cli fit        # 6 horizon models -> data/pulse/models/forecast/
+uv run python -m ml_service.pulse.forecast.cli evaluate   # OOF vs persistence/reversion -> forecast_evaluation.json
+uv run python -m ml_service.pulse.forecast.cli predict [--raw-dir DIR] [--all-months]   # -> data/pulse/forecast.{parquet,csv}
+uv run python -m ml_service.pulse.export_web              # -> data/pulse/web/ (+ mirror in ../frontend/src/data/pulse)
+```
+
+**Design.** One LightGBM model per horizon predicts the *change* of `pulse_raw`
+(`objective=huber`), plus two quantile boosters (α = 0.1 / 0.9) for the band, so
+persistence is the starting point and the model only learns deviations. Inputs
+(162 columns, `forecast/features.py`): the 11 variables and their percentiles,
+Δ1/Δ3/Δ6 and 6-month volatility of every level, the four pillars and PULSE itself,
+cash-account flows (inflows, net 3m/6m, growth), the invoice calendar (AR/AP
+already due within 1/3/6 months, open overdue amounts), stress narratives
+(returned debits, overdrafts), intragroup inflow share, group mean PULSE and
+observation length. The per-feature contributions returned by LightGBM
+(`pred_contrib`) are folded into the 11 variables (`forecast/attribution.py`):
+component-derived features go to their variable, pillar-level features are split
+by weight inside the pillar, PULSE-level features across all variables by weight,
+and everything else is reported as `contexto`; the bias is `base`. The parts sum
+to `delta_raw` to 1e-14. Forecasts are expressed on the 0-100 PULSE scale through
+the frozen calibration.
+
+**Evaluation** (`data/pulse/forecast_evaluation.json`, GroupKFold(5) on
+`group_id`, MAE in points of `pulse_raw`). "Reversion" is a one-parameter
+mean-reversion baseline fitted out of fold; anything that does not beat it is
+just percentiles drifting back to the middle.
+
+| horizon | rows | persist | reversion | ML | vs persist | vs reversion | direction on moves > 15 | recall declines | recall improvements | p10-p90 coverage |
+|---|---|---|---|---|---|---|---|---|---|---|
+| +1 | 20,932 | 5.72 | 5.88 | **5.32** | +7.0 % | +9.7 % | 0.84 | 0.13 | 0.00 | 0.77 |
+| +2 | 19,647 | 8.47 | 8.36 | **7.43** | +12.2 % | +11.1 % | 0.87 | 0.47 | 0.05 | 0.76 |
+| +3 | 18,362 | 10.52 | 9.97 | **8.86** | +15.8 % | +11.2 % | 0.87 | 0.61 | 0.18 | 0.76 |
+| +4 | 17,077 | 11.20 | 10.52 | **9.37** | +16.4 % | +11.0 % | 0.87 | 0.63 | 0.17 | 0.75 |
+| +5 | 15,795 | 11.83 | 10.99 | **9.90** | +16.4 % | +10.0 % | 0.87 | 0.64 | 0.16 | 0.74 |
+| +6 | 14,514 | 12.35 | 11.39 | **10.33** | +16.4 % | +9.4 % | 0.87 | 0.66 | 0.16 | 0.74 |
+
+The models see declines far better than recoveries (recall 0.66 vs 0.16 at six
+months): read the forecast as an early warning, not as a promise of improvement.
+A preliminary experiment forecasting each pillar separately showed that *cobro*
+and *pago* pillar forecasts do not beat the reversion baseline, which is why only
+PULSE itself is modelled and the breakdown comes from attribution rather than
+from per-variable models. Horizon models are independent, so a company's
+trajectory across horizons is not forced to be monotone.
+
+**API.** `GET /api/pulse/summary` and `GET /api/pulse/companies/{company_id}`
+serve the files written by `export_web.py` (`routes_pulse.py`); the contract is
+the JSON described in the frontend data layer (`frontend/src/lib/pulse`).

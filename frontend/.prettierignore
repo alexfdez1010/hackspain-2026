@@ -8,3 +8,6 @@ src/generated
 
 # Skills bundles — vendored docs, keep upstream formatting intact
 .agents/skills/
+
+# Generated PULSE export — rewritten by `uv run python -m ml_service.pulse.export_web`
+src/data/pulse/

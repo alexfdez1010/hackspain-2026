@@ -1,10 +1,11 @@
-"""Assemble the company x month panel with the 11 PULSE variables."""
+"""Assemble the company x month panel with the 11 PULSE variables and their bank proxies."""
 
 from __future__ import annotations
 
 import polars as pl
 
 from ml_service.pulse.clean.pipeline import CleanData
+from ml_service.pulse.features.bank_proxies import bank_proxy_features
 from ml_service.pulse.features.cash import cash_features
 from ml_service.pulse.features.credit import credit_line_features, maturity_features
 from ml_service.pulse.features.months import month_grid
@@ -29,6 +30,9 @@ def build_panel(clean: CleanData) -> pl.DataFrame:
     panel = panel.join(payables_features(clean.invoices, grid), on=KEY, how="left")
     panel = panel.join(receivables_features(clean.invoices, grid), on=KEY, how="left")
     panel = panel.join(network_features(clean.invoices, grid), on=KEY, how="left")
+    panel = panel.join(
+        bank_proxy_features(clean.transactions, grid), on=KEY, how="left"
+    )
     panel = panel.join(
         clean.companies.select("company_id", "group_id"), on="company_id", how="left"
     )

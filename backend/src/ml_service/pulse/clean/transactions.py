@@ -8,6 +8,7 @@ from ml_service.pulse.clean.currency import convert, product_currency
 from ml_service.pulse.clean.report import CleaningReport
 from ml_service.pulse.config import (
     CLEAN,
+    COUNTERPARTY_TOKEN_REGEX,
     EXTRACTION_DATE,
     FIRST_MONTH,
     CleaningThresholds,
@@ -98,6 +99,25 @@ def _drop_outliers(
     return out.filter(~absurd & ~relative).drop("_p99")
 
 
+def _resolve_counterparty(tx: pl.DataFrame, report: CleaningReport) -> pl.DataFrame:
+    """Add ``counterparty_ref``: the column when filled, else the COUNTERPARTY_xxxxx token in the narrative."""
+    token = pl.col("description").str.extract(COUNTERPARTY_TOKEN_REGEX, 1)
+    out = tx.with_columns(
+        pl.coalesce(pl.col("counterparty_id"), token).alias("counterparty_ref")
+    )
+    from_token = (
+        pl.col("counterparty_id").is_null() & pl.col("counterparty_ref").is_not_null()
+    )
+    report.add(
+        "transactions",
+        "counterparty resolved from narrative token (column empty)",
+        out.filter(from_token).height,
+        len(out),
+        note=f"{out['counterparty_ref'].null_count() / len(out):.1%} still unresolved",
+    )
+    return out
+
+
 def clean_transactions(
     raw: RawData, report: CleaningReport, th: CleaningThresholds = CLEAN
 ) -> pl.DataFrame:
@@ -131,6 +151,7 @@ def clean_transactions(
     ).drop("_ccur")
     tx = convert(tx, "currency", ("amount",), "transactions", report)
     tx = _drop_outliers(tx, report, th)
+    tx = _resolve_counterparty(tx, report)
     return tx.select(
         "transaction_id",
         "company_id",
@@ -141,4 +162,5 @@ def clean_transactions(
         "category",
         "description",
         "counterparty_id",
+        "counterparty_ref",
     ).sort("company_id", "product_id", "date")
