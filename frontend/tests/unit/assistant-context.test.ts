@@ -39,6 +39,7 @@ function company(overrides: Record<string, unknown> = {}) {
     pillars: { liquidez: 40 },
     series: [makeSeriesPoint()],
     forecast: [makeForecastPoint()],
+    signals: [],
     ...overrides,
   };
 }
@@ -117,9 +118,12 @@ describe('trusted assistant context', () => {
     expect(context.advisor?.leverStory).toEqual(['Si tu liquidez subiera…']);
     expect(context.sources.map((source) => source.href)).toEqual([
       '/company/COMP_0001',
+      '/company/COMP_0001/signals',
       '/company/COMP_0001/recommendations',
       '/method',
     ]);
+    expect(context.company?.signals).toEqual([]);
+    expect(context.company?.activeSignal).toBeNull();
 
     const missing = await getAssistantContext(
       '/company/COMP_9999',

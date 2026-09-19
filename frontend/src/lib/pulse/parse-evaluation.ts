@@ -4,6 +4,10 @@ import {
   toNumberMap,
   toNumberOrNull,
 } from '@/lib/parse-primitives';
+import {
+  EMPTY_SIGNALS_EVALUATION,
+  parseSignalsEvaluation,
+} from '@/lib/pulse/parse-signals';
 import type {
   PulseEvaluation,
   PulseForecastHorizonEvaluation,
@@ -21,6 +25,7 @@ export const EMPTY_EVALUATION: PulseEvaluation = {
   },
   forecast: [],
   risk: { rows: null, stressRate: null, auroc: null, coefficientsStd: {} },
+  signals: EMPTY_SIGNALS_EVALUATION,
 };
 
 /**
@@ -87,6 +92,7 @@ export function parsePulseEvaluation(value: unknown): PulseEvaluation {
       auroc: toNumberOrNull(risk.auroc),
       coefficientsStd: toNumberMap(risk.coefficients_std),
     },
+    signals: parseSignalsEvaluation(record.signals),
   };
 }
 

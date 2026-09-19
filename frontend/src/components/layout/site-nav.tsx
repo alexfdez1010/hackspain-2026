@@ -48,12 +48,13 @@ export function isActive(pathname: string, match: string): boolean {
  * marked as current while the recommendations are open.
  *
  * @param companyId - Company in context.
- * @returns PULSE, recommendations and method, in reading order.
+ * @returns PULSE, signals, recommendations and method, in reading order.
  */
 export function companySections(companyId: string): NavSection[] {
   const routes = companyRoutes(companyId);
   return [
     { href: routes.pulse, label: 'PULSE', match: routes.pulse },
+    { href: routes.signals, label: 'Señales', match: routes.signals },
     { href: routes.advisor, label: 'Recomendaciones', match: routes.advisor },
     { href: routes.method, label: 'Método', match: '/method' },
   ];

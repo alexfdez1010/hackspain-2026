@@ -56,8 +56,18 @@ describe('the company PULSE page', () => {
     expect(markup).not.toContain('NaN');
   });
 
-  it('offers the recommendations and the method of the same company', async () => {
+  it('raises the open signal as an alert and flags every signal on the chart', async () => {
     const markup = await render('COMP_0001');
+    expect(markup).toContain('Bache de 7 puntos en julio de 2026');
+    expect(markup).toContain('hace 1 mes · abierta, 39 % de que dure');
+    expect(markup).toContain('data-signal="caida"');
+    expect(markup).toContain('data-signal="bache"');
+    expect(markup).toContain('Triángulo: mes en que se abrió una señal.');
+  });
+
+  it('offers the signals, the recommendations and the method of the same company', async () => {
+    const markup = await render('COMP_0001');
+    expect(markup).toContain('href="/company/COMP_0001/signals"');
     expect(markup).toContain('href="/company/COMP_0001/recommendations"');
     expect(markup).toContain('href="/method?company=COMP_0001"');
   });

@@ -496,3 +496,63 @@ parameter the static files are served.
 
 The files are static, like the PULSE export: rerun `recommend.cli build` after
 `pulse.cli fit` / `forecast.cli predict`.
+
+## PULSE Señales: bache o caída, and how early the score sees it (`pulse/signals/`)
+
+The score answers *where* a company is; Señales answers *when it really moved*
+and *whether it will last*. Everything reads the scored panel; nothing here
+changes PULSE.
+
+```bash
+make pulse-signals-fit     # detect episodes, fit the persistence model, write data/pulse/signals_evaluation.json
+make pulse-signals-build   # score every episode with the frozen model -> data/pulse/signals.parquet
+make pulse-signals-show COMPANY=COMP_0001
+uv run python -m ml_service.pulse.export_web   # attaches `signals` to companies/<id>.json and `evaluation.signals` to summary.json
+```
+
+### Detection (`signals/detect.py`, thresholds in `signals/config.py`)
+
+A signal opens the first month PULSE sits **6 points or more** away from its own
+three-month baseline **and at least two pillars** moved 3 points the same way.
+A steady slide is one episode: the following months do not fire again until
+the direction changes. Once three more months are observed, the episode is
+labelled **persistent** (the score never returned to within 3 points of its
+baseline) or **transitory**; until then it is *open*.
+
+### Persistence model (`signals/model.py`)
+
+One standardised logistic regression per direction, fitted with GroupKFold(5)
+by company on the labelled episodes. Inputs known the month the signal opens:
+level, size of the move, breadth, data confidence, past volatility and each
+pillar's own move. The output `p_persistent` names the episode: fall with
+p ≥ 0.5 → **caída**, else **bache**; rise with p ≥ 0.5 → **mejora**, else
+**repunte**. On the hackathon panel: 1,858 falls (65 % persistent, OOF AUROC
+0.747) and 1,046 rises (55 % persistent, OOF AUROC 0.672). Confidence and
+breadth carry most of the signal: low-confidence drops tend to be blips.
+
+### Anticipation curve (`signals/anticipation.py`)
+
+For every company-month with **no stress in the last three months** (stress =
+overdraft or returned direct debit, the same label as `evaluate.py`), the label
+at horizon *k* is «at least one stress month in the next *k*». PULSE is read as
+it stood that month. Flagging the lowest 20 % of scores:
+
+| horizon | rows | base rate | AUROC | recall of coming stress | lift |
+| ------- | ------ | --------- | ----- | ----------------------- | ---- |
+| +1 m | 16,026 | 2.3 % | 0.668 | 43 % | 2.1x |
+| +3 m | 13,994 | 6.1 % | 0.645 | 37 % | 1.9x |
+| +6 m | 10,981 | 10.6 % | 0.619 | 34 % | 1.7x |
+
+A naive «median lead time of the first signal before stress» is not reported:
+signals open in ~8 % of company-months, so a signal in the nine months before
+any event is close to chance. The curve above is the honest number.
+
+### Contract
+
+`companies/<id>.json` carries `signals[]`, oldest first, each with `month`,
+`kind` (`caida|bache|mejora|repunte`), `direction`, `level`, `baseline`,
+`move`, `breadth`, `confidence`, `pillar_deltas`, `drivers[]`, `p_persistent`,
+`outcome` (`persistente|transitorio|null` while open), `headline` and `detail`
+in Spanish. `summary.json` → `evaluation.signals` carries the anticipation
+curve and the persistence-model figures. The frontend shows the most recent
+open signal as the alert of the company page and the full list as its timeline.

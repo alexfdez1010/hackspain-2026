@@ -2,6 +2,7 @@ import type {
   PulseCompanyRow,
   PulseForecastPoint,
   PulseSeriesPoint,
+  PulseSignal,
   PulseVariableMeta,
 } from '@/lib/pulse/types';
 
@@ -93,3 +94,38 @@ export const VARIABLE_META: PulseVariableMeta[] = [
     unit: '% del límite',
   },
 ];
+
+/**
+ * Builds a settled fall signal.
+ *
+ * @param overrides - Fields to replace.
+ * @returns One signal of the company.
+ */
+export function makeSignal(overrides: Partial<PulseSignal> = {}): PulseSignal {
+  return {
+    month: '2026-04',
+    kind: 'caida',
+    direction: 'down',
+    level: 46.9,
+    baseline: 53.56,
+    move: -6.65,
+    breadth: 3,
+    confidence: 0.82,
+    pillarDeltas: {
+      liquidez: -28.79,
+      deuda: -46.12,
+      pago: -4.87,
+      cobro: 24.41,
+    },
+    drivers: [
+      { pillar: 'deuda', label: 'deuda y servicio', delta: -46.1 },
+      { pillar: 'liquidez', label: 'liquidez', delta: -28.8 },
+    ],
+    pPersistent: 0.59,
+    outcome: 'persistente',
+    headline: 'Caída de 7 puntos en abril de 2026',
+    detail:
+      'PULSE bajó de 54 a 47 frente a la media de los 3 meses anteriores. 3 meses después seguía por debajo: caída confirmada.',
+    ...overrides,
+  };
+}

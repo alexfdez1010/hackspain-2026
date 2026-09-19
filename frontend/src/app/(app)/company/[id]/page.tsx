@@ -11,7 +11,9 @@ import { PulseForecastPanel } from '@/components/pulse/forecast-panel';
 import { PulseForecastTable } from '@/components/pulse/forecast-table';
 import { PulseMonthExplorer } from '@/components/pulse/month-explorer';
 import { PulseMonthTable } from '@/components/pulse/month-table';
+import { PulseSignalAlert } from '@/components/pulse/signal-alert';
 import { companyName } from '@/lib/company/names';
+import { companyRoutes } from '@/lib/routes';
 import { buildTrajectory } from '@/lib/pulse/company-view';
 import { getPulseDataSource } from '@/lib/pulse/data';
 import { buildVariableHeatMap } from '@/lib/pulse/heat-map';
@@ -56,9 +58,10 @@ function buildLead(
 }
 
 /**
- * PULSE of one company, month by month: the score of the last close, the full
- * observed history with its four pillars, the six predicted months and the
- * decomposition of both the current score and the prediction.
+ * PULSE of one company, month by month: the score of the last close, the
+ * alert when the score really moved recently, the full observed history with
+ * its four pillars, the six predicted months and the decomposition of both
+ * the current score and the prediction.
  *
  * @param props - Route parameters carrying the company identifier.
  * @returns The company page, or a 404 when the identifier is unknown.
@@ -92,12 +95,20 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
       aside={<PulseCompanyLinks companyId={company.companyId} />}
     >
       <PulseCompanyHeader company={company} />
+      <PulseSignalAlert
+        company={company}
+        href={companyRoutes(company.companyId).signals}
+      />
 
       <Section
         title="Trayectoria"
         note="Escala 0-100; 50 es el umbral de vigilancia"
       >
-        <PulseTrajectoryChart points={points} boundaryIndex={boundaryIndex} />
+        <PulseTrajectoryChart
+          points={points}
+          boundaryIndex={boundaryIndex}
+          signals={company.signals}
+        />
       </Section>
 
       <Section

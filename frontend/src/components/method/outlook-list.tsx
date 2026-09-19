@@ -1,5 +1,12 @@
-import { describeHits, pickOutlookHorizon } from '@/lib/method/outlook';
-import type { PulseForecastHorizonEvaluation } from '@/lib/pulse/types';
+import {
+  describeAnticipation,
+  describeHits,
+  pickOutlookHorizon,
+} from '@/lib/method/outlook';
+import type {
+  PulseAnticipationHorizon,
+  PulseForecastHorizonEvaluation,
+} from '@/lib/pulse/types';
 import { formatNumber } from '@/lib/format';
 
 interface MethodOutlookListProps {
@@ -7,25 +14,29 @@ interface MethodOutlookListProps {
   forecast: readonly PulseForecastHorizonEvaluation[];
   /** Furthest month the forecast reaches. */
   lastHorizon: number;
+  /** Evaluated anticipation horizons; empty when the export publishes none. */
+  anticipation?: readonly PulseAnticipationHorizon[];
 }
 
 /**
- * Says in three plain sentences what the score does beyond the month: the
- * forecast, the price and the limits.
+ * Says in four plain sentences what the score does beyond the month: the
+ * forecast, the signals, the price and the limits.
  *
- * The one figure it quotes, how many large falls the model saw coming, is the
- * honest summary of the forecast: it warns of declines far better than it
- * promises recoveries.
+ * The figures it quotes, how many large falls the model saw coming and how
+ * many coming cash squeezes an alert catches, are the honest summaries: the
+ * score warns of declines far better than it promises recoveries.
  *
  * @param props - The evaluated horizons and the furthest one.
- * @returns The list of three items.
+ * @returns The list of four items.
  */
 export function MethodOutlookList({
   forecast,
   lastHorizon,
+  anticipation = [],
 }: MethodOutlookListProps) {
   const horizon = pickOutlookHorizon(forecast);
   const hits = describeHits(horizon?.recallDeclines ?? null);
+  const early = describeAnticipation(anticipation);
   const items = [
     {
       key: 'prevision',
@@ -35,6 +46,11 @@ export function MethodOutlookList({
           ? ` A ${formatNumber(horizon.horizon)} meses ve venir ${hits} caídas grandes.`
           : ''
       }`,
+    },
+    {
+      key: 'senales',
+      title: 'Señales',
+      text: `Cuando la nota se aleja 6 puntos o más de su media de los tres meses anteriores y dos pilares se mueven a la vez, la página levanta la mano. Con lo que se sabe ese mes dice si será un bache que pasa o una caída que dura, y tres meses después cuenta qué fue.${early ? ` ${early}` : ''}`,
     },
     {
       key: 'precio',

@@ -15,6 +15,7 @@ import polars as pl
 
 from ml_service.pulse.forecast.attribution import BASE, CONTEXT
 from ml_service.pulse.forecast.config import HORIZONS, MAX_HORIZON
+from ml_service.pulse.signals.export import evaluation_block, signals_by_company
 from ml_service.pulse.variables import PILLARS, VARIABLES
 
 GENERATED_FOR = "HackSpain 2026 · Embat PULSE"
@@ -109,6 +110,7 @@ def evaluation_payload(work_dir: Path) -> dict:
             "auroc": risk.get("oof_auroc"),
             "coefficients_std": risk.get("coefficients_std", {}),
         },
+        "signals": evaluation_block(work_dir),
     }
 
 
@@ -175,8 +177,11 @@ def _forecast_row(r: dict) -> dict:
     }
 
 
-def company_payload(history: pl.DataFrame, forecast: pl.DataFrame) -> dict:
-    """Full payload for one company: monthly series plus the forecast made at the last month."""
+def company_payload(
+    history: pl.DataFrame, forecast: pl.DataFrame, signals: list[dict] | None = None
+) -> dict:
+    """Full payload for one company: monthly series, the forecast made at the last month
+    and the signals (episodes where the score really moved) found in its history."""
     rows = history.sort("month").to_dicts()
     last, prev = rows[-1], (rows[-2] if len(rows) > 1 else None)
     fc = forecast.sort("horizon").to_dicts()
@@ -191,6 +196,7 @@ def company_payload(history: pl.DataFrame, forecast: pl.DataFrame) -> dict:
         "pillars": {p: _num(last[f"pillar_{p}"]) for p in PILLARS},
         "series": [_series_row(r) for r in rows],
         "forecast": [_forecast_row(r) for r in fc],
+        "signals": signals or [],
     }
 
 
@@ -200,12 +206,15 @@ def write_all(work_dir: Path, mirror_dir: Path | None = None) -> Path:
         pl.col("pulse").is_not_null()
     )
     forecast = pl.read_parquet(work_dir / "forecast.parquet")
+    signals = signals_by_company(work_dir)
     web = work_dir / "web"
     shutil.rmtree(web, ignore_errors=True)
     (web / "companies").mkdir(parents=True)
     summary_rows = []
     for (cid,), hist in scored.group_by("company_id", maintain_order=True):
-        payload = company_payload(hist, forecast.filter(pl.col("company_id") == cid))
+        payload = company_payload(
+            hist, forecast.filter(pl.col("company_id") == cid), signals.get(cid)
+        )
         (web / "companies" / f"{cid}.json").write_text(
             json.dumps(payload, ensure_ascii=False)
         )

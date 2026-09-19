@@ -5,12 +5,13 @@ import {
 import { companyName } from '@/lib/company/names';
 import { getPulseDataSource, type PulseDataSource } from '@/lib/pulse/data';
 import { monthlyChange } from '@/lib/pulse/selectors';
+import { activeSignal } from '@/lib/pulse/signals';
 import { companyIdFromPath, companyRoutes } from '@/lib/routes';
 import { getPageLabel, type AssistantSource } from '@/lib/assistant/types';
 
 /** Spanish names for raw dataset fields, so the model never echoes identifiers. */
 function glossary(): string {
-  return 'Escribe los números en formato español (coma decimal, punto de miles) y las proporciones como porcentaje. Nunca muestres nombres de campos: pulse es «score PULSE» sobre 100; pulsePrev «score del mes anterior»; change «variación del mes en puntos»; confidence «confianza», la parte de los 100 puntos respaldada por datos (0,82 → 82 %); forecast «previsión» por horizonte con pulsePred «valor previsto» y pulseP10/pulseP90 «banda de incertidumbre»; monthsObserved «meses observados»; pillars «pilares» y variables «las once variables»; pStress6m «probabilidad de tensión de tesorería a seis meses»; fit «encaje del producto sobre 100»; annualRate «tipo anual» (0,0917 → 9,17 %); spreadBps «diferencial en puntos básicos».';
+  return 'Escribe los números en formato español (coma decimal, punto de miles) y las proporciones como porcentaje. Nunca muestres nombres de campos: pulse es «score PULSE» sobre 100; pulsePrev «score del mes anterior»; change «variación del mes en puntos»; confidence «confianza», la parte de los 100 puntos respaldada por datos (0,82 → 82 %); forecast «previsión» por horizonte con pulsePred «valor previsto» y pulseP10/pulseP90 «banda de incertidumbre»; monthsObserved «meses observados»; pillars «pilares» y variables «las once variables»; pStress6m «probabilidad de tensión de tesorería a seis meses»; fit «encaje del producto sobre 100»; annualRate «tipo anual» (0,0917 → 9,17 %); spreadBps «diferencial en puntos básicos»; signals «señales»: meses en que la nota se alejó 6 puntos o más de la media de los tres anteriores con dos pilares moviéndose, con kind «caída» (bajada que dura), «bache» (bajada pasajera), «mejora» o «repunte», pPersistent «probabilidad de que dure» leída el mes en que se abrió, outcome «lo que pasó tres meses después» (null si sigue abierta) y activeSignal «la señal viva que la página muestra como alerta».';
 }
 
 /** What the model may know about the company's recommended products. */
@@ -84,6 +85,7 @@ export async function getAssistantContext(
         label: `PULSE · ${companyName(company.companyId)}`,
         href: routes.pulse,
       },
+      { label: 'Señales', href: routes.signals },
       { label: 'Recomendaciones', href: routes.advisor },
     );
   }
@@ -116,6 +118,16 @@ export async function getAssistantContext(
                 .map(([key]) => key)
             : [],
           forecast: company.forecast,
+          signals: company.signals.map((signal) => ({
+            month: signal.month,
+            kind: signal.kind,
+            move: signal.move,
+            drivers: signal.drivers.map((d) => `${d.label} ${d.delta}`),
+            pPersistent: signal.pPersistent,
+            outcome: signal.outcome,
+            headline: signal.headline,
+          })),
+          activeSignal: activeSignal(company)?.headline ?? null,
         }
       : null,
     advisor: advisorSnapshot(recommendation),

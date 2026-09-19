@@ -49,6 +49,7 @@ const COMPANY: PulseCompany = {
   groupId: 'GROUP_0147',
   monthsObserved: 8,
   month: '2026-08',
+  signals: [],
   pulse: 32.77,
   pulsePrev: 17.88,
   confidence: 0.82,

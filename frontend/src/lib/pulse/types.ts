@@ -83,12 +83,48 @@ export interface PulseRiskEvaluation {
   coefficientsStd: Record<string, number>;
 }
 
+/** How well today's score ranks the cash stress that arrives `horizon` months later. */
+export interface PulseAnticipationHorizon {
+  horizon: number;
+  rows: number | null;
+  /** Share of clean company-months followed by stress within the horizon. */
+  baseRate: number | null;
+  auroc: number | null;
+  /** Share of companies an alert flags, lowest scores first. */
+  alertShare: number | null;
+  /** Share of the coming stress episodes the alert catches. */
+  recall: number | null;
+  /** Stress rate among the flagged companies. */
+  precision: number | null;
+  /** Precision divided by the base rate. */
+  lift: number | null;
+}
+
+/** Out-of-fold quality of the model that tells a lasting move from a blip. */
+export interface PulsePersistenceEvaluation {
+  signals: number | null;
+  persistentShare: number | null;
+  auroc: number | null;
+}
+
+/** Published evaluation of the signals layer. */
+export interface PulseSignalsEvaluation {
+  /** One entry per horizon, ascending; empty when not exported. */
+  anticipation: PulseAnticipationHorizon[];
+  /** Persistence model per direction of move. */
+  persistence: {
+    down: PulsePersistenceEvaluation;
+    up: PulsePersistenceEvaluation;
+  };
+}
+
 /** Every published evaluation figure, for the method page. */
 export interface PulseEvaluation {
   score: PulseScoreEvaluation;
   /** One entry per horizon, ascending. */
   forecast: PulseForecastHorizonEvaluation[];
   risk: PulseRiskEvaluation;
+  signals: PulseSignalsEvaluation;
 }
 
 /** Labels, weights and horizons shared by every PULSE view. */
@@ -171,6 +207,47 @@ export interface PulseForecastPoint extends PulseForecastBand {
   contributions: PulseContributions;
 }
 
+/** Name of an episode: falls are `caida` or `bache`, rises `mejora` or `repunte`. */
+export type PulseSignalKind = 'caida' | 'bache' | 'mejora' | 'repunte';
+
+/** A pillar that moved with the score when the signal opened. */
+export interface PulseSignalDriver {
+  pillar: string;
+  /** Spanish label of the pillar. */
+  label: string;
+  /** Points the pillar moved against its three-month baseline. */
+  delta: number;
+}
+
+/** A month where the score really moved, and what it turned out to be. */
+export interface PulseSignal {
+  /** Month the episode opened, as `YYYY-MM`. */
+  month: string;
+  kind: PulseSignalKind;
+  direction: 'down' | 'up';
+  /** Score the month the signal opened. */
+  level: number | null;
+  /** Mean of the three previous months. */
+  baseline: number | null;
+  /** `level` minus `baseline`, in points. */
+  move: number | null;
+  /** Pillars that moved the same way. */
+  breadth: number;
+  confidence: number | null;
+  /** Points each pillar moved against its baseline. */
+  pillarDeltas: Record<string, number | null>;
+  /** Pillars that moved with the score, largest first. */
+  drivers: PulseSignalDriver[];
+  /** Probability, read the month it opened, that the move lasts. */
+  pPersistent: number | null;
+  /** What happened three months later; `null` while still open. */
+  outcome: 'persistente' | 'transitorio' | null;
+  /** «Caída de 12 puntos en marzo de 2026». */
+  headline: string;
+  /** One sentence with the move, its drivers and the probability or outcome. */
+  detail: string;
+}
+
 /** A company with its monthly history and its six forecast horizons. */
 export interface PulseCompany {
   companyId: string;
@@ -186,4 +263,6 @@ export interface PulseCompany {
   series: PulseSeriesPoint[];
   /** Horizons +1 to `PULSE_FORECAST_MONTHS`, ascending. */
   forecast: PulseForecastPoint[];
+  /** Episodes where the score really moved, oldest first. */
+  signals: PulseSignal[];
 }

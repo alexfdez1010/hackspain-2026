@@ -53,6 +53,8 @@ describe('honest demo answers', () => {
         pillars: {},
         unknownVariables: [],
         forecast: [],
+        signals: [],
+        activeSignal: null,
       },
     });
     expect(reply).toContain('sin datos');
@@ -74,6 +76,8 @@ describe('honest demo answers', () => {
         pillars: {},
         unknownVariables: [],
         forecast: [],
+        signals: [],
+        activeSignal: null,
       },
       advisor: {
         summary: 'No hay hoy un producto que encaje.',

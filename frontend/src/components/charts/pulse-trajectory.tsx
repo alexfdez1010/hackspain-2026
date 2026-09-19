@@ -4,13 +4,16 @@ import { useMemo, useState } from 'react';
 
 import { linePath, type ChartBox } from '@/components/charts/geometry';
 import { ScoreGuides } from '@/components/charts/score-guides';
+import { TrajectoryMarkers } from '@/components/charts/trajectory-markers';
 import {
   TrajectoryHover,
   TrajectoryTooltip,
 } from '@/components/charts/trajectory-tooltip';
 import { useElementWidth } from '@/components/charts/use-element-width';
 import type { PulseTrajectoryPoint } from '@/lib/pulse/company-view';
+import { signalsByIndex } from '@/lib/pulse/signals';
 import { layoutTrajectory } from '@/lib/pulse/trajectory-layout';
+import type { PulseSignal } from '@/lib/pulse/types';
 import { formatMonth, formatMonthShort, formatNumber } from '@/lib/format';
 import { scoreColor } from '@/lib/score';
 
@@ -30,6 +33,8 @@ interface PulseTrajectoryChartProps {
   points: readonly PulseTrajectoryPoint[];
   /** Index of the last observed month; `-1` when there is no history. */
   boundaryIndex: number;
+  /** Signals to flag on their month; none by default. */
+  signals?: readonly PulseSignal[];
 }
 
 /**
@@ -40,14 +45,15 @@ interface PulseTrajectoryChartProps {
  * the forecast dashed, separated by the mark at the last close; the shaded
  * area is the p10-p90 band. Hovering, tapping or focusing a month opens a
  * tooltip with its value, and the last close and the farthest horizon stay
- * printed.
+ * printed. A triangle flags every month where a signal opened.
  *
- * @param props - The merged trajectory and its boundary.
+ * @param props - The merged trajectory, its boundary and the signals.
  * @returns The chart, or an empty state when there is no history.
  */
 export function PulseTrajectoryChart({
   points,
   boundaryIndex,
+  signals = [],
 }: PulseTrajectoryChartProps) {
   const [container, width] = useElementWidth<HTMLDivElement>(FALLBACK_WIDTH);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -55,6 +61,14 @@ export function PulseTrajectoryChart({
   const layout = useMemo(
     () => layoutTrajectory(points, boundaryIndex, box),
     [points, boundaryIndex, box],
+  );
+  const markers = useMemo(
+    () =>
+      signalsByIndex(
+        points.map((point) => point.month),
+        signals,
+      ),
+    [points, signals],
   );
   const count = points.length;
   if (count === 0 || boundaryIndex < 0) {
@@ -156,6 +170,7 @@ export function PulseTrajectoryChart({
               </text>
             ) : null,
           )}
+          <TrajectoryMarkers placed={placed} signals={markers} />
           <TrajectoryHover
             placed={placed}
             activeIndex={activeIndex}
@@ -170,6 +185,9 @@ export function PulseTrajectoryChart({
         <span>Línea continua: PULSE observado.</span>
         <span>Discontinua: previsión +1 a +6 meses.</span>
         <span>Área: banda p10-p90.</span>
+        {markers.size > 0 && (
+          <span>Triángulo: mes en que se abrió una señal.</span>
+        )}
         <span>Toca o pasa el ratón por un mes para ver su valor.</span>
       </figcaption>
     </figure>

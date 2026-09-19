@@ -65,6 +65,18 @@ pulse-forecast:
 pulse-export-details:
 	uv run python -m ml_service.pulse.export_details
 
+# --- PULSE Señales (bache/caída, anticipation curve) ------------------------
+pulse-signals-fit:
+	uv run python -m ml_service.pulse.signals.cli fit
+
+pulse-signals-build:
+	uv run python -m ml_service.pulse.signals.cli build
+
+pulse-signals-show:
+	uv run python -m ml_service.pulse.signals.cli show $(COMPANY)
+
+pulse-signals-all: pulse-signals-fit pulse-signals-build
+
 # --- PULSE Advisor (product recommendations) ------------------------------
 pulse-reco-fit:
 	uv run python -m ml_service.pulse.recommend.cli fit

@@ -24,6 +24,7 @@ describe('companyRoutes', () => {
   it('scopes every destination to the company', () => {
     expect(companyRoutes('COMP_0001')).toEqual({
       pulse: '/company/COMP_0001',
+      signals: '/company/COMP_0001/signals',
       advisor: '/company/COMP_0001/recommendations',
       method: '/method?company=COMP_0001',
     });
@@ -99,12 +100,16 @@ describe('navigation', () => {
     const sections = companySections('COMP_0001');
     expect(sections.map((section) => section.label)).toEqual([
       'PULSE',
+      'Señales',
       'Recomendaciones',
       'Método',
     ]);
     expect(
-      isActive('/company/COMP_0001/recommendations', sections[1].match),
+      isActive('/company/COMP_0001/recommendations', sections[2].match),
     ).toBe(true);
+    expect(isActive('/company/COMP_0001/signals', sections[1].match)).toBe(
+      true,
+    );
     expect(isActive('/method', '/method')).toBe(true);
     expect(isActive('/method', '/')).toBe(false);
   });

@@ -10,6 +10,7 @@ import {
   toPulsePillars,
   toPulseVariables,
 } from '@/lib/pulse/parse-primitives';
+import { parseSignals } from '@/lib/pulse/parse-signals';
 import { parseBand } from '@/lib/pulse/parse-summary';
 import {
   PULSE_FORECAST_MONTHS,
@@ -101,5 +102,6 @@ export function parsePulseCompany(value: unknown): PulseCompany | null {
     pillars: toPulsePillars(record.pillars),
     series,
     forecast,
+    signals: parseSignals(record.signals),
   };
 }

@@ -34,7 +34,7 @@ interface MethodPageProps {
 /**
  * How the PULSE of a month is built, in plain words: the scale, the 100
  * points, the four steps of the calculation, a real month added by hand, and
- * three sentences on what the score does beyond the month.
+ * four sentences on what the score does beyond the month.
  *
  * @param props - Query parameters of the route.
  * @returns The method page.
@@ -125,11 +125,12 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
 
       <Section
         title="Previsión, precio y límites"
-        note="Lo demás, en tres frases"
+        note="Lo demás, en cuatro frases"
       >
         <MethodOutlookList
           forecast={meta.evaluation.forecast}
           lastHorizon={lastHorizon}
+          anticipation={meta.evaluation.signals.anticipation}
         />
       </Section>
     </PageShell>

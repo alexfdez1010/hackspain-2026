@@ -1,4 +1,7 @@
-import type { PulseForecastHorizonEvaluation } from '@/lib/pulse/types';
+import type {
+  PulseAnticipationHorizon,
+  PulseForecastHorizonEvaluation,
+} from '@/lib/pulse/types';
 import { formatNumber } from '@/lib/format';
 
 /** Horizon the plain-language summary of the forecast is read at. */
@@ -37,4 +40,32 @@ export function describeHits(recall: number | null): string | null {
   if (recall === null || Number.isNaN(recall)) return null;
   const hits = Math.round(Math.min(Math.max(recall, 0), 1) * 10);
   return `${formatNumber(hits)} de cada 10`;
+}
+
+/**
+ * Says in plain words how early the score sees cash stress coming: how many
+ * of the episodes that arrive within the horizon an alert on the worst fifth
+ * would have caught.
+ *
+ * @param anticipation - Evaluated horizons, any order.
+ * @param preferred - Horizon in months the sentence talks about.
+ * @returns The sentence, or `null` when nothing was evaluated.
+ */
+export function describeAnticipation(
+  anticipation: readonly PulseAnticipationHorizon[],
+  preferred = OUTLOOK_HORIZON,
+): string | null {
+  let best: PulseAnticipationHorizon | null = null;
+  for (const row of anticipation) {
+    if (
+      best === null ||
+      Math.abs(row.horizon - preferred) < Math.abs(best.horizon - preferred)
+    ) {
+      best = row;
+    }
+  }
+  const hits = describeHits(best?.recall ?? null);
+  if (!best || !hits || best.alertShare === null) return null;
+  const share = Math.round(best.alertShare * 100);
+  return `Vigilando solo al ${formatNumber(share)} % con peor nota se adelanta a ${hits} tensiones de caja que llegan en los ${formatNumber(best.horizon)} meses siguientes.`;
 }
