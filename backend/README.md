@@ -120,6 +120,9 @@ training one.
 
 ## Cleaning rules (all logged in `data/pulse/cleaning_report.md`)
 
+Step-by-step description, thresholds and a sensitivity study of the forecast to
+alternative cleanings: [`docs/limpieza-de-datos.md`](docs/limpieza-de-datos.md).
+
 | Trap | Rule |
 |---|---|
 | Currencies (44 of them; `exchange_rate` is 1.0 for 43 % of USD rows, has zeros and 6500s) | Every amount is divided by a **fixed FX table** (`fx.py`, units per EUR). Currency = product's, else company's, else EUR. `exchange_rate` columns are ignored. |
@@ -222,7 +225,14 @@ at +12 against 19 observed. `alpha=6` removes the flat line (the spread at +12 i
 are scarcest), cuts the MAE from 9.29 to 8.97 and more than doubles the recall of
 large improvements; larger values (10, 15) or a plain `l2` objective are slightly
 worse, and a random forest on the same inputs (MAE 9.26) also flattens the far
-horizons. The p10-p90 band is
+horizons. A wider benchmark under the same out-of-fold protocol (LightGBM grids
+over leaves, leaf size, feature fraction, learning rate and rounds, DART, the
+target scaled by the square root of the horizon, the level as target, XGBoost
+pseudo-Huber and squared error, CatBoost Huber and RMSE, a ridge per horizon and
+averages of the best runs) found nothing beyond noise: the best blend reaches
+8.95 against 8.97, XGBoost 9.03, CatBoost 9.07 and the ridge 10.49, so the single
+LightGBM stays. Alternative cleanings do not move the forecast either (see
+`docs/limpieza-de-datos.md`). The p10-p90 band is
 **conformal**: the 10th/90th percentile of the out-of-fold residual at each horizon
 (GroupKFold(5) on `group_id`, computed inside `fit`) is added to the central
 forecast, which keeps the 80 % coverage honest without extra quantile models; the
