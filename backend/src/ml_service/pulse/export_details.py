@@ -1,9 +1,8 @@
 """Export the detail behind every PULSE variable: one JSON per company for the web app.
 
 Writes ``<work_dir>/web/details/<company_id>.json`` for every company already
-exported by :mod:`ml_service.pulse.export_web` and optionally mirrors the folder
-into the frontend's bundled data. Run it after ``export_web``: the company list
-comes from ``web/companies/``.
+exported by :mod:`ml_service.pulse.export_web`. Run it after ``export_web``: the
+company list comes from ``web/companies/``. ``uv run pulse`` runs both in order.
 """
 
 from __future__ import annotations
@@ -14,9 +13,9 @@ from pathlib import Path
 
 import polars as pl
 
-from ml_service.pulse.clean.pipeline import clean_all
+from ml_service.pulse.clean.pipeline import CleanData, clean_all
 from ml_service.pulse.details.build import build_payloads
-from ml_service.pulse.load import load_raw
+from ml_service.pulse.load import RawData, load_raw
 
 DETAILS = "details"
 
@@ -29,27 +28,37 @@ def exported_companies(web: Path) -> list[str] | None:
     return sorted(p.stem for p in companies.glob("*.json"))
 
 
-def write_all(work_dir: Path, raw_dir: Path, mirror_dir: Path | None = None) -> Path:
-    """Rebuild the cleaned frames, build every detail payload and write the folder."""
-    raw = load_raw(raw_dir, work_dir / "cache")
-    clean = clean_all(raw)
-    scored = pl.read_parquet(work_dir / "scored_panel.parquet").filter(
-        pl.col("pulse").is_not_null()
+def write_payloads(
+    web: Path, clean: CleanData, raw: RawData, scored: pl.DataFrame
+) -> Path:
+    """Build every detail payload from already-cleaned frames and write ``web/details``."""
+    payloads = build_payloads(
+        clean,
+        raw,
+        scored.filter(pl.col("pulse").is_not_null()),
+        exported_companies(web),
     )
-    web = work_dir / "web"
-    payloads = build_payloads(clean, raw, scored, exported_companies(web))
     out = web / DETAILS
     shutil.rmtree(out, ignore_errors=True)
     out.mkdir(parents=True)
     for company_id, payload in payloads.items():
         (out / f"{company_id}.json").write_text(json.dumps(payload, ensure_ascii=False))
+    return out
+
+
+def write_all(work_dir: Path, raw_dir: Path, mirror_dir: Path | None = None) -> Path:
+    """Rebuild the cleaned frames, build every detail payload and write the folder."""
+    raw = load_raw(raw_dir, work_dir / "cache")
+    clean = clean_all(raw)
+    scored = pl.read_parquet(work_dir / "scored_panel.parquet")
+    out = write_payloads(work_dir / "web", clean, raw, scored)
     if mirror_dir is not None:
-        mirror(web, mirror_dir)
+        mirror(work_dir / "web", mirror_dir)
     return out
 
 
 def mirror(web: Path, mirror_dir: Path) -> Path:
-    """Copy ``details/`` into the frontend data folder, leaving its siblings alone."""
+    """Copy ``details/`` into an output folder, leaving its siblings alone."""
     mirror_dir.mkdir(parents=True, exist_ok=True)
     shutil.rmtree(mirror_dir / DETAILS, ignore_errors=True)
     shutil.copytree(web / DETAILS, mirror_dir / DETAILS)
@@ -57,9 +66,6 @@ def mirror(web: Path, mirror_dir: Path) -> Path:
 
 
 if __name__ == "__main__":
-    from ml_service.pulse.config import ML_ROOT, RAW_DIR, WORK_DIR
+    from ml_service.pulse.config import RAW_DIR, WORK_DIR
 
-    folder = write_all(
-        WORK_DIR, RAW_DIR, ML_ROOT.parent / "frontend" / "src" / "data" / "pulse"
-    )
-    print(f"wrote {folder}")
+    print(f"wrote {write_all(WORK_DIR, RAW_DIR)}")

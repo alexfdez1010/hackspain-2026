@@ -91,7 +91,9 @@ def _customers_billed(ctx: DetailContext) -> Rows:
             .fill_null(False)
             .alias("top"),
         )
-        .sort(["company_id", "billed"], descending=[False, True])
+        .sort(
+            ["company_id", "billed", "counterparty_id"], descending=[False, True, False]
+        )
     )
     return rows_by_company(rounded(df), TOP_FIELDS)
 

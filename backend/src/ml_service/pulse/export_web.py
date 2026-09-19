@@ -1,7 +1,7 @@
-"""Export PULSE history + forecasts as the JSON contract consumed by the web app and the API.
+"""Export PULSE history + forecasts as the JSON contract consumed by the web app.
 
-Writes ``<work_dir>/web/summary.json`` and ``<work_dir>/web/companies/<company_id>.json``
-and optionally mirrors them into the frontend's bundled data folder.
+Writes ``<work_dir>/web/summary.json`` and ``<work_dir>/web/companies/<company_id>.json``;
+``uv run pulse`` copies them into the output folder afterwards.
 """
 
 from __future__ import annotations
@@ -230,7 +230,7 @@ def write_all(work_dir: Path, mirror_dir: Path | None = None) -> Path:
                 "pulse_prev": payload["pulse_prev"],
                 "confidence": payload["confidence"],
                 "pillars": payload["pillars"],
-                "forecast_12m": {
+                "forecast_6m": {
                     k: last[k] for k in ("pulse_pred", "pulse_p10", "pulse_p90")
                 }
                 if last
@@ -249,11 +249,10 @@ def write_all(work_dir: Path, mirror_dir: Path | None = None) -> Path:
 
 
 def mirror(web: Path, mirror_dir: Path) -> Path:
-    """Copy ``summary.json`` and ``companies/`` into the frontend data folder.
+    """Copy ``summary.json`` and ``companies/`` into an output folder.
 
-    Only the two PULSE artefacts are replaced: the ``recommendations/`` folder
-    the advisor mirrors next to them is left untouched, whatever the order the
-    two exports run in.
+    Only the two PULSE artefacts are replaced: ``details/`` and
+    ``recommendations/`` next to them are left untouched.
     """
     mirror_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy(web / "summary.json", mirror_dir / "summary.json")
@@ -263,7 +262,6 @@ def mirror(web: Path, mirror_dir: Path) -> Path:
 
 
 if __name__ == "__main__":
-    from ml_service.pulse.config import ML_ROOT, WORK_DIR
+    from ml_service.pulse.config import WORK_DIR
 
-    out = write_all(WORK_DIR, ML_ROOT.parent / "frontend" / "src" / "data" / "pulse")
-    print(f"wrote {out}")
+    print(f"wrote {write_all(WORK_DIR)}")

@@ -1,32 +1,10 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { parseAdvisorCatalogue } from '@/lib/advisor/parse-catalogue';
 import { parseAdvisorCompany } from '@/lib/advisor/parse-company';
-import { ApiAdvisorSource } from '@/lib/advisor/source/api';
 import { createAdvisorDataSource } from '@/lib/advisor/source/factory';
 import { StaticAdvisorSource } from '@/lib/advisor/source/static-json';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
-
-/**
- * Builds a `fetch` stub that answers a fixed map of paths.
- *
- * @param routes - Path fragment to JSON body map; unknown paths answer 404.
- * @returns The stub and the list of requested URLs.
- */
-function stubFetch(routes: Record<string, unknown>) {
-  const calls: string[] = [];
-  const impl = vi.fn(async (input: RequestInfo | URL) => {
-    const url = String(input);
-    calls.push(url);
-    const match = Object.keys(routes).find((path) => url.includes(path));
-    if (!match) return new Response('not found', { status: 404 });
-    return new Response(JSON.stringify(routes[match]), {
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-    });
-  }) as unknown as typeof fetch;
-  return { impl, calls };
-}
 
 describe('parseAdvisorCatalogue', () => {
   it('reads products, pricing constants and the risk model', () => {
@@ -213,44 +191,8 @@ describe('parseAdvisorCompany', () => {
 });
 
 describe('createAdvisorDataSource', () => {
-  it('falls back to the bundled JSON files without an API URL', () => {
-    expect(createAdvisorDataSource({})).toBeInstanceOf(StaticAdvisorSource);
-    expect(createAdvisorDataSource({ PULSE_API_URL: ' ' })).toBeInstanceOf(
-      StaticAdvisorSource,
-    );
-  });
-
-  it('uses the Advisor endpoints when the API URL is set', async () => {
-    const { impl, calls } = stubFetch({
-      '/api/pulse/recommendations/catalogue': { products: [{ key: 'x' }] },
-      '/api/pulse/recommendations/COMP_0001': { company_id: 'COMP_0001' },
-    });
-    const source = createAdvisorDataSource(
-      { PULSE_API_URL: 'http://localhost:8000/' },
-      impl,
-    );
-    expect(source).toBeInstanceOf(ApiAdvisorSource);
-    expect((await source.getCatalogue()).products).toHaveLength(1);
-    expect((await source.getCompany('COMP_0001'))?.companyId).toBe('COMP_0001');
-    expect(calls).toEqual([
-      'http://localhost:8000/api/pulse/recommendations/catalogue',
-      'http://localhost:8000/api/pulse/recommendations/COMP_0001',
-    ]);
-  });
-
-  it('still honours the legacy XRAY_API_URL variable', () => {
-    expect(
-      createAdvisorDataSource({ XRAY_API_URL: 'http://localhost:8000' }),
-    ).toBeInstanceOf(ApiAdvisorSource);
-  });
-
-  it('degrades to an empty catalogue when the service is down', async () => {
-    const source = createAdvisorDataSource(
-      { PULSE_API_URL: 'http://localhost:8000' },
-      stubFetch({}).impl,
-    );
-    expect((await source.getCatalogue()).products).toEqual([]);
-    expect(await source.getCompany('COMP_0001')).toBeNull();
+  it('returns the source backed by the bundled JSON files', () => {
+    expect(createAdvisorDataSource()).toBeInstanceOf(StaticAdvisorSource);
   });
 });
 

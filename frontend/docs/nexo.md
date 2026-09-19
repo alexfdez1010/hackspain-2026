@@ -1,125 +1,126 @@
 # Nexo
 
-Nexo explica la aplicación y permite preguntas abiertas al conectar Gateway.
-El modo local utiliza respuestas preparadas, identificadas como demo y basadas
-en el dataset disponible. No pretende simular comprensión de cualquier pregunta.
+Nexo explains the application and allows open questions once Gateway is
+connected. The local mode uses prepared answers, identified as a demo and based
+on the available dataset. It does not claim to simulate understanding of any
+question.
 
-## Uso e integración
+## Usage and integration
 
-`AssistantWidget({ mode })`, montado una sola vez en el layout, mantiene la
-conversación al navegar. `NexoMascot({ mood, className })` es el renderer decorativo.
-Ejemplo: `<NexoMascot mood="thinking" className="size-32" />`.
+`AssistantWidget({ mode })`, mounted once in the layout, keeps the conversation
+while navigating. `NexoMascot({ mood, className })` is the decorative renderer.
+Example: `<NexoMascot mood="thinking" className="size-32" />`.
 
-`useAssistant()` encapsula envío, cancelación, reintento, reinicio y contexto de
-ruta. `getAssistantContext(pathname, question, pulse?, advisor?)` admite inyección
-de los adaptadores de lectura para pruebas aisladas. `getMockReply(question,
-context)` es determinista. `parseAssistantRequest(value)` valida JSON ya leído;
-`readAssistantRequest(request)` añade límite de bytes y comprobación de origen.
+`useAssistant()` encapsulates sending, cancellation, retry, reset and route
+context. `getAssistantContext(pathname, question, pulse?, advisor?)` accepts
+injection of the read adapters for isolated tests. `getMockReply(question,
+context)` is deterministic. `parseAssistantRequest(value)` validates JSON that
+has already been read; `readAssistantRequest(request)` adds a byte limit and an
+origin check.
 
-Ejemplo sin clave, con `bun run dev`:
+Example without a key, with `bun run dev`:
 
 ```bash
 curl -N http://localhost:3000/api/assistant \
   -H 'Content-Type: application/json' \
-  -d '{"pathname":"/empresa/COMP_0001","messages":[{"id":"demo-1","role":"user","parts":[{"type":"text","text":"Resume esta empresa"}]}]}'
+  -d '{"pathname":"/company/COMP_0001","messages":[{"id":"demo-1","role":"user","parts":[{"type":"text","text":"Resume esta empresa"}]}]}'
 ```
 
-`AI_GATEWAY_API_KEY` se lee sólo en el servidor. La constante de modelo es
-`google/gemini-3.8-flash`, comprobada en el catálogo público de Gateway el
-19 de septiembre de 2026. No existe selector de modelo ni fallback silencioso.
-El modo automático usa la clave si existe; `ASSISTANT_MODE=mock` evita llamadas
-externas aun con clave. El modo `gateway` sin clave responde 503.
+`AI_GATEWAY_API_KEY` is read on the server only. The model constant is
+`google/gemini-3.8-flash`, checked against the public Gateway catalogue on
+19 September 2026. There is no model selector and no silent fallback. The
+automatic mode uses the key if it exists; `ASSISTANT_MODE=mock` avoids external
+calls even with a key. The `gateway` mode without a key answers 503.
 
-El endpoint usa AI SDK 7: `streamText`, `toUIMessageStream` y
-`createUIMessageStreamResponse`. Los mocks emiten el mismo protocolo mediante
-`createUIMessageStream`. La clave se obtiene con el proveedor Gateway por defecto
-del SDK; no hay un cliente Google ni una segunda clave. Máximo 10.000 tokens de
-salida, dos reintentos y cancelación del modelo a los 55 segundos
-(`maxDuration = 60`) o al abortar el cliente. Se omite el razonamiento interno
-del stream.
+The endpoint uses AI SDK 7: `streamText`, `toUIMessageStream` and
+`createUIMessageStreamResponse`. The mocks emit the same protocol through
+`createUIMessageStream`. The key is obtained with the SDK's default Gateway
+provider; there is no Google client and no second key. A maximum of 10,000
+output tokens, two retries and cancellation of the model after 55 seconds
+(`maxDuration = 60`) or when the client aborts. The internal reasoning is
+omitted from the stream.
 
-Gemini 3.x razona antes de escribir y ese razonamiento consume el presupuesto
-de salida. Con el nivel por defecto, una respuesta corta gastaba unos 900 de los
-1.000 tokens en razonamiento y se cortaba a mitad de frase
-(`finishReason: length`). Por eso `ASSISTANT_PROVIDER_OPTIONS` fija
-`thinkingConfig.thinkingLevel = 'low'` (el nivel `minimal` no existe para este
-modelo). El servidor añade `finishReason` a la metadata del mensaje al terminar;
-si vale `length`, la interfaz lo indica bajo la respuesta en lugar de dejar el
-corte sin explicar.
+Gemini 3.x reasons before writing and that reasoning consumes the output
+budget. At the default level, a short answer spent about 900 of the 1,000
+tokens on reasoning and was cut mid-sentence (`finishReason: length`). That is
+why `ASSISTANT_PROVIDER_OPTIONS` sets `thinkingConfig.thinkingLevel = 'low'`
+(the `minimal` level does not exist for this model). The server adds
+`finishReason` to the message metadata when it finishes; if it is `length`, the
+interface says so below the answer instead of leaving the cut unexplained.
 
-Las instrucciones incluyen un glosario construido desde `DIRECTION_LABELS` y
-`REGIME_LABELS` para que el modelo no repita identificadores del dataset
-(`pStress`, `structural_decline`) y use formato numérico español.
+The instructions include a glossary built from `DIRECTION_LABELS` and
+`REGIME_LABELS` so the model does not repeat dataset identifiers (`pStress`,
+`structural_decline`) and uses Spanish number formatting.
 
-Sólo se envían al modelo los metadatos del score y, cuando la ruta o la
-pregunta nombran una, una única empresa con su PULSE y sus recomendaciones;
-la aplicación nunca muestra la cartera y el asistente tampoco la recibe. La metadata de fuentes son rutas internas construidas por el
-servidor. No se renderizan HTML ni enlaces generados por el modelo. No hay
-persistencia de chats, herramientas de escritura ni acciones financieras.
-Esta app de demostración no tiene autenticación: antes de exposición pública de
-la ruta de pago, deben aplicarse los controles de acceso y cuota del despliegue.
+Only the score metadata is sent to the model and, when the route or the
+question names one, a single company with its PULSE and its recommendations;
+the application never shows the portfolio and the assistant does not receive it
+either. The source metadata are internal routes built by the server. Neither
+HTML nor links generated by the model are rendered. There is no chat
+persistence, no write tools and no financial actions. This demo app has no
+authentication: before the paid route is publicly exposed, the deployment's
+access and quota controls must be applied.
 
-El layout se resuelve por petición para que el indicador de modo no quede
-congelado en una build sin clave si se configura Gateway al arrancar el servidor.
-React y React DOM se actualizan sólo dentro de 19.1 (19.1.9 en los lockfiles)
-para satisfacer el peer dependency del SDK actual.
+The layout is resolved per request so that the mode indicator is not frozen in
+a build with no key if Gateway is configured when the server starts. React and
+React DOM are updated only within 19.1 (19.1.9 in the lockfiles) to satisfy the
+peer dependency of the current SDK.
 
-## Herramientas y gráficos (2026-09-19)
+## Tools and charts (2026-09-19)
 
-Nexo es un agente con herramientas de sólo lectura, definidas en
-`src/lib/assistant/tools` con `tool()` y `jsonSchema` de AI SDK 7 y pasadas a
-`streamText` con `stopWhen: stepCountIs(ASSISTANT_MAX_STEPS)` (seis pasos).
-Todas leen la empresa de la conversación a través de los mismos adaptadores
-que las páginas (`PulseDataSource`, `AdvisorDataSource`), memorizados por
-petición en `ToolRuntime`; ninguna escribe, sale a internet ni recibe la
-cartera. Las cifras se redondean antes de llegar al modelo.
+Nexo is an agent with read-only tools, defined in `src/lib/assistant/tools`
+with AI SDK 7's `tool()` and `jsonSchema` and passed to `streamText` with
+`stopWhen: stepCountIs(ASSISTANT_MAX_STEPS)` (six steps). They all read the
+company of the conversation through the same adapters as the pages
+(`PulseDataSource`, `AdvisorDataSource`), memoised per request in
+`ToolRuntime`; none writes, goes out to the internet or receives the portfolio.
+The figures are rounded before they reach the model.
 
-| Herramienta           | Qué lee                                                                                         |
-| --------------------- | ----------------------------------------------------------------------------------------------- |
-| `get_history`         | Score, confianza, caja al cierre y pilares de cada mes observado (últimos N)                    |
-| `get_month`           | Las once variables de un mes: score, cifra en bruto con unidad, peso y puntos aportados         |
-| `get_forecast`        | Horizontes +1…+6 con banda p10-p90 y los cuatro impulsores mayores de cada uno                  |
-| `get_signals`         | Señales con impulsores, probabilidad de que dure y desenlace; la alerta viva                    |
-| `get_financing`       | Ofertas con importe, tipo, componentes del precio y motivos; descartados, desbloqueos, palancas |
-| `get_variable`        | Historial de una variable, estadísticas y su peso en la previsión                               |
-| `get_variable_detail` | Rankings del detalle (clientes, proveedores, morosos, líneas, deuda, antigüedad) y caja diaria  |
-| `show_chart`          | Dibuja un gráfico interactivo en el chat                                                        |
+| Tool                  | What it reads                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| `get_history`         | Score, confidence, closing cash and pillars of every observed month (last N)                |
+| `get_month`           | The eleven variables of a month: score, raw figure with unit, weight and points contributed |
+| `get_forecast`        | Horizons +1…+6 with the p10–p90 band and the four largest drivers of each one               |
+| `get_signals`         | Signals with drivers, probability that they last and outcome; the live alert                |
+| `get_financing`       | Offers with amount, rate, price components and reasons; declined, unlocks, levers           |
+| `get_variable`        | History of one variable, statistics and its weight in the forecast                          |
+| `get_variable_detail` | Detail rankings (customers, suppliers, late payers, lines, debt, aging) and daily cash      |
+| `show_chart`          | Draws an interactive chart in the chat                                                      |
 
-`show_chart` recibe `{ kind, variable?, variables?, horizon?, month?, ranking? }`
-con `kind` en `trayectoria`, `pilares`, `variables`, `puntos`, `variable`,
-`comparar`, `impulsores`, `caja` o `ranking`, y devuelve un `ChartSpec`
-(`src/lib/assistant/charts/types.ts`) construido en el servidor con los datos
-del export: el modelo elige el gráfico, nunca sus números. El navegador recibe
-la especificación completa en la parte `tool-show_chart` y la dibuja con
-`AssistantChart` (`src/components/assistant/charts`) reutilizando los SVG del
-producto (`PulseTrajectoryChart`, `PillarSpark`, `VariableScoreChart`,
-`DailyBalanceChart`) y cuatro listas de barras apiladas propias del panel
-(`ScoreBars`, `PointsBars`, `DriverBars`, `RankingBars`) más `CompareLines`. El
-modelo sólo recibe `{ shown, kind, title, summary }` (`toModelOutput`), y el
-navegador devuelve esa misma versión compacta en el historial
-(`compactMessage`), así que los puntos del gráfico nunca vuelven a pagarse en
-tokens. Cada figura enlaza a la página de la aplicación donde vive la misma
-lectura.
+`show_chart` receives `{ kind, variable?, variables?, horizon?, month?, ranking? }`
+with `kind` in `trayectoria`, `pilares`, `variables`, `puntos`, `variable`,
+`comparar`, `impulsores`, `caja` or `ranking`, and returns a `ChartSpec`
+(`src/lib/assistant/charts/types.ts`) built on the server with the export's
+data: the model picks the chart, never its numbers. The browser receives the
+full specification in the `tool-show_chart` part and draws it with
+`AssistantChart` (`src/components/assistant/charts`), reusing the product's
+SVGs (`PulseTrajectoryChart`, `PillarSpark`, `VariableScoreChart`,
+`DailyBalanceChart`) and four stacked bar lists of the panel's own
+(`ScoreBars`, `PointsBars`, `DriverBars`, `RankingBars`) plus `CompareLines`.
+The model only receives `{ shown, kind, title, summary }` (`toModelOutput`),
+and the browser returns that same compact version in the history
+(`compactMessage`), so the chart's points are never paid for again in tokens.
+Every figure links to the page of the application where the same reading lives.
 
-El historial admite ahora partes de herramienta en los mensajes del asistente:
-sólo las de herramientas conocidas, en estado `output-available`, con entrada
-objeto y menos de 12.000 caracteres serializados; el resto se descarta sin
-error. El cuerpo admite 256 KiB y 32 partes por mensaje.
+The history now accepts tool parts in the assistant's messages: only those of
+known tools, in `output-available` state, with an object input and fewer than
+12,000 serialised characters; the rest are discarded without an error. The body
+accepts 256 KiB and 32 parts per message.
 
-En modo `mock`, `getMockChart` decide si la pregunta pide un gráfico
-(«dibuja», «trayectoria», «pilares», «restan puntos», «impulsores») y la ruta
-ejecuta el mismo constructor con los datos reales, emitiendo
-`tool-input-start`, `tool-input-available` y `tool-output-available` antes del
-texto. La demo dibuja gráficos verdaderos con prosa preparada.
+In `mock` mode, `getMockChart` decides whether the question asks for a chart
+("dibuja", "trayectoria", "pilares", "restan puntos", "impulsores") and the
+route runs the same builder with the real data, emitting `tool-input-start`,
+`tool-input-available` and `tool-output-available` before the text. The demo
+draws true charts with prepared prose.
 
-Comprobado el 19 de septiembre de 2026 con Gateway: «Dibuja la trayectoria del
-PULSE y dime qué variables restan más puntos» llama en paralelo a `show_chart`
-y `get_month` y escribe la lectura en 5 s; una pregunta con comparación y
-ranking encadena `get_month`, `get_variable_detail` y dos `show_chart` en 6 s.
-Pruebas: 481 unitarias (herramientas, constructores, renderizado, historial),
-7 de integración (ruta con herramientas y demo con gráfico) y 8 de navegador.
+Checked on 19 September 2026 with Gateway: "Dibuja la trayectoria del PULSE y
+dime qué variables restan más puntos" calls `show_chart` and `get_month` in
+parallel and writes the reading in 5 s; a question with a comparison and a
+ranking chains `get_month`, `get_variable_detail` and two `show_chart` in 6 s.
+Tests: 540 unit (tools, builders, rendering, history), 7 integration (route
+with tools and demo with a chart) and 16 browser tests.
 
-Ejemplo de parte de gráfico en el stream:
+Example of a chart part in the stream:
 
 ```json
 {
@@ -149,42 +150,44 @@ Ejemplo de parte de gráfico en el stream:
 }
 ```
 
-## Diseño y decisiones conservadas
+## Design and preserved decisions
 
-2026-09-19: se toma de Quitapón la separación entre ilustración inmutable,
-expresiones SVG y animación CSS; no se reutiliza su personaje. SOLID: el renderer
-no conoce el chat, el hook no conoce las fuentes financieras, los adaptadores de
-datos existentes se inyectan en el contexto y el SDK comparte un contrato entre
-mock y Gateway. Cada módulo tiene una responsabilidad acotada.
+2026-09-19: the separation between immutable illustration, SVG expressions and
+CSS animation is taken from Quitapón; its character is not reused. SOLID: the
+renderer does not know the chat, the hook does not know the financial sources,
+the existing data adapters are injected into the context, and the SDK shares a
+contract between mock and Gateway. Every module has a bounded responsibility.
 
-El traje azul noche, camisa y corbata fueron pedidos explícitamente. Nexo tiene
-seis expresiones persistentes que se funden suavemente: idle, listening, thinking,
-speaking, happy y error. Respiración y parpadeo son CSS; el puntero sólo actualiza
-variables de mirada, sin repintados de React. Reduced motion desactiva animación,
-transición y desplazamiento de la mirada. No hay sonidos ni apertura automática.
+The midnight-blue suit, shirt and tie were explicitly requested. Nexo has six
+persistent expressions that blend smoothly: idle, listening, thinking,
+speaking, happy and error. Breathing and blinking are CSS; the pointer only
+updates gaze variables, with no React repaints. Reduced motion disables
+animation, transition and gaze displacement. There are no sounds and no
+automatic opening.
 
-Los controles usan HeroUI v3. El diálogo gestiona foco, Escape y retorno al
-disparador. La conversación no fuerza el desplazamiento si se están leyendo
-mensajes anteriores. El editor respeta composición IME y el área segura móvil.
+The controls use HeroUI v3. The dialog handles focus, Escape and return to the
+trigger. The conversation does not force scrolling when earlier messages are
+being read. The editor respects IME composition and the mobile safe area.
 
-2026-09-19 (revisión): el acceso flotante queda reducido a la mascota y un
-bocadillo «¿Necesitas ayuda? Escríbeme»; el botón de HeroUI se mantiene por
-accesibilidad pero sin fondo. La cabecera del panel reúne mascota, nombre, una
-línea de estado en texto (escucho, reviso, escribo, error, demo) y la página
-consultada; desaparecen el chip «CONECTADO», la fila de estado con mini mascota
-y el pie repetido. Los mensajes del usuario van en burbuja de acento a la
-derecha; las respuestas de Nexo ocupan el ancho sin avatar, con fuentes, marca
-DEMO y copia debajo. El renderizador de Markdown agrupa líneas: un título en
-negrita seguido de viñetas se muestra como texto más lista, y admite listas
-numeradas, cabeceras `#`, cursiva y código en línea como texto plano.
+2026-09-19 (revision): the floating access is reduced to the mascot and a
+"¿Necesitas ayuda? Escríbeme" speech bubble; the HeroUI button is kept for
+accessibility but with no background. The panel header gathers the mascot, the
+name, a status line in text (escucho, reviso, escribo, error, demo) and the
+page being consulted; the "CONECTADO" chip, the status row with the mini mascot
+and the repeated footer are gone. The user's messages go in an accent bubble on
+the right; Nexo's answers take the full width with no avatar, with sources, the
+DEMO mark and the copy below. The Markdown renderer groups lines: a bold title
+followed by bullets is shown as text plus a list, and it accepts numbered
+lists, `#` headers, italics and inline code as plain text.
 
-## Arte original
+## Original artwork
 
-Generado con la herramienta integrada ImageGen; sin API ni clave local.
-Archivo utilizado: `public/mascot/nexo-suit.png` (1254 × 1254, alpha real).
-El cuerpo sin traje queda como referencia en `public/mascot/nexo-body.png`.
+Generated with the built-in ImageGen tool; no API and no local key.
+File used: `public/mascot/nexo-suit.png` (1254 × 1254, real alpha).
+The body without the suit remains as a reference in
+`public/mascot/nexo-body.png`.
 
-Prompt original: “Create an original premium collectible character called Nexo:
+Original prompt: “Create an original premium collectible character called Nexo:
 one small friendly floating ceramic robot, a plump rounded pebble head joined
 to a compact rounded body, pearlescent ice-blue ceramic material, tiny relaxed
 flipper arms, two rounded feet and a cobalt-blue antenna. Large blank dark navy
@@ -192,7 +195,7 @@ visor, no eyes or mouth, subtle pulse-wave on lower belly. Front-facing, full
 body centered, soft studio lighting, genuinely transparent RGBA background,
 no floor, shadow, text or watermark.”
 
-Prompt final de edición (literal):
+Final editing prompt (verbatim):
 
 > Use case: precise-object-edit. Edit target: this original Nexo assistant mascot.
 > The user wants it wearing a serious, professional suit. Add a beautifully
@@ -209,44 +212,42 @@ Prompt final de edición (literal):
 > background, floor, checkerboard, shadow, props, text or watermark. Change only
 > the outfit.
 
-Documentación oficial consultada: [AI SDK](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot),
-[transporte](https://ai-sdk.dev/docs/ai-sdk-ui/transport),
+Official documentation consulted: [AI SDK](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot),
+[transport](https://ai-sdk.dev/docs/ai-sdk-ui/transport),
 [Gateway](https://vercel.com/docs/ai-gateway/getting-started),
 [HeroUI Modal](https://heroui.com/en/docs/react/components/modal),
 [TextArea](https://heroui.com/en/docs/react/components/text-area),
 [Next.js Route Handlers](https://nextjs.org/docs/app/api-reference/file-conventions/route),
-[React effects](https://react.dev/reference/react/useEffect) y
+[React effects](https://react.dev/reference/react/useEffect) and
 [Tailwind animation](https://tailwindcss.com/docs/animation).
 
-## Verificación
+## Verification
 
-- `bun run lint-format` y comprobación de tipos de Next.js.
-- `bun run test`: 226 pruebas unitarias, 5 de integración y 7 de navegador,
-  incluida build de producción. Las pruebas E2E fuerzan el modo mock.
-- 2026-09-19: llamada real a Gateway comprobada en local con la clave de
-  `.env`: dos preguntas (cartera y empresa) terminan con `finishReason: stop`
-  en unos 4 segundos; antes del ajuste terminaban con `length` a los 300
-  caracteres.
-- Revisión visual de la bienvenida y la conversación en navegador, escritorio
-  1280 × 720 y móvil 390 × 844, temas claro/oscuro y movimiento reducido.
-- Se prueban validación del endpoint, streaming, contexto de ruta, cancelación,
-  reintento, preservación al navegar, reinicio, teclado y límites del panel.
-- La llamada al proveedor se verifica con un doble de prueba en el límite del
-  SDK. No se ha efectuado una llamada pagada: el entorno local no tiene clave.
-- Se sustituyen los E2E obsoletos de la plantilla por el radar real. La prueba
-  previa de detalle X-Ray usa una fixture en el límite de archivo, porque los
-  exports por empresa no están versionados. Nexo conserva los datos del resumen
-  cuando falta ese detalle, sin inventar límites ni enlazar a una ficha ausente.
+- `bun run lint-format` and the Next.js type check.
+- `bun run test`: 540 unit tests, 7 integration tests and 16 browser tests,
+  including a production build. The E2E tests force the mock mode.
+- 2026-09-19: a real Gateway call checked locally with the key from `.env`: two
+  questions (portfolio and company) finish with `finishReason: stop` in about
+  4 seconds; before the adjustment they finished with `length` at 300
+  characters.
+- Visual review of the welcome and the conversation in the browser, desktop
+  1280 × 720 and mobile 390 × 844, light/dark themes and reduced motion.
+- Endpoint validation, streaming, route context, cancellation, retry,
+  preservation while navigating, reset, keyboard and panel limits are tested.
+- The provider call is verified with a test double at the SDK boundary. No paid
+  call has been made: the local environment has no key.
 
-## Modelo de una sola empresa (2026-09-19)
+## Single-company model (2026-09-19)
 
-La aplicación pasó a mostrar una única empresa por pantalla. Nexo sigue el
-mismo principio: el contexto sale de `PulseDataSource` (score, meses observados,
-variables sin datos y previsión) y de `AdvisorDataSource` (resumen, probabilidad
-de tensión, ofertas con importe, tipo y motivos, descartados, desbloqueos y
-palancas). Sin empresa en la ruta ni en la pregunta, sólo viajan los metadatos
-del score y Nexo remite a la portada. Rutas admitidas: `/`,
-`/empresa/COMP_xxxx`, `/empresa/COMP_xxxx/recomendaciones` y `/metodo`;
-cualquier otra se normaliza a `/`. Las respuestas simuladas cubren: resumen de
-la empresa, productos recomendados (o por qué no hay ninguno), previsión, score
-y método.
+The application moved to showing a single company per screen. Nexo follows the
+same principle: the context comes from `PulseDataSource` (score, observed
+months, variables with no data and forecast) and from `AdvisorDataSource`
+(summary, stress probability, offers with amount, rate and reasons, declined,
+unlocks and levers). With no company in the route and none in the question,
+only the score metadata travels and Nexo points to the home page. Accepted
+routes (`KNOWN_PATH` in `src/lib/assistant/request.ts`): `/`,
+`/company/COMP_xxxx` and its `/diagnosis`, `/detail`, `/signals`,
+`/recommendations`, `/action`, `/action/<key>` and `/variable/<key>` pages,
+and `/method`; any other is
+normalised to `/`. The simulated answers cover: company summary, recommended
+products (or why there are none), forecast, score and method.

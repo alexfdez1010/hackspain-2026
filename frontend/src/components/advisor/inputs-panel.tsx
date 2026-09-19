@@ -63,7 +63,7 @@ export function InputsPanel({ inputs }: InputsPanelProps) {
             columns={1}
           />
         </LabelledBlock>
-        <LabelledBlock title="Previsión a +12 meses" level={3}>
+        <LabelledBlock title="Previsión a +6 meses" level={3}>
           <DefinitionList
             columns={1}
             items={[

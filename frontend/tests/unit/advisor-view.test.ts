@@ -169,8 +169,8 @@ describe('formatReasonValue', () => {
     expect(formatReasonValue(623191.46, 'EUR')).toBe('623.191 €');
     expect(formatReasonValue(0.03, 'tipo anual')).toBe('3,00 %');
     expect(formatReasonValue(38.56, 'PULSE')).toBe('38,6 PULSE');
-    expect(formatReasonValue(7.39, 'puntos PULSE a +12 m')).toBe(
-      '+7,4 puntos PULSE a +12 m',
+    expect(formatReasonValue(7.39, 'puntos PULSE a +6 m')).toBe(
+      '+7,4 puntos PULSE a +6 m',
     );
     expect(formatReasonValue(0.1148, '% vs trimestre anterior')).toBe(
       '11,5 % vs trimestre anterior',

@@ -1,162 +1,189 @@
-# Web (Next.js)
+# Embat Pulse · web app
 
-Next.js application of the HackSpain 2026 monorepo. The Python ML service lives in [`../backend`](../backend).
+Next.js application of the HackSpain 2026 monorepo (Embat challenge). It is a
+single-company product: every screen shows the PULSE of the company that is
+open, never a portfolio view.
 
-A **production-grade Next.js template** engineered with enterprise-level best practices, comprehensive testing infrastructure, and strict code quality standards. Built for teams that demand excellence in maintainability, scalability, and developer experience. This template is based in the practices used in [ZeroChats](https://github.com/zerochats).
+There is no database and no backend at runtime. The app reads the JSON export
+bundled under `src/data/pulse/`, produced by the Python pipeline in
+[`../backend`](../backend), so it builds and serves itself with nothing else
+running.
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.1.0-blue)](https://react.dev/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.x-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.1-blue)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.x-38bdf8)](https://tailwindcss.com/)
 [![HeroUI](https://img.shields.io/badge/HeroUI-v3-7c3aed)](https://heroui.com/)
 
-## 🩻 Embat Pulse (HackSpain 2026, reto Embat)
+## 🩻 The product
 
-Producto de una sola empresa: cada pantalla muestra el PULSE de la empresa
-abierta y nunca una vista global de la cartera. Sin base de datos y sin backend
-obligatorio.
+| Route                           | What it shows                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                             | Landing: hero with the product access, the pages of the product with the PULSE trajectory played by score level, and a heatmap footer. The company is changed from the header picker, which keeps the open section.                                                                                                                                                                                                                                                                    |
+| `/company/[id]`                 | Summary: the close's score on the band rule, its change, confidence, customer health (the payment health of its customers weighted by invoicing, out of 100) and cash days; the signal alert; the trajectory with the +1..+6 m forecast and its p10–p90 band; "What to do now" (up to three actions written by the model).                                                                                                                                                             |
+| `/company/[id]/diagnosis`       | Diagnosis: mosaic of the 11 variables by pillar (width = pillar weight, height = variable weight, each cell washed with its band colour) with the detail strip of the chosen variable, and the evolution of the four pillars.                                                                                                                                                                                                                                                          |
+| `/company/[id]/action`          | Action: the three variables where the company has the most PULSE points to gain, ranked by `weight · (100 − score) / known weight`, each with the plan that would collect them.                                                                                                                                                                                                                                                                                                        |
+| `/company/[id]/action/[key]`    | The plan of one variable: what to do, why that variable holds the points, what the measure costs and when it reaches the score.                                                                                                                                                                                                                                                                                                                                                        |
+| `/company/[id]/detail`          | Detail: any close opened in full (pillars and contributions), the forecast broken down by horizon and the month-by-month tables (observed and forecast).                                                                                                                                                                                                                                                                                                                               |
+| `/company/[id]/variable/[key]`  | One PULSE variable of the company: score, value and contribution of the last close, history statistics, month-by-month score against the pillar and against PULSE, observed value, points gained, position against the rest, weight in the forecast, the variable's own detail (customer ranking by payment health, suppliers by DPO and term, credit lines, debt and maturities, receivables aging, daily cash) and the month table. Opened from the Diagnosis mosaic's detail strip. |
+| `/company/[id]/signals`         | Alerts: open alerts (episodes without three months of follow-up, with the probability that they last) and the history of closed episodes with what they turned out to be (dip or fall, rebound or improvement), counters of confirmed falls and improvements and of hits at opening time. The PULSE page shows the most recent signal of the last six months as an alert and marks every signal with a triangle on the trajectory.                                                     |
+| `/company/[id]/recommendations` | Financing: "Before financing · at no cost" with the operational measure for the biggest gap, the approved products one per row with amount, rate, fit and their argument folded into "Ver detalle", "Fuera de alcance hoy" with the rule that leaves each product out, and "Más detalle" with the improvement plan, risk and inputs used, all folded.                                                                                                                                  |
+| `/method?company=[id]`          | Method: how the month's PULSE is computed in plain words (scale, 100 points, four steps, confidence and one real month added by hand); forecast, signals, pricing and limits in four sentences.                                                                                                                                                                                                                                                                                        |
 
-| Ruta                            | Qué muestra                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                             | Redirige a la empresa de demo. No hay portada: la empresa se cambia desde el selector de la cabecera, que mantiene la sección abierta.                                                                                                                                                                                                                                                                                                                                                                           |
-| `/company/[id]`                 | Resumen de la empresa: score del cierre sobre la regla de bandas, variación, confianza, salud de los clientes (media de la salud de pago de sus clientes ponderada por facturación, sobre 100) y días de caja; alerta de señal; trayectoria con previsión +1..+6 m y banda p10-p90; «Qué hacer ahora» (hasta tres acciones escritas por el modelo).                                                                                                                                                              |
-| `/company/[id]/diagnosis`       | Diagnóstico: mosaico de las 11 variables por pilar (ancho = peso del pilar, alto = peso de la variable, cada celda con el lavado de su banda) con la tira de detalle de la variable elegida, y la evolución de los cuatro pilares.                                                                                                                                                                                                                                                                               |
-| `/company/[id]/detail`          | Detalle: cualquier cierre abierto entero (pilares y aportes), la previsión desglosada por horizonte y las tablas mes a mes (observados y previstos).                                                                                                                                                                                                                                                                                                                                                             |
-| `/company/[id]/variable/[key]`  | Una variable del PULSE de la empresa: score, valor y aporte del último cierre, estadísticas del historial, score mes a mes frente al pilar y al PULSE, valor observado, puntos ganados, posición frente al resto, peso en la previsión, el detalle propio de la variable (ranking de clientes por salud de pago, proveedores por DPO y plazo, líneas de crédito, deuda y vencimientos, antigüedad de la cartera, caja diaria) y la tabla mes a mes. Se abre desde la tira de detalle del mosaico de Diagnóstico. |
-| `/company/[id]/signals`         | Señales: alertas abiertas (episodios sin tres meses de seguimiento, con la probabilidad de que duren) e histórico de episodios cerrados con lo que fueron (bache o caída, repunte o mejora), contadores de caídas y mejoras confirmadas y de aciertos al abrirse. La página de PULSE muestra la señal más reciente de los últimos seis meses como alerta y marca cada señal con un triángulo en la trayectoria.                                                                                                  |
-| `/company/[id]/recommendations` | Financiación: «Antes de financiar · sin coste» con la medida operativa del mayor hueco, los productos aprobados en una fila cada uno con importe, tipo, encaje y su argumento plegado en «Ver detalle», «Fuera de alcance hoy» con la regla que deja fuera cada producto, y «Más detalle» con plan de mejora, riesgo y datos usados, todo plegado.                                                                                                                                                               |
-| `/method?company=[id]`          | Método: cómo se calcula el PULSE del mes en palabras llanas (escala, 100 puntos, cuatro pasos, confianza y un mes real sumado a mano); previsión, señales, precio y límites en cuatro frases.                                                                                                                                                                                                                                                                                                                    |
+Companies and groups in the export are anonymous (`COMP_0001`, `GROUP_0147`).
+The interface shows them under the name of a well-known company or group picked
+by a deterministic hash of the identifier (`src/lib/company/names.ts`,
+catalogues in `src/lib/company/catalogues.ts`): the same identifier always gives
+the same name, two identifiers may share one, and the real identifier stays
+visible in the routes, in the picker and in the intro of every page.
 
-Las empresas y los grupos del export son anónimos (`COMP_0001`, `GROUP_0147`).
-La interfaz los muestra con el nombre de una empresa o grupo famoso elegido por
-un hash determinista del identificador (`src/lib/company/names.ts`, catálogos
-en `src/lib/company/catalogues.ts`): el mismo identificador da siempre el mismo
-nombre, dos identificadores pueden compartirlo y el identificador real sigue
-visible en las rutas, en el selector y en la entradilla de cada página.
-
-### Arrancar la demo
+### Run the demo
 
 ```bash
 bun run dev
 ```
 
-### Nexo, asistente de Pulse
+### Nexo, the Pulse assistant
 
-Mascota con traje, expresiones animadas y chat global accesible desde el botón
-flotante o `Ctrl/Cmd+J`. Funciona sin clave con respuestas simuladas, streaming,
-contexto de la página, cancelación, reintento y enlaces a los datos originales.
-La conversación permanece en memoria al navegar y se elimina al recargar.
+A mascot in a suit, with animated expressions and a global chat reachable from
+the floating button or `Ctrl/Cmd+J`. It works with no key through simulated
+answers, with streaming, page context, cancellation, retry and links to the
+original data. The conversation stays in memory while navigating and is dropped
+on reload.
 
-Nexo es un agente: dispone de siete herramientas de sólo lectura sobre la
-empresa de la conversación (historial, mes, previsión, alertas, financiación,
-variable y detalle de contrapartes) y de `show_chart`, que dibuja gráficos
-interactivos dentro del chat con los datos reales del export: trayectoria con
-previsión y señales, pilares, las once variables, puntos ganados y perdidos,
-una variable mes a mes, comparación de variables, impulsores de la previsión,
-caja diaria y rankings de clientes, proveedores, morosos, líneas o deuda. El
-modelo elige el gráfico y comenta la lectura; los números los pone el servidor.
-Pídele «Dibuja la trayectoria del PULSE», «¿Qué variables restan más puntos?»
-o «Compara días de caja y DSO, y un ranking de morosidad».
+Nexo is an agent: it has seven read-only tools over the company of the
+conversation (history, month, forecast, alerts, financing, variable and
+counterparty detail) plus `show_chart`, which draws interactive charts inside
+the chat with the real numbers of the export: trajectory with forecast and
+signals, pillars, the eleven variables, points gained and lost, one variable
+month by month, variable comparison, forecast drivers, daily cash and rankings
+of customers, suppliers, late payers, lines or debt. The model picks the chart
+and comments on the reading; the numbers come from the server. Ask it "Dibuja la
+trayectoria del PULSE", "¿Qué variables restan más puntos?" or "Compara días de
+caja y DSO, y un ranking de morosidad".
 
-Para conectar Vercel AI Gateway, define `AI_GATEWAY_API_KEY` en `.env` (o
-`.env.local`) y reinicia Next.js; el servidor la lee al arrancar y el SDK la
-toma del entorno. El modelo está fijado como `ASSISTANT_MODEL =
-'google/gemini-3.8-flash'` en `src/lib/assistant/config.ts`, con razonamiento
-en nivel bajo y 10.000 tokens de salida para que la respuesta llegue completa.
-No se configura desde el navegador. `ASSISTANT_MODE=mock` fuerza la demo;
-`ASSISTANT_MODE=gateway` exige una clave y devuelve un error claro si falta.
-Nunca se envía la clave al cliente.
+To connect the Vercel AI Gateway, set `AI_GATEWAY_API_KEY` in `.env` (or
+`.env.local`) and restart Next.js; the server reads it at start-up and the SDK
+takes it from the environment. The model is pinned as `ASSISTANT_MODEL =
+'google/gemini-3.8-flash'` in `src/lib/assistant/config.ts`, with low reasoning
+and 10,000 output tokens so the answer arrives complete. It is not configurable
+from the browser. `ASSISTANT_MODE=mock` forces the demo; `ASSISTANT_MODE=gateway`
+requires a key and returns a clear error when it is missing. The key is never
+sent to the client.
 
-El frontend es propietario de `POST /api/assistant` y `GET /api/actions/[id]`; no añade endpoints a FastAPI.
-Acepta `{ messages: UIMessage[], pathname: string }` y devuelve SSE con el protocolo
-UI Message Stream de AI SDK 7, partes de herramienta (`tool-*`) incluidas. Acepta
-texto y, en las respuestas anteriores del asistente, partes de herramienta
-terminadas de las ocho herramientas conocidas; roles `user`/`assistant`, hasta
-20 mensajes, 32 partes por mensaje, 2.000 caracteres por pregunta y 256 KiB por
-petición. El transporte
-del navegador limita el historial a los últimos 20 mensajes. La respuesta incluye
-metadata `{ mode: 'mock' | 'gateway', sources: { label, href }[] }`.
-Errores antes del stream: JSON `{ error: string }`, códigos 400/403/413/415/503;
-errores del modelo durante el stream: evento SDK `error` con mensaje seguro.
-El contexto se obtiene de los adaptadores de datos existentes, nunca del HTML
-enviado por el cliente. Ejemplo de invocación y contrato completo en
-[la documentación de Nexo](docs/nexo.md).
+The frontend owns `POST /api/assistant` and `GET /api/actions/[id]`; these are
+its only route handlers. The assistant route accepts
+`{ messages: UIMessage[], pathname: string }` and answers SSE with the AI SDK 7
+UI Message Stream protocol, tool parts (`tool-*`) included. It accepts text and,
+in previous assistant answers, finished tool parts of the eight known tools;
+roles `user`/`assistant`, up to 20 messages, 32 parts per message, 2,000
+characters per question and 256 KiB per request. The browser transport limits
+the history to the last 20 messages. The answer carries metadata
+`{ mode: 'mock' | 'gateway', sources: { label, href }[] }`. Errors before the
+stream: JSON `{ error: string }`, status codes 400/403/413/415/503; model errors
+during the stream: SDK `error` event with a safe message. The context comes from
+the existing data adapters, never from HTML sent by the client. Invocation
+example and full contract in [the Nexo documentation](docs/nexo.md).
 
-Referencias: [Vercel AI Gateway](https://vercel.com/docs/ai-gateway/getting-started),
+References: [Vercel AI Gateway](https://vercel.com/docs/ai-gateway/getting-started),
 [AI SDK Chatbot](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot),
 [Gemini 3.8 Flash](https://vercel.com/ai-gateway/models/gemini-3.8-flash).
 
-### Qué hacer ahora (acciones)
+### What to do now (actions)
 
-Cada página de empresa abre con el bloque navy «Qué hacer ahora»: como máximo
-tres acciones, de mayor a menor impacto, escritas por el mismo modelo de
-Gateway que Nexo (`ASSISTANT_MODEL`) con salida tipada `Output.object` y 30 s
-de plazo. La primera acción es el titular de la página; las otras dos van bajo
-una línea, y cada una enlaza a la página donde se ejecuta o se comprueba.
+Every company page opens with the navy "Qué hacer ahora" block: at most three
+actions, from the highest impact down, written by the same Gateway model as Nexo
+(`ASSISTANT_MODEL`) with typed output (`Output.object`) and a 30 s deadline. The
+first action is the page headline; the other two sit below a rule, and each one
+links to the page where it is carried out or checked.
 
-El modelo sólo recibe las cifras de esa empresa —score, pilares, variables
-flojas y sin datos, señal abierta, previsión, tensión a seis meses, caja,
-ofertas con su palanca y descartados—; nunca la cartera. Los destinos que
-escribe se validan contra las rutas conocidas: cualquier otro cae en la página
-de recomendaciones. Las acciones llegan por `GET /api/actions/[id]` y el navegador guarda la
-respuesta del modelo en `localStorage` por empresa y cierre, así que volver a
-la empresa —hoy o mañana— no vuelve a pagar tokens; el servidor añade además
-un memo de una hora por empresa. Con `ASSISTANT_MODE=mock`, si el modelo falla o si no devuelve nada
-utilizable, el bloque escribe las acciones deterministas a partir de las mismas
-cifras y se marca con la etiqueta `DEMO`. Contrato y ejemplo de la respuesta en
-[la documentación de acciones](docs/actions.md).
+The model only receives that company's figures — score, pillars, weak and
+missing variables, open signal, forecast, six-month stress, cash, offers with
+their lever and the declined ones; never the portfolio. The destinations it
+writes are validated against the known routes: anything else falls back to the
+recommendations page. Actions arrive through `GET /api/actions/[id]` and the
+browser stores the model's answer in `localStorage` per company and close, so
+coming back to the company — today or tomorrow — does not pay tokens again; the
+server also adds a one-hour memo per company. With `ASSISTANT_MODE=mock`, if the
+model fails or returns nothing usable, the block writes the deterministic
+actions from the same figures and is marked with the `DEMO` tag. Contract and
+response example in [the actions documentation](docs/actions.md).
 
-### Fuente de datos
+### 🗄️ Data source
 
-Dos capas con el mismo patrón —una interfaz, una implementación estática y otra
-contra la API— seleccionadas por entorno en un factory:
+Two layers share the same shape — one interface, one static implementation
+reading the bundled JSON — behind a memoised factory:
 
-- **PULSE** (`src/lib/pulse/data.ts`, interfaz `PulseDataSource`):
-  `StaticPulseSource` lee `src/data/pulse/summary.json` y
-  `src/data/pulse/companies/<id>.json` (1.285 ficheros que reescribe
-  `uv run python -m ml_service.pulse.export_web`) y el detalle por variable de
-  `src/data/pulse/details/<id>.json` (espejo de
-  `uv run python -m ml_service.pulse.export_details`, tipos en
-  `src/lib/pulse/details/types.ts`); `ApiPulseSource` se activa con
-  `PULSE_API_URL`.
-- **Advisor** (`src/lib/advisor/data.ts`, interfaz `AdvisorDataSource`):
-  `StaticAdvisorSource` lee `src/data/pulse/recommendations/catalogue.json` y
-  `src/data/pulse/recommendations/companies/<id>.json` (espejo que escribe
-  `uv run python -m ml_service.pulse.recommend.cli build`); `ApiAdvisorSource`
-  se activa con la misma variable.
+- **PULSE** (`src/lib/pulse/data.ts`, interface `PulseDataSource`):
+  `StaticPulseSource` reads `summary.json`, `companies/<id>.json` and the
+  per-variable detail in `details/<id>.json` (types in
+  `src/lib/pulse/details/types.ts`).
+- **Advisor** (`src/lib/advisor/data.ts`, interface `AdvisorDataSource`):
+  `StaticAdvisorSource` reads `recommendations/catalogue.json` and
+  `recommendations/companies/<id>.json`.
 
-| Variable        | Obligatoria | Descripción                                                                                                                              |
-| --------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `PULSE_API_URL` | No          | URL raíz del servicio FastAPI, p. ej. `http://localhost:8000`. Sin ella se leen los JSON del repositorio. `XRAY_API_URL` sigue valiendo. |
+File layout under `src/data/pulse/`:
 
-Contrato consumido (el servicio es el dueño de cada endpoint; este listado es el
-espejo en el consumidor):
+```
+src/data/pulse/
+├── summary.json                        # score metadata, weights and one row per company
+├── companies/<id>.json                 # 1,285 files: monthly history and forecast
+├── details/<id>.json                   # 1,285 files: per-variable detail of the last month
+└── recommendations/
+    ├── catalogue.json                  # products, pricing constants and risk model
+    └── companies/<id>.json             # 1,285 files: the Advisor proposal per company
+```
 
-| Método y ruta                              | Respuesta esperada                                                                                                                                                                                                                                                                                                                               |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /api/pulse/summary`                   | `score_name`, `score_expansion`, `horizons`, `last_month`, `pillars[{key,label,weight}]`, `variables[{key,number,label,pillar,weight,raw,unit}]`, `contribution_keys`, `evaluation{score,forecast{horizons},risk,signals{anticipation{horizons},persistence}}`, `companies[...]` (solo se usan los identificadores).                             |
-| `GET /api/pulse/companies/{id}`            | Empresa con `series[]` (por mes: `pulse`, `confidence`, `pillars`, `variables`, `contributions`, `cash_end`) y `forecast[]` (`horizon`, `target_month`, `pulse_pred`, `pulse_p10`, `pulse_p90`, `delta_raw`, `contributions`) y `signals[]` (por episodio: `month`, `kind` `caida                                                                | bache | mejora | repunte`, `direction`, `level`, `baseline`, `move`, `breadth`, `confidence`, `pillar_deltas`, `drivers[]`, `p_persistent`, `outcome` `persistente | transitorio | null`, `headline`, `detail`; parser en `src/lib/pulse/parse-signals.ts`); la app conserva solo los horizontes +1..+6. |
-| `GET /api/pulse/companies/{id}/details`    | `company_id`, `month` y `variables{...}` con un bloque por variable: listas con tope de 8 (`accounts`, `lines`, `suppliers`, `customers`, `debtors`, `products`), `daily[]` (62 días), `aging[]` (5 tramos) y `months[]` (12 meses) con las columnas que documenta el README del backend. Bloques siempre presentes, vacíos cuando no hay datos. |
-| `GET /api/pulse/recommendations/catalogue` | `reference_rate`, `pricing_parameters`, `products[]`, `risk_model`.                                                                                                                                                                                                                                                                              |
-| `GET /api/pulse/recommendations/{id}`      | `summary`, `risk`, `recommendations[]` (con `reasons`, `sizing`, `pricing`, `levers`), `declined[]`, `improvement_plan`, `inputs`, `disclaimer`. Admite `?euribor=`.                                                                                                                                                                             |
+Regenerate the whole export from the backend, which runs cleaning, the PULSE
+score, the six-month forecast, the signals and the Advisor in one command:
 
-Las respuestas se parsean con parsers tolerantes: claves desconocidas se
-ignoran, las ausentes quedan a `null` y un fallo de red degrada la página a su
-estado vacío. Una variable sin evidencia llega con `known: false` y se muestra
-como «sin datos», nunca como un cero. Los pesos suman 100 puntos y las
-contribuciones de cada horizonte suman exactamente `delta`; ambas
-invariantes se comprueban en `tests/unit/pulse-source.test.ts` y
-`tests/unit/pulse-company-view.test.ts`. En el Advisor, los componentes del
-precio suman el diferencial (`tests/unit/advisor-source.test.ts`).
+```bash
+cd ../backend
+uv run pulse --out ../frontend/src/data/pulse
+```
 
-Empresas de ejemplo: `/company/COMP_0001` («Atresmedia Labs»: 8 meses observados,
-82 % de confianza, dos variables de líneas sin datos, tres productos
-recomendados) y `/company/COMP_0051` («Atlassian Global»: 24 meses y
-utilización de líneas conocida). Ambas están fijadas en `src/lib/pulse/demo.ts`.
+(`uv run pulse` with no `--out` writes to `backend/data/pulse/export/`.)
+
+Consumed contract. The backend owns it and
+[`../backend/docs/json-contract.md`](../backend/docs/json-contract.md) documents every field; this table
+is only the mirror kept in the consumer:
+
+| File                                  | Expected content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `summary.json`                        | `score_name`, `score_expansion`, `horizons`, `last_month`, `pillars[{key,label,weight}]`, `variables[{key,number,label,pillar,weight,raw,unit}]`, `contribution_keys`, `evaluation{score,forecast{horizons},risk,signals{anticipation{horizons},persistence}}`, `companies[...]`.                                                                                                                                                                                                                                                                                                                |
+| `companies/<id>.json`                 | The company with `series[]` (per month: `pulse`, `confidence`, `pillars`, `variables`, `contributions`, `cash_end`), `forecast[]` (`horizon`, `target_month`, `pulse_pred`, `pulse_p10`, `pulse_p90`, `delta_raw`, `contributions`) and `signals[]` (per episode: `month`, `kind` `caida \| bache \| mejora \| repunte`, `direction`, `level`, `baseline`, `move`, `breadth`, `confidence`, `pillar_deltas`, `drivers[]`, `p_persistent`, `outcome` `persistente \| transitorio \| null`, `headline`, `detail`; parser in `src/lib/pulse/parse-signals.ts`). The app keeps only horizons +1..+6. |
+| `details/<id>.json`                   | `company_id`, `month` and `variables{...}` with one block per variable: lists capped at 8 (`accounts`, `lines`, `suppliers`, `customers`, `debtors`, `products`), `daily[]` (62 days), `aging[]` (5 buckets) and `months[]` (12 months) with the columns documented in the backend README. Blocks are always present, empty when there is no data.                                                                                                                                                                                                                                               |
+| `recommendations/catalogue.json`      | `reference_rate`, `pricing_parameters`, `products[]`, `risk_model`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `recommendations/companies/<id>.json` | `summary`, `risk`, `recommendations[]` (with `reasons`, `sizing`, `pricing`, `levers`), `declined[]`, `improvement_plan`, `inputs`, `disclaimer`.                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+Files are parsed by tolerant parsers: unknown keys are ignored, missing ones
+stay `null` and an unreadable file degrades the page to its empty state. A
+variable with no evidence arrives with `known: false` and is shown as "sin
+datos", never as a zero. Weights add up to 100 points and the contributions of
+every horizon add up exactly to `delta`; both invariants are checked in
+`tests/unit/pulse-source.test.ts` and `tests/unit/pulse-company-view.test.ts`.
+In the Advisor, the price components add up to the spread
+(`tests/unit/advisor-source.test.ts`).
+
+Example companies: `/company/COMP_0001` ("Atresmedia Labs": 8 months observed,
+82 % confidence, two credit-line variables with no data, three recommended
+products) and `/company/COMP_0051` ("Atlassian Global": 24 months and known line
+utilisation). Both are pinned in `src/lib/pulse/demo.ts`.
+
+### Environment variables
+
+None is required: without any key the app serves the bundled JSON and Nexo runs
+its deterministic demo.
+
+| Variable             | Required | Description                                                                                                   |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `AI_GATEWAY_API_KEY` | No       | Vercel AI Gateway key used by Nexo and by "What to do now". Server-only; never prefix `NEXT_PUBLIC_`.         |
+| `ASSISTANT_MODE`     | No       | `mock` forces the deterministic demo even with a key; `gateway` requires a key and fails clearly without one. |
 
 ## 🎯 Philosophy
 
-This template embodies **professional software engineering principles** with a focus on:
+This application follows **professional software engineering principles** with a
+focus on:
 
 - **SOLID Principles** - Applied rigorously across all code
 - **Design Pattern Driven** - Appropriate patterns for maintainability and scalability
@@ -165,35 +192,39 @@ This template embodies **professional software engineering principles** with a f
 - **Code Quality** - Strict linting, formatting, and file size limits (200 lines max)
 - **Type Safety** - Full TypeScript strict mode enforcement
 
-See [AGENTS.md](./AGENTS.md) for complete development guidelines and principles that are used to guide AI Agents.
+See [AGENTS.md](./AGENTS.md) for complete development guidelines and principles
+that are used to guide AI Agents.
 
-## ✨ Features
+## ✨ Stack
 
-### Core Stack
+### Core
 
-- **[Next.js 15.5.4](https://nextjs.org/docs)** - React framework with App Router
-- **[React 19.1.0](https://react.dev/)** - Latest React with Server Components
+- **[Next.js 16](https://nextjs.org/docs)** - React framework with App Router
+- **[React 19](https://react.dev/)** - Server Components
 - **[TypeScript 5.x](https://www.typescriptlang.org/)** - Strict type safety
 - **[TailwindCSS 4.x](https://tailwindcss.com/)** - Utility-first CSS framework
 - **[HeroUI v3](https://heroui.com/en/docs/react/components)** - Accessible React components built on React Aria and Tailwind CSS 4
+- **[AI SDK 7](https://ai-sdk.dev/)** - Streaming and tool calling for Nexo
 
-### Testing Infrastructure
+### Testing
 
 - **[Vitest](https://vitest.dev/)** - Fast unit and integration testing
 - **[Playwright](https://playwright.dev/)** - Reliable E2E testing across browsers
 - **Comprehensive test setup** - Separate unit, integration, and E2E test suites
 
-### Code Quality Tools
+### Code quality
 
 - **[ESLint](https://eslint.org/)** - Next.js and TypeScript linting rules
 - **[Prettier](https://prettier.io/)** - Consistent code formatting
-- **Pre-commit hooks** - Automated testing and formatting before commits
+- **Pre-commit script** - Automated testing and formatting before commits
 - **Strict TypeScript** - Maximum type safety configuration
 
 ### Infrastructure
 
 - **Environment management** - Configuration with `.env` files
-- **Dockerfile** - Multi-stage standalone image (see `../Makefile` `up`)
+- **Dockerfile** - Multi-stage standalone image; the image bakes in the JSON
+  export, so the container serves the product with no other service. Started
+  from the root `compose.yml` with `make up`.
 
 ## 📋 Prerequisites
 
@@ -203,43 +234,37 @@ See [AGENTS.md](./AGENTS.md) for complete development guidelines and principles 
 
 ## 🚀 Getting Started
 
-### 1. Clone and Install
+### 1. Install
 
 ```bash
-# Clone the repository
-git clone https://github.com/alexfdez1010/next-template.git my-project
-cd my-project
-
-# Install dependencies
+cd frontend
 bun install
 ```
 
-### 2. Environment Setup
+### 2. Environment setup
 
 ```bash
-# Copy environment template
 cp .env.example .env
-
-# Optional: point XRAY_API_URL at the FastAPI service
-# XRAY_API_URL="http://localhost:8000"
 ```
 
-### 3. Run Development Server
+Everything works without editing it; add `AI_GATEWAY_API_KEY` only to run Nexo
+and the actions against a real model.
+
+### 3. Run the development server
 
 ```bash
-# Start development server with Turbopack
 bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see your application.
+Open [http://localhost:3000](http://localhost:3000).
 
 ## 🎨 HeroUI and design system
 
-This template uses HeroUI v3 as its UI component library. It does not use
-shadcn/ui or require a provider. Complete [`design.md`](./design.md) before
-implementing product features; it defines the visual language, semantic
-tokens, approved component variants, accessibility requirements, and layout
-decisions for the project.
+The app uses HeroUI v3 as its UI component library. It does not use shadcn/ui
+and does not require a provider. Read [`design.md`](./design.md) before
+implementing product features; it defines the visual language, semantic tokens,
+approved component variants, accessibility requirements, and layout decisions
+for the project.
 
 ### HeroUI CLI
 
@@ -271,9 +296,8 @@ HeroUI CLI performs registry checks through the `npm` executable even when the
 project is managed with Bun. No global npm installation is required for these
 commands.
 
-For a new project, use `bunx heroui-cli@latest init`. For this existing
-template, install dependencies with `bun install`; do not run `init` because it
-would replace the current application structure. The official references are
+Do not run `heroui init` in this checkout: it would replace the current
+application structure. The official references are
 [HeroUI Quick Start](https://heroui.com/en/docs/react/getting-started/quick-start),
 [HeroUI CLI](https://heroui.com/en/docs/react/getting-started/cli), and
 [HeroUI React components](https://heroui.com/en/docs/react/components).
@@ -290,24 +314,24 @@ Use compound components such as `Card.Header`, `Card.Content`, and
 `Card.Footer`; use semantic variants and `onPress` for interactive controls.
 HeroUI v3 does not require `HeroUIProvider`.
 
-The official React agent skill is installed at
-`../.agents/skills/heroui-react` (repository root) and registered in `../skills-lock.json`. To refresh
-it with the official source, run:
+The official React agent skill is installed at `../.agents/skills/heroui-react`
+(repository root) and registered in `../skills-lock.json`. To refresh it with
+the official source, run:
 
 ```bash
 bunx skills add heroui-inc/heroui --skill heroui-react --yes
 ```
 
-### Tablas con orden por columna
+### Tables sorted by column
 
-Toda tabla de datos se construye con `DataTable`
-(`src/components/ui/data-table.tsx`), un envoltorio de HeroUI `Table` que
-ordena por cualquier columna al pulsar su cabecera, en ambos sentidos. Las
-columnas se declaran como datos: id, cabecera, celda y, si la columna se puede
-ordenar, un `sortBy` que devuelve el valor a comparar (`number | string | null`).
-Una fila sin valor (`null`) queda siempre al final, en cualquier sentido, para
-que «sin datos» nunca parezca la mejor ni la peor cifra. `defaultSort` fija el
-orden con el que abre la tabla y la cabecera lo muestra.
+Every data table is built with `DataTable`
+(`src/components/ui/data-table.tsx`), a wrapper around the HeroUI `Table` that
+sorts by any column when its header is pressed, in both directions. Columns are
+declared as data: id, header, cell and, when the column is sortable, a `sortBy`
+returning the value to compare (`number | string | null`). A row with no value
+(`null`) always stays last, in either direction, so "no data" never looks like
+the best or the worst figure. `defaultSort` fixes the order the table opens
+with, and the header shows it.
 
 ```tsx
 const COLUMNS: readonly DataTableColumn<Row>[] = [
@@ -336,10 +360,10 @@ const COLUMNS: readonly DataTableColumn<Row>[] = [
 />;
 ```
 
-La ordenación es pura (`sortRows` en `src/lib/table/sort.ts`, con colación
-española) y ocurre en el cliente sobre filas ya calculadas en el servidor; el
-componente no accede a la fuente de datos. Las cuatro tablas del producto (mes a
-mes, previsión, variables y ejemplo del método) la usan.
+Sorting is pure (`sortRows` in `src/lib/table/sort.ts`, with Spanish collation)
+and happens on the client over rows already computed on the server; the
+component never reaches the data source. The four product tables (month by
+month, forecast, variables and the method example) use it.
 
 ## 📜 Available Scripts
 
@@ -371,26 +395,24 @@ mes, previsión, variables y ejemplo del método) la usan.
 ```
 frontend/
 ├── src/
-│   └── app/              # Next.js App Router pages
-│       ├── layout.tsx    # Root layout
-│       ├── page.tsx      # Home page
-│       └── globals.css   # Global styles
+│   ├── app/              # Next.js App Router pages and route handlers
+│   ├── components/       # UI, layout, PULSE and assistant components
+│   ├── lib/              # Data layer, parsers, formatting and domain logic
+│   └── data/pulse/       # JSON export consumed by the app (generated)
 ├── tests/
 │   ├── unit/             # Unit tests
 │   ├── integration/      # Integration tests
 │   ├── e2e/              # End-to-end tests
 │   └── setup.ts          # Test configuration
+├── docs/                 # Nexo and actions contracts
 ├── public/               # Static assets
-├── .vscode/              # VS Code settings
 ├── Dockerfile            # Production image (standalone Next.js)
 ├── eslint.config.mjs     # ESLint configuration
 ├── playwright.config.ts  # Playwright configuration
 ├── vitest.config.ts      # Vitest configuration
 ├── tsconfig.json         # TypeScript configuration
-├── tailwind.config.ts    # TailwindCSS configuration
-├── .prettierrc           # Prettier configuration
 ├── .env.example          # Environment template
-└── AGENTS.md             # AI Agents Development guidelines
+└── AGENTS.md             # AI Agents development guidelines
 ```
 
 ## 🧪 Testing Strategy
@@ -405,7 +427,7 @@ bun run test:unit
 
 ### Integration Tests
 
-Located in `tests/integration/`, these test module interactions and API endpoints.
+Located in `tests/integration/`, these test module interactions and route handlers.
 
 ```bash
 bun run test:integration
@@ -421,16 +443,7 @@ bun run test:e2e
 
 ## 🚢 Deployment
 
-### Environment Variables
-
-No variable is required. Set `XRAY_API_URL` to read from the FastAPI service;
-leave it unset to serve the JSON bundled under `src/data`:
-
-```bash
-XRAY_API_URL="https://api.example.com"
-```
-
-### Build and Deploy
+### Build and run
 
 ```bash
 # Build production bundle
@@ -439,6 +452,19 @@ bun run build
 # Run production server
 bun run start
 ```
+
+### Docker
+
+The multi-stage `Dockerfile` produces a standalone Next.js image and copies
+`src/data` into it, so the container serves the bundled JSON export with no
+other service. From the repository root:
+
+```bash
+make up
+```
+
+No environment variable is required. `AI_GATEWAY_API_KEY` is read from
+`frontend/.env` by the root `compose.yml` when present.
 
 ## 🔧 Configuration Files
 
@@ -450,8 +476,6 @@ bun run start
 
 ## 📚 Resources
 
-### Official Documentation
-
 - [Next.js Documentation](https://nextjs.org/docs)
 - [React Documentation](https://react.dev/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
@@ -459,28 +483,20 @@ bun run start
 - [Vitest Documentation](https://vitest.dev/)
 - [Playwright Documentation](https://playwright.dev/)
 
-## 📄 Template Usage
+## 🖼️ Social image
 
-This is a template repository. To use it:
+`src/app/opengraph-image.jpg` is the Open Graph image shared by the routes of
+the application (1200 × 630). It shows Embat Pulse, the header icon and Nexo.
+It was generated with ImageGen using `src/app/icon.svg` and
+`public/mascot/nexo-suit.png` as identity references. Its alternative text lives
+in `src/app/opengraph-image.alt.txt`.
 
-1. Click "Use this template" on GitHub
-2. Clone your new repository
-3. Remove or modify this README as needed
-4. Start building your application
+Decision (2026-09-19): keeping the artwork as a static asset separates the
+visual identity from the components and avoids rendering images on every
+request.
 
-## Imagen social
-
-`src/app/opengraph-image.jpg` es la imagen Open Graph compartida por las rutas
-de la aplicación (1200 × 630). Incluye Embat Pulse, el icono del header y Nexo.
-Se generó con ImageGen usando `src/app/icon.svg` y
-`public/mascot/nexo-suit.png` como referencias de identidad. Su texto alternativo
-vive en `src/app/opengraph-image.alt.txt`.
-
-Decisión (2026-09-19): mantener el arte como recurso estático separa la identidad
-visual de los componentes y evita renderizar imágenes en cada petición.
-
-Next.js publica la imagen y sus metadatos automáticamente mediante su
-[convención de imágenes sociales](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image).
-Para verla localmente, arranca la aplicación con `bun run dev` y abre
-`http://localhost:3000/opengraph-image.jpg`. Las tarjetas de Twitter/X también
-heredan esta imagen desde Open Graph.
+Next.js publishes the image and its metadata automatically through its
+[social image convention](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image).
+To see it locally, start the application with `bun run dev` and open
+`http://localhost:3000/opengraph-image.jpg`. Twitter/X cards inherit this image
+from Open Graph too.

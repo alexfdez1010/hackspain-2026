@@ -1,0 +1,221 @@
+{
+ "steps": [
+  {
+   "table": "transactions",
+   "rule": "exact duplicate (product, date, amount, description)",
+   "affected": 112346,
+   "total": 2556437,
+   "share": 0.04395,
+   "note": ""
+  },
+  {
+   "table": "transactions",
+   "rule": "status pending (not settled)",
+   "affected": 5551,
+   "total": 2444091,
+   "share": 0.00227,
+   "note": ""
+  },
+  {
+   "table": "transactions",
+   "rule": "booking date null or outside dataset window",
+   "affected": 0,
+   "total": 2444091,
+   "share": 0.0,
+   "note": ""
+  },
+  {
+   "table": "transactions",
+   "rule": "amount null or zero",
+   "affected": 349,
+   "total": 2444091,
+   "share": 0.00014,
+   "note": ""
+  },
+  {
+   "table": "transactions",
+   "rule": "value_date corrupt (null or > 30 days from booking) -> booking date used",
+   "affected": 2639,
+   "total": 2438191,
+   "share": 0.00108,
+   "note": ""
+  },
+  {
+   "table": "transactions",
+   "rule": "product not in any product table (currency from company)",
+   "affected": 1305,
+   "total": 2438191,
+   "share": 0.00054,
+   "note": ""
+  },
+  {
+   "table": "transactions",
+   "rule": "currency not in FX table (assumed EUR)",
+   "affected": 0,
+   "total": 2438191,
+   "share": 0.0,
+   "note": ""
+  },
+  {
+   "table": "transactions",
+   "rule": "rows converted from a non-EUR currency",
+   "affected": 234530,
+   "total": 2438191,
+   "share": 0.09619,
+   "note": ""
+  },
+  {
+   "table": "transactions",
+   "rule": "|amount| > 1e+09 EUR (absurd)",
+   "affected": 0,
+   "total": 2438191,
+   "share": 0.0,
+   "note": ""
+  },
+  {
+   "table": "transactions",
+   "rule": "|amount| > 20x company p99 and > 1e+06 EUR",
+   "affected": 178,
+   "total": 2438191,
+   "share": 7e-05,
+   "note": "39 companies affected"
+  },
+  {
+   "table": "transactions",
+   "rule": "counterparty resolved from narrative token (column empty)",
+   "affected": 500661,
+   "total": 2438013,
+   "share": 0.20536,
+   "note": "69.4% still unresolved"
+  },
+  {
+   "table": "invoices",
+   "rule": "document_type not invoice/invoiceGroup",
+   "affected": 123713,
+   "total": 897894,
+   "share": 0.13778,
+   "note": ""
+  },
+  {
+   "table": "invoices",
+   "rule": "status cancel",
+   "affected": 12099,
+   "total": 897894,
+   "share": 0.01347,
+   "note": ""
+  },
+  {
+   "table": "invoices",
+   "rule": "amount null or zero",
+   "affected": 968,
+   "total": 897894,
+   "share": 0.00108,
+   "note": ""
+  },
+  {
+   "table": "invoices",
+   "rule": "issuance_date null or after extraction",
+   "affected": 591,
+   "total": 897894,
+   "share": 0.00066,
+   "note": ""
+  },
+  {
+   "table": "invoices",
+   "rule": "currency not in FX table (assumed EUR)",
+   "affected": 0,
+   "total": 760536,
+   "share": 0.0,
+   "note": ""
+  },
+  {
+   "table": "invoices",
+   "rule": "rows converted from a non-EUR currency",
+   "affected": 110347,
+   "total": 760536,
+   "share": 0.14509,
+   "note": ""
+  },
+  {
+   "table": "invoices",
+   "rule": "due_date impossible (before issuance or > 365 d) -> unknown",
+   "affected": 16356,
+   "total": 760536,
+   "share": 0.02151,
+   "note": ""
+  },
+  {
+   "table": "invoices",
+   "rule": "payment_date not trusted (status != paid or pending > 0)",
+   "affected": 198589,
+   "total": 760536,
+   "share": 0.26112,
+   "note": "unpaid documents carry the due date as payment_date"
+  },
+  {
+   "table": "invoices",
+   "rule": "payment_date impossible on settled invoices -> unknown",
+   "affected": 30552,
+   "total": 760536,
+   "share": 0.04017,
+   "note": ""
+  },
+  {
+   "table": "invoices",
+   "rule": "|amount| > 20x company p99 and > 1e+06 EUR",
+   "affected": 77,
+   "total": 760536,
+   "share": 0.0001,
+   "note": "sum 1.208e+09 EUR"
+  },
+  {
+   "table": "balances",
+   "rule": "currency not in FX table (assumed EUR)",
+   "affected": 0,
+   "total": 7996,
+   "share": 0.0,
+   "note": ""
+  },
+  {
+   "table": "balances",
+   "rule": "rows converted from a non-EUR currency",
+   "affected": 1001,
+   "total": 7996,
+   "share": 0.12519,
+   "note": ""
+  },
+  {
+   "table": "balances",
+   "rule": "cash products without a snapshot (unanchored)",
+   "affected": 209,
+   "total": 4898,
+   "share": 0.04267,
+   "note": ""
+  },
+  {
+   "table": "balances",
+   "rule": "|balance| > 20x monthly gross flow and > 1e+06 EUR -> unanchored",
+   "affected": 11,
+   "total": 4898,
+   "share": 0.00225,
+   "note": "max discarded 1.000e+11 EUR"
+  },
+  {
+   "table": "balances",
+   "rule": "cash snapshot exactly zero (kept, but weak anchor)",
+   "affected": 961,
+   "total": 4898,
+   "share": 0.1962,
+   "note": ""
+  }
+ ],
+ "facts": {
+  "companies": 1286,
+  "companies_with_transactions": 1286,
+  "companies_with_invoices": 784,
+  "companies_with_ar": 718,
+  "companies_with_ap": 782,
+  "transactions_kept": 2438013,
+  "invoices_kept": 760459
+ }
+}

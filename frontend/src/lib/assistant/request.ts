@@ -14,7 +14,7 @@ const MAX_PARTS = 32;
 const MAX_TOOL_PART_CHARS = 12_000;
 /** The routes the assistant may be told it is on; mirrors `VARIABLE_KEY_PATTERN`. */
 const KNOWN_PATH =
-  /^\/(?:company\/COMP_\d{4}(?:\/recommendations|\/signals|\/diagnosis|\/detail|\/variable\/[a-z][a-z0-9_]{0,31})?|method)?$/;
+  /^\/(?:company\/COMP_\d{4}(?:\/recommendations|\/signals|\/diagnosis|\/detail|\/action(?:\/[a-z][a-z0-9_]{0,31})?|\/variable\/[a-z][a-z0-9_]{0,31})?|method)?$/;
 
 /** A safe public error; no provider details are exposed to the client. */
 export class AssistantRequestError extends Error {

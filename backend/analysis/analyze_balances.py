@@ -1,9 +1,9 @@
 """Exploratory plots and outlier report for balances.csv.
 
 Run from backend/ with:
-    uv run python ml-tests/analyze_balances.py
+    uv run --with matplotlib --with pandas python analysis/analyze_balances.py
 
-Writes PNG charts and CSV reports to ml-tests/output/.
+Writes PNG charts and CSV reports to analysis/output/.
 """
 
 from __future__ import annotations

@@ -188,7 +188,7 @@ describe('VariableForecastChart', () => {
     );
     expect(markup).toContain('+1 m');
     expect(markup).toContain('sep 2026');
-    expect(markup).toContain('+0,87');
+    expect(markup).toContain('+0,80');
     expect(markup).toContain('var(--score-solid)');
     expect(markup).toContain('cambio total previsto del PULSE');
   });

@@ -7,7 +7,7 @@ import type { AdvisorCatalogue, AdvisorCompany } from '@/lib/advisor/types';
 
 /**
  * Data source backed by the JSON files bundled in
- * `src/data/pulse/recommendations`, the fallback when no API URL is set.
+ * `src/data/pulse/recommendations`, the only store of the Advisor.
  */
 export class StaticAdvisorSource implements AdvisorDataSource {
   readonly kind = 'static' as const;

@@ -52,7 +52,7 @@ def settlement_ranking(ctx: DetailContext, side: str) -> pl.DataFrame:
     )
     return ranked.with_columns(
         (pl.col("days") - pl.col("terms_days")).alias("late_days")
-    ).sort(["company_id", "amount"], descending=[False, True])
+    ).sort(["company_id", "amount", "counterparty_id"], descending=[False, True, False])
 
 
 def billed_ranking(

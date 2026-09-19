@@ -71,7 +71,7 @@ def test_targets_are_future_change_and_null_at_the_edge():
     out = add_targets(df)
     assert out["y_1"].to_list()[:2] == [10.0, 10.0] and out["y_1"].to_list()[-1] is None
     assert out["y_6"].to_list()[0] == 60.0 and out["y_6"].null_count() == 6
-    assert out["y_12"].null_count() == 8 and HORIZONS == tuple(range(1, 13))
+    assert "y_12" not in out.columns and HORIZONS == tuple(range(1, 7))
 
 
 def _synthetic_frame(n_companies: int = 30, n_months: int = 20) -> pl.DataFrame:
@@ -161,8 +161,8 @@ def _drift_frame(n_companies: int = 40, n_months: int = 24) -> pl.DataFrame:
 
 def test_far_horizons_keep_moving_with_the_production_huber_threshold():
     """Guards the Huber ``alpha``: with LightGBM's default (0.9) every gradient is clipped
-    and the forecast freezes past +3 (a flat line); on a rising company +12 must sit
-    clearly above +4."""
+    and the forecast freezes past +3 (a flat line); on a rising company +6 must sit
+    clearly above +3."""
     frame = _drift_frame()
     params = {**FAST_PARAMS, "alpha": POINT_PARAMS["alpha"]}
     out = ForecastEngine.fit(frame, params, rounds=60).predict(frame)
@@ -171,7 +171,7 @@ def test_far_horizons_keep_moving_with_the_production_huber_threshold():
     )
     rising = deltas.filter(pl.col("trend") > 1)
     assert len(rising) >= 5
-    assert ((rising["12"] - rising["4"]) > 3).all()
+    assert ((rising["6"] - rising["3"]) > 2).all()
 
 
 def test_inflow_growth_is_finite_without_inflows():

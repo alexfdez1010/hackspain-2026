@@ -57,7 +57,11 @@ def _lines(ctx: DetailContext, lines: pl.DataFrame, drawn: pl.DataFrame) -> Rows
             .then(pl.col("drawn") / pl.col("limit"))
             .otherwise(None),
         )
-        .sort(["company_id", "util"], descending=[False, True], nulls_last=True)
+        .sort(
+            ["company_id", "util", "product_id"],
+            descending=[False, True, False],
+            nulls_last=True,
+        )
     )
     return rows_by_company(rounded(df), LINE_FIELDS)
 
@@ -96,7 +100,11 @@ def _debt_products(ctx: DetailContext) -> Rows:
             next_payment_date=pl.col("next_payment_date").dt.strftime("%Y-%m-%d"),
             periods_left=pl.col("periods_left"),
         )
-        .sort(["company_id", "outstanding"], descending=[False, True], nulls_last=True)
+        .sort(
+            ["company_id", "outstanding", "product_id"],
+            descending=[False, True, False],
+            nulls_last=True,
+        )
     )
     return rows_by_company(rounded(df), PRODUCT_FIELDS)
 

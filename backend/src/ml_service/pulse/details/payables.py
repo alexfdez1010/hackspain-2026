@@ -56,7 +56,10 @@ def _suppliers_terms(ctx: DetailContext) -> Rows:
             pl.len().alias("invoices"),
             weighted_mean("_terms", "amount_eur").alias("terms_days"),
         )
-        .sort(["company_id", "billed_6m"], descending=[False, True])
+        .sort(
+            ["company_id", "billed_6m", "counterparty_id"],
+            descending=[False, True, False],
+        )
     )
     return rows_by_company(rounded(df), TERMS_FIELDS)
 

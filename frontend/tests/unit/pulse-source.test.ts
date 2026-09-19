@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { parsePulseCompany } from '@/lib/pulse/parse-company';
 import { parsePulseSummary } from '@/lib/pulse/parse-summary';
@@ -6,30 +6,8 @@ import {
   PULSE_DEMO_COMPANY_ID,
   PULSE_DEMO_CREDIT_LINE_COMPANY_ID,
 } from '@/lib/pulse/demo';
-import { ApiPulseSource } from '@/lib/pulse/source/api';
 import { createPulseDataSource } from '@/lib/pulse/source/factory';
 import { StaticPulseSource } from '@/lib/pulse/source/static-json';
-
-/**
- * Builds a `fetch` stub that answers a fixed map of paths.
- *
- * @param routes - Path fragment to JSON body map; unknown paths answer 404.
- * @returns The stub and the list of requested URLs.
- */
-function stubFetch(routes: Record<string, unknown>) {
-  const calls: string[] = [];
-  const impl = vi.fn(async (input: RequestInfo | URL) => {
-    const url = String(input);
-    calls.push(url);
-    const match = Object.keys(routes).find((path) => url.includes(path));
-    if (!match) return new Response('not found', { status: 404 });
-    return new Response(JSON.stringify(routes[match]), {
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-    });
-  }) as unknown as typeof fetch;
-  return { impl, calls };
-}
 
 describe('parsePulseSummary', () => {
   it('reads metadata, weights and rows', () => {
@@ -60,7 +38,7 @@ describe('parsePulseSummary', () => {
           pulse_prev: 17.88,
           confidence: 0.82,
           pillars: { liquidez: 34.33 },
-          forecast_12m: {
+          forecast_6m: {
             pulse_pred: 31.07,
             pulse_p10: 15.58,
             pulse_p90: 48.35,
@@ -72,7 +50,7 @@ describe('parsePulseSummary', () => {
     expect(summary.meta.horizons).toEqual([1, 6]);
     expect(summary.meta.pillars).toHaveLength(1);
     expect(summary.companies).toHaveLength(1);
-    expect(summary.companies[0].forecast12m?.pulsePred).toBe(31.07);
+    expect(summary.companies[0].forecast6m?.pulsePred).toBe(31.07);
     expect(summary.companies[0].pillars.liquidez).toBe(34.33);
   });
 
@@ -84,9 +62,9 @@ describe('parsePulseSummary', () => {
 
   it('keeps a missing forecast as null', () => {
     const summary = parsePulseSummary({
-      companies: [{ company_id: 'COMP_0001', forecast_12m: null }],
+      companies: [{ company_id: 'COMP_0001', forecast_6m: null }],
     });
-    expect(summary.companies[0].forecast12m).toBeNull();
+    expect(summary.companies[0].forecast6m).toBeNull();
   });
 });
 
@@ -142,38 +120,8 @@ describe('parsePulseCompany', () => {
 });
 
 describe('createPulseDataSource', () => {
-  it('falls back to the bundled JSON files without PULSE_API_URL', () => {
-    expect(createPulseDataSource({})).toBeInstanceOf(StaticPulseSource);
-    expect(createPulseDataSource({ PULSE_API_URL: '  ' })).toBeInstanceOf(
-      StaticPulseSource,
-    );
-  });
-
-  it('uses the PULSE endpoints when PULSE_API_URL is set', async () => {
-    const { impl, calls } = stubFetch({
-      '/api/pulse/summary': { companies: [{ company_id: 'COMP_0001' }] },
-      '/api/pulse/companies/COMP_0001': { company_id: 'COMP_0001' },
-    });
-    const source = createPulseDataSource(
-      { PULSE_API_URL: 'http://localhost:8000/' },
-      impl,
-    );
-    expect(source).toBeInstanceOf(ApiPulseSource);
-    expect((await source.getSummary()).companies).toHaveLength(1);
-    expect((await source.getCompany('COMP_0001'))?.companyId).toBe('COMP_0001');
-    expect(calls).toEqual([
-      'http://localhost:8000/api/pulse/summary',
-      'http://localhost:8000/api/pulse/companies/COMP_0001',
-    ]);
-  });
-
-  it('degrades to an empty portfolio when the service is down', async () => {
-    const source = createPulseDataSource(
-      { PULSE_API_URL: 'http://localhost:8000' },
-      stubFetch({}).impl,
-    );
-    expect((await source.getSummary()).companies).toEqual([]);
-    expect(await source.getCompany('COMP_0001')).toBeNull();
+  it('returns the source backed by the bundled JSON files', () => {
+    expect(createPulseDataSource()).toBeInstanceOf(StaticPulseSource);
   });
 });
 
@@ -192,7 +140,7 @@ describe('StaticPulseSource', () => {
     ).toBe(100);
     expect(meta.evaluation.score.auroc).toBeGreaterThan(0.5);
     expect(meta.evaluation.forecast.map((item) => item.horizon)).toEqual([
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+      1, 2, 3, 4, 5, 6,
     ]);
     expect(meta.evaluation.risk.auroc).toBeGreaterThan(0.5);
   });

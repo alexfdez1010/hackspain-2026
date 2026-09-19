@@ -202,7 +202,7 @@ describe('a company with no offer', () => {
     );
     expect(markup).toContain('4.150.001 €');
     expect(markup).toContain('24 préstamos');
-    expect(markup).toContain('Banda p10-p90 30,9-65,7');
+    expect(markup).toContain('Banda p10-p90 31,3-61,3');
     expect(markup).toContain('sin datos');
   });
 });

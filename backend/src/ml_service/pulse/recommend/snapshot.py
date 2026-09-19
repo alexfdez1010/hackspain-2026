@@ -51,7 +51,7 @@ class InvoiceBook:
 
 @dataclass(frozen=True)
 class Outlook:
-    """One-year (+12 month) PULSE forecast produced by ``pulse.forecast``."""
+    """Six-month (+6) PULSE forecast produced by ``pulse.forecast``."""
 
     pulse_pred: float | None = None
     pulse_p10: float | None = None
@@ -90,7 +90,7 @@ class CompanySnapshot:
 
     @property
     def forecast_delta(self) -> float | None:
-        """Expected PULSE change at +12 months (None without a forecast)."""
+        """Expected PULSE change at +6 months (None without a forecast)."""
         if self.outlook.pulse_pred is None:
             return None
         return self.outlook.pulse_pred - self.pulse

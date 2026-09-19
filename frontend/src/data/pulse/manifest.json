@@ -1,0 +1,21 @@
+{
+ "generated_at": "2026-09-19T21:13:32+00:00",
+ "mode": "train",
+ "raw_dir": "/Users/alejandro/Downloads/output",
+ "work_dir": "/Users/alejandro/Projects/hackspain-2026/backend/data/pulse",
+ "last_month": "2026-08",
+ "companies": 1285,
+ "files": {
+  "companies": 1285,
+  "details": 1285,
+  "recommendations": 1285
+ },
+ "reports": [
+  "cleaning_report.json",
+  "cleaning_report.md",
+  "evaluation.json",
+  "forecast_evaluation.json",
+  "risk_evaluation.json",
+  "signals_evaluation.json"
+ ]
+}

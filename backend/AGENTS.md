@@ -2,6 +2,10 @@
 
 This document provides comprehensive guidance for AI coding assistants working on this Python project. It covers project structure, tooling, testing patterns, and development workflows.
 
+## This project in one paragraph
+
+`backend/` is the Embat PULSE pipeline: a **command-line program, not a service**. `uv run pulse` (package `src/ml_service/pulse/run/`) reads the raw CSVs in `data/raw/xray/`, chains cleaning → score → forecast → signals → advisor → JSON export and writes the output folder the web app bundles (`--out ../frontend/src/data/pulse`). Read [`README.md`](./README.md) for the pipeline, `docs/json-contract.md` for the output files, `docs/model-selection.md` before touching a model and `docs/data-cleaning.md` before touching a cleaning rule. Nothing under `data/` is versioned; the evaluation figures quoted in the docs are out of fold (GroupKFold by `group_id`) and must stay that way. There is no HTTP layer, no Docker image and no deployment config to maintain.
+
 ## Project Overview
 
 **Technology Stack:**
