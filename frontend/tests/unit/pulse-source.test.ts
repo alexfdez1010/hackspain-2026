@@ -142,20 +142,20 @@ describe('parsePulseCompany', () => {
 });
 
 describe('createPulseDataSource', () => {
-  it('falls back to the bundled JSON files without XRAY_API_URL', () => {
+  it('falls back to the bundled JSON files without PULSE_API_URL', () => {
     expect(createPulseDataSource({})).toBeInstanceOf(StaticPulseSource);
-    expect(createPulseDataSource({ XRAY_API_URL: '  ' })).toBeInstanceOf(
+    expect(createPulseDataSource({ PULSE_API_URL: '  ' })).toBeInstanceOf(
       StaticPulseSource,
     );
   });
 
-  it('uses the PULSE endpoints when XRAY_API_URL is set', async () => {
+  it('uses the PULSE endpoints when PULSE_API_URL is set', async () => {
     const { impl, calls } = stubFetch({
       '/api/pulse/summary': { companies: [{ company_id: 'COMP_0001' }] },
       '/api/pulse/companies/COMP_0001': { company_id: 'COMP_0001' },
     });
     const source = createPulseDataSource(
-      { XRAY_API_URL: 'http://localhost:8000/' },
+      { PULSE_API_URL: 'http://localhost:8000/' },
       impl,
     );
     expect(source).toBeInstanceOf(ApiPulseSource);
@@ -169,7 +169,7 @@ describe('createPulseDataSource', () => {
 
   it('degrades to an empty portfolio when the service is down', async () => {
     const source = createPulseDataSource(
-      { XRAY_API_URL: 'http://localhost:8000' },
+      { PULSE_API_URL: 'http://localhost:8000' },
       stubFetch({}).impl,
     );
     expect((await source.getSummary()).companies).toEqual([]);
@@ -190,6 +190,11 @@ describe('StaticPulseSource', () => {
     expect(
       meta.pillars.reduce((total, pillar) => total + pillar.weight, 0),
     ).toBe(100);
+    expect(meta.evaluation.score.auroc).toBeGreaterThan(0.5);
+    expect(meta.evaluation.forecast.map((item) => item.horizon)).toEqual([
+      1, 2, 3, 4, 5, 6,
+    ]);
+    expect(meta.evaluation.risk.auroc).toBeGreaterThan(0.5);
   });
 
   it('reads the demo companies of the navigation', async () => {

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Suspense } from 'react';
 
 import { SiteNav } from '@/components/layout/site-nav';
 import { AssistantWidget } from '@/components/assistant/assistant-widget';
@@ -23,7 +24,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Embat Pulse — salud financiera mensual de la cartera',
   description:
-    'Score X-Ray 0-100, trayectoria, régimen y línea de circulante dinámica sobre 1.286 pymes.',
+    'Score PULSE 0-100 con 11 variables en 4 pilares, historia mensual y previsión a seis meses sobre 1.285 pymes.',
 };
 
 /**
@@ -42,7 +43,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}
       >
-        <SiteNav />
+        <Suspense fallback={null}>
+          <SiteNav />
+        </Suspense>
         {children}
         <AssistantWidget mode={getAssistantMode()} />
       </body>

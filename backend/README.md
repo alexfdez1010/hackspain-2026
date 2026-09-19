@@ -202,6 +202,7 @@ uv run python -m ml_service.pulse.forecast.cli fit        # 6 horizon models -> 
 uv run python -m ml_service.pulse.forecast.cli evaluate   # OOF vs persistence/reversion -> forecast_evaluation.json
 uv run python -m ml_service.pulse.forecast.cli predict [--raw-dir DIR] [--all-months]   # -> data/pulse/forecast.{parquet,csv}
 uv run python -m ml_service.pulse.export_web              # -> data/pulse/web/ (+ mirror in ../frontend/src/data/pulse)
+# summary.json also carries an `evaluation` block (score, forecast and risk figures) read by the web app's method page
 ```
 
 **Design.** One LightGBM model per horizon predicts the *change* of `pulse_raw`
@@ -257,7 +258,8 @@ it is being offered. It is rule-based where the decision must be auditable
 
 ```bash
 uv run python -m ml_service.pulse.recommend.cli fit     # stress scorecard -> data/pulse/models/risk_model.json + risk_evaluation.json
-uv run python -m ml_service.pulse.recommend.cli build   # every company -> data/pulse/recommendations/{summary.json,companies/<id>.json}
+uv run python -m ml_service.pulse.recommend.cli build   # every company -> data/pulse/recommendations/{summary.json,catalogue.json,companies/<id>.json}
+#   (+ mirror of catalogue.json and companies/ in ../frontend/src/data/pulse/recommendations)
 uv run python -m ml_service.pulse.recommend.cli show COMP_1030   # human-readable narrative for one company
 make pulse-reco-all                                     # fit + build
 ```

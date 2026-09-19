@@ -38,6 +38,59 @@ export interface PulseVariableMeta {
   unit: string;
 }
 
+/** Published evaluation of the score itself. */
+export interface PulseScoreEvaluation {
+  /** Company-months with an observable six-month future. */
+  rows: number | null;
+  /** Share of those months followed by a stress episode. */
+  stressRate: number | null;
+  /** AUROC of PULSE for "no stress in the next six months". */
+  auroc: number | null;
+  /** Same AUROC restricted to companies not stressed today. */
+  aurocExcludingCurrentStress: number | null;
+  /** AUROC on months from September 2025 onwards. */
+  aurocTemporal: number | null;
+  /** AUROC of each variable on its own, keyed by variable. */
+  aurocByVariable: Record<string, number>;
+}
+
+/** Out-of-fold accuracy of the forecast at one horizon. */
+export interface PulseForecastHorizonEvaluation {
+  horizon: number;
+  rows: number | null;
+  /** Mean absolute error of "the score stays where it is". */
+  maePersist: number | null;
+  /** Mean absolute error of a one-parameter mean-reversion baseline. */
+  maeReversion: number | null;
+  /** Mean absolute error of the model. */
+  maeMl: number | null;
+  gainVsPersistPct: number | null;
+  gainVsReversionPct: number | null;
+  /** Share of moves larger than 15 points whose direction was right. */
+  directionAccuracyBigMoves: number | null;
+  recallDeclines: number | null;
+  recallImprovements: number | null;
+  /** Share of outcomes that fell inside the p10-p90 band. */
+  bandCoverage: number | null;
+}
+
+/** Evaluation of the logistic stress model that prices the risk premium. */
+export interface PulseRiskEvaluation {
+  rows: number | null;
+  stressRate: number | null;
+  auroc: number | null;
+  /** Standardised coefficients per feature; negative lowers the risk. */
+  coefficientsStd: Record<string, number>;
+}
+
+/** Every published evaluation figure, for the method page. */
+export interface PulseEvaluation {
+  score: PulseScoreEvaluation;
+  /** One entry per horizon, ascending. */
+  forecast: PulseForecastHorizonEvaluation[];
+  risk: PulseRiskEvaluation;
+}
+
 /** Labels, weights and horizons shared by every PULSE view. */
 export interface PulseMeta {
   generatedFor: string;
@@ -52,6 +105,8 @@ export interface PulseMeta {
   variables: PulseVariableMeta[];
   /** Variable keys plus `contexto` and `base`. */
   contributionKeys: string[];
+  /** Published evaluation figures; empty blocks when not exported. */
+  evaluation: PulseEvaluation;
 }
 
 /** Forecast of the score at one horizon, with its 80 % band. */

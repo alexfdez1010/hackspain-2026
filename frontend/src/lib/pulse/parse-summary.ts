@@ -5,7 +5,11 @@ import {
   toNumberOrNull,
   toText,
   type RawRecord,
-} from '@/lib/xray/parse-primitives';
+} from '@/lib/parse-primitives';
+import {
+  EMPTY_EVALUATION,
+  parsePulseEvaluation,
+} from '@/lib/pulse/parse-evaluation';
 import { toPulsePillars } from '@/lib/pulse/parse-primitives';
 import type {
   PulseCompanyRow,
@@ -26,6 +30,7 @@ const EMPTY_META: PulseMeta = {
   pillars: [],
   variables: [],
   contributionKeys: [],
+  evaluation: EMPTY_EVALUATION,
 };
 
 /**
@@ -129,6 +134,7 @@ function parseMeta(record: RawRecord): PulseMeta {
     contributionKeys: toArray(record.contribution_keys).map((item) =>
       toText(item),
     ),
+    evaluation: parsePulseEvaluation(record.evaluation),
   };
 }
 

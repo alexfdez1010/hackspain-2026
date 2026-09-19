@@ -6,8 +6,7 @@ import {
 } from '@/lib/assistant/types';
 
 const MAX_BODY_BYTES = 65_536;
-const KNOWN_PATH =
-  /^\/(?:pulse(?:\/COMP_\d{4})?|empresa\/COMP_\d{4}|capital|monitor|metodo)?$/;
+const KNOWN_PATH = /^\/(?:empresa\/COMP_\d{4}(?:\/recomendaciones)?|metodo)?$/;
 
 /** A safe public error; no provider details are exposed to the client. */
 export class AssistantRequestError extends Error {

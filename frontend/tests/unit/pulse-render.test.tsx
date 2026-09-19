@@ -1,17 +1,23 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
+import { PillarSparklines } from '@/components/charts/pillar-sparklines';
 import { PulseCompanyHeader } from '@/components/pulse/company-header';
+import { PulseCompanyLinks } from '@/components/pulse/company-links';
 import { PulseForecastPanel } from '@/components/pulse/forecast-panel';
+import { PulseForecastTable } from '@/components/pulse/forecast-table';
+import { PulseMonthExplorer } from '@/components/pulse/month-explorer';
+import { PulseMonthTable } from '@/components/pulse/month-table';
 import { PulsePillarList } from '@/components/pulse/pillar-list';
-import { PulsePortfolioTable } from '@/components/pulse/portfolio-table';
 import { ScoreLegend } from '@/components/pulse/score-legend';
 import { PulseVariableTable } from '@/components/pulse/variable-table';
 import { buildVariableRows } from '@/lib/pulse/company-view';
+import { buildForecastRows, buildMonthRows } from '@/lib/pulse/history';
+import { buildPillarSeries } from '@/lib/pulse/pillar-series';
+import { StaticPulseSource } from '@/lib/pulse/source/static-json';
 import type { PulseCompany } from '@/lib/pulse/types';
 import {
   makeForecastPoint,
-  makeRow,
   makeSeriesPoint,
   VARIABLE_META,
 } from './pulse-fixtures';
@@ -75,14 +81,6 @@ describe('PULSE views render on the server', () => {
     expect(markup).toContain('14,0 días');
   });
 
-  it('links every row of the portfolio to its company view', () => {
-    const markup = renderToStaticMarkup(
-      <PulsePortfolioTable rows={[makeRow(), makeRow({ companyId: 'B' })]} />,
-    );
-    expect(markup).toContain('href="/pulse/COMP_0001"');
-    expect(markup).toContain('href="/pulse/B"');
-  });
-
   it('decomposes the default horizon of the forecast', () => {
     const markup = renderToStaticMarkup(
       <PulseForecastPanel
@@ -96,5 +94,87 @@ describe('PULSE views render on the server', () => {
     expect(markup).toContain('Base del modelo');
     expect(markup).toContain('las 4 suman −1,50');
     expect(markup).toContain('<code>delta_raw</code> de −1,50');
+  });
+});
+
+describe('the month-by-month view renders on the server', () => {
+  const source = new StaticPulseSource();
+
+  it('lists every observed month with its move and its cash', async () => {
+    const company = await source.getCompany('COMP_0001');
+    const rows = buildMonthRows(company?.series ?? []);
+    const markup = renderToStaticMarkup(
+      <PulseMonthTable rows={rows} pillars={PILLARS} />,
+    );
+    expect(markup).toContain('ago 2026');
+    expect(markup).toContain('primer mes');
+    expect(markup).toContain('2 var. sin datos');
+    expect(markup).toContain('Calidad de cobro');
+    expect(markup).not.toContain('NaN');
+    expect(markup.match(/2026<\/td>|2025<\/td>/g)?.length ?? 0).toBeGreaterThan(
+      0,
+    );
+  });
+
+  it('explains what is missing when there is no observed month', () => {
+    expect(
+      renderToStaticMarkup(<PulseMonthTable rows={[]} pillars={PILLARS} />),
+    ).toContain('Sin meses observados');
+  });
+
+  it('names every predicted month as such, next to its band', () => {
+    const rows = buildForecastRows(COMPANY.forecast, COMPANY.pulse);
+    const markup = renderToStaticMarkup(
+      <PulseForecastTable rows={rows} baseMonth={COMPANY.month} />,
+    );
+    expect(markup).toContain('feb 2027');
+    expect(markup).toContain('previsto');
+    expect(markup).toContain('20,0-55,0');
+    expect(markup).toContain('+5,2');
+  });
+
+  it('says what a company without forecast is missing', () => {
+    expect(
+      renderToStaticMarkup(
+        <PulseForecastTable rows={[]} baseMonth="2026-08" />,
+      ),
+    ).toContain('Sin previsión publicada');
+  });
+
+  it('draws one small multiple per pillar with its weight', async () => {
+    const company = await source.getCompany('COMP_0051');
+    const series = buildPillarSeries(PILLARS, company?.series ?? []);
+    const markup = renderToStaticMarkup(<PillarSparklines series={series} />);
+    expect(markup.match(/role="img"/g)).toHaveLength(4);
+    expect(markup).toContain('36 de 100 puntos');
+    expect(markup).toContain('Comportamiento de pago');
+    expect(markup).not.toContain('NaN');
+  });
+
+  it('opens the last observed month with its contributions', async () => {
+    const company = await source.getCompany('COMP_0001');
+    const { meta } = await source.getSummary();
+    const markup = renderToStaticMarkup(
+      <PulseMonthExplorer
+        series={company?.series ?? []}
+        pillars={meta.pillars}
+        variables={meta.variables}
+      />,
+    );
+    expect(markup).toContain('PULSE de ago 2026');
+    expect(markup).toContain('82 de 100 puntos con datos');
+    expect(markup).toContain('2 de 11 variables sin datos');
+    expect(markup).toContain('Tramo +90 días');
+    expect(markup).toContain('10,51 pts');
+    expect(markup).toContain('45,64');
+  });
+
+  it('points at the recommendations and at the method of the company', () => {
+    const markup = renderToStaticMarkup(
+      <PulseCompanyLinks companyId="COMP_0001" />,
+    );
+    expect(markup).toContain('href="/empresa/COMP_0001/recomendaciones"');
+    expect(markup).toContain('href="/metodo?empresa=COMP_0001"');
+    expect(markup).toContain('Ver productos recomendados');
   });
 });

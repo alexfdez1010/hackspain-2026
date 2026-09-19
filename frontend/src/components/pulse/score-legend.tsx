@@ -1,4 +1,4 @@
-import { formatNumber } from '@/lib/xray/format';
+import { formatNumber } from '@/lib/format';
 import type { PulsePillarMeta, PulseVariableMeta } from '@/lib/pulse/types';
 
 interface ScoreLegendProps {

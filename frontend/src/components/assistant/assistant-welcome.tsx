@@ -12,24 +12,38 @@ export function AssistantWelcome({
   mood: NexoMood;
   onSelect: (text: string) => void;
 }) {
-  const company = /\/(empresa|pulse)\/COMP_/.test(pathname);
-  const suggestions = [
-    {
-      title: company ? 'Resume esta empresa' : 'Resume mi cartera',
-      detail: company
-        ? 'Score, régimen y trayectoria'
-        : 'Cifras del último cierre',
-    },
-    {
-      title: '¿Qué empresas revisaría primero?',
-      detail: 'Mayores caídas a seis meses',
-    },
-    { title: 'Explícame el score', detail: 'Qué mide y qué no' },
-    {
-      title: '¿Cómo puede ayudarme la IA?',
-      detail: 'Del dato a la explicación',
-    },
-  ];
+  const company = /^\/empresa\/COMP_/.test(pathname);
+  const suggestions = company
+    ? [
+        {
+          title: 'Resume esta empresa',
+          detail: 'Score, confianza y previsión',
+        },
+        {
+          title: '¿Qué productos me recomiendas?',
+          detail: 'Importe, tipo y por qué',
+        },
+        { title: 'Explícame el score', detail: 'Qué mide y qué no' },
+        {
+          title: '¿Cómo puede ayudarme la IA?',
+          detail: 'Del dato a la explicación',
+        },
+      ]
+    : [
+        { title: 'Explícame el score', detail: 'Qué mide y qué no' },
+        {
+          title: '¿Cómo se calcula la previsión?',
+          detail: 'Horizontes y banda p10-p90',
+        },
+        {
+          title: '¿Qué productos puede recomendar?',
+          detail: 'Siete productos y sus reglas',
+        },
+        {
+          title: '¿Cómo puede ayudarme la IA?',
+          detail: 'Del dato a la explicación',
+        },
+      ];
   return (
     <div className="flex flex-col px-5 pt-1 pb-4 sm:px-6">
       <div className="relative flex items-end justify-between gap-3 overflow-hidden rounded-2xl bg-radial-[at_85%_110%] from-accent/18 via-accent/6 to-transparent to-75% px-5 pt-5">
@@ -38,7 +52,7 @@ export function AssistantWelcome({
             Hola, soy Nexo.
           </h3>
           <p className="mt-2 max-w-52 text-sm leading-relaxed text-muted">
-            Te ayudo a interpretar la cartera con los datos de esta app.
+            Te ayudo a interpretar el PULSE de tu empresa y sus productos.
           </p>
         </div>
         <NexoMascot mood={mood} className="-mb-2 size-28 sm:size-32" />

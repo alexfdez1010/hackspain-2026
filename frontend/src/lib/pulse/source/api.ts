@@ -2,10 +2,7 @@ import { parsePulseCompany } from '@/lib/pulse/parse-company';
 import { parsePulseSummary } from '@/lib/pulse/parse-summary';
 import type { PulseDataSource } from '@/lib/pulse/source/types';
 import type { PulseCompany, PulseSummary } from '@/lib/pulse/types';
-import {
-  createJsonGetter,
-  type JsonGetter,
-} from '@/lib/xray/source/api-client';
+import { createJsonGetter, type JsonGetter } from '@/lib/api-client';
 
 /**
  * Data source backed by the PULSE endpoints of the FastAPI service.

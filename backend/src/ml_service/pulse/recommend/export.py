@@ -16,6 +16,8 @@ from ml_service.pulse.recommend.snapshot import CompanySnapshot
 GENERATED_FOR = "HackSpain 2026 · Embat PULSE Advisor"
 SNAPSHOTS_FILE = "snapshots.json"
 """Inputs of every recommendation, so the API can re-price them for another reference rate."""
+CATALOGUE_FILE = "catalogue.json"
+"""``summary.json`` without the company rows: what the web app bundles and the API serves as catalogue."""
 
 
 def catalogue_payload(risk_evaluation: dict | None = None) -> dict:
@@ -41,8 +43,13 @@ def write_all(
     snapshots: list[CompanySnapshot],
     out_dir: Path,
     risk_evaluation: dict | None = None,
+    mirror_dir: Path | None = None,
 ) -> Path:
-    """Recommend every snapshot and write ``summary.json``, ``companies/<id>.json`` and ``snapshots.json``."""
+    """Recommend every snapshot and write ``summary.json``, ``catalogue.json``, ``companies/<id>.json`` and ``snapshots.json``.
+
+    ``mirror_dir`` receives a copy of what the web app bundles: the catalogue and
+    the per-company files, never the portfolio rows or the snapshots.
+    """
     shutil.rmtree(out_dir, ignore_errors=True)
     (out_dir / "companies").mkdir(parents=True)
     rows = []
@@ -52,9 +59,29 @@ def write_all(
             json.dumps(payload, ensure_ascii=False)
         )
         rows.append(summary_row(payload))
-    summary = {**catalogue_payload(risk_evaluation), "companies": rows}
+    catalogue = catalogue_payload(risk_evaluation)
+    summary = {**catalogue, "companies": rows}
     (out_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False))
+    (out_dir / CATALOGUE_FILE).write_text(json.dumps(catalogue, ensure_ascii=False))
     (out_dir / SNAPSHOTS_FILE).write_text(
         json.dumps([s.to_dict() for s in snapshots], ensure_ascii=False)
     )
+    if mirror_dir is not None:
+        mirror(out_dir, mirror_dir)
     return out_dir
+
+
+def mirror(out_dir: Path, mirror_dir: Path) -> Path:
+    """Copy ``catalogue.json`` and ``companies/`` from ``out_dir`` into the web app's data folder."""
+    shutil.rmtree(mirror_dir, ignore_errors=True)
+    mirror_dir.mkdir(parents=True)
+    shutil.copy(out_dir / CATALOGUE_FILE, mirror_dir / CATALOGUE_FILE)
+    shutil.copytree(out_dir / "companies", mirror_dir / "companies")
+    return mirror_dir
+
+
+def web_mirror_dir() -> Path:
+    """Where the frontend bundles the recommendations (``frontend/src/data/pulse/recommendations``)."""
+    from ml_service.pulse.config import ML_ROOT
+
+    return ML_ROOT.parent / "frontend" / "src" / "data" / "pulse" / "recommendations"

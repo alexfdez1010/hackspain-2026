@@ -3,15 +3,15 @@
 import { useMemo, useState } from 'react';
 
 import { ImpactBars } from '@/components/charts/impact-bars';
-import { FacetSelect, type FacetOption } from '@/components/radar/facet-select';
-import { ScoreBadge } from '@/components/xray/score-badge';
+import { FacetSelect, type FacetOption } from '@/components/ui/facet-select';
+import { ScoreBadge } from '@/components/ui/score-badge';
 import {
   buildContributionItems,
   sumContributions,
 } from '@/lib/pulse/company-view';
 import { formatBand, formatHorizon } from '@/lib/pulse/format';
 import type { PulseForecastPoint, PulseVariableMeta } from '@/lib/pulse/types';
-import { formatMonth, formatNumber, formatSigned } from '@/lib/xray/format';
+import { formatMonth, formatNumber, formatSigned } from '@/lib/format';
 
 interface PulseForecastPanelProps {
   /** Forecast horizons, ascending. */

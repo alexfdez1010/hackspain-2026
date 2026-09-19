@@ -15,10 +15,12 @@ export const DEFAULT_PULSE_SORT: PulseSort = { key: 'pulse', direction: 'asc' };
 /**
  * Change of the score against the previous month.
  *
- * @param row - Portfolio row.
+ * @param row - Anything carrying both months, a row or a full company.
  * @returns The change in points, or `null` when either month is unknown.
  */
-export function monthlyChange(row: PulseCompanyRow): number | null {
+export function monthlyChange(
+  row: Pick<PulseCompanyRow, 'pulse' | 'pulsePrev'>,
+): number | null {
   if (row.pulse === null || row.pulsePrev === null) return null;
   return row.pulse - row.pulsePrev;
 }

@@ -1,15 +1,20 @@
-import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
-import { PillarBars } from '@/components/charts/pillar-bars';
-import { ScoreTimeline } from '@/components/charts/score-timeline';
-import { CapitalCard } from '@/components/company/capital-card';
-import { CompanyHeader } from '@/components/company/company-header';
-import { KpiTable } from '@/components/company/kpi-table';
-import { WhyPanel } from '@/components/company/why-panel';
+import { PillarSparklines } from '@/components/charts/pillar-sparklines';
+import { PulseTrajectoryChart } from '@/components/charts/pulse-trajectory';
 import { PageShell, Section } from '@/components/layout/page-shell';
-import { AlertList } from '@/components/monitor/alert-list';
-import { getDataSource } from '@/lib/xray/data';
+import { PulseCompanyHeader } from '@/components/pulse/company-header';
+import { PulseCompanyLinks } from '@/components/pulse/company-links';
+import { PulseForecastPanel } from '@/components/pulse/forecast-panel';
+import { PulseForecastTable } from '@/components/pulse/forecast-table';
+import { PulseMonthExplorer } from '@/components/pulse/month-explorer';
+import { PulseMonthTable } from '@/components/pulse/month-table';
+import { buildTrajectory } from '@/lib/pulse/company-view';
+import { getPulseDataSource } from '@/lib/pulse/data';
+import { buildForecastRows, buildMonthRows } from '@/lib/pulse/history';
+import { buildPillarSeries } from '@/lib/pulse/pillar-series';
+import { formatMonth, formatNumber } from '@/lib/format';
 
 interface CompanyPageProps {
   params: Promise<{ id: string }>;
@@ -25,84 +30,115 @@ export async function generateMetadata({
   params,
 }: CompanyPageProps): Promise<Metadata> {
   const { id } = await params;
-  return { title: `${id} — Radiografía · Embat Pulse` };
+  return { title: `${id} — PULSE · Embat Pulse` };
 }
 
 /**
- * Company X-ray: score history, pillars, drivers, raw figures and the credit
- * line the score unlocks.
+ * Writes the lead sentence: what the page covers and how far it reaches.
+ *
+ * @param months - Months with observed data.
+ * @param lastMonth - Month of the last close.
+ * @param horizonMonth - Farthest forecast month, or an empty string.
+ * @returns One sentence naming the observed window and the forecast window.
+ */
+function buildLead(
+  months: number,
+  lastMonth: string,
+  horizonMonth: string,
+): string {
+  const observed = `${formatNumber(months)} meses observados hasta ${formatMonth(lastMonth)}`;
+  return horizonMonth
+    ? `${observed}, con previsión mensual hasta ${formatMonth(horizonMonth)}.`
+    : `${observed}. Sin previsión publicada.`;
+}
+
+/**
+ * PULSE of one company, month by month: the score of the last close, the full
+ * observed history with its four pillars, the six predicted months and the
+ * decomposition of both the current score and the prediction.
  *
  * @param props - Route parameters carrying the company identifier.
  * @returns The company page, or a 404 when the identifier is unknown.
  */
-export default async function CompanyPage({ params }: CompanyPageProps) {
+export default async function CompanyPulsePage({ params }: CompanyPageProps) {
   const { id } = await params;
-  const source = getDataSource();
-  const [detail, meta] = await Promise.all([
+  const source = getPulseDataSource();
+  const [company, summary] = await Promise.all([
     source.getCompany(id),
-    source.getMeta(),
+    source.getSummary(),
   ]);
-  if (!detail) notFound();
+  if (!company) notFound();
 
-  const { company, alerts, offer, offerHistory, avgMonthlyInflow } = detail;
-  const series = company.series ?? [];
-  const last = series[series.length - 1];
-  const sixMonthsAgo = series.length >= 7 ? series[series.length - 7] : null;
+  const { meta } = summary;
+  const { points, boundaryIndex } = buildTrajectory(
+    company.series,
+    company.forecast,
+  );
+  const monthRows = buildMonthRows(company.series);
+  const forecastRows = buildForecastRows(company.forecast, company.pulse);
+  const pillarSeries = buildPillarSeries(meta.pillars, company.series);
+  const horizonMonth =
+    company.forecast[company.forecast.length - 1]?.targetMonth ?? '';
 
   return (
     <PageShell
-      title={company.company_id}
-      lead={`Grupo ${company.group_id} · ${series.length} meses de extractos bancarios, facturas y deuda.`}
+      title={company.companyId}
+      lead={buildLead(company.monthsObserved, company.month, horizonMonth)}
+      aside={<PulseCompanyLinks companyId={company.companyId} />}
     >
-      <CompanyHeader company={company} />
+      <PulseCompanyHeader company={company} />
 
       <Section
-        title="Score mensual"
+        title="Trayectoria"
         note="Escala 0-100; 50 es el umbral de vigilancia"
       >
-        <ScoreTimeline series={series} trend6m={company.trend_6m} />
+        <PulseTrajectoryChart points={points} boundaryIndex={boundaryIndex} />
       </Section>
 
-      <div className="grid gap-10 lg:grid-cols-2">
-        <Section
-          title="Pilares"
-          note={
-            sixMonthsAgo
-              ? 'Barra: hoy · marca: hace 6 meses'
-              : 'Sin comparación a seis meses'
-          }
-        >
-          <PillarBars
-            current={company.pillars}
-            previous={sixMonthsAgo?.pillars ?? null}
-            labels={meta.pillarLabels}
-          />
-        </Section>
+      <Section
+        title="Mes a mes"
+        note={`${formatNumber(monthRows.length)} cierres observados y ${formatNumber(forecastRows.length)} meses previstos`}
+      >
+        <div className="flex flex-col gap-3">
+          <h3 className="text-sm font-semibold">
+            Meses observados, del más reciente al más antiguo
+          </h3>
+          <PulseMonthTable rows={monthRows} pillars={meta.pillars} />
+        </div>
+        <div className="flex flex-col gap-3 pt-4">
+          <h3 className="text-sm font-semibold">
+            Meses previstos, aún sin cerrar
+          </h3>
+          <PulseForecastTable rows={forecastRows} baseMonth={company.month} />
+        </div>
+      </Section>
 
-        <Section title="Por qué este score" note="Contribución SHAP en puntos">
-          <WhyPanel company={company} pillarLabels={meta.pillarLabels} />
-        </Section>
-      </div>
+      <Section
+        title="Evolución por pilar"
+        note="Guías en 35, 50 y 65; misma escala en los cuatro"
+      >
+        <PillarSparklines series={pillarSeries} />
+      </Section>
 
-      <Section title="Línea de circulante">
-        <CapitalCard
-          offer={offer}
-          history={offerHistory}
-          avgMonthlyInflow={avgMonthlyInflow}
+      <Section
+        title="Detalle de un mes"
+        note="Pilares, aportes y las 11 variables del mes elegido"
+      >
+        <PulseMonthExplorer
+          series={company.series}
+          pillars={meta.pillars}
+          variables={meta.variables}
         />
       </Section>
 
-      {last && (
-        <Section title="Datos del último mes">
-          <KpiTable raw={last.raw} month={last.month} />
-        </Section>
-      )}
-
-      <Section title="Alertas de esta empresa">
-        <AlertList
-          alerts={alerts}
-          hideCompany
-          emptyText="El monitor no ha disparado ninguna alerta para esta empresa."
+      <Section
+        title="Previsión desglosada"
+        note="Aportes en puntos de pulse_raw, positivos a la derecha"
+      >
+        <PulseForecastPanel
+          forecast={company.forecast}
+          variables={meta.variables}
+          pulseNow={company.pulse}
         />
       </Section>
     </PageShell>

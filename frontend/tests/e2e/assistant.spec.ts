@@ -13,28 +13,28 @@ async function openAssistant(page: Page) {
 test('streams a demo, preserves the conversation through navigation, and starts fresh', async ({
   page,
 }) => {
-  await page.goto('/');
+  await page.goto('/empresa/COMP_0001');
   await openAssistant(page);
-  await page.getByRole('button', { name: /Resume mi cartera/ }).click();
+  await page.getByRole('button', { name: /Resume esta empresa/ }).click();
   await expect(
     page.getByRole('button', { name: 'Detener respuesta' }),
   ).toBeVisible();
   await expect(page.getByRole('log')).toContainText(
-    'Estos grupos pueden solaparse',
+    'Revisa los pilares y las variables',
   );
   await expect(
     page.getByRole('button', { name: 'Detener respuesta' }),
   ).toBeHidden();
   await page
     .getByRole('dialog')
-    .getByRole('link', { name: 'Metodología' })
+    .getByRole('link', { name: 'Recomendaciones' })
     .click();
-  await expect(page).toHaveURL('/metodo');
+  await expect(page).toHaveURL('/empresa/COMP_0001/recomendaciones');
   await openAssistant(page);
-  await expect(page.getByRole('log')).toContainText(
-    'Tu cartera, en una lectura.',
+  await expect(page.getByRole('log')).toContainText('COMP_0001 · PULSE');
+  await expect(page.getByRole('dialog')).toContainText(
+    'Viendo: Recomendaciones · COMP_0001',
   );
-  await expect(page.getByRole('dialog')).toContainText('Viendo: Metodología');
   await page.getByRole('button', { name: 'Nueva conversación' }).click();
   await expect(
     page.getByRole('heading', { name: 'Hola, soy Nexo.' }),
@@ -154,13 +154,20 @@ test('fits a short desktop viewport and traps focus in the dialog', async ({
   });
 });
 
-test('uses the current PULSE page in the request', async ({ page }) => {
-  await page.goto('/pulse');
+test('uses the current company page in the request and answers about its products', async ({
+  page,
+}) => {
+  await page.goto('/empresa/COMP_0001/recomendaciones');
   await openAssistant(page);
   const request = page.waitForRequest((request) =>
     request.url().endsWith('/api/assistant'),
   );
-  await page.getByRole('button', { name: /Resume mi cartera/ }).click();
-  expect((await request).postDataJSON().pathname).toBe('/pulse');
-  await expect(page.getByRole('log')).toContainText('Tu cartera PULSE');
+  await page
+    .getByRole('button', { name: /Qué productos me recomiendas/ })
+    .click();
+  expect((await request).postDataJSON().pathname).toBe(
+    '/empresa/COMP_0001/recomendaciones',
+  );
+  await expect(page.getByRole('log')).toContainText('productos recomendados');
+  await expect(page.getByRole('log')).toContainText('Línea de crédito');
 });

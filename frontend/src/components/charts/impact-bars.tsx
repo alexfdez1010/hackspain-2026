@@ -1,4 +1,4 @@
-import { formatSigned } from '@/lib/xray/format';
+import { formatSigned } from '@/lib/format';
 
 /** One diverging bar: a driver and its signed contribution in points. */
 export interface ImpactItem {

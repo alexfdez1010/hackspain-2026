@@ -1,9 +1,9 @@
-import { ScoreBadge } from '@/components/xray/score-badge';
-import { StatGrid, type StatItem } from '@/components/xray/stat-grid';
+import { ScoreBadge } from '@/components/ui/score-badge';
+import { StatGrid, type StatItem } from '@/components/ui/stat-grid';
 import { formatConfidence, formatConfidencePoints } from '@/lib/pulse/format';
 import type { PulseCompany } from '@/lib/pulse/types';
-import { formatMonth, formatNumber, formatSigned } from '@/lib/xray/format';
-import { scoreBand } from '@/lib/xray/score';
+import { formatMonth, formatNumber, formatSigned } from '@/lib/format';
+import { scoreBand } from '@/lib/score';
 
 interface PulseCompanyHeaderProps {
   company: PulseCompany;
@@ -22,6 +22,7 @@ interface PulseCompanyHeaderProps {
  */
 export function PulseCompanyHeader({ company }: PulseCompanyHeaderProps) {
   const band = scoreBand(company.pulse);
+  const firstMonth = company.series[0]?.month ?? '';
   const change =
     company.pulse !== null && company.pulsePrev !== null
       ? company.pulse - company.pulsePrev
@@ -46,7 +47,7 @@ export function PulseCompanyHeader({ company }: PulseCompanyHeaderProps) {
       key: 'months',
       label: 'Meses observados',
       value: formatNumber(company.monthsObserved),
-      hint: company.month ? `Último cierre ${formatMonth(company.month)}` : '',
+      hint: firstMonth ? `Desde ${formatMonth(firstMonth)}` : '',
     },
     {
       key: 'group',
@@ -61,7 +62,9 @@ export function PulseCompanyHeader({ company }: PulseCompanyHeaderProps) {
       <div className="flex flex-col gap-1">
         <ScoreBadge score={company.pulse} size="lg" />
         <p className="text-sm text-muted">
-          PULSE {company.month ? formatMonth(company.month) : ''} · {band.label}
+          PULSE del último cierre
+          {company.month ? `, ${formatMonth(company.month)}` : ''} ·{' '}
+          {band.label}
         </p>
       </div>
       <div className="min-w-0 flex-1">

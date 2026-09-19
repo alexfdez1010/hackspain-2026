@@ -1,6 +1,6 @@
 # Full local stack: FastAPI (PULSE artefacts baked in) and the Next.js app.
 #   docker compose up --build
-#   open http://localhost:3000/pulse/COMP_0001
+#   open http://localhost:3000/empresa/COMP_0001
 services:
   api:
     build:

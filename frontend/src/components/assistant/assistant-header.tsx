@@ -18,7 +18,7 @@ export function statusLabel(mood: NexoMood, mode: AssistantMode): string {
     default:
       return mode === 'mock'
         ? 'Demo · respuestas simuladas con datos de la app.'
-        : 'Pregúntame por la cartera, una empresa o el método.';
+        : 'Pregúntame por tu empresa, sus productos o el score.';
   }
 }
 

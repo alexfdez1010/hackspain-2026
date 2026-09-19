@@ -4,7 +4,7 @@ import {
   toNumber,
   toNumberOrNull,
   toText,
-} from '@/lib/xray/parse-primitives';
+} from '@/lib/parse-primitives';
 import {
   toPulseContributions,
   toPulsePillars,

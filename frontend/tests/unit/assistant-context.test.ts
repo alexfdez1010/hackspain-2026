@@ -1,87 +1,151 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getAssistantContext } from '@/lib/assistant/context';
 import { getMockReply } from '@/lib/assistant/mock';
+import { makeForecastPoint, makeSeriesPoint } from './pulse-fixtures';
 
-/** Supplies deterministic data adapters; no filesystem or backend is consulted. */
-function sources() {
-  const rows = [
-    {
-      id: 'COMP_0001',
-      score: 40,
-      pStress: 0.3,
-      regime: 'steady',
-      direction: 'deteriorating',
-      delta6m: -12,
-    },
-    {
-      id: 'COMP_0002',
-      score: 50,
-      pStress: 0.1,
-      regime: 'steady',
-      direction: 'stable',
-      delta6m: -2,
-    },
-  ];
-  const xray = {
+/** Supplies a deterministic PULSE adapter; no filesystem or backend is consulted. */
+function pulseSource(company: unknown = null) {
+  return {
     kind: 'static' as const,
-    getSummary: vi.fn().mockResolvedValue({ rows, stats: { total: 2 } }),
-    getCompany: vi.fn().mockResolvedValue(null),
-  };
-  const pulse = {
     getSummary: vi.fn().mockResolvedValue({
-      meta: { lastMonth: '2026-08', pillars: [], variables: [] },
+      meta: {
+        lastMonth: '2026-08',
+        scoreName: 'PULSE',
+        horizons: [1, 6],
+        pillars: [],
+        variables: [],
+      },
       companies: [],
     }),
-    getCompany: vi.fn().mockResolvedValue(null),
+    getCompany: vi.fn().mockResolvedValue(company),
   };
-  return { xray, pulse, rows };
+}
+
+/** Supplies a deterministic Advisor adapter. */
+function advisorSource(recommendation: unknown = null) {
+  return { getCompany: vi.fn().mockResolvedValue(recommendation) };
+}
+
+/** A company with one observed month and one forecast horizon. */
+function company(overrides: Record<string, unknown> = {}) {
+  return {
+    companyId: 'COMP_0001',
+    groupId: 'GROUP_0147',
+    monthsObserved: 8,
+    month: '2026-08',
+    pulse: 40,
+    pulsePrev: 35,
+    confidence: 0.8,
+    pillars: { liquidez: 40 },
+    series: [makeSeriesPoint()],
+    forecast: [makeForecastPoint()],
+    ...overrides,
+  };
+}
+
+/** A recommendation with one priced offer. */
+function recommendation() {
+  return {
+    companyId: 'COMP_0001',
+    summary: 'PULSE 40: 1 producto encaja',
+    risk: { pStress6m: 0.28, baseRate: 0.22, contributions: [] },
+    referenceRate: { label: 'Euríbor 12 m', value: 0.021, source: 'default' },
+    recommendations: [
+      {
+        rank: 1,
+        label: 'Línea de crédito',
+        headline: 'Línea de crédito de 25.000 €',
+        fit: 75,
+        amount: 25_000,
+        annualRate: 0.0917,
+        rateKind: 'cost',
+        spreadBps: 707,
+        why: ['Tu caja cubre 14 días de pagos.'],
+        leverStory: ['Si tu liquidez subiera…'],
+      },
+    ],
+    declined: [
+      { label: 'Préstamo', status: 'no_elegible', reasons: ['PULSE < 60'] },
+    ],
+    improvementPlan: { unlocks: [], levers: [], story: [] },
+  };
 }
 
 describe('trusted assistant context', () => {
-  it('uses a portfolio row when optional company exports are absent, without inventing an offer', async () => {
-    const { xray, pulse, rows } = sources();
-    const context = await getAssistantContext(
-      '/',
-      'Revisa COMP_0001',
-      xray,
-      pulse,
+  it('never carries the portfolio: without a company only metadata travels', async () => {
+    const pulse = pulseSource();
+    const advisor = advisorSource();
+    const context = await getAssistantContext('/', 'Hola', pulse, advisor);
+    expect(pulse.getCompany).not.toHaveBeenCalled();
+    expect(advisor.getCompany).not.toHaveBeenCalled();
+    expect(context.page).toBe('Elegir empresa');
+    expect(context.provenance).toBe('Dataset local PULSE');
+    expect(context.company).toBeNull();
+    expect(context.advisor).toBeNull();
+    expect(context).not.toHaveProperty('stats');
+    expect(context.sources).toEqual([{ label: 'Método', href: '/metodo' }]);
+    expect(getMockReply('Resume mi cartera', context)).toContain(
+      'una empresa cada vez',
     );
-    expect(context.company).toMatchObject({
-      id: 'COMP_0001',
-      score: 40,
-      offer: null,
-    });
-    expect(
-      context.sources.some((source) => source.href.includes('/empresa/')),
-    ).toBe(false);
-    expect(getMockReply('Revisa COMP_0001', context)).toContain(
-      'no puedo atribuirle un límite',
-    );
-    expect(rows.map((row) => row.id)).toEqual(['COMP_0001', 'COMP_0002']);
-    expect(pulse.getSummary).not.toHaveBeenCalled();
   });
+
   it('gives an explicitly mentioned company precedence over the page', async () => {
-    const { xray, pulse } = sources();
+    const pulse = pulseSource();
+    const advisor = advisorSource();
     await getAssistantContext(
       '/empresa/COMP_0001',
       'Revisa comp_0002',
-      xray,
       pulse,
+      advisor,
     );
-    expect(xray.getCompany).toHaveBeenCalledWith('COMP_0002');
+    expect(pulse.getCompany).toHaveBeenCalledWith('COMP_0002');
+    expect(advisor.getCompany).toHaveBeenCalledWith('COMP_0002');
   });
-  it('keeps PULSE separate from X-Ray and does not link missing company detail', async () => {
-    const { xray, pulse } = sources();
+
+  it('links the company pages only when the export has the company', async () => {
     const context = await getAssistantContext(
-      '/pulse/COMP_0001',
+      '/empresa/COMP_0001/recomendaciones',
       'Resume esta empresa',
-      xray,
-      pulse,
+      pulseSource(company()),
+      advisorSource(recommendation()),
     );
-    expect(pulse.getCompany).toHaveBeenCalledWith('COMP_0001');
-    expect(xray.getCompany).not.toHaveBeenCalled();
-    expect(context.company).toBeNull();
-    expect(context.pulse?.month).toBe('2026-08');
-    expect(context.sources[0].href).toBe('/pulse');
+    expect(context.page).toBe('Recomendaciones · COMP_0001');
+    expect(context.company?.change).toBe(5);
+    expect(context.company?.unknownVariables).toEqual(['loc_util']);
+    expect(context.advisor?.offers[0].label).toBe('Línea de crédito');
+    expect(context.advisor?.leverStory).toEqual(['Si tu liquidez subiera…']);
+    expect(context.sources.map((source) => source.href)).toEqual([
+      '/empresa/COMP_0001',
+      '/empresa/COMP_0001/recomendaciones',
+      '/metodo',
+    ]);
+
+    const missing = await getAssistantContext(
+      '/empresa/COMP_9999',
+      'Resume esta empresa',
+      pulseSource(),
+      advisorSource(),
+    );
+    expect(missing.company).toBeNull();
+    expect(
+      missing.sources.some((entry) => entry.href.includes('COMP_9999')),
+    ).toBe(false);
+    expect(getMockReply('Resume esta empresa', missing)).toContain(
+      'No hay datos de',
+    );
+  });
+
+  it('answers product questions from the recommendation of the company', async () => {
+    const context = await getAssistantContext(
+      '/empresa/COMP_0001',
+      '¿Qué productos me recomiendas?',
+      pulseSource(company()),
+      advisorSource(recommendation()),
+    );
+    const reply = getMockReply('¿Qué productos me recomiendas?', context);
+    expect(reply).toContain('Línea de crédito');
+    expect(reply).toContain('9,17');
+    expect(reply).toContain('encaje 75/100');
+    expect(reply).toContain('28 %'.replace(' ', ' '));
   });
 });

@@ -1,4 +1,4 @@
-import { asRecord, toNumberOrNull } from '@/lib/xray/parse-primitives';
+import { asRecord, toNumberOrNull } from '@/lib/parse-primitives';
 import type {
   PulseContributions,
   PulsePillars,

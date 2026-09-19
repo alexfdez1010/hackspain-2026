@@ -52,6 +52,18 @@ UNITS = {
     "network": "pts de salud de clientes",
 }
 CONTRIB_KEYS = [v.key for v in VARIABLES] + [CONTEXT, BASE]
+FORECAST_EVAL_KEYS = (
+    "n",
+    "mae_persist",
+    "mae_reversion",
+    "mae_ml",
+    "gain_vs_persist_pct",
+    "gain_vs_reversion_pct",
+    "direction_accuracy_big_moves",
+    "recall_declines",
+    "recall_improvements",
+    "band_p10_p90_coverage",
+)
 
 
 def _num(x) -> float | None:
@@ -60,7 +72,48 @@ def _num(x) -> float | None:
     return round(float(x), 2)
 
 
-def metadata() -> dict:
+def _read_json(path: Path) -> dict:
+    return json.loads(path.read_text()) if path.exists() else {}
+
+
+def evaluation_payload(work_dir: Path) -> dict:
+    """Published evaluation figures of the score, the forecast and the risk model.
+
+    Everything is read from the JSON files the ``evaluate`` commands write, so the
+    method page of the web app quotes the same numbers as the backend docs. A
+    missing file leaves its block empty instead of failing the export.
+    """
+    score = _read_json(work_dir / "evaluation.json")
+    forecast = _read_json(work_dir / "forecast_evaluation.json")
+    risk = _read_json(work_dir / "risk_evaluation.json")
+    return {
+        "score": {
+            "rows": score.get("rows"),
+            "stress_rate": score.get("stress_rate"),
+            "auroc": score.get("auroc_pulse"),
+            "auroc_excluding_current_stress": score.get(
+                "auroc_pulse_excluding_current_stress"
+            ),
+            "auroc_temporal": score.get("auroc_temporal_from_2025_09"),
+            "auroc_by_variable": score.get("auroc_by_variable", {}),
+        },
+        "forecast": {
+            "horizons": {
+                str(h): {k: v.get(k) for k in FORECAST_EVAL_KEYS}
+                for h, v in forecast.get("horizons", {}).items()
+            }
+        },
+        "risk": {
+            "rows": risk.get("rows"),
+            "stress_rate": risk.get("stress_rate"),
+            "auroc": risk.get("oof_auroc"),
+            "coefficients_std": risk.get("coefficients_std", {}),
+        },
+    }
+
+
+def metadata(work_dir: Path | None = None) -> dict:
+    """Score metadata shared by every export; ``work_dir`` adds the evaluation block."""
     return {
         "generated_for": GENERATED_FOR,
         "score_name": "PULSE",
@@ -87,6 +140,7 @@ def metadata() -> dict:
             for v in VARIABLES
         ],
         "contribution_keys": CONTRIB_KEYS,
+        "evaluation": evaluation_payload(work_dir) if work_dir else {},
     }
 
 
@@ -174,7 +228,7 @@ def write_all(work_dir: Path, mirror_dir: Path | None = None) -> Path:
             }
         )
     summary = {
-        **metadata(),
+        **metadata(work_dir),
         "last_month": scored["month"].max().strftime("%Y-%m"),
         "companies": summary_rows,
     }

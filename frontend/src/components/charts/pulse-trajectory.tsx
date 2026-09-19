@@ -1,23 +1,48 @@
 import {
+  bandPath,
   linePath,
   xAt,
   yAt,
   type ChartBox,
 } from '@/components/charts/geometry';
+import { ScoreGuides } from '@/components/charts/score-guides';
 import type { PulseTrajectoryPoint } from '@/lib/pulse/company-view';
-import { formatMonth, formatMonthShort } from '@/lib/xray/format';
-import { scoreColor } from '@/lib/xray/score';
+import { formatMonth, formatMonthShort, formatNumber } from '@/lib/format';
+import { scoreColor } from '@/lib/score';
 
 const BOX: ChartBox = {
   width: 720,
-  height: 250,
+  height: 264,
   padLeft: 28,
-  padRight: 12,
-  padTop: 12,
-  padBottom: 26,
+  padRight: 34,
+  padTop: 22,
+  padBottom: 28,
 };
 
-const GUIDES = [35, 50, 65];
+/** A trajectory point already placed in viewBox coordinates. */
+type PlacedPoint = PulseTrajectoryPoint & { x: number; y: number | null };
+
+/**
+ * Decides how often a month label fits without overlapping its neighbour.
+ *
+ * @param count - Number of points on the axis.
+ * @returns The index step between printed labels; `1` labels every month.
+ */
+function labelStep(count: number): number {
+  return Math.max(1, Math.ceil(count / 15));
+}
+
+/**
+ * Places the points and keeps only those with a drawable value.
+ *
+ * @param points - Points to place, in reading order.
+ * @returns The placed points that carry a finite y coordinate.
+ */
+function drawable(points: readonly PlacedPoint[]) {
+  return points.filter(
+    (point): point is PlacedPoint & { y: number } => point.y !== null,
+  );
+}
 
 interface PulseTrajectoryChartProps {
   /** Observed months followed by the forecast horizons. */
@@ -32,7 +57,8 @@ interface PulseTrajectoryChartProps {
  * The observed line is solid and the forecast dashed, separated by the vertical
  * mark at the last closed month; the shaded area is the 80 % band (p10-p90), so
  * the reader sees the prediction and its uncertainty at the same scale as the
- * history.
+ * history. The last close and the farthest horizon are printed next to their
+ * point, because those two numbers are the ones quoted in a committee.
  *
  * @param props - The merged trajectory and its boundary.
  * @returns An inline SVG chart, or an empty state when there is no history.
@@ -46,76 +72,39 @@ export function PulseTrajectoryChart({
     return <p className="text-sm text-muted">Sin historial mensual.</p>;
   }
 
-  const placed = points.map((point, index) => ({
+  const placed: PlacedPoint[] = points.map((point, index) => ({
     ...point,
     x: xAt(index, count, BOX),
     y: point.value === null ? null : yAt(point.value, 0, 100, BOX),
   }));
-  const observed = placed
-    .slice(0, boundaryIndex + 1)
-    .filter((point): point is (typeof placed)[number] & { y: number } =>
-      Number.isFinite(point.y),
-    );
-  const projected = placed
-    .slice(boundaryIndex)
-    .filter((point): point is (typeof placed)[number] & { y: number } =>
-      Number.isFinite(point.y),
-    );
+  const observed = drawable(placed.slice(0, boundaryIndex + 1));
+  const projected = drawable(placed.slice(boundaryIndex));
   const banded = placed.filter(
-    (point) => point.p10 !== null && point.p90 !== null,
+    (point): point is PlacedPoint & { p10: number; p90: number } =>
+      point.p10 !== null && point.p90 !== null,
   );
-  const bandPath =
-    banded.length > 1
-      ? `${linePath(
-          banded.map((point) => ({
-            x: point.x,
-            y: yAt(point.p90 as number, 0, 100, BOX),
-          })),
-        )} ${banded
-          .slice()
-          .reverse()
-          .map(
-            (point) => `L${point.x} ${yAt(point.p10 as number, 0, 100, BOX)}`,
-          )
-          .join(' ')} Z`
-      : '';
+  const band = bandPath(
+    banded.map((point) => ({ x: point.x, y: yAt(point.p90, 0, 100, BOX) })),
+    banded.map((point) => ({ x: point.x, y: yAt(point.p10, 0, 100, BOX) })),
+  );
 
   const last = placed[count - 1];
   const boundary = placed[boundaryIndex];
   const stroke = scoreColor(boundary.value);
   const forecastStroke = scoreColor(last.value);
+  const step = labelStep(count);
 
   return (
     <figure className="flex flex-col gap-2">
       <svg
         viewBox={`0 0 ${BOX.width} ${BOX.height}`}
-        className="h-56 w-full sm:h-64"
+        className="h-56 w-full sm:h-72 lg:h-80"
         role="img"
         aria-label={`PULSE mensual desde ${formatMonth(points[0].month)} hasta ${formatMonth(boundary.month)} y previsión hasta ${formatMonth(last.month)}`}
       >
-        {GUIDES.map((guide) => (
-          <g key={guide}>
-            <line
-              x1={BOX.padLeft}
-              x2={BOX.width - BOX.padRight}
-              y1={yAt(guide, 0, 100, BOX)}
-              y2={yAt(guide, 0, 100, BOX)}
-              stroke="var(--separator)"
-              strokeWidth={1}
-            />
-            <text
-              x={0}
-              y={yAt(guide, 0, 100, BOX) + 3}
-              className="fill-muted text-[10px]"
-            >
-              {guide}
-            </text>
-          </g>
-        ))}
+        <ScoreGuides box={BOX} />
 
-        {bandPath && (
-          <path d={bandPath} fill={forecastStroke} fillOpacity={0.16} />
-        )}
+        {band && <path d={band} fill={forecastStroke} fillOpacity={0.16} />}
 
         <path
           d={linePath(observed)}
@@ -147,21 +136,45 @@ export function PulseTrajectoryChart({
         />
         <text
           x={boundary.x + 4}
-          y={BOX.padTop + 9}
+          y={BOX.padTop - 8}
           className="fill-muted text-[10px]"
         >
           previsión
         </text>
 
         {boundary.y !== null && (
-          <circle cx={boundary.x} cy={boundary.y} r={3.6} fill={stroke} />
+          <g>
+            <circle cx={boundary.x} cy={boundary.y} r={3.6} fill={stroke} />
+            <text
+              x={boundary.x - 6}
+              y={boundary.y - 9}
+              textAnchor="end"
+              className="text-[11px] font-medium tabular-nums"
+              fill={stroke}
+            >
+              {formatNumber(boundary.value, 1)}
+            </text>
+          </g>
         )}
-        {last.y !== null && (
-          <circle cx={last.x} cy={last.y} r={3.2} fill={forecastStroke} />
+        {last.y !== null && boundaryIndex < count - 1 && (
+          <g>
+            <circle cx={last.x} cy={last.y} r={3.2} fill={forecastStroke} />
+            <text
+              x={last.x}
+              y={last.y - 9}
+              textAnchor="end"
+              className="text-[11px] font-medium tabular-nums"
+              fill={forecastStroke}
+            >
+              {formatNumber(last.value, 1)}
+            </text>
+          </g>
         )}
 
         {placed.map((point, index) =>
-          index % 3 === 0 || index === count - 1 ? (
+          index % step === 0 ||
+          index === count - 1 ||
+          index === boundaryIndex ? (
             <text
               key={`label-${point.month}`}
               x={point.x}

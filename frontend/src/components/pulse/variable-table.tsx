@@ -2,10 +2,10 @@
 
 import { Table } from '@heroui/react';
 
-import { ScoreBadge } from '@/components/xray/score-badge';
+import { ScoreBadge } from '@/components/ui/score-badge';
 import type { PulseVariableRow } from '@/lib/pulse/company-view';
 import { formatRawValue, UNKNOWN_TEXT } from '@/lib/pulse/format';
-import { formatNumber } from '@/lib/xray/format';
+import { formatNumber } from '@/lib/format';
 
 interface PulseVariableTableProps {
   /** Variable rows of the month, already ordered by weight. */

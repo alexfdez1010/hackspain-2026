@@ -1,5 +1,7 @@
 import type { UIMessage } from 'ai';
 
+import { companyIdFromPath } from '@/lib/routes';
+
 /** The server selects the provider; the browser never receives credentials. */
 export type AssistantMode = 'mock' | 'gateway';
 
@@ -27,22 +29,22 @@ export interface AssistantRequest {
   pathname: string;
 }
 
-/** Resolves a page label from a local pathname; unknown pages use a safe label. */
+/**
+ * Resolves a page label from a local pathname; unknown pages use a safe label.
+ *
+ * @param pathname - Application pathname, already validated by the server.
+ * @returns A Spanish label naming the section and, on company pages, the company.
+ */
 export function getPageLabel(pathname: string): string {
-  const company = pathname.match(/^\/(empresa|pulse)\/(COMP_\d{4})$/);
-  if (company)
-    return `${company[1] === 'pulse' ? 'PULSE' : 'Radiografía'} · ${company[2]}`;
-  return (
-    (
-      {
-        '/': 'Radar de cartera',
-        '/pulse': 'Cartera PULSE',
-        '/capital': 'Embat Capital',
-        '/monitor': 'Monitor de alertas',
-        '/metodo': 'Metodología',
-      } as Record<string, string>
-    )[pathname] ?? 'Embat Pulse'
-  );
+  const companyId = companyIdFromPath(pathname);
+  if (companyId) {
+    return pathname.endsWith('/recomendaciones')
+      ? `Recomendaciones · ${companyId}`
+      : `PULSE · ${companyId}`;
+  }
+  if (pathname === '/') return 'Elegir empresa';
+  if (pathname === '/metodo') return 'Método';
+  return 'Embat Pulse';
 }
 
 /** Extracts rendered text, ignoring all non-text SDK parts without side effects. */

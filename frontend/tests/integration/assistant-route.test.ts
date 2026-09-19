@@ -13,21 +13,17 @@ vi.mock('@/lib/assistant/context', async (importOriginal) => ({
 }));
 
 const context = {
-  page: 'Radar',
-  provenance: 'Dataset local X-Ray',
+  page: 'Elegir empresa',
+  provenance: 'Dataset local PULSE',
   companyId: undefined,
-  stats: {
-    total: 10,
-    medianScore: 50,
-    deteriorating: 2,
-    structuralDecline: 1,
-    highStress: 1,
-  },
-  worstMovers: [],
+  month: '2026-08',
+  scoreName: 'PULSE',
+  horizons: [1, 6],
+  pillars: [],
+  variables: [],
   company: null,
-  pulse: null,
-  pulseCompany: null,
-  sources: [{ label: 'Radar', href: '/' }],
+  advisor: null,
+  sources: [{ label: 'Método', href: '/metodo' }],
 };
 
 /** Builds a valid in-process HTTP request without an external service or API key. */

@@ -5,9 +5,25 @@ import type { PulseDataSource } from '@/lib/pulse/source/types';
 let cached: PulseDataSource | null = null;
 
 /**
+ * Reads the root URL of the FastAPI service from an environment.
+ *
+ * `PULSE_API_URL` is the current name; `XRAY_API_URL` is still honoured so an
+ * existing deployment keeps working.
+ *
+ * @param env - Environment to read.
+ * @returns The trimmed URL, or `null` when unset, blank or whitespace.
+ */
+export function apiBaseUrl(
+  env: Record<string, string | undefined>,
+): string | null {
+  const url = (env.PULSE_API_URL ?? env.XRAY_API_URL)?.trim();
+  return url ? url : null;
+}
+
+/**
  * Builds the PULSE data source implied by an environment.
  *
- * `XRAY_API_URL` selects the FastAPI service, which serves PULSE under
+ * `PULSE_API_URL` selects the FastAPI service, which serves PULSE under
  * `/api/pulse`; anything else — unset, blank or whitespace — falls back to the
  * bundled JSON files, so the demo never depends on a running backend.
  *
@@ -19,7 +35,7 @@ export function createPulseDataSource(
   env: Record<string, string | undefined> = process.env,
   fetchImpl?: typeof fetch,
 ): PulseDataSource {
-  const baseUrl = env.XRAY_API_URL?.trim();
+  const baseUrl = apiBaseUrl(env);
   if (!baseUrl) return new StaticPulseSource();
   return new ApiPulseSource(baseUrl, fetchImpl);
 }

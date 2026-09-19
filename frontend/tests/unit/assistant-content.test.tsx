@@ -5,39 +5,28 @@ import { getMockReply } from '@/lib/assistant/mock';
 import type { AssistantContext } from '@/lib/assistant/context';
 
 const context: AssistantContext = {
-  page: 'Radar de cartera',
+  page: 'Elegir empresa',
   sources: [],
   companyId: undefined,
-  provenance: 'Dataset local X-Ray',
-  stats: {
-    total: 10,
-    medianScore: 44.5,
-    deteriorating: 3,
-    structuralDecline: 2,
-    highStress: 1,
-  },
-  worstMovers: [],
+  provenance: 'Dataset local PULSE',
+  month: '2026-08',
+  scoreName: 'PULSE',
+  horizons: [1, 6],
+  pillars: [],
+  variables: [],
   company: null,
-  pulse: null,
-  pulseCompany: null,
+  advisor: null,
 };
 
 describe('honest demo answers', () => {
-  it('uses supplied numbers and explains overlapping groups', () => {
+  it('refuses to summarise a portfolio the app never shows', () => {
     const reply = getMockReply('Resume mi cartera', context);
-    expect(reply).toContain('10 empresas');
-    expect(reply).toContain('44,5/100');
-    expect(reply).toContain('solaparse');
+    expect(reply).toContain('una empresa cada vez');
+    expect(reply).not.toMatch(/\d+ empresas/);
   });
-  it('does not invent evidence when the dataset is empty', () => {
-    expect(
-      getMockReply('Resume mi cartera', {
-        ...context,
-        stats: { ...context.stats, total: 0 },
-      }),
-    ).toContain('no hay empresas');
-    expect(getMockReply('¿Qué empresas revisaría primero?', context)).toContain(
-      'No hay suficiente historial',
+  it('explains products in general without a company in context', () => {
+    expect(getMockReply('¿Qué productos puede recomendar?', context)).toContain(
+      'empresa a empresa',
     );
   });
   it('names unavailable company data without fabricating a score', () => {
@@ -46,23 +35,63 @@ describe('honest demo answers', () => {
         ...context,
         companyId: 'COMP_9999',
       }),
-    ).toContain('No hay datos disponibles');
+    ).toContain('No hay datos de');
   });
   it('distinguishes absent PULSE values from zero', () => {
     const reply = getMockReply('Resume esta empresa', {
       ...context,
       companyId: 'COMP_0001',
-      pulseCompany: {
+      company: {
         id: 'COMP_0001',
-        score: null,
-        previous: null,
+        month: '2026-08',
+        monthsObserved: 1,
+        pulse: null,
+        pulsePrev: null,
+        change: null,
         confidence: null,
         pillars: {},
+        unknownVariables: [],
         forecast: [],
       },
     });
     expect(reply).toContain('sin datos');
     expect(reply).not.toContain('0/100');
+  });
+  it('says when a company has no product that fits and lists what unlocks one', () => {
+    const reply = getMockReply('¿Qué productos me recomiendas?', {
+      ...context,
+      companyId: 'COMP_0007',
+      company: {
+        id: 'COMP_0007',
+        month: '2026-08',
+        monthsObserved: 12,
+        pulse: 45,
+        pulsePrev: 44,
+        change: 1,
+        confidence: 0.59,
+        pillars: {},
+        unknownVariables: [],
+        forecast: [],
+      },
+      advisor: {
+        summary: 'No hay hoy un producto que encaje.',
+        pStress6m: 0.11,
+        baseRate: 0.22,
+        referenceRate: {
+          label: 'Euríbor 12 m',
+          value: 0.021,
+          source: 'default',
+        },
+        offers: [],
+        declined: [],
+        unlocks: [
+          'Préstamo a plazo: se desbloquea con un PULSE de 60 (hoy 45).',
+        ],
+        leverStory: [],
+      },
+    });
+    expect(reply).toContain('sin producto que encaje hoy');
+    expect(reply).toContain('PULSE de 60');
   });
   it('answers AI questions and labels unsupported free-form questions honestly', () => {
     expect(getMockReply('¿Cómo puede ayudarme la IA?', context)).toContain(

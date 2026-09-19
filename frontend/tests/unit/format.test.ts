@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  formatBps,
   formatEuro,
   formatMonth,
   formatMonthShort,
   formatNumber,
   formatPercent,
   formatSigned,
-} from '@/lib/xray/format';
+} from '@/lib/format';
 
 describe('formatNumber', () => {
   it('uses Spanish separators', () => {
@@ -59,11 +58,5 @@ describe('month formatting', () => {
   it('returns malformed input untouched', () => {
     expect(formatMonth('agosto')).toBe('agosto');
     expect(formatMonth('2026-13')).toBe('2026-13');
-  });
-});
-
-describe('formatBps', () => {
-  it('labels basis points', () => {
-    expect(formatBps(370)).toBe('370 pb');
   });
 });

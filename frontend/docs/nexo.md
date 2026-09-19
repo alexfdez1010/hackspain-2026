@@ -11,7 +11,7 @@ conversación al navegar. `NexoMascot({ mood, className })` es el renderer decor
 Ejemplo: `<NexoMascot mood="thinking" className="size-32" />`.
 
 `useAssistant()` encapsula envío, cancelación, reintento, reinicio y contexto de
-ruta. `getAssistantContext(pathname, question, xray?, pulse?)` admite inyección
+ruta. `getAssistantContext(pathname, question, pulse?, advisor?)` admite inyección
 de los adaptadores de lectura para pruebas aisladas. `getMockReply(question,
 context)` es determinista. `parseAssistantRequest(value)` valida JSON ya leído;
 `readAssistantRequest(request)` añade límite de bytes y comprobación de origen.
@@ -21,7 +21,7 @@ Ejemplo sin clave, con `bun run dev`:
 ```bash
 curl -N http://localhost:3000/api/assistant \
   -H 'Content-Type: application/json' \
-  -d '{"pathname":"/","messages":[{"id":"demo-1","role":"user","parts":[{"type":"text","text":"Resume mi cartera"}]}]}'
+  -d '{"pathname":"/empresa/COMP_0001","messages":[{"id":"demo-1","role":"user","parts":[{"type":"text","text":"Resume esta empresa"}]}]}'
 ```
 
 `AI_GATEWAY_API_KEY` se lee sólo en el servidor. La constante de modelo es
@@ -51,8 +51,9 @@ Las instrucciones incluyen un glosario construido desde `DIRECTION_LABELS` y
 `REGIME_LABELS` para que el modelo no repita identificadores del dataset
 (`pStress`, `structural_decline`) y use formato numérico español.
 
-Sólo se envían al modelo un resumen de cartera, tres movimientos y, cuando se
-pide, una empresa. La metadata de fuentes son rutas internas construidas por el
+Sólo se envían al modelo los metadatos del score y, cuando la ruta o la
+pregunta nombran una, una única empresa con su PULSE y sus recomendaciones;
+la aplicación nunca muestra la cartera y el asistente tampoco la recibe. La metadata de fuentes son rutas internas construidas por el
 servidor. No se renderizan HTML ni enlaces generados por el modelo. No hay
 persistencia de chats, herramientas de escritura ni acciones financieras.
 Esta app de demostración no tiene autenticación: antes de exposición pública de
@@ -151,3 +152,16 @@ Documentación oficial consultada: [AI SDK](https://ai-sdk.dev/docs/ai-sdk-ui/ch
   previa de detalle X-Ray usa una fixture en el límite de archivo, porque los
   exports por empresa no están versionados. Nexo conserva los datos del resumen
   cuando falta ese detalle, sin inventar límites ni enlazar a una ficha ausente.
+
+## Modelo de una sola empresa (2026-09-19)
+
+La aplicación pasó a mostrar una única empresa por pantalla. Nexo sigue el
+mismo principio: el contexto sale de `PulseDataSource` (score, meses observados,
+variables sin datos y previsión) y de `AdvisorDataSource` (resumen, probabilidad
+de tensión, ofertas con importe, tipo y motivos, descartados, desbloqueos y
+palancas). Sin empresa en la ruta ni en la pregunta, sólo viajan los metadatos
+del score y Nexo remite a la portada. Rutas admitidas: `/`,
+`/empresa/COMP_xxxx`, `/empresa/COMP_xxxx/recomendaciones` y `/metodo`;
+cualquier otra se normaliza a `/`. Las respuestas simuladas cubren: resumen de
+la empresa, productos recomendados (o por qué no hay ninguno), previsión, score
+y método.

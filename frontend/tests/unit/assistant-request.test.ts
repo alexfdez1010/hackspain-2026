@@ -31,12 +31,12 @@ describe('assistant configuration', () => {
 describe('assistant request boundary', () => {
   it('keeps text and strips client metadata and model overrides', () => {
     const parsed = parseAssistantRequest({
-      pathname: '/pulse/COMP_0001',
+      pathname: '/empresa/COMP_0001',
       model: 'other',
       messages: [{ ...message, metadata: { mode: 'gateway' } }],
     });
     expect(parsed).toEqual({
-      pathname: '/pulse/COMP_0001',
+      pathname: '/empresa/COMP_0001',
       messages: [message],
     });
   });
@@ -45,6 +45,7 @@ describe('assistant request boundary', () => {
     '//evil.test',
     '/empresa/../../secret',
     '/unknown',
+    '/pulse/COMP_0001',
   ])('does not use an untrusted path: %s', (pathname) => {
     expect(
       parseAssistantRequest({ pathname, messages: [message] }).pathname,
@@ -136,8 +137,11 @@ describe('assistant request boundary', () => {
     });
   });
   it('labels company and section context without interpreting arbitrary URLs', () => {
-    expect(getPageLabel('/pulse/COMP_0001')).toBe('PULSE · COMP_0001');
-    expect(getPageLabel('/capital')).toBe('Embat Capital');
+    expect(getPageLabel('/empresa/COMP_0001')).toBe('PULSE · COMP_0001');
+    expect(getPageLabel('/empresa/COMP_0001/recomendaciones')).toBe(
+      'Recomendaciones · COMP_0001',
+    );
+    expect(getPageLabel('/metodo')).toBe('Método');
     expect(getPageLabel('/unknown')).toBe('Embat Pulse');
   });
 });

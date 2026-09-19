@@ -34,8 +34,8 @@ make up          # builds and starts the API (:8000) and the web app (:3000)
 make down
 ```
 
-Then open <http://localhost:3000/pulse> for the portfolio or
-<http://localhost:3000/pulse/COMP_0001> for an example company: monthly PULSE
+Then open <http://localhost:3000> and pick a company, or go straight to
+<http://localhost:3000/empresa/COMP_0001> for an example company: monthly PULSE
 history, the 11 variables with their contributions, and the +1..+6 month
 forecast with bands. The API image ships the precomputed artefacts
 (`backend/data/pulse/web`); the web container reads them through
