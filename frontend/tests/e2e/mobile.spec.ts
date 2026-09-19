@@ -5,7 +5,7 @@ test.use({ ...devices['iPhone 13'] });
 test('fits a phone: two-row navigation, no sideways scroll and stacked maps', async ({
   page,
 }) => {
-  await page.goto('/company/COMP_0001', { waitUntil: 'networkidle' });
+  await page.goto('/company/COMP_0001/diagnosis', { waitUntil: 'networkidle' });
   const nav = page.getByRole('navigation', { name: 'Secciones' });
   const search = nav.getByRole('combobox', { name: 'Empresa' });
   const home = nav.getByRole('link', { name: 'Embat Pulse, inicio' });
@@ -42,7 +42,7 @@ test('fits a phone: two-row navigation, no sideways scroll and stacked maps', as
   await expect(page.getByText('¿Necesitas ayuda? Escríbeme')).toBeHidden();
   await search.fill('atlassian glo');
   await page.getByRole('option', { name: 'Atlassian Global' }).click();
-  await expect(page).toHaveURL('/company/COMP_0051');
+  await expect(page).toHaveURL('/company/COMP_0051/diagnosis');
   await method.click();
   await expect(page).toHaveURL('/method?company=COMP_0051');
   await expect(

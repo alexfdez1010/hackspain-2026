@@ -40,26 +40,44 @@ test('lands on the demo company without browser errors', async ({ page }) => {
     page.getByRole('heading', { level: 1, name: 'Atresmedia Labs' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('heading', { level: 2, name: 'Dónde se decide' }),
-  ).toBeVisible();
-  await expect(
     page.getByRole('img', { name: /sobre la escala de bandas/ }),
   ).toBeVisible();
   await page.getByRole('img', { name: /PULSE mensual/ }).hover();
   await expect(
     page.getByRole('status').filter({ hasText: /\d,\d/ }),
   ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 2, name: /Contrata|Explica|Sube/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Abrir Nexo, asistente de Pulse' }),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('diagnoses the company from the mosaic', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto('/company/COMP_0001');
+  const nav = page.getByRole('navigation', { name: 'Secciones' });
+  await nav.getByRole('link', { name: 'Diagnóstico', exact: true }).click();
+  await expect(page).toHaveURL('/company/COMP_0001/diagnosis');
+  await expect(page).toHaveTitle(/Atresmedia Labs — Diagnóstico/);
+  await expect(
+    page.getByRole('heading', { level: 2, name: 'Dónde se decide' }),
+  ).toBeVisible();
+  await expect(
+    nav.getByRole('link', { name: 'Diagnóstico', exact: true }),
+  ).toHaveAttribute('aria-current', 'page');
   const cell = page.getByRole('button', { name: /Días de caja/ }).first();
   await cell.click();
   await expect(cell).toHaveAttribute('aria-pressed', 'true');
   await expect(
-    page
-      .locator('section')
-      .filter({ hasText: 'Dónde se decide' })
-      .getByRole('link', { name: /Ver la variable/ }),
+    page.getByRole('link', { name: /Ver la variable/ }),
   ).toHaveAttribute('href', '/company/COMP_0001/variable/cash_days');
+  await nav.getByRole('link', { name: 'Detalle', exact: true }).click();
+  await expect(page).toHaveURL('/company/COMP_0001/detail');
   await expect(
-    page.getByRole('button', { name: 'Abrir Nexo, asistente de Pulse' }),
+    page.getByRole('heading', { level: 2, name: 'Mes a mes' }),
   ).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -122,7 +140,7 @@ test('opens a variable from the mosaic and moves to the next one', async ({
   page,
 }) => {
   const errors = trackErrors(page);
-  await page.goto('/company/COMP_0001');
+  await page.goto('/company/COMP_0001/diagnosis');
   await page
     .getByRole('button', { name: /Días de caja/ })
     .first()

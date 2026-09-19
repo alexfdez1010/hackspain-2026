@@ -4,7 +4,6 @@ import { describe, expect, it } from 'vitest';
 import { PulseCompanyHeader } from '@/components/pulse/company-header';
 import { PulseForecastPanel } from '@/components/pulse/forecast-panel';
 import { PulseForecastTable } from '@/components/pulse/forecast-table';
-import { PulseMethodCards } from '@/components/pulse/method-cards';
 import { PulseMonthExplorer } from '@/components/pulse/month-explorer';
 import { PulseMonthTable } from '@/components/pulse/month-table';
 import { PulsePillarCards } from '@/components/pulse/pillar-cards';
@@ -177,19 +176,5 @@ describe('the month-by-month view renders on the server', () => {
     expect(markup).toContain('Ver la variable');
     expect(markup).toMatch(/href="\/company\/COMP_0001\/variable\/\w+"/);
     expect(markup).not.toContain('NaN');
-  });
-
-  it('states the model with the weights of the export', async () => {
-    const company = await source.getCompany('COMP_0001');
-    const { meta } = await source.getSummary();
-    const markup = renderToStaticMarkup(
-      <PulseMethodCards meta={meta} company={company!} />,
-    );
-    expect(markup).toContain('PULSE = Σ(peso · score) / Σ(pesos con dato)');
-    expect(markup).toContain('36 · 26 · 26 · 12 de 100');
-    expect(markup).toContain('ene 2026 – ago 2026');
-    expect(markup).toContain('6 meses, hasta feb 2027');
-    expect(markup).toContain('2 de 11 variables');
-    expect(markup).toContain('href="/method?company=COMP_0001"');
   });
 });

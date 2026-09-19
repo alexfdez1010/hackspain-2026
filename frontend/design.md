@@ -314,12 +314,15 @@ Component rules:
 - Breakpoints: los de Tailwind (`sm` 640, `lg` 1024).
 - Navigation behavior by breakpoint: en `/` no hay `SiteNav`; el acceso es
   `HeroAccess`. En producto, barra superior fija con hairline inferior: marca
-  (a `/`), hairline vertical y claim, el buscador de empresa y cuatro pestañas
-  —PULSE, Señales, Financiación, Método—. Las pestañas son enlaces con aspecto
-  de tab: 16/500, padding 11/14, radio 8, la actual en azul de enlace sobre
-  `brand-subtle` y el resto en secundario sobre transparente. El claim se
-  oculta bajo `md`; en móvil la barra son dos filas (marca y buscador arriba,
-  pestañas debajo, 40 px de alto) y envuelve, sin menú colapsable. En `lg` el
+  (a `/`), el buscador de empresa y seis pestañas
+  —PULSE, Diagnóstico, Detalle, Señales, Financiación, Método—. Las pestañas
+  son enlaces con aspecto de tab: 15/500, padding 11/12, radio 8, la actual en
+  azul de enlace sobre `brand-subtle` y el resto en secundario sobre
+  transparente; la actual es la sección que nombra `sectionFromPath`, así que
+  una página de variable mantiene PULSE. El claim del mock no cabe junto al
+  buscador en 1240 px y se queda en la landing; bajo `lg` la barra son dos filas (marca y buscador arriba, pestañas debajo
+  con 40 px de alto) y la fila de pestañas se desplaza en horizontal sin
+  barra visible en vez de envolver, para no crecer a una tercera fila. En `lg` el
   hero es 50/50 y el pie ocupa el cuadrante derecho; por debajo de `lg`,
   wordmark, accesos y pie se apilan dentro de los gutters.
 - Mobile-first exceptions: las tablas mes a mes y de variables mantienen su
@@ -391,6 +394,7 @@ patterns.
 | 2026-09-19 | Banda del score como píldora con punto de 8 px y nombre (`ScoreBadge variant="pill"`); la cifra se queda en tinta con el punto delante | El color no va solo y la cifra nunca se tiñe de azul ni de rojo: el punto y el texto portan la banda | Equipo Pulse |
 | 2026-09-19 | Pie de producto (`SiteFooter`) con hairline superior: «Pulse · 11 variables en 4 pilares» y «By humans for humans.» | Cierra la página con lo que mide el score y quién lo firma, sin repetir la navegación | Equipo Pulse |
 | 2026-09-19 | Destinos de la nav como pestañas (radio 8, la actual en azul de enlace sobre `brand-subtle`) sin dejar de ser enlaces con `aria-current`; «Recomendaciones» pasa a «Financiación» | La barra agrupa las vistas de una misma empresa y se leen como pestañas; el nombre dice qué se decide allí, no qué hace el sistema | Equipo Pulse |
+| 2026-09-19 | La empresa se divide en tres páginas como el mock: Resumen (`/company/[id]`), Diagnóstico (`/diagnosis`) y Detalle (`/detail`); «Cómo se calcula» vive sólo en Método | Cada pestaña responde una pregunta y cabe en una pantalla; un solo scroll de nueve secciones no se leía | Equipo Pulse |
 | 2026-09-19 | La página de variable elimina el párrafo «qué mide» repetido; el bloque pasa a ser «Ficha de la variable» | La entradilla ya es esa frase; copia que repite el título no añade nada | Equipo Pulse |
 | 2026-09-19 | Método abre con la caja de fórmulas (`surface-deep`, hairline, radio 8) y la «Ficha del modelo»; después un panel por bloque explicativo | Reproduce el par «Cómo se calcula» del mock y pone la regla antes que sus ilustraciones | Equipo Pulse |
 | 2026-09-19 | Los tipos de señal usan una píldora punto + etiqueta teñida con el color de feedback de la dirección; la alerta pierde el borde izquierdo de color | El brief reserva el color a bandas, series y estados, y prohíbe tarjetas con borde lateral de color | Equipo Pulse |

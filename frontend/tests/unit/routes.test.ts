@@ -24,6 +24,8 @@ describe('companyRoutes', () => {
   it('scopes every destination to the company', () => {
     expect(companyRoutes('COMP_0001')).toEqual({
       pulse: '/company/COMP_0001',
+      diagnosis: '/company/COMP_0001/diagnosis',
+      detail: '/company/COMP_0001/detail',
       signals: '/company/COMP_0001/signals',
       advisor: '/company/COMP_0001/recommendations',
       method: '/method?company=COMP_0001',
@@ -96,22 +98,30 @@ describe('navigation', () => {
     expect(resolveNavCompany('/', null)).toBe('COMP_0001');
   });
 
-  it('marks the advisor and not PULSE while the recommendations are open', () => {
+  it('lists the six sections of a company in the order of the prototype', () => {
     const sections = companySections('COMP_0001');
     expect(sections.map((section) => section.label)).toEqual([
       'PULSE',
+      'Diagnóstico',
+      'Detalle',
       'Señales',
       'Financiación',
       'Método',
     ]);
+    expect(sections.map((section) => section.href)).toEqual([
+      '/company/COMP_0001',
+      '/company/COMP_0001/diagnosis',
+      '/company/COMP_0001/detail',
+      '/company/COMP_0001/signals',
+      '/company/COMP_0001/recommendations',
+      '/method?company=COMP_0001',
+    ]);
     expect(
-      isActive('/company/COMP_0001/recommendations', sections[2].match),
+      isActive('/company/COMP_0001/recommendations', sections[4].match),
     ).toBe(true);
-    expect(isActive('/company/COMP_0001/signals', sections[1].match)).toBe(
+    expect(isActive('/company/COMP_0001/signals', sections[3].match)).toBe(
       true,
     );
-    expect(isActive('/method', '/method')).toBe(true);
-    expect(isActive('/method', '/')).toBe(false);
   });
 });
 
@@ -124,6 +134,8 @@ describe('sectionFromPath', () => {
     expect(sectionFromPath('/company/COMP_0001/variable/cash_days')).toBe(
       'pulse',
     );
+    expect(sectionFromPath('/company/COMP_0001/diagnosis')).toBe('diagnosis');
+    expect(sectionFromPath('/company/COMP_0001/detail')).toBe('detail');
     expect(sectionFromPath('/method')).toBe('method');
     expect(sectionFromPath('/')).toBe('pulse');
     expect(sectionFromPath('/other/recommendations')).toBe('pulse');

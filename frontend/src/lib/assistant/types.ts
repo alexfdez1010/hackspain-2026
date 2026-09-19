@@ -44,6 +44,8 @@ export function getPageLabel(pathname: string): string {
     if (variableKey) return `Variable ${variableKey} · ${name}`;
     if (pathname.endsWith('/recommendations')) return `Financiación · ${name}`;
     if (pathname.endsWith('/signals')) return `Señales · ${name}`;
+    if (pathname.endsWith('/diagnosis')) return `Diagnóstico · ${name}`;
+    if (pathname.endsWith('/detail')) return `Detalle · ${name}`;
     return `PULSE · ${name}`;
   }
   if (pathname === '/method') return 'Método';
