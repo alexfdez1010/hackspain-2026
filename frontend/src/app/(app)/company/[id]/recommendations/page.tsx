@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { CompanyActionsSection } from '@/components/actions/company-actions-panel';
 import { AdvisorDetail } from '@/components/advisor/advisor-detail';
 import { ApprovedPanel } from '@/components/advisor/approved-panel';
 import { SoftActionPanel } from '@/components/advisor/soft-action-panel';
@@ -56,10 +55,10 @@ function buildLead(fitting: number, declined: number): string {
 }
 
 /**
- * What the company should do about its financing this month: the action
- * first, then the operational measure that costs nothing, then the products it
- * can sign today with their price and fit, and the argument behind them
- * folded away.
+ * What the company can do about its financing this month: the operational
+ * measure that costs nothing first, then the products it can sign today with
+ * their price and fit, and the argument behind them folded away. The written
+ * actions live on the Acción page, so they are not repeated here.
  *
  * The free measure comes before the catalogue on purpose: the largest gap of
  * the last close is worth points of PULSE that no product buys, so it has to
@@ -93,11 +92,6 @@ export default async function CompanyAdvisorPage({ params }: AdvisorPageProps) {
       title={companyName(company.companyId)}
       lead={buildLead(company.recommendations.length, company.declined.length)}
     >
-      <CompanyActionsSection
-        companyId={company.companyId}
-        month={company.month}
-        current="advisor"
-      />
       {gap && <SoftActionPanel gap={gap} />}
       <ApprovedPanel
         company={company}

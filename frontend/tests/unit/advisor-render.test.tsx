@@ -248,13 +248,12 @@ describe('the advisor page', () => {
     return renderToStaticMarkup(element);
   }
 
-  it('opens COMP_0001 with the action, then what it can sign today', async () => {
+  it('opens COMP_0001 with the free measure, then what it can sign today', async () => {
     const markup = await renderPage('COMP_0001');
     expect(markup).toContain('<h1');
     expect(markup).toContain('3 productos encajan hoy');
     expect(markup).toContain('4 quedan fuera');
-    expect(markup).toContain('Qué hacer ahora');
-    expect(markup).toContain('Leyendo las cifras de la empresa…');
+    expect(markup).not.toContain('Qué hacer ahora');
     expect(markup).toContain('Antes de financiar · sin coste');
     expect(markup).toContain('Efecto en el PULSE si la variable llega a 100');
     expect(markup).toContain('Coste financiero de la medida');
