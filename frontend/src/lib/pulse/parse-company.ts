@@ -11,10 +11,11 @@ import {
   toPulseVariables,
 } from '@/lib/pulse/parse-primitives';
 import { parseBand } from '@/lib/pulse/parse-summary';
-import type {
-  PulseCompany,
-  PulseForecastPoint,
-  PulseSeriesPoint,
+import {
+  PULSE_FORECAST_MONTHS,
+  type PulseCompany,
+  type PulseForecastPoint,
+  type PulseSeriesPoint,
 } from '@/lib/pulse/types';
 
 /**
@@ -66,7 +67,9 @@ function parseForecastPoint(value: unknown): PulseForecastPoint | null {
  * Parses one company payload, tolerating missing or malformed fields.
  *
  * The same shape is served by `GET /api/pulse/companies/{id}` and by the
- * bundled `src/data/pulse/companies/<id>.json`.
+ * bundled `src/data/pulse/companies/<id>.json`. The export carries twelve
+ * forecast horizons; only the first `PULSE_FORECAST_MONTHS` are kept, so the
+ * app never shows a month it does not want to commit to.
  *
  * @param value - Raw payload.
  * @returns The company with its history and forecast, or `null` when the
@@ -82,7 +85,10 @@ export function parsePulseCompany(value: unknown): PulseCompany | null {
     .sort((a, b) => a.month.localeCompare(b.month));
   const forecast = toArray(record.forecast)
     .map(parseForecastPoint)
-    .filter((item): item is PulseForecastPoint => item !== null)
+    .filter(
+      (item): item is PulseForecastPoint =>
+        item !== null && item.horizon <= PULSE_FORECAST_MONTHS,
+    )
     .sort((a, b) => a.horizon - b.horizon);
   return {
     companyId,

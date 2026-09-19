@@ -1,3 +1,4 @@
+import type { PulseCompanyDetails } from '@/lib/pulse/details/types';
 import type { PulseCompany, PulseSummary } from '@/lib/pulse/types';
 
 /**
@@ -14,9 +15,16 @@ export interface PulseDataSource {
   /** Score metadata plus one row per company. */
   getSummary(): Promise<PulseSummary>;
   /**
-   * One company with its monthly history and its twelve forecast horizons.
+   * One company with its monthly history and its six forecast horizons.
    *
    * @param companyId - Identifier such as `COMP_0001`.
    */
   getCompany(companyId: string): Promise<PulseCompany | null>;
+  /**
+   * The detail behind every variable of one company for its last month:
+   * counterparties, credit lines, debt products, aging and daily cash.
+   *
+   * @param companyId - Identifier such as `COMP_0001`.
+   */
+  getCompanyDetails(companyId: string): Promise<PulseCompanyDetails | null>;
 }

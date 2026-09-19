@@ -15,6 +15,7 @@ import {
 } from '@/lib/method/example';
 import { getPulseDataSource } from '@/lib/pulse/data';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
+import { PULSE_FORECAST_MONTHS } from '@/lib/pulse/types';
 import { companyIdFromQuery, companyRoutes } from '@/lib/routes';
 import { formatMonth, formatNumber } from '@/lib/format';
 
@@ -54,7 +55,10 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
     meta.variables,
     company?.series[company.series.length - 1] ?? null,
   );
-  const lastHorizon = meta.horizons[meta.horizons.length - 1] ?? 12;
+  const lastHorizon = Math.min(
+    meta.horizons[meta.horizons.length - 1] ?? PULSE_FORECAST_MONTHS,
+    PULSE_FORECAST_MONTHS,
+  );
 
   return (
     <PageShell

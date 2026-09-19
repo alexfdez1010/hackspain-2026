@@ -72,7 +72,7 @@ export function getMockReply(
     /prevision|forecast|futuro|banda|p10|p90/.test(query) &&
     !context.company
   ) {
-    return '**La previsión se lee aparte del dato observado.**\n\nCada empresa tiene horizontes de +1 a +12 meses. El valor previsto viene acompañado de una banda p10–p90 que refleja la incertidumbre del modelo; cuanto más ancha, menos concluyente es la estimación.\n\nAbre una empresa para ver su trayectoria observada, la previsión y el desglose de los aportes que la explican.';
+    return '**La previsión se lee aparte del dato observado.**\n\nCada empresa tiene horizontes de +1 a +6 meses. El valor previsto viene acompañado de una banda p10–p90 que refleja la incertidumbre del modelo; cuanto más ancha, menos concluyente es la estimación.\n\nAbre una empresa para ver su trayectoria observada, la previsión y el desglose de los aportes que la explican.';
   }
   if (context.companyId) {
     if (!context.company) {
@@ -97,7 +97,7 @@ export function getMockReply(
     return '**Las recomendaciones se calculan empresa a empresa.**\n\nSiete productos —línea de crédito, ampliación, factoring, confirming, préstamo a plazo, reestructuración y depósito— se evalúan con reglas ligadas a las variables del score; los que encajan se dimensionan y se les pone precio sobre el Euríbor a 12 meses.\n\nAbre una empresa y pregúntame por sus productos: te diré cuáles encajan, por cuánto y por qué.';
   }
   if (/empresa|cartera|resum|situacion|hola/.test(query)) {
-    return '**Esta aplicación muestra una empresa cada vez, nunca la cartera.**\n\nElige una empresa en el selector de la cabecera para abrir su PULSE mes a mes, su previsión a un año y los productos financieros que encajan. Cuando estés en una empresa, pregúntame «Resume esta empresa» o «¿Qué productos me recomiendas?».';
+    return '**Esta aplicación muestra una empresa cada vez, nunca la cartera.**\n\nElige una empresa en el selector de la cabecera para abrir su PULSE mes a mes, su previsión a seis meses y los productos financieros que encajan. Cuando estés en una empresa, pregúntame «Resume esta empresa» o «¿Qué productos me recomiendas?».';
   }
   return 'Estoy en **modo demostración**, con respuestas preparadas sobre la aplicación. Esta pregunta todavía no tiene una respuesta simulada.\n\nPuedes probar «Resume esta empresa», «¿Qué productos me recomiendas?», «Explícame el score» o «¿Cómo puede ayudarme la IA?». Con el asistente conectado podrás hacer preguntas abiertas y continuar la conversación.';
 }

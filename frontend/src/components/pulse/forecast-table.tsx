@@ -77,7 +77,7 @@ function buildColumns(
 }
 
 /**
- * Lists the twelve predicted months with their band and the move they imply,
+ * Lists the six predicted months with their band and the move they imply,
  * sortable by any column.
  *
  * Nothing in these rows is a measurement: the month column says «previsto» on

@@ -21,7 +21,7 @@ describe('the company PULSE page', () => {
     const markup = await render('COMP_0001');
     expect(markup).toContain('COMP_0001');
     expect(markup).toContain('8 meses observados hasta ago 2026');
-    expect(markup).toContain('previsión mensual hasta ago 2027');
+    expect(markup).toContain('previsión mensual hasta feb 2027');
     expect(markup).toContain('32,8');
     expect(markup).toContain('82 de 100 puntos con datos');
   });
@@ -40,7 +40,7 @@ describe('the company PULSE page', () => {
     ]) {
       expect(markup).toContain(month);
     }
-    expect(markup).toContain('8 cierres observados y 12 meses previstos');
+    expect(markup).toContain('8 cierres observados y 6 meses previstos');
     expect(markup).toContain('Meses previstos, aún sin cerrar');
     expect(markup).toContain('primer mes');
   });

@@ -10,7 +10,11 @@ import {
   sumContributions,
 } from '@/lib/pulse/company-view';
 import { formatBand, formatHorizon } from '@/lib/pulse/format';
-import type { PulseForecastPoint, PulseVariableMeta } from '@/lib/pulse/types';
+import {
+  PULSE_FORECAST_MONTHS,
+  type PulseForecastPoint,
+  type PulseVariableMeta,
+} from '@/lib/pulse/types';
 import { formatMonth, formatNumber, formatSigned } from '@/lib/format';
 
 interface PulseForecastPanelProps {
@@ -42,7 +46,7 @@ export function PulseForecastPanel({
     label: formatHorizon(point.horizon),
   }));
   const [horizon, setHorizon] = useState(
-    String(forecast[forecast.length - 1]?.horizon ?? 12),
+    String(forecast[forecast.length - 1]?.horizon ?? PULSE_FORECAST_MONTHS),
   );
   const point =
     forecast.find((item) => String(item.horizon) === horizon) ??

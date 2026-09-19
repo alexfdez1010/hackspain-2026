@@ -152,6 +152,14 @@ export interface PulseSeriesPoint {
   cashEnd: number | null;
 }
 
+/**
+ * Farthest forecast horizon the app shows, in months.
+ *
+ * The export publishes +1..+12; the parser drops everything beyond this, so
+ * every chart, table and decomposition reads the same six months.
+ */
+export const PULSE_FORECAST_MONTHS = 6;
+
 /** One forecast horizon with its decomposition. */
 export interface PulseForecastPoint extends PulseForecastBand {
   /** Horizon in months ahead of the last observed month. */
@@ -163,7 +171,7 @@ export interface PulseForecastPoint extends PulseForecastBand {
   contributions: PulseContributions;
 }
 
-/** A company with its monthly history and its twelve forecast horizons. */
+/** A company with its monthly history and its six forecast horizons. */
 export interface PulseCompany {
   companyId: string;
   groupId: string;
@@ -176,6 +184,6 @@ export interface PulseCompany {
   pillars: PulsePillars;
   /** Observed months, ascending. */
   series: PulseSeriesPoint[];
-  /** Horizons +1 to +12, ascending. */
+  /** Horizons +1 to `PULSE_FORECAST_MONTHS`, ascending. */
   forecast: PulseForecastPoint[];
 }
