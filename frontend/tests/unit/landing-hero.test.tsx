@@ -39,7 +39,13 @@ describe('the landing hero', () => {
     expect(html).toContain('hero-dither');
     expect(html).toContain('data-dither');
     expect(html).toContain('aria-label="Dashboard"');
-    expect(html).toContain('>Embat Pulse<');
+    expect(html).toContain('<h1');
+    expect(html).toContain('>PULSE<');
+    expect(html).toContain('Cada mes: cómo está y hacia dónde va');
+    expect(html).toContain('text-ink-secondary');
+    expect(html).not.toContain('>Pulse<');
+    expect(html).not.toContain('text-ink-muted');
+    expect(html).not.toContain('Embat');
     expect(html).not.toContain(PULSE_MARK_VIEWBOX);
     expect(html).not.toContain('hero-grain');
 

@@ -14,10 +14,12 @@ import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 /**
  * Marketing landing: three viewport-tall bands inside the site frame.
  *
- * The hero splits a dithered sparkle field and product access. The webp is
- * `preload`ed here so the fetch starts with the document; Paper still owns
- * the canvas. The middle band is a 2×2 of product surfaces; PULSE plays the
- * marketing trajectory. The footer is heatmap and lists.
+ * The hero splits a dithered sparkle field and product access: PULSE is the
+ * `h1`, the monthly line sits under the links. The webp is `preload`ed here so
+ * the fetch starts with the document; Paper still owns the canvas. The middle
+ * band is a 2×2 of
+ * product surfaces; PULSE plays the marketing trajectory. The footer is
+ * heatmap and lists.
  *
  * @returns The framed landing page.
  */
@@ -38,10 +40,14 @@ export default async function LandingPage() {
             <div className="hero-dither pointer-events-none absolute inset-0 overflow-hidden">
               <PulseHeroDither />
             </div>
-            <h1 className="sr-only">Embat Pulse</h1>
           </div>
           <div className="col-start-2 flex h-full items-center px-6 py-10 sm:px-10 lg:col-start-3">
-            <HeroAccess />
+            <div className="flex w-full flex-col gap-10 sm:gap-12">
+              <HeroAccess />
+              <p className="max-w-xl text-[17px] leading-[1.6] text-ink-secondary">
+                Cada mes: cómo está y hacia dónde va
+              </p>
+            </div>
           </div>
           <div className="col-start-3 row-span-2 lg:col-start-4 lg:row-span-1" />
         </section>

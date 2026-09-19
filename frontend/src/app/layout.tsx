@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
-import { inter } from '@/lib/fonts';
+import { aktivGrotesk, dmSans } from '@/lib/fonts';
 import './globals.css';
 import '@/styles/nexo.css';
 
@@ -13,7 +13,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Embat Pulse — salud financiera mensual de la cartera',
+  title: 'Pulse — salud financiera mensual de la cartera',
   description:
     'Score PULSE 0-100 con 11 variables en 4 pilares, historia mensual y previsión a seis meses sobre 1.285 pymes.',
 };
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="es" className={inter.variable}>
+    <html lang="es" className={`${dmSans.variable} ${aktivGrotesk.variable}`}>
       <body className="min-h-screen font-sans antialiased">{children}</body>
     </html>
   );

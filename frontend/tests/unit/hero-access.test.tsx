@@ -15,9 +15,15 @@ describe('HeroAccess', () => {
     expect(html).toContain('aria-label="Dashboard"');
     expect(html).toContain('grid-cols-2');
     expect(html).toContain('hero-access-link');
+    expect(html).toContain('font-normal');
     expect(html).toContain(`href="${demo.pulse}"`);
     expect(html).toContain(`href="${demo.advisor}"`);
     expect(html).toContain(`href="${demo.method}"`);
+    expect(html.indexOf('<h1')).toBeGreaterThan(-1);
+    expect(html.indexOf('<h1')).toBeLessThan(
+      html.indexOf(`href="${demo.pulse}"`),
+    );
+    expect(html.split('<h1').length - 1).toBe(1);
     expect(html).not.toContain('href="/radar"');
     expect(html).not.toContain('href="/capital"');
     expect(html).not.toContain('rounded-t-md');

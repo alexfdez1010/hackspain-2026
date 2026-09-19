@@ -73,7 +73,8 @@ unresolved placeholders. Keep them when completing or updating this document.
   sólo añade el corte interior vertical. El marco ya cierra el recuadro, no se
   dibuja una segunda caja. El hero llena la
   primera banda: dither Paper de destellos a la izquierda (`fit: contain`);
-  `HeroAccess` a la derecha, sobre fondo plano. El pie llena la
+  a la derecha, `HeroAccess` (PULSE es el `h1`) y debajo la línea
+  «Cada mes: cómo está y hacia dónde va», fondo plano. El pie llena la
   tercera: heatmap a la izquierda; grano dither detrás de Platform / Docs y
   legal a la derecha, con aire a eje y gutter.
 - `/` es marketing. El producto empieza en `/radar`.
@@ -131,24 +132,20 @@ llevan etiqueta de severidad además de color.
 
 ### Typography
 
-- **Una sola familia**: Inter (`next/font/google`, pesos 400/500/600), en
-  `--font-inter`. `--font-sans` y `--font-display` resuelven los dos a Inter:
-  no hay familia de display aparte. El stack de marca es
-  «Aeonik → General Sans → Inter»; Inter es el corte del que disponemos y el
-  que carga el prototipo.
-- **Nunca bold**: los titulares van en 600 con tracking negativo; los botones,
-  etiquetas y enlaces de navegación en 500; el texto corrido en 400. El 700 no
-  aparece en ninguna pieza.
+- Display: Aktiv Grotesk (`next/font/local`, `--font-aktiv`). 700 en `h1`/`h2`,
+  500 en `h3`. No hay SemiBold: 600 y 700 resuelven al corte Bold.
+- Cuerpo: DM Sans (`next/font/google`, `--font-dm-sans`) 400 / 500 / 600.
+  `--font-sans` apunta a DM Sans; `--font-display` a Aktiv.
 - Cuerpo: 15 px / 1,55, `font-variant-numeric: tabular-nums` y
   `text-wrap: pretty` en `body`. No hay monoespaciada: los importes y los
-  identificadores (`COMP_0001`) usan Inter con cifras tabulares.
+  identificadores (`COMP_0001`) usan DM Sans con cifras tabulares.
 - Type scale (tamaño / interlineado / peso / tracking):
 
   | Estilo   | Valor                      | Uso                                        |
   | -------- | -------------------------- | ------------------------------------------ |
-  | display  | 40 / 1,15 / 600 / −0,015em | `h1` de página (30 px en móvil)            |
+  | display  | 40 / 1,15 / 700 / −0,015em | `h1` de página (30 px en móvil)            |
   | metric   | 32 / 1,1 / 600 / −0,01em   | Cifra de la tira de KPI                    |
-  | h3       | 20 / 1,35 / 600            | Título dentro de un panel                  |
+  | h3       | 20 / 1,35 / 500            | Título dentro de un panel                  |
   | body-lg  | 17 / 1,6 / 400             | Entradilla sobre fondo oscuro              |
   | body     | 15 / 1,55 / 400            | Texto corrido, tablas y menús              |
   | label    | 14 / 1,2 / 500             | Etiquetas y cabeceras de tabla             |
@@ -160,7 +157,9 @@ llevan etiqueta de severidad además de color.
   wordmark `PulseWordmark` (`ui/wordmark`, 14 px) a su derecha, y a
   continuación un hairline vertical y el claim «La inteligencia que impulsa tu
   tesorería» (oculto bajo `md`). En el hero de `/` no hay lockup a escala de
-  columna: el `h1` es «Embat Pulse» y es `sr-only`. El enlace de la nav se
+  columna: el `h1` es el enlace «PULSE» de `HeroAccess`. Debajo de la
+  nav, una sola línea en body-lg `--text-secondary`: «Cada mes: cómo está
+  y hacia dónde va». El enlace de la nav de producto se
   llama «Embat Pulse, inicio».
 - Line-height rules: 1,55 en texto corrido; 1,1-1,2 en titulares y cifras.
 - Maximum readable line length: 70-75 caracteres (720 px).
@@ -238,13 +237,13 @@ adding it to the codebase.
 | Asistente Nexo    | `Modal`, `Button`, `TextArea`                 | `primary`, `secondary`, `ghost` | Diálogo lateral de 440 px; hoja inferior en móvil. Solo en rutas de producto.                                      |
 | Icono de marca    | SVG estático (`src/app/icon.svg`)             | paleta de Nexo                  | Nav de producto; el enlace lleva `aria-label="Embat Pulse, inicio"` y apunta a `/`.                                |
 | Hero dither       | Paper `ImageDithering` (`PulseHeroDither`)    | destellos locales, `contain`    | Columna izquierda de `/`; webp propio; `preload` RSC; fade `data-ready`; `maxPixelCount` 480 000; no `next/image`. |
-| Hero mark         | SVG propio (`PulseHeroMark`)                  | tokens de score + accent        | Geometría compartida; no se monta en `/`. El `h1` de la landing es «Embat Pulse» y es `sr-only`.                   |
+| Hero mark         | SVG propio (`PulseHeroMark`)                  | tokens de score + accent        | Geometría compartida; no se monta en `/`.                                                                          |
 | Site frame        | `SiteFrame`                                   | `split`, `pulse`                | Gutters y eje; `pulse` solo en `/`, sobre la línea derecha existente.                                              |
 | Landing scroll    | `LandingScroll`                               | paging 900 ms                   | Un gesto, una banda; tween propio, no snap nativo.                                                                 |
 | Landing footer    | `LandingFooter`                               | cuadrante derecho               | Platform / Docs y legal; grano dither detrás de las listas; heatmap a la izquierda en `lg+`.                       |
 | Footer heatmap    | Paper `Heatmap` (`PulseFooterHeatmap`)        | rampa Embat                     | Columna izquierda, solo `lg+`; `aria-hidden`; `speed={0}` con reduced motion.                                      |
 | Footer dither     | Paper `ImageDithering` (`PulseFooterDither`)  | recorte rotado detrás de listas | Mismo `/hero-dither.webp`; `scale` 2.4, origin 0.68/0.32, 28°; tinta `#afafbb` a 0.22 `screen`; no Heatmap.        |
-| Hero access       | `HeroAccess`                                  | cuadrícula 2 columnas           | PULSE, Recomendaciones, Método (`HERO_SECTIONS`); subrayado animado.                                               |
+| Hero access       | `HeroAccess`                                  | cuadrícula 2 columnas           | PULSE es el `h1`; Recomendaciones y Método al lado; subrayado animado. La línea mensual va debajo, en `page.tsx`.  |
 | Landing showcase  | `LandingShowcase`                             | 2×2 + trayectoria               | Banda 1: plus gutter a gutter; 2×2 sin `gap`; PULSE anima `COMP_0001`; el resto usa el gráfico de producto.        |
 | Feature dither    | Paper `ImageDithering` (`PulseFeatureDither`) | un campo detrás del 2×2         | Mismo `/hero-dither.webp`; tinta `#050b2c` a 0.32; hover/selected por tipo, no `--accent`; no Heatmap.             |
 | Showcase PULSE    | SVG vendido (`PulseShowcaseAnimation`)        | loop 7,2 s                      | Inline; `COMP_0001`; Arrow 2 animate no disponible en el plan; motion CSS local; freeze con reduced-motion.        |
@@ -419,6 +418,7 @@ patterns.
 | 2026-09-19 | Juego de tokens de marca de Embat en lugar de la paleta anterior: primitivos (`--surface-*`, `--border-*`, `--text-*`, feedback) y los tokens de HeroUI apuntando a ellos | Una sola fuente de color para producto y marketing, con claro y oscuro definidos por el brief; lo ya escrito sigue funcionando sin reescribir clases | Equipo Pulse |
 | 2026-09-19 | Bandas de score en los hex de estado de la marca (`#C62A2F`, `#B06F00`, `#6E7488`, `#12A150` y sus variantes oscuras) en vez de `oklch` propios | El score es un estado más de la marca; dos escalas de rojo y verde en la misma pantalla no se sostienen | Equipo Pulse |
 | 2026-09-19 | Inter como única familia: `--font-sans` y `--font-display` resuelven a ella; Aktiv Grotesk y DM Sans retirados, 700 eliminado del producto | El brief pide una sola grotesca y peso medio; dos familias y un bold no aportaban jerarquía que no diera ya el tamaño | Equipo Pulse |
+| 2026-09-19 | `--font-sans` y `--font-display` vuelven a DM Sans y Aktiv Grotesk | Inter unificó el mock de producto; el pairing de la landing ya estaba cargado y se lee mejor en titulares | Equipo Pulse |
 | 2026-09-19 | Títulos de sección como overline (13 px, mayúsculas, 600, 0,06em) en `Section` | El `h2` competía con las cifras del panel; en overline ordena sin pesar | Equipo Pulse |
 | 2026-09-19 | `Panel` como único contenedor: hairline de 1 px, radio 12, inset 24, sin sombra | «Se separa con borde, no con sombra»: un solo contenedor evita que cada página invente el suyo | Equipo Pulse |
 | 2026-09-19 | `StatGrid` como tira de KPI: un panel con hairlines entre celdas, no cifras sueltas separadas por espacio | Las cifras de cabecera son una sola lectura comparable; la línea vertical es la separación de la marca | Equipo Pulse |
@@ -458,6 +458,7 @@ patterns.
 | 2026-09-19 | Dither del pie detrás de Platform/Docs: tinta oscura `#afafbb` a 0.22 con `screen` | El 2×2 `#050b2c` desaparecería sobre navy; el heatmap se queda a la izquierda | Equipo Pulse |
 | 2026-09-19 | Dither del pie: recorte `scale` 2.4, origin 0.68/0.32, rotación 28° | El campo entero se leía como el 2×2 con la tinta invertida | Equipo Pulse |
 | 2026-09-19 | Hero dither: `preload` RSC del webp + fade al decode; `maxPixelCount` 480 000 | Paper no consume `next/image`; el destello no debe depender de que el archivo llegue tarde | Equipo Pulse |
+| 2026-09-19 | Hero: el enlace PULSE es el `h1`; una línea bajo la nav | Pulse ya estaba en la retícula; el caption partido competía con los enlaces | Equipo Pulse |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce
