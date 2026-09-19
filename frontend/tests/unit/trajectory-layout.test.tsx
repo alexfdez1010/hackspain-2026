@@ -6,7 +6,11 @@ import {
   TrajectoryTooltip,
 } from '@/components/charts/trajectory-tooltip';
 import { buildTrajectory } from '@/lib/pulse/company-view';
-import { labelStep, layoutTrajectory } from '@/lib/pulse/trajectory-layout';
+import {
+  labelIndices,
+  labelStep,
+  layoutTrajectory,
+} from '@/lib/pulse/trajectory-layout';
 import { makeForecastPoint, makeSeriesPoint } from './pulse-fixtures';
 
 const BOX = {
@@ -51,12 +55,23 @@ describe('layoutTrajectory', () => {
     ]);
     expect(layout.band).toMatch(/Z$/);
     expect(layout.labelStep).toBe(1);
+    expect([...layout.labels].sort()).toEqual([0, 1, 2, 3]);
   });
 
   it('labels fewer months when the plot is narrow', () => {
     expect(labelStep(24, 1200)).toBe(1);
     expect(labelStep(24, 300)).toBe(4);
     expect(labelStep(3, 40)).toBe(3);
+  });
+
+  it('never prints a label on top of the last close or the last horizon', () => {
+    const xs = Array.from({ length: 20 }, (_, index) => 28 + index * 17.3);
+    const labels = labelIndices(xs, 7, 4);
+    expect(labels.has(7)).toBe(true);
+    expect(labels.has(19)).toBe(true);
+    expect(labels.has(8)).toBe(false);
+    expect([...labels].sort((a, b) => a - b)).toEqual([0, 4, 7, 12, 16, 19]);
+    expect(labelIndices([], -1, 1).size).toBe(0);
   });
 });
 

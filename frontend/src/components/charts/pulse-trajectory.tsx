@@ -38,8 +38,9 @@ interface PulseTrajectoryChartProps {
  * The chart fills its container: the SVG takes the measured width as its
  * viewBox, so the text keeps a real pixel size. The observed line is solid and
  * the forecast dashed, separated by the mark at the last close; the shaded
- * area is the p10-p90 band. Hovering or focusing a month opens a tooltip
- * with its value, and the last close and the farthest horizon stay printed.
+ * area is the p10-p90 band. Hovering, tapping or focusing a month opens a
+ * tooltip with its value, and the last close and the farthest horizon stay
+ * printed.
  *
  * @param props - The merged trajectory and its boundary.
  * @returns The chart, or an empty state when there is no history.
@@ -60,7 +61,7 @@ export function PulseTrajectoryChart({
     return <p className="text-sm text-muted">Sin historial mensual.</p>;
   }
 
-  const { placed, observed, projected, band, labelStep } = layout;
+  const { placed, observed, projected, band, labels } = layout;
   const last = placed[count - 1];
   const boundary = placed[boundaryIndex];
   const stroke = scoreColor(boundary.value);
@@ -143,9 +144,7 @@ export function PulseTrajectoryChart({
             </g>
           )}
           {placed.map((point, index) =>
-            index % labelStep === 0 ||
-            index === count - 1 ||
-            index === boundaryIndex ? (
+            labels.has(index) ? (
               <text
                 key={`label-${point.month}`}
                 x={point.x}
@@ -171,7 +170,7 @@ export function PulseTrajectoryChart({
         <span>Línea continua: PULSE observado.</span>
         <span>Discontinua: previsión +1 a +12 meses.</span>
         <span>Área: banda p10-p90.</span>
-        <span>Pasa el ratón o el foco por un mes para ver su valor.</span>
+        <span>Toca o pasa el ratón por un mes para ver su valor.</span>
       </figcaption>
     </figure>
   );

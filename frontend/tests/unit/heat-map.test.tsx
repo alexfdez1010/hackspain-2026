@@ -1,8 +1,13 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
+import { PulseHeatRows } from '@/components/pulse/heat-rows';
 import { PulseVariableHeatMap } from '@/components/pulse/variable-heat-map';
-import { buildVariableHeatMap, HEAT_MAP_SIZE } from '@/lib/pulse/heat-map';
+import {
+  buildVariableHeatMap,
+  HEAT_MAP_SIZE,
+  stackHeatMap,
+} from '@/lib/pulse/heat-map';
 import { StaticPulseSource } from '@/lib/pulse/source/static-json';
 import { makeSeriesPoint } from './pulse-fixtures';
 
@@ -73,5 +78,26 @@ describe('the heat map component', () => {
     expect(markup).toContain('Crítico (&lt;35)');
     expect(markup).toContain('34 · Crítico (&lt;35)');
     expect(markup).not.toContain('NaN');
+  });
+
+  it('draws the phone rows with the pillar and its score as heading', () => {
+    const map = stackHeatMap(
+      buildVariableHeatMap(meta.pillars, meta.variables, last),
+    );
+    const markup = renderToStaticMarkup(<PulseHeatRows map={map} />);
+    expect(markup).toContain('text-anchor="end"');
+    expect(markup).toContain('Calidad de cobro');
+    expect(markup).toContain('55 · Neutro (50-65)');
+    expect(markup).toContain('Tramo +90 días');
+    expect(markup).toContain('aria-label="Qué mide Días de caja"');
+    expect(markup).not.toContain('NaN');
+  });
+
+  it('renders both layouts so CSS can pick one per breakpoint', () => {
+    const map = buildVariableHeatMap(meta.pillars, meta.variables, last);
+    const markup = renderToStaticMarkup(<PulseVariableHeatMap map={map} />);
+    expect(markup.match(/role="group"/g)).toHaveLength(2);
+    expect(markup).toContain('hidden overflow-x-auto md:block');
+    expect(markup).toContain('md:hidden');
   });
 });

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Suspense } from 'react';
 
@@ -22,6 +22,13 @@ const geistMono = Geist_Mono({
 
 /** Resolve assistant credentials at request time, including keys added after a build. */
 export const dynamic = 'force-dynamic';
+
+/** Lets the fixed launcher and the bottom sheet respect the safe areas of a phone. */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   title: 'Embat Pulse — salud financiera mensual de la cartera',

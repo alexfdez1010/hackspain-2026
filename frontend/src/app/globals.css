@@ -32,6 +32,8 @@
     --default: oklch(27.4% 0.006 286.033);
     --default-foreground: oklch(0.9911 0 0);
     --field-background: oklch(0.2103 0.0059 285.89);
+    --field-foreground: oklch(0.9911 0 0);
+    --field-placeholder: oklch(70.5% 0.015 286.067);
     --segment: oklch(0.3964 0.01 285.93);
     --segment-foreground: oklch(0.9911 0 0);
     --border: oklch(28% 0.006 286.033);

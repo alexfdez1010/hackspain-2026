@@ -92,6 +92,9 @@ llevan etiqueta de severidad además de color.
 
 ### Typography
 
+- Logotipo: la palabra PULSE (`public/pulse-wordmark.png`) dibujada como
+  máscara CSS sobre `foreground`, así sigue al tema; 14 px de alto en la
+  navegación. El enlace que la envuelve se llama «Embat Pulse, inicio».
 - Display family and weights: Geist Sans 600, `tracking-tight`.
 - Body family and weights: Geist Sans 400 y 500.
 - Code family: Geist Mono (identificadores y valores crudos cuando aparecen).
@@ -150,7 +153,8 @@ adding it to the codebase.
   escucha, pensamiento, respuesta, saludo y error. Los componentes son
   decorativos; el chat comunica sus estados mediante texto.
 - Acceso flotante en la esquina inferior derecha: sólo la mascota y un
-  bocadillo «¿Necesitas ayuda? Escríbeme», sin fondo ni chip. Panel con
+  bocadillo «¿Necesitas ayuda? Escríbeme», sin fondo ni chip. En móvil la
+  mascota se reduce a 64 px y el bocadillo desaparece para no tapar cifras. Panel con
   cabecera (mascota, nombre, estado en texto y página consultada), conversación
   y editor fijo. Radios de 24 px para el overlay, 12 px para sugerencias y 16 px
   para el editor. Sombra sólo en el overlay y en el bocadillo.
@@ -177,8 +181,13 @@ Component rules:
 - Error states: una empresa desconocida devuelve 404 de Next.js; un backend
   caído degrada a lista vacía con su texto, nunca a excepción.
 - Destructive actions: no existen en este producto.
-- Responsive behavior: rejillas de una columna por debajo de `sm`; la tabla y el
-  mapa de calor scrollan en horizontal dentro de su contenedor.
+- Responsive behavior: rejillas de una columna por debajo de `sm`; las tablas
+  scrollan en horizontal dentro de su contenedor. El mapa de calor y el treemap
+  del método se dibujan por columnas desde `md` y por filas (un pilar por fila,
+  misma proporción de áreas) por debajo, sin scroll lateral. La navegación
+  ocupa dos filas en móvil: logotipo y buscador arriba, secciones abajo con
+  objetivos táctiles de 40 px; el buscador mantiene 16 px de fuente para que
+  iOS no haga zoom al enfocarlo.
 
 ## 5. Accessibility and content
 

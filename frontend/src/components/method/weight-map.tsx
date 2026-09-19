@@ -3,8 +3,9 @@
 import { useMemo, useState } from 'react';
 
 import { MethodVariableDetail } from '@/components/method/variable-detail';
+import { MethodWeightRows } from '@/components/method/weight-rows';
 import { MethodWeightTreemap } from '@/components/method/weight-treemap';
-import { buildWeightMap } from '@/lib/method/weights';
+import { buildWeightMap, stackWeightMap } from '@/lib/method/weights';
 import { HEAT_MAP_SIZE } from '@/lib/pulse/heat-map';
 import type { PulsePillarMeta, PulseVariableMeta } from '@/lib/pulse/types';
 
@@ -18,7 +19,9 @@ interface MethodWeightMapProps {
  * variables, with the detail of whichever one the reader is pointing at.
  *
  * Weights come from the export, never from this page, so the drawing cannot
- * contradict the specification the backend applies.
+ * contradict the specification the backend applies. Wide screens get the
+ * pillars as columns; under `md` the same cells are laid out as rows, so the
+ * map fits a phone without scrolling sideways.
  *
  * @param props - Pillar and variable metadata from the export.
  * @returns The treemap over its detail panel.
@@ -28,6 +31,7 @@ export function MethodWeightMap({ pillars, variables }: MethodWeightMapProps) {
     () => buildWeightMap(pillars, variables, HEAT_MAP_SIZE),
     [pillars, variables],
   );
+  const stacked = useMemo(() => stackWeightMap(map), [map]);
   const [selected, setSelected] = useState(map.segments[0]?.key ?? '');
   const active =
     map.segments.find((segment) => segment.key === selected) ??
@@ -44,7 +48,7 @@ export function MethodWeightMap({ pillars, variables }: MethodWeightMapProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="overflow-x-auto">
+      <div className="hidden overflow-x-auto md:block">
         <div className="min-w-[48rem] lg:min-w-0">
           <MethodWeightTreemap
             map={map}
@@ -52,6 +56,13 @@ export function MethodWeightMap({ pillars, variables }: MethodWeightMapProps) {
             onSelect={setSelected}
           />
         </div>
+      </div>
+      <div className="md:hidden">
+        <MethodWeightRows
+          map={stacked}
+          selectedKey={active.key}
+          onSelect={setSelected}
+        />
       </div>
       <MethodVariableDetail segment={active} total={map.totalWeight} />
     </div>

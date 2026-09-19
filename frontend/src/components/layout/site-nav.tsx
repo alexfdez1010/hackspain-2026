@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { CompanySearch } from '@/components/layout/company-search';
+import { PulseWordmark } from '@/components/ui/wordmark';
 import type { CompanyOption } from '@/lib/company/options';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 import {
@@ -86,8 +87,12 @@ export function resolveNavCompany(
  * the company in context is searched right here, and switching it keeps the
  * reader on the section they were reading.
  *
+ * On a phone the bar takes two rows: the product name with the search filling
+ * the rest of the first one, and the section links on their own row with
+ * touch-sized targets. From `sm` up everything sits on one row.
+ *
  * @param props - The companies the search offers.
- * @returns The product name, the company search and the section links.
+ * @returns The wordmark, the company search and the section links.
  */
 export function SiteNav({ companies }: SiteNavProps) {
   const pathname = usePathname();
@@ -104,18 +109,20 @@ export function SiteNav({ companies }: SiteNavProps) {
     <header className="sticky top-0 z-20 bg-background/85 backdrop-blur">
       <nav
         aria-label="Secciones"
-        className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 sm:px-8"
+        className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-4 pt-2 sm:gap-x-6 sm:gap-y-2 sm:px-8 sm:py-3"
       >
-        <Link href="/" className="text-base font-semibold tracking-tight">
-          Embat Pulse
+        <Link href="/" aria-label="Embat Pulse, inicio" className="shrink-0">
+          <PulseWordmark className="h-3.5" />
         </Link>
-        <CompanySearch
-          key={companyId}
-          companies={companies}
-          selectedId={companyId}
-          onSelect={switchCompany}
-        />
-        <ul className="flex flex-wrap items-baseline gap-x-5 gap-y-1 text-sm">
+        <div className="min-w-0 flex-1 sm:flex-none">
+          <CompanySearch
+            key={companyId}
+            companies={companies}
+            selectedId={companyId}
+            onSelect={switchCompany}
+          />
+        </div>
+        <ul className="flex basis-full items-baseline gap-x-5 text-sm sm:basis-auto">
           {sections.map((section, index) => {
             const active =
               index === 0
@@ -126,11 +133,11 @@ export function SiteNav({ companies }: SiteNavProps) {
                 <Link
                   href={section.href}
                   aria-current={active ? 'page' : undefined}
-                  className={
+                  className={`inline-block py-2.5 sm:py-0 ${
                     active
                       ? 'text-foreground underline decoration-2 underline-offset-8'
                       : 'text-muted transition-colors hover:text-foreground'
-                  }
+                  }`}
                 >
                   {section.label}
                 </Link>

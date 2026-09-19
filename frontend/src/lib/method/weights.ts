@@ -1,3 +1,4 @@
+import { stackColumns } from '@/lib/method/stack';
 import type { PulsePillarMeta, PulseVariableMeta } from '@/lib/pulse/types';
 
 /** One variable placed on the map of the 100 points. */
@@ -116,4 +117,19 @@ export function buildWeightMap(
     width,
     height,
   };
+}
+
+/**
+ * Lays the weight map out as one row per pillar, for a phone.
+ *
+ * @param map - Column weight map.
+ * @returns The same cells, one row per pillar.
+ */
+export function stackWeightMap(map: MethodWeightMap): MethodWeightMap {
+  const stacked = stackColumns(
+    map,
+    (group) => group.segments,
+    (group, segments) => ({ ...group, segments }),
+  );
+  return { ...map, ...stacked, segments: stacked.cells };
 }

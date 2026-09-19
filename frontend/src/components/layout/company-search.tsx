@@ -26,6 +26,8 @@ interface CompanySearchProps {
  * Only a page of matches is rendered, so opening the list is cheap even with
  * the whole export loaded; «cargar más» appends the next page and the count
  * says how many companies there are. Identifiers are matched but never shown.
+ * The field fills its row on a phone and keeps a 16 px font there, so iOS does
+ * not zoom the page when it gets the focus.
  *
  * @param props - Options, selection and change handler.
  * @returns A searchable combo box.
@@ -61,13 +63,14 @@ export function CompanySearch({
       onSelectionChange={handleChange}
       menuTrigger="focus"
       allowsEmptyCollection
-      className="w-64"
+      className="w-full min-w-0 sm:w-64"
     >
       <ComboBox.InputGroup>
         <Input
           placeholder="Buscar empresa"
           autoComplete="off"
           spellCheck={false}
+          className="text-base sm:text-sm"
         />
         <ComboBox.Trigger />
       </ComboBox.InputGroup>

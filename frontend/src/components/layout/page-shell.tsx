@@ -12,14 +12,15 @@ interface PageShellProps {
 
 /**
  * Applies the page-level rhythm: one container width, one heading block and a
- * consistent vertical gap between sections.
+ * consistent vertical gap between sections. The bottom padding leaves room for
+ * the floating assistant, which is taller than the gutter on a phone.
  *
  * @param props - Title, lead sentence, optional aside and the page sections.
  * @returns The page main element.
  */
 export function PageShell({ title, lead, aside, children }: PageShellProps) {
   return (
-    <main className="mx-auto flex max-w-7xl flex-col gap-10 px-5 pb-20 pt-6 sm:px-8">
+    <main className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-24 pt-5 sm:gap-10 sm:px-8 sm:pb-20 sm:pt-6">
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
         <div className="flex max-w-2xl flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">

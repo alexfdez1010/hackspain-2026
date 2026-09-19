@@ -1,3 +1,4 @@
+import { stackColumns } from '@/lib/method/stack';
 import {
   buildWeightMap,
   type MethodWeightGroup,
@@ -93,5 +94,22 @@ export function buildVariableHeatMap(
     width: layout.width,
     height: layout.height,
     unknownCount: cells.filter((cell) => !cell.known).length,
+  };
+}
+
+/**
+ * Lays the heat map out as one row per pillar, for a phone.
+ *
+ * @param map - Column heat map of a month.
+ * @returns The same cells and colours, one row per pillar.
+ */
+export function stackHeatMap(map: PulseHeatMap): PulseHeatMap {
+  return {
+    ...map,
+    ...stackColumns(
+      map,
+      (group) => group.cells,
+      (group, cells) => ({ ...group, cells }),
+    ),
   };
 }

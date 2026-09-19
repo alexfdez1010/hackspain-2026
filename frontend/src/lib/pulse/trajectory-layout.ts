@@ -25,6 +25,8 @@ export interface TrajectoryLayout {
   band: string;
   /** Index step between printed month labels. */
   labelStep: number;
+  /** Indices of the months whose label is printed. */
+  labels: ReadonlySet<number>;
 }
 
 /**
@@ -37,6 +39,38 @@ export interface TrajectoryLayout {
 export function labelStep(count: number, width: number): number {
   const room = Math.max(1, Math.floor(width / 48));
   return Math.max(1, Math.ceil(count / room));
+}
+
+/** Pixels a step label needs from a fixed label to be printed. */
+const LABEL_CLEARANCE = 40;
+
+/**
+ * Chooses the months whose label is printed on the axis.
+ *
+ * The last close and the farthest horizon are always named; the other labels
+ * follow the step, skipping any month that would sit too close to one of
+ * those two, so no label overlaps another on a narrow plot.
+ *
+ * @param xs - Horizontal position of every point, in pixels.
+ * @param boundaryIndex - Index of the last observed month.
+ * @param step - Index step between printed labels.
+ * @returns The indices to label.
+ */
+export function labelIndices(
+  xs: readonly number[],
+  boundaryIndex: number,
+  step: number,
+): Set<number> {
+  const count = xs.length;
+  const fixed = [boundaryIndex, count - 1].filter((index) => index >= 0);
+  const labels = new Set(fixed);
+  for (let index = 0; index < count; index += step) {
+    const clear = fixed.every(
+      (anchor) => Math.abs(xs[anchor] - xs[index]) >= LABEL_CLEARANCE,
+    );
+    if (clear) labels.add(index);
+  }
+  return labels;
 }
 
 /**
@@ -75,6 +109,7 @@ export function layoutTrajectory(
     (point): point is PlacedTrajectoryPoint & { p10: number; p90: number } =>
       point.p10 !== null && point.p90 !== null,
   );
+  const step = labelStep(count, box.width - box.padLeft - box.padRight);
   return {
     placed,
     observed: drawable(placed.slice(0, boundaryIndex + 1)),
@@ -83,6 +118,11 @@ export function layoutTrajectory(
       banded.map((point) => ({ x: point.x, y: yAt(point.p90, 0, 100, box) })),
       banded.map((point) => ({ x: point.x, y: yAt(point.p10, 0, 100, box) })),
     ),
-    labelStep: labelStep(count, box.width - box.padLeft - box.padRight),
+    labelStep: step,
+    labels: labelIndices(
+      placed.map((point) => point.x),
+      boundaryIndex,
+      step,
+    ),
   };
 }
