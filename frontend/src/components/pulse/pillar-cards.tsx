@@ -1,6 +1,6 @@
 import { PillarSpark } from '@/components/charts/pillar-spark';
 import { Panel } from '@/components/ui/panel';
-import { NO_DATA_COLOR } from '@/lib/pulse/band';
+import { bandSurfaceStyle, NO_DATA_COLOR } from '@/lib/pulse/band';
 import { UNKNOWN_TEXT } from '@/lib/pulse/format';
 import { pillarOrderIndex } from '@/lib/pulse/mosaic';
 import type { PulsePillarSeries } from '@/lib/pulse/pillar-series';
@@ -13,7 +13,8 @@ interface PillarCardProps {
 
 /**
  * One pillar: where it stands today, how it got there and how much of the
- * score it can move.
+ * score it can move. The card wears the wash of its band, so the four read as
+ * a severity map before any figure is read.
  *
  * @param props - The observed history of one pillar.
  * @returns The pillar card.
@@ -22,7 +23,7 @@ function PillarCard({ series }: PillarCardProps) {
   const band = scoreBand(series.last);
   const first = series.points[0]?.month ?? '';
   return (
-    <Panel className="min-w-0">
+    <Panel className="min-w-0" style={bandSurfaceStyle(series.last)}>
       <div className="flex items-baseline justify-between gap-3">
         <b className="min-w-0 text-[15px] font-semibold leading-snug">
           {series.label}

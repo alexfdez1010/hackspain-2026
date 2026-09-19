@@ -1,98 +1,40 @@
-import { Suspense } from 'react';
+'use client';
 
 import {
-  ActionsBlock,
-  ON_NAVY_SECONDARY,
-} from '@/components/actions/actions-block';
-import { CompanyActionsList } from '@/components/actions/company-actions-list';
-import { getCompanyActions } from '@/lib/actions/service';
-import type { CompanyActions } from '@/lib/actions/types';
-import { formatMonth } from '@/lib/format';
+  CompanyActionsPending,
+  CompanyActionsView,
+} from '@/components/actions/company-actions-view';
+import { useCompanyActions } from '@/components/actions/use-company-actions';
 import type { CompanySection } from '@/lib/routes';
 
-/** Overline every page uses for the actions, so the reader finds them by name. */
-export const ACTIONS_TITLE = 'Qué hacer ahora';
+export { ACTIONS_TITLE } from '@/components/actions/company-actions-view';
 
-interface CompanyActionsPanelProps {
+interface CompanyActionsSectionProps {
   companyId: string;
+  /** Last observed month of the company, as `YYYY-MM`. */
+  month: string;
   current: CompanySection;
-  /** Loader of the actions; injected in tests. */
-  load?: (companyId: string) => Promise<CompanyActions | null>;
 }
 
 /**
- * Says which close the actions were written for. Where they came from is not
- * a sentence: demo mode carries its own tag.
+ * The actions block pages drop in: it renders pending on the server, then in
+ * the browser reads its own copy of the actions or asks the server for them.
  *
- * @param result - Actions of the company.
- * @returns The line under the overline.
+ * @param props - Company, its close and the section.
+ * @returns The block, pending or filled.
  */
-export function actionsNote(result: CompanyActions | null): string {
-  if (!result) return 'Sin datos de la empresa';
-  return `Sobre el cierre de ${formatMonth(result.month)}`;
-}
-
-/**
- * Loads the actions and renders them; awaited inside a Suspense boundary so
- * the rest of the page never waits for the model.
- *
- * @param props - Company, section and loader.
- * @returns The actions block.
- */
-export async function CompanyActionsPanel({
+export function CompanyActionsSection({
   companyId,
+  month,
   current,
-  load = getCompanyActions,
-}: CompanyActionsPanelProps) {
-  const result = await load(companyId);
+}: CompanyActionsSectionProps) {
+  const state = useCompanyActions(companyId, month);
+  if (state.status === 'loading') return <CompanyActionsPending />;
   return (
-    <ActionsBlock
-      title={ACTIONS_TITLE}
-      note={actionsNote(result)}
-      demo={result?.mode === 'mock'}
-    >
-      <CompanyActionsList
-        actions={result?.actions ?? []}
-        companyId={companyId}
-        current={current}
-      />
-    </ActionsBlock>
-  );
-}
-
-/**
- * What the page shows while the actions are being written: the same block in
- * the same place, so the layout never jumps when they arrive.
- *
- * @returns The pending block.
- */
-export function CompanyActionsPending() {
-  return (
-    <ActionsBlock title={ACTIONS_TITLE}>
-      <p
-        aria-live="polite"
-        className="mx-auto mt-5 max-w-[720px] text-[17px] leading-[1.6]"
-        style={{ color: ON_NAVY_SECONDARY }}
-      >
-        Leyendo las cifras de la empresa…
-      </p>
-    </ActionsBlock>
-  );
-}
-
-/**
- * The actions block with its boundary: pages drop this in and the actions
- * stream in when ready.
- *
- * @param props - Company and section.
- * @returns The suspended block.
- */
-export function CompanyActionsSection(
-  props: Omit<CompanyActionsPanelProps, 'load'>,
-) {
-  return (
-    <Suspense fallback={<CompanyActionsPending />}>
-      <CompanyActionsPanel {...props} />
-    </Suspense>
+    <CompanyActionsView
+      result={state.result}
+      companyId={companyId}
+      current={current}
+    />
   );
 }

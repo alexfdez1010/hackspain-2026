@@ -42,14 +42,9 @@ const COMPANY: PulseCompany = {
 };
 
 describe('PULSE views render on the server', () => {
-  it('opens the company with the score, the ruler and the four qualifiers', () => {
+  it('opens the company with the score, the ruler and the three qualifiers', () => {
     const markup = renderToStaticMarkup(
-      <PulseCompanyHeader
-        company={COMPANY}
-        pStress6m={0.28}
-        baseRate={0.22}
-        cashEnd={36_982.49}
-      />,
+      <PulseCompanyHeader company={COMPANY} cashEnd={36_982.49} />,
     );
     expect(markup).toContain('32,8');
     expect(markup).toContain('PULSE del cierre de ago 2026');
@@ -57,8 +52,7 @@ describe('PULSE views render on the server', () => {
     expect(markup).toContain('+14,9');
     expect(markup).toContain('Desde 17,9 puntos en jul 2026');
     expect(markup).toContain('82 de 100 puntos de peso con datos');
-    expect(markup).toContain('Tensión a 6 meses');
-    expect(markup).toContain('Media de la cartera 22\u00a0%');
+    expect(markup).not.toContain('Tensión a 6 meses');
     expect(markup).toContain('Días de caja');
     expect(markup).not.toContain('NaN');
   });
@@ -138,6 +132,7 @@ describe('the month-by-month view renders on the server', () => {
     expect(markup.match(/role="img"/g)).toHaveLength(4);
     expect(markup).toContain('36 de 100 puntos');
     expect(markup).toContain('Comportamiento de pago');
+    expect(markup.match(/color-mix\(in oklab, var\(--score-/g)).toHaveLength(8);
     expect(markup).not.toContain('NaN');
   });
 
@@ -172,6 +167,7 @@ describe('the month-by-month view renders on the server', () => {
     expect(markup).toContain('36 pts de peso');
     expect(markup).toContain('Tramo +90 días');
     expect(markup).toContain('2 sin datos');
+    expect(markup).toContain('color-mix(in oklab, var(--score-critical) 8%');
     expect(markup).toContain('Peso en el modelo');
     expect(markup).toContain('Ver la variable');
     expect(markup).toMatch(/href="\/company\/COMP_0001\/variable\/\w+"/);

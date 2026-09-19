@@ -80,8 +80,6 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
     >
       <PulseCompanyHeader
         company={company}
-        pStress6m={advisor?.risk.pStress6m ?? null}
-        baseRate={advisor?.risk.baseRate ?? null}
         cashEnd={advisor?.inputs.cashEnd ?? lastPoint?.cashEnd ?? null}
       />
       <PulseSignalAlert
@@ -103,7 +101,11 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
         </Panel>
       </Section>
 
-      <CompanyActionsSection companyId={company.companyId} current="pulse" />
+      <CompanyActionsSection
+        companyId={company.companyId}
+        month={company.month}
+        current="pulse"
+      />
     </PageShell>
   );
 }

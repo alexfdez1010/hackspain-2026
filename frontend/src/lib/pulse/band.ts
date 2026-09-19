@@ -1,4 +1,5 @@
-import { SCORE_BANDS, type ScoreBand } from '@/lib/score';
+import { SCORE_BANDS, scoreBand, type ScoreBand } from '@/lib/score';
+import type { CSSProperties } from 'react';
 
 /** Lowest and highest score any 0-100 ruler draws. */
 export const BAND_SCALE = { min: 0, max: 100 } as const;
@@ -40,3 +41,26 @@ export const DRAWABLE_BANDS = SCORE_BANDS.map((band) => ({
 
 /** Colour of a dot that stands for «no evidence this month». */
 export const NO_DATA_COLOR = 'var(--border-subtle, #d2d2db)';
+
+/**
+ * Surface of a card that carries a score: a wash of its band behind the
+ * figure and a border of the same hue, both mixed with the neutral tokens so
+ * they read in light and dark mode without a token per band.
+ *
+ * The mix is the one the signal alert uses, so every tinted surface of the
+ * product says «severity» the same way. Without a score the card keeps its
+ * plain surface: an unmeasured variable has no severity.
+ *
+ * @param score - Score in the 0-100 range, or `null` when the month has none.
+ * @returns Inline styles for the card, or `undefined` to keep the plain surface.
+ */
+export function bandSurfaceStyle(
+  score: number | null,
+): CSSProperties | undefined {
+  if (score === null || !Number.isFinite(score)) return undefined;
+  const tone = scoreBand(score).color;
+  return {
+    borderColor: `color-mix(in oklab, ${tone} 30%, var(--border-subtle))`,
+    background: `color-mix(in oklab, ${tone} 8%, var(--surface-raised))`,
+  };
+}

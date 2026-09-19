@@ -4,8 +4,8 @@ export const MAX_ACTIONS = 3;
 /** Longest title the page shows; longer model output is cut at a word. */
 export const MAX_TITLE_LENGTH = 90;
 
-/** Longest detail sentence the page shows. */
-export const MAX_DETAIL_LENGTH = 200;
+/** Longest detail the page shows: room to say plainly why the action pays. */
+export const MAX_DETAIL_LENGTH = 260;
 
 /** Pages an action can send the reader to; a variable target carries its key. */
 export type ActionTarget =
@@ -15,7 +15,7 @@ export type ActionTarget =
 export interface CompanyAction {
   /** Imperative sentence with the concrete figure, such as an amount or a variable. */
   title: string;
-  /** One sentence: why now and what changes, with one figure from the data. */
+  /** Up to two plain sentences: why it is a good option now and what it gains, with one figure from the data. */
   detail: string;
   /** Page where the action is executed or checked. */
   target: ActionTarget;

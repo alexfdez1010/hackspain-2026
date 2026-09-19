@@ -5,20 +5,15 @@ import {
   formatEuro,
   formatMonth,
   formatNumber,
-  formatPercent,
   formatSigned,
 } from '@/lib/format';
 
 /** Key of the variable that measures how long the cash lasts. */
 export const CASH_DAYS_KEY = 'cash_days';
 
-/** Everything the four headline figures read, from two data sources. */
+/** Everything the three headline figures read, from two data sources. */
 export interface PulseHeaderInput {
   company: PulseCompany;
-  /** Probability of a cash stress episode within six months, 0 to 1. */
-  pStress6m: number | null;
-  /** Share of the portfolio that hits stress, the base rate of that model. */
-  baseRate: number | null;
   /** Cash at the end of the last observed month, in euros. */
   cashEnd: number | null;
 }
@@ -36,19 +31,19 @@ export function cashDays(company: PulseCompany): number | null {
 }
 
 /**
- * Builds the four figures that qualify the headline score.
+ * Builds the three figures that qualify the headline score.
  *
  * Each one answers a question the score alone cannot: where it came from, how
- * much of it rests on data, what it implies for the next six months and how
- * long the cash lasts if nothing changes.
+ * much of it rests on data and how long the cash lasts if nothing changes.
+ * The six-month stress probability stays out on purpose: the price of the
+ * offers already charges for it and the actions block names it when it
+ * changes what to do.
  *
- * @param input - The company, its stress probability and its cash.
- * @returns The four figures, in reading order.
+ * @param input - The company and its cash.
+ * @returns The three figures, in reading order.
  */
 export function buildHeaderStats({
   company,
-  pStress6m,
-  baseRate,
   cashEnd,
 }: PulseHeaderInput): StatItem[] {
   const previousMonth = company.series[company.series.length - 2]?.month ?? '';
@@ -72,15 +67,6 @@ export function buildHeaderStats({
       label: 'Confianza del dato',
       value: formatConfidence(company.confidence),
       hint: formatWeightPoints(company.confidence),
-    },
-    {
-      key: 'stress',
-      label: 'Tensión a 6 meses',
-      value: formatPercent(pStress6m, 0),
-      hint:
-        baseRate === null
-          ? 'Sin media de cartera publicada'
-          : `Media de la cartera ${formatPercent(baseRate, 0)}`,
     },
     {
       key: 'cash',

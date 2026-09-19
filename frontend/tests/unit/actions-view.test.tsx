@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 
 import {
   actionsNote,
-  CompanyActionsPanel,
   CompanyActionsPending,
-} from '@/components/actions/company-actions-panel';
+  CompanyActionsView,
+} from '@/components/actions/company-actions-view';
 import type { CompanyAction, CompanyActions } from '@/lib/actions/types';
 import type { CompanySection } from '@/lib/routes';
 
@@ -35,16 +35,17 @@ const ACTIONS: CompanyAction[] = [
  * @param current - Section the reader is on.
  * @returns The static markup of the block.
  */
-async function render(
+function render(
   result: CompanyActions | null,
   current: CompanySection = 'advisor',
-): Promise<string> {
-  const element = await CompanyActionsPanel({
-    companyId: 'COMP_0001',
-    current,
-    load: async () => result,
-  });
-  return renderToStaticMarkup(element);
+): string {
+  return renderToStaticMarkup(
+    <CompanyActionsView
+      result={result}
+      companyId="COMP_0001"
+      current={current}
+    />,
+  );
 }
 
 /**
@@ -72,8 +73,8 @@ describe('actionsNote', () => {
 });
 
 describe('the actions block', () => {
-  it('makes the first action the headline and the other two a row', async () => {
-    const markup = await render(close(ACTIONS));
+  it('makes the first action the headline and the other two a row', () => {
+    const markup = render(close(ACTIONS));
     expect(markup).toContain('Qué hacer ahora');
     expect(markup).toContain('Sobre el cierre de ago 2026');
     expect(markup).toContain('<h2');
@@ -86,35 +87,33 @@ describe('the actions block', () => {
     expect(markup).not.toContain('NaN');
   });
 
-  it('links every action that is executed somewhere else', async () => {
-    const markup = await render(close(ACTIONS));
+  it('links every action that is executed somewhere else', () => {
+    const markup = render(close(ACTIONS));
     expect(markup).toContain('href="/company/COMP_0001/signals"');
     expect(markup).toContain('Ver la señal');
     expect(markup).toContain('href="/company/COMP_0001/variable/cash_days"');
     expect(markup).toContain('Ver la variable');
   });
 
-  it('never links the page the reader is already on', async () => {
-    expect(await render(close(ACTIONS), 'advisor')).not.toContain(
-      'Ver el producto',
-    );
-    expect(await render(close(ACTIONS), 'pulse')).toContain('Ver el producto');
+  it('never links the page the reader is already on', () => {
+    expect(render(close(ACTIONS), 'advisor')).not.toContain('Ver el producto');
+    expect(render(close(ACTIONS), 'pulse')).toContain('Ver el producto');
   });
 
-  it('flags a demo answer the way Nexo does', async () => {
-    expect(await render(close(ACTIONS, 'mock'))).toContain('DEMO');
-    expect(await render(close(ACTIONS, 'gateway'))).not.toContain('DEMO');
+  it('flags a demo answer the way Nexo does', () => {
+    expect(render(close(ACTIONS, 'mock'))).toContain('DEMO');
+    expect(render(close(ACTIONS, 'gateway'))).not.toContain('DEMO');
   });
 
-  it('shows no lower row when there is only one thing to do', async () => {
-    const markup = await render(close([ACTIONS[0]]));
+  it('shows no lower row when there is only one thing to do', () => {
+    const markup = render(close([ACTIONS[0]]));
     expect(markup).toContain('Contrata la línea de crédito');
     expect(markup).not.toContain('Explica la caída');
     expect(markup).not.toContain('border-t');
   });
 
-  it('says so in one sentence when nothing is urgent', async () => {
-    const markup = await render(close([]));
+  it('says so in one sentence when nothing is urgent', () => {
+    const markup = render(close([]));
     expect(markup).toContain('Nada urgente este mes');
     expect(markup).not.toContain('<h2');
   });

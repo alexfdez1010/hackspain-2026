@@ -81,7 +81,11 @@ export default async function CompanyAdvisorPage({ params }: AdvisorPageProps) {
       title={companyName(company.companyId)}
       lead={buildLead(company.recommendations.length, company.declined.length)}
     >
-      <CompanyActionsSection companyId={company.companyId} current="advisor" />
+      <CompanyActionsSection
+        companyId={company.companyId}
+        month={company.month}
+        current="advisor"
+      />
       <ApprovedPanel
         company={company}
         pillarLabels={pillarLabels}

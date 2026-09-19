@@ -28,7 +28,7 @@ async function render(page: Page, id: string): Promise<string> {
 }
 
 describe('the company summary page', () => {
-  it('opens with the name, the group, the score and its four qualifiers', async () => {
+  it('opens with the name, the group, the score and its three qualifiers', async () => {
     const markup = await render(CompanyPulsePage, 'COMP_0001');
     expect(markup).toContain('Atresmedia Labs');
     expect(markup).toContain('Grupo Ebro');
@@ -36,7 +36,8 @@ describe('the company summary page', () => {
     expect(markup).toContain('previsión mensual hasta feb 2027');
     expect(markup).toContain('PULSE del cierre de ago 2026');
     expect(markup).toContain('82 de 100 puntos de peso con datos');
-    expect(markup).toContain('Tensión a 6 meses');
+    expect(markup).toContain('Días de caja');
+    expect(markup).not.toContain('Tensión a 6 meses');
   });
 
   it('keeps only the trajectory and the actions, in that order', async () => {
