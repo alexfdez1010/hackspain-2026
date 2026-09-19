@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { LandingFooter } from '@/components/layout/landing-footer';
 import { FOOTER_DITHER } from '@/lib/landing/pulse-footer-dither';
 import { PULSE_FOOTER_HEATMAP_IMAGE } from '@/lib/landing/pulse-footer-heatmap';
+import { companySections } from '@/lib/company/sections';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 import { companyRoutes } from '@/lib/routes';
 
@@ -38,17 +39,21 @@ vi.mock('@paper-design/shaders-react', () => ({
 const demo = companyRoutes(PULSE_DEMO_COMPANY_ID);
 
 describe('LandingFooter', () => {
-  it('lists Platform and Docs in the right pane, with legal links and no mark', () => {
+  it('lists every product page in the right pane, with the copyright and no legal links', () => {
     const html = renderToStaticMarkup(<LandingFooter />);
     expect(html).toContain('landing-band-dark');
-    expect(html).toContain('Platform');
-    expect(html).toContain('Docs');
-    expect(html).toContain(`href="${demo.pulse}"`);
-    expect(html).toContain(`href="${demo.advisor}"`);
+    expect(html).toContain('Producto');
+    expect(html).toContain('Documentación');
+    for (const section of companySections(PULSE_DEMO_COMPANY_ID)) {
+      expect(html).toContain(`href="${section.href}"`);
+    }
     expect(html).toContain(`href="${demo.method}"`);
-    expect(html).toContain('href="/condiciones"');
-    expect(html).toContain('href="/privacidad"');
+    expect(html).not.toContain('href="/condiciones"');
+    expect(html).not.toContain('href="/privacidad"');
+    expect(html).not.toContain('Condiciones de uso');
+    expect(html).not.toContain('Política de privacidad');
     expect(html).toContain('© 2026 Pulse');
+    expect(html).toContain('By humans for humans.');
     expect(html).not.toContain('<h2');
     expect(html).not.toContain('Embat');
     expect(html).not.toContain('HackSpain');

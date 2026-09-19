@@ -6,7 +6,13 @@ export const COMPANY_QUERY_KEY = 'company';
 
 /** The destinations of the app, keyed as {@link CompanyRoutes}. */
 export type CompanySection =
-  'pulse' | 'diagnosis' | 'detail' | 'signals' | 'advisor' | 'method';
+  | 'pulse'
+  | 'diagnosis'
+  | 'action'
+  | 'detail'
+  | 'signals'
+  | 'advisor'
+  | 'method';
 
 /** Every destination of the app for one company. */
 export interface CompanyRoutes {
@@ -14,6 +20,8 @@ export interface CompanyRoutes {
   pulse: string;
   /** Where the score is decided: the variable mosaic and the pillars. */
   diagnosis: string;
+  /** The three variables with the most points of PULSE on the table. */
+  action: string;
   /** One month in full, the forecast decomposition and the month tables. */
   detail: string;
   /** Open alerts and past signals of the company. */
@@ -28,13 +36,15 @@ export interface CompanyRoutes {
  * Builds the four destinations of a company.
  *
  * @param companyId - Identifier such as `COMP_0001`.
- * @returns The routes of the summary, diagnosis, detail, signals, advisor and method pages.
+ * @returns The routes of the summary, diagnosis, action, detail, signals,
+ * advisor and method pages.
  */
 export function companyRoutes(companyId: string): CompanyRoutes {
   const id = encodeURIComponent(companyId);
   return {
     pulse: `/company/${id}`,
     diagnosis: `/company/${id}/diagnosis`,
+    action: `/company/${id}/action`,
     detail: `/company/${id}/detail`,
     signals: `/company/${id}/signals`,
     advisor: `/company/${id}/recommendations`,
@@ -84,6 +94,7 @@ export function sectionFromPath(pathname: string): CompanySection {
   if (pathname.endsWith('/signals')) return 'signals';
   if (pathname.endsWith('/diagnosis')) return 'diagnosis';
   if (pathname.endsWith('/detail')) return 'detail';
+  if (/\/action(\/[^/]+)?$/.test(pathname)) return 'action';
   return 'pulse';
 }
 
@@ -102,6 +113,20 @@ export function companyVariableRoute(
   variableKey: string,
 ): string {
   return `${companyRoutes(companyId).pulse}/variable/${encodeURIComponent(variableKey)}`;
+}
+
+/**
+ * Builds the route of the plan of one variable.
+ *
+ * @param companyId - Identifier such as `COMP_0001`.
+ * @param variableKey - Variable key of the export, such as `cash_min`.
+ * @returns The route of the recommendation page of that variable.
+ */
+export function companyActionRoute(
+  companyId: string,
+  variableKey: string,
+): string {
+  return `${companyRoutes(companyId).action}/${encodeURIComponent(variableKey)}`;
 }
 
 /**

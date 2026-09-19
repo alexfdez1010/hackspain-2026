@@ -45,6 +45,8 @@ describe('assistant request boundary', () => {
     '/company/COMP_0001/recommendations',
     '/company/COMP_0001/variable/cash_days',
     '/company/COMP_0001/variable/ar90',
+    '/company/COMP_0001/action',
+    '/company/COMP_0001/action/cash_days',
     '/method',
     '/',
   ])('keeps a known application path: %s', (pathname) => {
@@ -62,6 +64,8 @@ describe('assistant request boundary', () => {
     '/company/COMP_0001/variable/CASH_DAYS',
     '/company/COMP_0001/variable/',
     '/company/COMP_0001/variable/cash_days/raw',
+    '/company/COMP_0001/action/CASH_DAYS',
+    '/company/COMP_0001/action/cash_days/raw',
   ])('does not use an untrusted path: %s', (pathname) => {
     expect(
       parseAssistantRequest({ pathname, messages: [message] }).pathname,
@@ -133,7 +137,7 @@ describe('assistant request boundary', () => {
     const request = new Request('http://localhost/api/assistant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: 'á'.repeat(40_000),
+      body: 'á'.repeat(140_000),
     });
     await expect(readAssistantRequest(request)).rejects.toMatchObject({
       status: 413,

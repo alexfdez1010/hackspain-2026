@@ -1,0 +1,103 @@
+{
+ "signals_detected": 3537,
+ "persistence": {
+  "down": {
+   "signals": 1858,
+   "persistent_share": 0.6529,
+   "oof_auroc": 0.7467,
+   "coefficients_std": {
+    "level": 0.7764,
+    "move": -0.6815,
+    "breadth": 0.1818,
+    "confidence": 0.1026,
+    "volatility": -0.2244,
+    "delta_liquidez": -0.1358,
+    "delta_deuda": -0.1051,
+    "delta_pago": 0.0061,
+    "delta_cobro": -0.1279
+   }
+  },
+  "up": {
+   "signals": 1046,
+   "persistent_share": 0.5468,
+   "oof_auroc": 0.672,
+   "coefficients_std": {
+    "level": -0.2804,
+    "move": 0.7578,
+    "breadth": 0.102,
+    "confidence": -0.2363,
+    "volatility": -0.0603,
+    "delta_liquidez": 0.0098,
+    "delta_deuda": -0.0381,
+    "delta_pago": 0.1235,
+    "delta_cobro": -0.0149
+   }
+  }
+ },
+ "anticipation": {
+  "clean_rows": 17065,
+  "alert_share": 0.2,
+  "horizons": {
+   "1": {
+    "rows": 16026,
+    "base_rate": 0.0231,
+    "auroc": 0.6682,
+    "alert_share": 0.2,
+    "alert_cut": 45.62,
+    "recall": 0.427,
+    "precision": 0.0493,
+    "lift": 2.13
+   },
+   "2": {
+    "rows": 15004,
+    "base_rate": 0.0425,
+    "auroc": 0.6517,
+    "alert_share": 0.2,
+    "alert_cut": 45.83,
+    "recall": 0.3799,
+    "precision": 0.0806,
+    "lift": 1.9
+   },
+   "3": {
+    "rows": 13994,
+    "base_rate": 0.0607,
+    "auroc": 0.6452,
+    "alert_share": 0.2,
+    "alert_cut": 46.0,
+    "recall": 0.3722,
+    "precision": 0.1129,
+    "lift": 1.86
+   },
+   "4": {
+    "rows": 12985,
+    "base_rate": 0.0773,
+    "auroc": 0.6376,
+    "alert_share": 0.2,
+    "alert_cut": 46.28,
+    "recall": 0.3616,
+    "precision": 0.1398,
+    "lift": 1.81
+   },
+   "5": {
+    "rows": 11980,
+    "base_rate": 0.0922,
+    "auroc": 0.6271,
+    "alert_share": 0.2,
+    "alert_cut": 46.56,
+    "recall": 0.352,
+    "precision": 0.1624,
+    "lift": 1.76
+   },
+   "6": {
+    "rows": 10981,
+    "base_rate": 0.1061,
+    "auroc": 0.6189,
+    "alert_share": 0.2,
+    "alert_cut": 46.87,
+    "recall": 0.3391,
+    "precision": 0.1797,
+    "lift": 1.69
+   }
+  }
+ }
+}

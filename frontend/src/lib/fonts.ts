@@ -1,48 +1,20 @@
-import { DM_Sans } from 'next/font/google';
 import localFont from 'next/font/local';
 
 /**
- * Body, tables, links and highlighted figures.
+ * The single family of the product: headings, body, tables and figures.
  *
- * 400 is running text, 500 is emphasis (`font-medium`) and 600 is the
- * prominent numeric figures (`font-semibold`).
+ * Haffer SQ XH is the grotesque embat.io sets its whole site in, self-hosted
+ * from the two cuts that site ships: 400 for running text and 500 for
+ * labels, emphasis and headings. The 600 the type scale names resolves to
+ * the 500 file on purpose, so the browser never synthesises a faux bold;
+ * there is no 700 anywhere in the design.
  */
-export const dmSans = DM_Sans({
-  variable: '--font-dm-sans',
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-});
-
-/**
- * Display face for titles. Files live under `src/fonts/aktiv-grotesk/`.
- *
- * Medium is 500 (`h3`). Bold is registered as both 600 and 700 so
- * `font-semibold` and `font-bold` resolve to a real cut, not a synthetic
- * weight — the family has no SemiBold file.
- */
-export const aktivGrotesk = localFont({
-  src: [
-    {
-      path: '../fonts/aktiv-grotesk/AktivGrotesk-Regular.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../fonts/aktiv-grotesk/AktivGrotesk-Medium.woff2',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: '../fonts/aktiv-grotesk/AktivGrotesk-Bold.woff2',
-      weight: '600',
-      style: 'normal',
-    },
-    {
-      path: '../fonts/aktiv-grotesk/AktivGrotesk-Bold.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-aktiv',
+export const haffer = localFont({
+  variable: '--font-haffer',
   display: 'swap',
+  src: [
+    { path: '../fonts/haffer-sqxh-400.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/haffer-sqxh-500.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/haffer-sqxh-500.woff2', weight: '600', style: 'normal' },
+  ],
 });

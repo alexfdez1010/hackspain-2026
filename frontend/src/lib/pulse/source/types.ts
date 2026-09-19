@@ -4,14 +4,13 @@ import type { PulseCompany, PulseSummary } from '@/lib/pulse/types';
 /**
  * Read model of the PULSE dataset.
  *
- * Two implementations exist: `StaticPulseSource`, which reads the JSON bundled
- * in `src/data/pulse`, and `ApiPulseSource`, which calls the FastAPI service.
- * Pages depend on this interface only, so switching backends is an environment
- * change and never a code change.
+ * `StaticPulseSource` is the only implementation: it reads the JSON bundled in
+ * `src/data/pulse`. Pages depend on this interface only, so a different store
+ * stays a one-file change.
  */
 export interface PulseDataSource {
   /** Which implementation is active. */
-  readonly kind: 'static' | 'api';
+  readonly kind: 'static';
   /** Score metadata plus one row per company. */
   getSummary(): Promise<PulseSummary>;
   /**

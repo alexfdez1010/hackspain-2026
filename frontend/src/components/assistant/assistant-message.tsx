@@ -2,8 +2,9 @@ import { Button } from '@heroui/react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { AssistantIcon } from '@/components/assistant/assistant-icon';
-import { MessageContent } from '@/components/assistant/message-content';
+import { MessageParts } from '@/components/assistant/message-parts';
 import {
+  hasContent,
   messageText,
   type AssistantMessage as Message,
 } from '@/lib/assistant/types';
@@ -33,7 +34,7 @@ export function AssistantMessage({
       setCopyError(true);
     }
   }
-  if (!user && !text) return null;
+  if (!user && !hasContent(message) && !streaming) return null;
   if (user)
     return (
       <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-accent px-4 py-2.5 text-[13px] leading-relaxed break-words whitespace-pre-wrap text-accent-foreground [overflow-wrap:anywhere]">
@@ -43,7 +44,7 @@ export function AssistantMessage({
     );
   return (
     <article className="min-w-0 max-w-[94%]" aria-label="Respuesta de Nexo">
-      <MessageContent text={text} />
+      <MessageParts message={message} onNavigate={onNavigate} />
       {streaming ? null : (
         <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
           {message.metadata?.sources.map((source) => (
@@ -62,16 +63,18 @@ export function AssistantMessage({
               DEMO
             </span>
           ) : null}
-          <Button
-            isIconOnly
-            variant="ghost"
-            size="sm"
-            aria-label={copied ? 'Respuesta copiada' : 'Copiar respuesta'}
-            onPress={copy}
-            className="ml-auto size-7 min-w-7 text-muted"
-          >
-            <AssistantIcon name={copied ? 'check' : 'copy'} />
-          </Button>
+          {text ? (
+            <Button
+              isIconOnly
+              variant="ghost"
+              size="sm"
+              aria-label={copied ? 'Respuesta copiada' : 'Copiar respuesta'}
+              onPress={copy}
+              className="ml-auto size-7 min-w-7 text-muted"
+            >
+              <AssistantIcon name={copied ? 'check' : 'copy'} />
+            </Button>
+          ) : null}
           {truncated ? (
             <p role="status" className="w-full text-[11px] text-muted">
               Respuesta recortada por longitud. Pídeme que continúe.

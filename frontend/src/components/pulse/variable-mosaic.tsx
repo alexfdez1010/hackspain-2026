@@ -5,7 +5,6 @@ import { useState, type CSSProperties } from 'react';
 import { MosaicCell } from '@/components/pulse/mosaic-cell';
 import { MosaicDetail } from '@/components/pulse/mosaic-detail';
 import { Panel } from '@/components/ui/panel';
-import { NO_DATA_COLOR } from '@/lib/pulse/band';
 import { UNKNOWN_TEXT } from '@/lib/pulse/format';
 import type { PulseMosaic, PulseMosaicColumn } from '@/lib/pulse/mosaic';
 import { formatNumber } from '@/lib/format';
@@ -26,23 +25,19 @@ interface MosaicColumnProps {
 function MosaicColumn({ column, selectedKey, onSelect }: MosaicColumnProps) {
   return (
     <div className="flex min-w-0 flex-col">
-      <div className="mb-3 flex min-h-[100px] flex-col gap-1 border-b border-hairline pb-3">
-        <b className="text-[15px] font-semibold leading-snug">{column.label}</b>
-        <span className="inline-flex items-center gap-2 text-[13px] text-ink-secondary">
-          <span
-            aria-hidden
-            className="size-2 shrink-0 rounded-full"
-            style={{
-              background:
-                column.score === null ? NO_DATA_COLOR : column.band.color,
-            }}
-          />
-          {column.score === null
-            ? UNKNOWN_TEXT
-            : `${formatNumber(column.score, 1)} · ${column.band.name.toLowerCase()}`}
-        </span>
-        <span className="text-[13px] text-ink-secondary">
-          {formatNumber(column.weight)} pts de peso
+      <div className="border-hairline mb-3.5 flex min-h-[92px] flex-col justify-end gap-1.5 border-b pb-3.5">
+        <b className="text-ink-secondary text-[13px] leading-[1.3] font-semibold tracking-[0.04em] uppercase">
+          {column.label}
+        </b>
+        <span className="flex items-baseline gap-2">
+          <b className="text-2xl leading-[1.1] font-semibold tracking-[-0.01em] tabular-nums">
+            {column.score === null ? '—' : formatNumber(column.score, 1)}
+          </b>
+          <em className="text-ink-secondary text-[13px] leading-[1.45] not-italic">
+            {column.score === null
+              ? UNKNOWN_TEXT
+              : column.band.name.toLowerCase()}
+          </em>
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-2">

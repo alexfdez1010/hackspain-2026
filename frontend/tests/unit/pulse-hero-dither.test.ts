@@ -6,13 +6,13 @@ import {
 } from '@/lib/landing/pulse-hero-dither';
 
 describe('PULSE_HERO_DITHER', () => {
-  it('is a local sparkle field with a transparent back and no Pulse lockup', () => {
+  it('is a local sparkle field with an opaque black back and no Pulse lockup', () => {
     expect(PULSE_HERO_DITHER.image).toBe(PULSE_HERO_DITHER_IMAGE);
     expect(PULSE_HERO_DITHER_IMAGE).toBe('/hero-dither.webp');
     expect(PULSE_HERO_DITHER_IMAGE).not.toContain('paper.design');
     expect(PULSE_HERO_DITHER_IMAGE).not.toContain('pulse-wordmark');
     expect(PULSE_HERO_DITHER.originalColors).toBe(false);
-    expect(PULSE_HERO_DITHER.colorBack).toBe('#00000000');
+    expect(PULSE_HERO_DITHER.colorBack).toBe('#000000');
     expect(PULSE_HERO_DITHER.colorFront).toBe('#afafbb');
     expect(PULSE_HERO_DITHER.colorHighlight).toBe('#ffffff');
     expect(PULSE_HERO_DITHER.type).toBe('4x4');

@@ -40,6 +40,12 @@
     #0a1033 48%,
     #05081c 100%
   );
+  --gradient-beam: linear-gradient(
+    196deg,
+    #ffffff00 38%,
+    #93b4ff2e 50%,
+    #ffffff00 62%
+  );
 
   /* HeroUI primitives, resolved from the Embat set above. */
   --background: var(--surface-page);
@@ -104,8 +110,9 @@
 /*
  * Landing ignores the system scheme: hero and footer are dark, the middle
  * band is light. `html:has` tints body and SiteFrame chrome as the scroller
- * pages. Each band then redefines the same primitives locally so the 2×2
- * does not snap to navy mid-tween. Score tokens stay on the product palette.
+ * pages. Each band then redefines the same HeroUI tokens locally, with the
+ * Embat values the product uses in each scheme, so the feature grid does not
+ * snap to navy mid-tween and the landing reads as the same product.
  */
 html:has([data-landing-snap]:not([data-band-theme='light'])) {
   color-scheme: dark;
@@ -156,51 +163,59 @@ html:has([data-landing-snap][data-band-theme='light']) {
   color-scheme: dark;
   --background: #050b2c;
   --foreground: #ffffff;
-  --surface: #232845;
-  --surface-secondary: #41465f;
-  --surface-tertiary: #373c56;
-  --overlay: #232845;
-  --muted: #afafbb;
-  --accent: #5c92fe;
-  --danger: #c2401f;
-  --default: #41465f;
+  --surface: #111a46;
+  --surface-secondary: #1b2759;
+  --surface-tertiary: #27356e;
+  --overlay: #111a46;
+  --muted: #c3cada;
+  --accent: #86aef9;
+  --danger: #ff8a8e;
+  --default: #1b2759;
   --default-foreground: #ffffff;
-  --field-background: #232845;
-  --segment: #41465f;
+  --field-background: #111a46;
+  --segment: #1b2759;
   --segment-foreground: #ffffff;
-  --border: #373c56;
-  --separator: #373c56;
-  --backdrop: #0e1431a6;
+  --border: #ffffff1f;
+  --separator: #ffffff1f;
+  --backdrop: #05081ca6;
+  --score-critical: #ff8a8e;
+  --score-fragile: #f7b955;
+  --score-neutral: #8e9ab9;
+  --score-solid: #3dd68c;
   background-color: var(--background);
   color: var(--foreground);
 }
 
 .landing-band-light {
   color-scheme: light;
-  --background: #fbfbfc;
-  --foreground: #050b2c;
+  --background: #ffffff;
+  --foreground: #0d1130;
   --surface: #ffffff;
-  --surface-secondary: #f3f4f6;
-  --surface-tertiary: #e8e8ed;
+  --surface-secondary: #eff1f5;
+  --surface-tertiary: #e4e7ee;
   --overlay: #ffffff;
-  --muted: #6e707c;
+  --muted: #6e7488;
   --accent: #3878f6;
-  --danger: #c2401f;
-  --default: #e8e8ed;
-  --default-foreground: #050b2c;
+  --danger: #c62a2f;
+  --default: #eff1f5;
+  --default-foreground: #0d1130;
   --field-background: #ffffff;
-  --field-foreground: #050b2c;
+  --field-foreground: #0d1130;
   --segment: #ffffff;
-  --segment-foreground: #050b2c;
-  --border: #d2d2db;
-  --separator: #d2d2db;
+  --segment-foreground: #0d1130;
+  --border: #e4e7ee;
+  --separator: #e4e7ee;
+  --score-critical: #c62a2f;
+  --score-fragile: #b06f00;
+  --score-neutral: #6e7488;
+  --score-solid: #12a150;
   background-color: var(--background);
   color: var(--foreground);
 }
 
 @theme inline {
-  --font-sans: var(--font-dm-sans);
-  --font-display: var(--font-aktiv);
+  --font-sans: var(--font-haffer);
+  --font-display: var(--font-haffer);
 
   --color-page: var(--surface-page);
   --color-deep: var(--surface-deep);
@@ -231,7 +246,7 @@ html:has([data-landing-snap][data-band-theme='light']) {
 body {
   background: var(--surface-page);
   color: var(--text-primary);
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-family: var(--font-haffer), system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.55;
   font-weight: 400;
@@ -243,17 +258,7 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-aktiv), var(--font-dm-sans), sans-serif;
-}
-
-h1,
-h2 {
-  font-weight: 700;
-}
-
-h3,
-h4 {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 html:has([data-landing-snap]),
@@ -277,6 +282,12 @@ html:has([data-landing-snap]) .bg-separator {
  * (band 0 / first paint) and screens onto the dark band; the footer Heatmap
  * and list dither wait for band 2. The Heatmap uses a radial mask so it is
  * not a hard rectangle.
+ *
+ * The hero and feature dithers sit on a `score-quadrants` field, one score
+ * level per sparkle. Each canvas paints an opaque back and blends onto the
+ * field inside an isolated wrapper: the hero ink multiplies (black hides the
+ * field, the sparkle takes the level), the feature ink screens (white hides
+ * it). The wrapper then meets the page as before, so the field never shows.
  */
 .hero-dither,
 .footer-heatmap,
@@ -290,10 +301,16 @@ html:has([data-landing-snap]) .bg-separator {
 }
 
 .hero-dither-canvas {
+  position: relative;
+  isolation: isolate;
   height: 100%;
   width: 100%;
   opacity: 0;
   transition: opacity 500ms ease-out;
+}
+
+.hero-dither-ink {
+  mix-blend-mode: multiply;
 }
 
 .hero-dither-canvas[data-ready] {
@@ -301,11 +318,17 @@ html:has([data-landing-snap]) .bg-separator {
 }
 
 /*
- * One dither field behind the 2×2. No `screen` blend: light-band ink on
- * `#fbfbfc`. Hover and selected states are type, not an accent fill.
+ * One dither field behind the feature grid. The wrapper meets the white page
+ * with no blend: light-band ink, coloured by level, on white. Hover and
+ * selected states are type, not an accent fill.
  */
 .feature-dither {
-  opacity: 0.32;
+  isolation: isolate;
+  opacity: 0.45;
+}
+
+.feature-dither-ink {
+  mix-blend-mode: screen;
 }
 
 .feature-cell {

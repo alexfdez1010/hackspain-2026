@@ -6,12 +6,10 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { CompanySearch } from '@/components/layout/company-search';
 import { MobileNav } from '@/components/layout/mobile-nav';
-import {
-  NavSectionLinks,
-  type NavSection,
-} from '@/components/layout/nav-section-links';
+import { NavSectionLinks } from '@/components/layout/nav-section-links';
 import { PulseWordmark } from '@/components/ui/wordmark';
 import type { CompanyOption } from '@/lib/company/options';
+import { companySections } from '@/lib/company/sections';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 import {
   companyIdFromPath,
@@ -20,6 +18,8 @@ import {
   COMPANY_QUERY_KEY,
   sectionFromPath,
 } from '@/lib/routes';
+
+export { companySections } from '@/lib/company/sections';
 
 interface SiteNavProps {
   /** Every company of the export, as the search lists them. */
@@ -36,46 +36,6 @@ interface SiteNavProps {
 export function isActive(pathname: string, match: string): boolean {
   if (match === '/') return pathname === '/';
   return pathname === match || pathname.startsWith(`${match}/`);
-}
-
-/**
- * Builds the sections of the navigation for one company, in the order of
- * the prototype: the summary, where the score is decided, the month-level
- * detail, the signals, the financing and the method.
- *
- * @param companyId - Company in context.
- * @returns The six destinations, in reading order.
- */
-export function companySections(companyId: string): NavSection[] {
-  const routes = companyRoutes(companyId);
-  return [
-    { key: 'pulse', href: routes.pulse, label: 'PULSE', match: routes.pulse },
-    {
-      key: 'diagnosis',
-      href: routes.diagnosis,
-      label: 'Diagnóstico',
-      match: routes.diagnosis,
-    },
-    {
-      key: 'detail',
-      href: routes.detail,
-      label: 'Detalle',
-      match: routes.detail,
-    },
-    {
-      key: 'signals',
-      href: routes.signals,
-      label: 'Alertas',
-      match: routes.signals,
-    },
-    {
-      key: 'advisor',
-      href: routes.advisor,
-      label: 'Financiación',
-      match: routes.advisor,
-    },
-    { key: 'method', href: routes.method, label: 'Método', match: '/method' },
-  ];
 }
 
 /**
@@ -115,9 +75,11 @@ export function resolveNavCompany(
  * `brand-subtle` — but they stay `next/link` anchors with `aria-current`, so
  * every section keeps its own URL and can be opened in a new tab.
  *
- * Six tabs, a search and a mark do not fit one row below `lg`, so there the
+ * Seven tabs, a search and a mark do not fit one row below `lg`, so there the
  * bar keeps only the mark and one menu button; the search and the sections
- * move into the drawer of {@link MobileNav}. The prototype's tagline is left
+ * move into the drawer of {@link MobileNav}. Between `lg` and `xl` the search
+ * is 176 px wide and the tabs lose two pixels of padding each side, which is
+ * what the seventh tab costs. The prototype's tagline is left
  * out: with the search beside the tabs it no longer fits the 1240 px row, and
  * the landing already carries it. The current tab is the section
  * {@link sectionFromPath} names, so a variable page keeps PULSE current.
@@ -151,7 +113,7 @@ export function SiteNav({ companies }: SiteNavProps) {
           <PulseWordmark className="h-3.5" />
         </Link>
         <div className="hidden min-w-0 items-center gap-x-6 lg:flex">
-          <div className="w-56 xl:w-64">
+          <div className="w-40 shrink-0 xl:w-64">
             <CompanySearch
               key={companyId}
               companies={companies}

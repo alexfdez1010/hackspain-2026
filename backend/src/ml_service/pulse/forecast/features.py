@@ -94,7 +94,10 @@ def forecast_frame(scored: pl.DataFrame, clean: CleanData) -> pl.DataFrame:
     df = calendar_ratios(df)
     df = _dynamics(df)
     df = _group_context(df)
-    return add_targets(df)
+    df = add_targets(df)
+    # Fixed column order: the feature list (and so the booster) must not depend on
+    # the order Polars happens to emit the joined aggregates in.
+    return df.select(KEY + sorted(c for c in df.columns if c not in KEY))
 
 
 def feature_columns(df: pl.DataFrame) -> list[str]:

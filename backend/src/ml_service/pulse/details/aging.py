@@ -85,7 +85,10 @@ def _debtors(at_ref: pl.DataFrame) -> Rows:
             .otherwise(None)
             .alias("share_over_90")
         )
-        .sort(["company_id", "over_90", "open"], descending=[False, True, True])
+        .sort(
+            ["company_id", "over_90", "open", "counterparty_id"],
+            descending=[False, True, True, False],
+        )
     )
     return rows_by_company(rounded(df), DEBTOR_FIELDS)
 

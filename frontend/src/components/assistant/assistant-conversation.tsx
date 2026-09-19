@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { AssistantMessage } from '@/components/assistant/assistant-message';
 import { NexoMascot } from '@/components/assistant/nexo-mascot';
 import type { AssistantController } from '@/components/assistant/use-assistant';
-import { messageText } from '@/lib/assistant/types';
+import { hasContent } from '@/lib/assistant/types';
 
 /** Scrolls only while following the latest message; users can freely read older replies. */
 export function AssistantConversation({ chat }: { chat: AssistantController }) {
@@ -11,7 +11,7 @@ export function AssistantConversation({ chat }: { chat: AssistantController }) {
   const following = useRef(true);
   const last = chat.messages.at(-1);
   const waiting =
-    chat.busy && (last?.role !== 'assistant' || !messageText(last));
+    chat.busy && (last?.role !== 'assistant' || !hasContent(last));
   useEffect(() => {
     if (following.current && container.current)
       container.current.scrollTop = container.current.scrollHeight;
@@ -48,7 +48,11 @@ export function AssistantConversation({ chat }: { chat: AssistantController }) {
           className="mt-4 flex items-center gap-2 text-xs text-muted"
         >
           <NexoMascot mood="thinking" className="size-10" />
-          <span>Estoy revisando tu pregunta…</span>
+          <span>
+            {chat.working
+              ? 'Consultando los datos de la empresa…'
+              : 'Estoy revisando tu pregunta…'}
+          </span>
         </div>
       ) : null}
       {chat.error ? (

@@ -1,0 +1,14 @@
+{
+ "rows": 14514,
+ "stress_rate": 0.2239,
+ "oof_auroc": 0.871,
+ "mean_predicted": 0.2228,
+ "coefficients_std": {
+  "pillar_liquidez": -1.9099,
+  "pillar_deuda": -0.149,
+  "pillar_pago": 0.0,
+  "pillar_cobro": -0.1004,
+  "confidence": -0.0261,
+  "log_months": -0.3618
+ }
+}

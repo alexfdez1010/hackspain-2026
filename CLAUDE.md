@@ -6,7 +6,7 @@ tooling, dependencies, tests and agent guidelines. Never mix them.
 | Path           | Stack                                             | Guidelines                        |
 | -------------- | ------------------------------------------------- | --------------------------------- |
 | `frontend/`    | Next.js 16, React 19, TailwindCSS 4, HeroUI v3         | [`frontend/CLAUDE.md`](./frontend/CLAUDE.md) |
-| `backend/`     | Python 3.12, uv, pytest, Ruff, FastAPI            | [`backend/AGENTS.md`](./backend/AGENTS.md) |
+| `backend/`     | Python 3.12, uv, pytest, Ruff, Polars, LightGBM (CLI pipeline, no server) | [`backend/AGENTS.md`](./backend/AGENTS.md) |
 
 ## Rules for every task
 
@@ -14,8 +14,10 @@ tooling, dependencies, tests and agent guidelines. Never mix them.
   `uv`/`make` commands from `backend/`. There is no root package manager.
 - **Follow the app-specific guidelines** linked above; they are binding for
   code style, architecture, documentation and testing in that app.
-- **Cross-app contracts** (HTTP payloads, shared schemas) must be documented
-  in the README of the app that owns the endpoint and mirrored in the consumer.
+- **Cross-app contract**: the backend writes JSON files (`uv run pulse --out
+  ../frontend/src/data/pulse`) that the frontend reads. The backend owns and
+  documents the contract (`backend/docs/json-contract.md`); the frontend README
+  mirrors what it consumes. There is no HTTP API between the apps.
 - **Commits** may touch both apps, but each app must pass its own checks:
   `bun run lint-format` and `bun run test` in `frontend/`, `make pre-commit` in
   `backend/`.

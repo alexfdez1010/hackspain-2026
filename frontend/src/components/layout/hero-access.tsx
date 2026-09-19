@@ -29,8 +29,8 @@ function HeroAccessLink({
 /**
  * Direct access to the company-scoped product from the landing hero.
  *
- * PULSE, Recomendaciones and Método in a 2-column grid. PULSE is the page
- * `h1` so the name is written once. Not a folder tab.
+ * Every demo company page in a 2-column grid. PULSE is the page `h1` so the
+ * name is written once. Not a folder tab.
  *
  * @returns A labelled grid of large underlined product links.
  */

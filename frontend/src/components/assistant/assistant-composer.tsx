@@ -38,7 +38,7 @@ export function AssistantComposer({
           onChange={(event) => chat.setInput(event.target.value)}
           onFocus={() => onFocusChange(true)}
           onBlur={() => onFocusChange(false)}
-          placeholder="Pregúntame sobre tu cartera…"
+          placeholder="Pregunta o pide un gráfico…"
           maxLength={MAX_PROMPT_LENGTH}
           rows={1}
           className="max-h-32 min-h-9 flex-1 resize-none rounded-none border-0 bg-transparent px-0 py-2 text-base shadow-none field-sizing-content focus:outline-none sm:text-sm"

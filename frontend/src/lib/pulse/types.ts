@@ -164,8 +164,8 @@ export interface PulseCompanyRow {
   /** Share of the 100 points backed by data, between 0 and 1. */
   confidence: number | null;
   pillars: PulsePillars;
-  /** One-year (+12 month) forecast, or `null` when it could not be computed. */
-  forecast12m: PulseForecastBand | null;
+  /** Six-month (+6) forecast, or `null` when it could not be computed. */
+  forecast6m: PulseForecastBand | null;
 }
 
 /** Metadata plus one row per company. */
@@ -191,7 +191,7 @@ export interface PulseSeriesPoint {
 /**
  * Farthest forecast horizon the app shows, in months.
  *
- * The export publishes +1..+12; the parser drops everything beyond this, so
+ * The export publishes +1..+6; the parser drops anything beyond this, so
  * every chart, table and decomposition reads the same six months.
  */
 export const PULSE_FORECAST_MONTHS = 6;

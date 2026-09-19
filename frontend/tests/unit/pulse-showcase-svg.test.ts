@@ -59,7 +59,9 @@ describe('pulseShowcaseSvg', () => {
     expect(svg).not.toContain('NaN');
     expect(svg).not.toContain('figcaption');
     expect(svg).not.toContain('var(--score-');
-    expect(svg).toContain('oklch(0.72 0.15 72)');
+    expect(svg).toContain('#b06f00');
+    expect(svg).toContain('id="pulse-area"');
+    expect(svg).not.toContain('font-family=');
   });
 
   it('labels only the first close, last close and farthest horizon', () => {

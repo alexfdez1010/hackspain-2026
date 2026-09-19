@@ -10,8 +10,8 @@ import type { PulseCompany, PulseSummary } from '@/lib/pulse/types';
 /**
  * Data source backed by the JSON files bundled in `src/data/pulse`.
  *
- * It is the fallback used whenever `PULSE_API_URL` is not configured, which
- * keeps the demo working with no backend running.
+ * It is the only implementation of `PulseDataSource`: the app ships its data,
+ * so it works with no backend running.
  */
 export class StaticPulseSource implements PulseDataSource {
   readonly kind = 'static' as const;

@@ -17,8 +17,8 @@ describe('FEATURE_DITHER', () => {
       existsSync(resolve(process.cwd(), `public${FEATURE_DITHER.image}`)),
     ).toBe(true);
 
-    expect(FEATURE_DITHER.colorBack).toBe('#00000000');
-    expect(FEATURE_DITHER.colorFront).toBe('#050b2c');
+    expect(FEATURE_DITHER.colorBack).toBe('#ffffff');
+    expect(FEATURE_DITHER.colorFront).toBe('#0d1130');
     expect(FEATURE_DITHER.originalColors).toBe(false);
     expect(FEATURE_DITHER.inverted).toBe(false);
     expect(FEATURE_DITHER.fit).toBe('cover');

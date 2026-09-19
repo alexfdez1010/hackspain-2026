@@ -4,7 +4,6 @@ import { counterpartyName } from '@/lib/company/names';
 import { parsePulseCompanyDetails } from '@/lib/pulse/details/parse';
 import { camelCase, parseMonths, parseRows } from '@/lib/pulse/details/rows';
 import { NETWORK_CUSTOMER_SPEC } from '@/lib/pulse/details/specs';
-import { ApiPulseSource } from '@/lib/pulse/source/api';
 
 const PAYLOAD = {
   company_id: 'COMP_0001',
@@ -130,28 +129,5 @@ describe('counterpartyName', () => {
     expect(a).not.toContain('COUNTERPARTY');
     expect(a).not.toBe(counterpartyName('COUNTERPARTY_47798'));
     expect(counterpartyName('')).toBe('');
-  });
-});
-
-describe('ApiPulseSource.getCompanyDetails', () => {
-  it('calls the details endpoint and parses the answer', async () => {
-    const calls: string[] = [];
-    const fetchImpl = (async (input: RequestInfo | URL) => {
-      calls.push(String(input));
-      return new Response(JSON.stringify(PAYLOAD), { status: 200 });
-    }) as typeof fetch;
-    const source = new ApiPulseSource('http://api.test', fetchImpl);
-    const details = await source.getCompanyDetails('COMP_0001');
-    expect(calls[0]).toBe(
-      'http://api.test/api/pulse/companies/COMP_0001/details',
-    );
-    expect(details?.variables.network.customers).toHaveLength(1);
-  });
-
-  it('returns null on a 404', async () => {
-    const fetchImpl = (async () =>
-      new Response('', { status: 404 })) as typeof fetch;
-    const source = new ApiPulseSource('http://api.test', fetchImpl);
-    expect(await source.getCompanyDetails('COMP_9999')).toBeNull();
   });
 });

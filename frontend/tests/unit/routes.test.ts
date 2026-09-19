@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  companyActionRoute,
   companyIdFromPath,
   companyIdFromQuery,
   companyRoutes,
@@ -25,6 +26,7 @@ describe('companyRoutes', () => {
     expect(companyRoutes('COMP_0001')).toEqual({
       pulse: '/company/COMP_0001',
       diagnosis: '/company/COMP_0001/diagnosis',
+      action: '/company/COMP_0001/action',
       detail: '/company/COMP_0001/detail',
       signals: '/company/COMP_0001/signals',
       advisor: '/company/COMP_0001/recommendations',
@@ -40,6 +42,17 @@ describe('companyVariableRoute', () => {
     );
     expect(companyVariableRoute('COMP 1', 'cash_days')).toBe(
       '/company/COMP%201/variable/cash_days',
+    );
+  });
+});
+
+describe('companyActionRoute', () => {
+  it('nests the plan of a variable under the action page', () => {
+    expect(companyActionRoute('COMP_0001', 'cash_min')).toBe(
+      '/company/COMP_0001/action/cash_min',
+    );
+    expect(companyActionRoute('COMP 1', 'ar90')).toBe(
+      '/company/COMP%201/action/ar90',
     );
   });
 });
@@ -98,11 +111,12 @@ describe('navigation', () => {
     expect(resolveNavCompany('/', null)).toBe('COMP_0001');
   });
 
-  it('lists the six sections of a company in the order of the prototype', () => {
+  it('lists the seven sections of a company in the order of the prototype', () => {
     const sections = companySections('COMP_0001');
     expect(sections.map((section) => section.label)).toEqual([
       'PULSE',
       'Diagnóstico',
+      'Acción',
       'Detalle',
       'Alertas',
       'Financiación',
@@ -111,17 +125,21 @@ describe('navigation', () => {
     expect(sections.map((section) => section.href)).toEqual([
       '/company/COMP_0001',
       '/company/COMP_0001/diagnosis',
+      '/company/COMP_0001/action',
       '/company/COMP_0001/detail',
       '/company/COMP_0001/signals',
       '/company/COMP_0001/recommendations',
       '/method?company=COMP_0001',
     ]);
     expect(
-      isActive('/company/COMP_0001/recommendations', sections[4].match),
+      isActive('/company/COMP_0001/recommendations', sections[5].match),
     ).toBe(true);
-    expect(isActive('/company/COMP_0001/signals', sections[3].match)).toBe(
+    expect(isActive('/company/COMP_0001/signals', sections[4].match)).toBe(
       true,
     );
+    expect(
+      isActive('/company/COMP_0001/action/cash_min', sections[2].match),
+    ).toBe(true);
   });
 });
 
@@ -136,6 +154,10 @@ describe('sectionFromPath', () => {
     );
     expect(sectionFromPath('/company/COMP_0001/diagnosis')).toBe('diagnosis');
     expect(sectionFromPath('/company/COMP_0001/detail')).toBe('detail');
+    expect(sectionFromPath('/company/COMP_0001/action')).toBe('action');
+    expect(sectionFromPath('/company/COMP_0001/action/cash_min')).toBe(
+      'action',
+    );
     expect(sectionFromPath('/method')).toBe('method');
     expect(sectionFromPath('/')).toBe('pulse');
     expect(sectionFromPath('/other/recommendations')).toBe('pulse');

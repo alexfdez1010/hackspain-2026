@@ -41,10 +41,10 @@ def _series(company_daily: pl.DataFrame) -> Rows:
 
 
 def _min_day(company_daily: pl.DataFrame) -> dict[str, dict | None]:
-    """Lowest day of the reference month per company."""
+    """Lowest day of the reference month per company (earliest day on a tie)."""
     month = company_daily.filter(pl.col("day") >= pl.col("ref_month").dt.date())
     low = (
-        month.sort("company_id", "balance")
+        month.sort("company_id", "balance", "day")
         .group_by("company_id", maintain_order=True)
         .first()
         .select("company_id", pl.col("day").dt.strftime("%Y-%m-%d"), "balance")
@@ -61,7 +61,7 @@ def _accounts(daily: pl.DataFrame, ctx: DetailContext) -> Rows:
     df = (
         at_end.join(ctx.products, on="product_id", how="left")
         .select("company_id", "product_id", "label", "bank", "type", "balance")
-        .sort(["company_id", "balance"], descending=[False, True])
+        .sort(["company_id", "balance", "product_id"], descending=[False, True, False])
     )
     return rows_by_company(
         rounded(df), ["product_id", "label", "bank", "type", "balance"]

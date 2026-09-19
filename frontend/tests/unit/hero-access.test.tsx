@@ -4,24 +4,24 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import { HeroAccess } from '@/components/layout/hero-access';
+import { companySections } from '@/lib/company/sections';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
-import { companyRoutes } from '@/lib/routes';
-
-const demo = companyRoutes(PULSE_DEMO_COMPANY_ID);
 
 describe('HeroAccess', () => {
-  it('links the company-scoped product surfaces in a grid, not a folder tab', () => {
+  it('links every product page of the demo company in a grid, not a folder tab', () => {
     const html = renderToStaticMarkup(<HeroAccess />);
     expect(html).toContain('aria-label="Dashboard"');
     expect(html).toContain('grid-cols-2');
     expect(html).toContain('hero-access-link');
     expect(html).toContain('font-normal');
-    expect(html).toContain(`href="${demo.pulse}"`);
-    expect(html).toContain(`href="${demo.advisor}"`);
-    expect(html).toContain(`href="${demo.method}"`);
+    for (const section of companySections(PULSE_DEMO_COMPANY_ID)) {
+      expect(html).toContain(`href="${section.href}"`);
+      expect(html).toContain(`>${section.label}<`);
+    }
+    const pulse = companySections(PULSE_DEMO_COMPANY_ID)[0];
     expect(html.indexOf('<h1')).toBeGreaterThan(-1);
     expect(html.indexOf('<h1')).toBeLessThan(
-      html.indexOf(`href="${demo.pulse}"`),
+      html.indexOf(`href="${pulse.href}"`),
     );
     expect(html.split('<h1').length - 1).toBe(1);
     expect(html).not.toContain('href="/radar"');

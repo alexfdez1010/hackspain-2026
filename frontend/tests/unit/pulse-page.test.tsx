@@ -76,7 +76,8 @@ describe('the company diagnosis page', () => {
     const markup = await render(CompanyDiagnosisPage, 'COMP_0001');
     expect(markup).toContain('Diagnóstico del cierre de ago 2026');
     expect(markup).toContain('Dónde se decide');
-    expect(markup).toContain('36 pts de peso');
+    expect(markup).toContain('Calidad de cobro');
+    expect(markup).not.toContain('pts de peso');
     expect(markup).toContain('Tramo +90 días');
     expect(markup).toContain('Utilización de líneas');
     expect(markup).toContain('Evolución por pilar');

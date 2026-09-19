@@ -1,25 +1,8 @@
-# Full local stack: FastAPI (PULSE artefacts baked in) and the Next.js app.
+# Local demo of the web app. There is no backend at runtime: the image bakes in the
+# JSON export under frontend/src/data/pulse, regenerated with `make pulse-web`.
 #   docker compose up --build
-#   open http://localhost:3000/empresa/COMP_0001
+#   open http://localhost:3000/company/COMP_0001
 services:
-  api:
-    build:
-      context: ./backend
-    image: hackspain-api:latest
-    container_name: hackspain-api
-    ports:
-      - "${API_PORT:-8000}:8000"
-    environment:
-      PORT: "8000"
-      PULSE_DATA_DIR: /app/data
-      PULSE_CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-
   web:
     build:
       context: ./frontend
@@ -27,9 +10,7 @@ services:
     container_name: hackspain-web
     ports:
       - "${WEB_PORT:-3000}:3000"
-    environment:
-      # Server-side fetches go to the API container; the browser never calls it directly.
-      PULSE_API_URL: http://api:8000
-    depends_on:
-      api:
-        condition: service_healthy
+    # Nexo reads AI_GATEWAY_API_KEY from frontend/.env; without it the assistant runs its demo.
+    env_file:
+      - path: ./frontend/.env
+        required: false

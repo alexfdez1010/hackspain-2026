@@ -11,10 +11,11 @@ describe('NavSectionLinks', () => {
     const markup = renderToStaticMarkup(
       <NavSectionLinks sections={SECTIONS} current="signals" layout="row" />,
     );
-    expect(markup.match(/<a /g)).toHaveLength(6);
+    expect(markup.match(/<a /g)).toHaveLength(7);
     expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
     expect(markup).toMatch(/<a[^>]*aria-current="page"[^>]*>Alertas</);
     expect(markup).toContain('href="/company/COMP_0001/signals"');
+    expect(markup).toContain('href="/company/COMP_0001/action"');
     expect(markup).toContain('href="/method?company=COMP_0001"');
   });
 
@@ -26,6 +27,8 @@ describe('NavSectionLinks', () => {
       <NavSectionLinks sections={SECTIONS} current="pulse" layout="column" />,
     );
     expect(row).toContain('min-h-10');
+    expect(row).toContain('px-2 ');
+    expect(row).toContain('xl:px-3');
     expect(column).toContain('min-h-12');
     expect(column).toContain('flex-col');
   });

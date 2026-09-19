@@ -1,4 +1,9 @@
-import { linePath, yAt, type ChartBox } from '@/components/charts/geometry';
+import {
+  areaPath,
+  linePath,
+  yAt,
+  type ChartBox,
+} from '@/components/charts/geometry';
 import { formatMonth, formatMonthShort, formatNumber } from '@/lib/format';
 import type { PulseTrajectoryPoint } from '@/lib/pulse/company-view';
 import { layoutTrajectory } from '@/lib/pulse/trajectory-layout';
@@ -14,17 +19,20 @@ export const PULSE_SHOWCASE_BOX: ChartBox = {
   padBottom: 44,
 };
 
-/** Light-band score colours, baked so the SVG does not depend on CSS variables. */
-const LIGHT_SCORE: Record<ScoreBandKey, string> = {
-  critical: 'oklch(0.6 0.21 26)',
-  fragile: 'oklch(0.72 0.15 72)',
-  neutral: 'oklch(0.62 0.03 262)',
-  solid: 'oklch(0.63 0.15 156)',
+/**
+ * Light-band score colours, baked so the SVG does not depend on CSS
+ * variables. Same values as the Embat score tokens of the product.
+ */
+export const LIGHT_SCORE: Record<ScoreBandKey, string> = {
+  critical: '#c62a2f',
+  fragile: '#b06f00',
+  neutral: '#6e7488',
+  solid: '#12a150',
 };
 
-const SEPARATOR = '#d2d2db';
-const FOREGROUND = '#050b2c';
-const MUTED = '#6e707c';
+const SEPARATOR = '#e4e7ee';
+const FOREGROUND = '#0d1130';
+const MUTED = '#6e7488';
 
 /**
  * Escapes text for SVG attribute and text nodes.
@@ -70,8 +78,10 @@ export function pulseShowcaseLabel(
  * Serializes a simplified PULSE trajectory as a standalone SVG string.
  *
  * No hover, tooltip or figcaption. Month labels only at the first close, the
- * last close and the farthest horizon. Colours are the light-band score tokens.
- * Returns an empty string when there is no observed history.
+ * last close and the farthest horizon. Colours are the light-band score tokens
+ * of the band the last close sits in: the line, the wash under it, the
+ * p10-p90 band and the close mark all carry that band. The text inherits the
+ * page font. Returns an empty string when there is no observed history.
  *
  * @param points - Observed months followed by the forecast.
  * @param boundaryIndex - Last observed month.
@@ -111,9 +121,13 @@ export function pulseShowcaseSvg(
     last.y !== null && boundaryIndex < placed.length - 1
       ? `<circle cx="${n(last.x)}" cy="${n(last.y)}" r="3.2" fill="${forecastStroke}"/>`
       : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${box.width} ${box.height}" width="100%" height="${box.height}" role="img" aria-label="${label}" font-family="DM Sans, sans-serif">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${box.width} ${box.height}" width="100%" height="${box.height}" role="img" aria-label="${label}">
 <g id="pulse-guides" aria-hidden="true">${guides}</g>
 ${band ? `<path id="pulse-band" d="${band}" fill="${forecastStroke}" fill-opacity="0.16"/>` : ''}
+<path id="pulse-area" d="${areaPath(
+    observed.map((point) => ({ x: n(point.x), y: n(point.y) })),
+    box.height - box.padBottom,
+  )}" fill="${stroke}" fill-opacity="0.08"/>
 <path id="pulse-observed" d="${observedPath}" fill="none" stroke="${stroke}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
 <path id="pulse-forecast" d="${forecastPath}" fill="none" stroke="${forecastStroke}" stroke-width="2" stroke-dasharray="6 4" stroke-linejoin="round" stroke-linecap="round"/>
 <line id="pulse-boundary" x1="${n(boundary.x)}" x2="${n(boundary.x)}" y1="${box.padTop}" y2="${box.height - box.padBottom}" stroke="${FOREGROUND}" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.45"/>

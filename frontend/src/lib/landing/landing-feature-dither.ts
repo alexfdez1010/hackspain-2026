@@ -1,12 +1,13 @@
 import { PULSE_HERO_DITHER_IMAGE } from '@/lib/landing/pulse-hero-dither';
 
 /**
- * Paper ImageDithering uniforms for the landing 2×2 column.
+ * Paper ImageDithering uniforms for the landing feature column.
  *
  * One canvas covers the whole grid so the hero sparkle continues under the
- * plus. `cover` fills the column; light-band ink (`#050b2c`), no `screen`
- * blend. Hover and selected states live on each cell in CSS. `speed` stays
- * 0 at the canvas.
+ * rules. `cover` fills the column. The ink is the light-band foreground on an
+ * opaque white back: the canvas screens onto the score quadrants beneath it,
+ * so white hides the field and the ink lets each level through. Hover and
+ * selected states live on each cell in CSS. `speed` stays 0 at the canvas.
  */
 export const FEATURE_DITHER = {
   image: PULSE_HERO_DITHER_IMAGE,
@@ -20,7 +21,7 @@ export const FEATURE_DITHER = {
   size: 3.5,
   colorSteps: 2,
   rotation: 0,
-  colorBack: '#00000000',
-  colorFront: '#050b2c',
+  colorBack: '#ffffff',
+  colorFront: '#0d1130',
   maxPixelCount: 480_000,
 } as const;

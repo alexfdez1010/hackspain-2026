@@ -18,7 +18,7 @@ function deriveMood(
   hovered: boolean,
 ): NexoMood {
   if (chat.error) return 'error';
-  if (chat.status === 'submitted') return 'thinking';
+  if (chat.status === 'submitted' || chat.working) return 'thinking';
   if (chat.status === 'streaming') return 'speaking';
   if (focused) return 'listening';
   return hovered ? 'happy' : 'idle';

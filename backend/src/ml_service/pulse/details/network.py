@@ -56,7 +56,10 @@ def _customers(ctx: DetailContext) -> Rows:
                 "share"
             ),
         )
-        .sort(["company_id", "billed_6m"], descending=[False, True])
+        .sort(
+            ["company_id", "billed_6m", "counterparty_id"],
+            descending=[False, True, False],
+        )
     )
     return rows_by_company(rounded(df), CUSTOMER_FIELDS)
 

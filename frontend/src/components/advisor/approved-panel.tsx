@@ -38,6 +38,9 @@ function weakestSentence(
  * product with its amount, its price and its fit, and under them the
  * products the rules left out, folded.
  *
+ * The heading frames the catalogue as an option and not as a result, because
+ * the panel above it already offers the measure that costs nothing.
+ *
  * @param props - The company, the pillar labels and the variable labels.
  * @returns The panel that answers «¿qué puedo contratar?».
  */
@@ -52,7 +55,7 @@ export function ApprovedPanel({
     <Panel>
       <div className="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-1 pb-1">
         <h3 className="text-[20px] leading-[1.35] font-semibold">
-          Aprobado con tu PULSE de hoy
+          Si necesitas financiación
         </h3>
         {aside && (
           <p className="text-ink-secondary text-[15px] leading-[1.55]">

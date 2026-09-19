@@ -94,7 +94,7 @@ describe('buildVariableForecast', () => {
     const forecast = buildVariableForecast(company.forecast, 'cash_min');
     expect(forecast.impacts).toHaveLength(6);
     expect(forecast.impacts[0].horizon).toBe(1);
-    expect(forecast.impacts[0].points).toBeCloseTo(1.42);
+    expect(forecast.impacts[0].points).toBeCloseTo(1.22);
     expect(forecast.farthest?.horizon).toBe(6);
     expect(forecast.peak).not.toBeNull();
     expect(forecast.driverCount).toBe(13);

@@ -26,17 +26,48 @@ const context = {
   sources: [{ label: 'Método', href: '/method' }],
 };
 
+/** A company page context; the chart tool reads the bundled export of COMP_0001. */
+const companyContext = {
+  ...context,
+  companyId: 'COMP_0001',
+  page: 'PULSE · Atresmedia Labs',
+  company: {
+    id: 'COMP_0001',
+    name: 'Atresmedia Labs',
+    month: '2026-08',
+    firstMonth: '2026-01',
+    monthsObserved: 8,
+    pulse: 45.6,
+    pulsePrev: 38.1,
+    change: 7.5,
+    confidence: 0.82,
+    pillars: {},
+    unknownVariables: [],
+    forecast: [],
+    signals: [],
+    activeSignal: null,
+  },
+};
+
 /** Builds a valid in-process HTTP request without an external service or API key. */
-function request(text = 'Hola', signal?: AbortSignal) {
+function request(text = 'Hola', signal?: AbortSignal, pathname = '/') {
   return new Request('http://localhost/api/assistant', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      pathname: '/',
+      pathname,
       messages: [{ id: 'u-1', role: 'user', parts: [{ type: 'text', text }] }],
     }),
     signal,
   });
+}
+
+/** Parses the SSE events of a response body. */
+function events(body: string): Record<string, unknown>[] {
+  return body
+    .split('\n')
+    .filter((line) => line.startsWith('data: {'))
+    .map((line) => JSON.parse(line.slice(6)));
 }
 
 afterEach(() => {
@@ -96,18 +127,54 @@ describe('assistant streaming endpoint', () => {
     expect(streamText).toHaveBeenCalledWith(
       expect.objectContaining({
         model: 'google/gemini-3.8-flash',
-        instructions: expect.stringContaining('Nexo'),
+        instructions: expect.stringContaining('show_chart'),
         maxOutputTokens: 10000,
         providerOptions: {
           google: { thinkingConfig: { thinkingLevel: 'low' } },
         },
         abortSignal: expect.any(AbortSignal),
+        stopWhen: expect.any(Function),
+        tools: expect.objectContaining({
+          get_history: expect.anything(),
+          get_month: expect.anything(),
+          get_forecast: expect.anything(),
+          get_signals: expect.anything(),
+          get_financing: expect.anything(),
+          get_variable: expect.anything(),
+          get_variable_detail: expect.anything(),
+          show_chart: expect.anything(),
+        }),
       }),
     );
     expect(events).toContain('"mode":"gateway"');
     expect(events).toContain('"finishReason":"length"');
     expect(events).toContain('Respuesta de prueba');
     expect(events).not.toContain('not-a-real-key');
+  });
+  it('replays a real chart through the tool protocol in demo mode', async () => {
+    vi.stubEnv('ASSISTANT_MODE', 'mock');
+    vi.mocked(getAssistantContext).mockResolvedValue(companyContext);
+    const response = await POST(
+      request(
+        'Dibuja la trayectoria del PULSE',
+        undefined,
+        '/company/COMP_0001',
+      ),
+    );
+    const parsed = events(await response.text());
+    const types = parsed.map((event) => event.type);
+    expect(types).toContain('tool-input-available');
+    expect(types).toContain('tool-output-available');
+    expect(types.indexOf('tool-output-available')).toBeLessThan(
+      types.indexOf('text-start'),
+    );
+    const output = parsed.find(
+      (event) => event.type === 'tool-output-available',
+    )?.output as { kind: string; company: string; points: unknown[] };
+    expect(output.kind).toBe('trayectoria');
+    expect(output.company).toBe('Atresmedia Labs');
+    expect(output.points.length).toBeGreaterThan(6);
+    expect(streamText).not.toHaveBeenCalled();
   });
   it('does not expose exceptions from the data service', async () => {
     vi.stubEnv('ASSISTANT_MODE', 'mock');

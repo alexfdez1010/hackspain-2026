@@ -63,7 +63,7 @@ export function CompanySearch({
       onSelectionChange={handleChange}
       menuTrigger="focus"
       allowsEmptyCollection
-      className="w-full min-w-0 sm:w-64"
+      className="w-full min-w-0"
     >
       <ComboBox.InputGroup>
         <Input

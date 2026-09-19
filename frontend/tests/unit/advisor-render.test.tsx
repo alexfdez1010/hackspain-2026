@@ -202,7 +202,7 @@ describe('a company with no offer', () => {
     );
     expect(markup).toContain('4.150.001 €');
     expect(markup).toContain('24 préstamos');
-    expect(markup).toContain('Banda p10-p90 30,9-65,7');
+    expect(markup).toContain('Banda p10-p90 31,3-61,3');
     expect(markup).toContain('sin datos');
   });
 });
@@ -248,14 +248,18 @@ describe('the advisor page', () => {
     return renderToStaticMarkup(element);
   }
 
-  it('opens COMP_0001 with the action, then what it can sign today', async () => {
+  it('opens COMP_0001 with the free measure, then what it can sign today', async () => {
     const markup = await renderPage('COMP_0001');
     expect(markup).toContain('<h1');
     expect(markup).toContain('3 productos encajan hoy');
     expect(markup).toContain('4 quedan fuera');
-    expect(markup).toContain('Qué hacer ahora');
-    expect(markup).toContain('Leyendo las cifras de la empresa…');
-    expect(markup).toContain('Aprobado con tu PULSE de hoy');
+    expect(markup).not.toContain('Qué hacer ahora');
+    expect(markup).toContain('Antes de financiar · sin coste');
+    expect(markup).toContain('Efecto en el PULSE si la variable llega a 100');
+    expect(markup).toContain('Coste financiero de la medida');
+    expect(markup).toContain('Cuándo se ve en el PULSE');
+    expect(markup).toContain('Si necesitas financiación');
+    expect(markup).not.toContain('Aprobado con tu PULSE de hoy');
     expect(markup).toContain('Tu pilar más débil es deuda y servicio, en 34.');
     expect(markup).toContain('Línea de crédito');
     expect(markup).toContain('Anticipo de facturas');

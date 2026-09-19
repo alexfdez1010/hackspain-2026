@@ -32,7 +32,7 @@ export function monthlyChange(
  * @returns The change in points, or `null` when there is no forecast.
  */
 export function forecastDelta(row: PulseCompanyRow): number | null {
-  const predicted = row.forecast12m?.pulsePred ?? null;
+  const predicted = row.forecast6m?.pulsePred ?? null;
   if (row.pulse === null || predicted === null) return null;
   return predicted - row.pulse;
 }

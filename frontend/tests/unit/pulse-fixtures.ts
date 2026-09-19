@@ -23,7 +23,7 @@ export function makeRow(
     pulsePrev: 35,
     confidence: 0.8,
     pillars: { liquidez: 40, deuda: 40, cobro: 40, pago: 40 },
-    forecast12m: { pulsePred: 38, pulseP10: 20, pulseP90: 55 },
+    forecast6m: { pulsePred: 38, pulseP10: 20, pulseP90: 55 },
     ...overrides,
   };
 }

@@ -1,0 +1,78 @@
+{
+ "rows": 14521,
+ "stress_rate": 0.2238,
+ "auroc_pulse": 0.821,
+ "auroc_pulse_excluding_current_stress": 0.6387,
+ "auroc_by_variable": {
+  "cash_days": 0.8587,
+  "cash_min": 0.8702,
+  "loc_util": 0.471,
+  "loc_accel": 0.4979,
+  "dpo": 0.4723,
+  "terms": 0.4734,
+  "dso": 0.5062,
+  "ar90": 0.4992,
+  "top_client": 0.4581,
+  "maturities": 0.6332,
+  "network": 0.4894
+ },
+ "auroc_by_proxy_component": {
+  "returned_share": 0.5285,
+  "returned_d3": 0.4991,
+  "top_client_growth_bank": 0.4582,
+  "network_exposure_bank": 0.4968
+ },
+ "auroc_pulse_by_cobro_source": {
+  "primary": {
+   "rows": 6354,
+   "auroc": 0.771
+  },
+  "proxy": {
+   "rows": 6720,
+   "auroc": 0.8409
+  },
+  "none": {
+   "rows": 1447,
+   "auroc": 0.9006
+  }
+ },
+ "auroc_pulse_overdraft_only_label": {
+  "stress_rate": 0.1943,
+  "auroc_pulse": 0.8422,
+  "auroc_pulse_excluding_current_stress": 0.6288,
+  "auroc_returned_share": 0.5077
+ },
+ "auroc_by_confidence": {
+  "0.0-0.4": {
+   "rows": 1074,
+   "auroc": 0.8973
+  },
+  "0.4-0.7": {
+   "rows": 8604,
+   "auroc": 0.839
+  },
+  "0.7-1.0": {
+   "rows": 4843,
+   "auroc": 0.7678
+  }
+ },
+ "auroc_by_months_observed": {
+  "1-3": {
+   "rows": 3537,
+   "auroc": 0.8339
+  },
+  "4-6": {
+   "rows": 2881,
+   "auroc": 0.8449
+  },
+  "7-12": {
+   "rows": 4819,
+   "auroc": 0.8343
+  },
+  "13-24": {
+   "rows": 3284,
+   "auroc": 0.8165
+  }
+ },
+ "auroc_temporal_from_2025_09": 0.8091
+}

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
-import { aktivGrotesk, dmSans } from '@/lib/fonts';
+import { haffer } from '@/lib/fonts';
 import './globals.css';
 import '@/styles/nexo.css';
 
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${dmSans.variable} ${aktivGrotesk.variable}`}>
+    <html lang="es" className={haffer.variable}>
       <body className="min-h-screen font-sans antialiased">{children}</body>
     </html>
   );

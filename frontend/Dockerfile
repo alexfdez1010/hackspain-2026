@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-# Embat Pulse web app (Next.js standalone). Reads PULSE and Advisor data from the API
-# when PULSE_API_URL is set, otherwise from the JSON bundled under src/data.
+# Embat Pulse web app (Next.js standalone). Reads PULSE and Advisor data from the
+# JSON export bundled under src/data; there is no backend at runtime.
 
 FROM node:22-alpine AS deps
 WORKDIR /app
@@ -23,7 +23,7 @@ ENV NODE_ENV=production \
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-# Bundled JSON fallback (used when PULSE_API_URL is unset).
+# Bundled JSON export: the only data source of the app.
 COPY --from=builder /app/src/data ./src/data
 EXPOSE 3000
 CMD ["node", "server.js"]

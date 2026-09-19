@@ -20,7 +20,7 @@ from ml_service.pulse.config import RAW_DIR, WORK_DIR
 from ml_service.pulse.evaluate import stress_label
 from ml_service.pulse.load import load_raw
 from ml_service.pulse.recommend.engine import Recommender
-from ml_service.pulse.recommend.export import web_mirror_dir, write_all
+from ml_service.pulse.recommend.export import write_all
 from ml_service.pulse.recommend.inputs import build_snapshots
 from ml_service.pulse.recommend.inputs_raw import holdings_by_company, invoice_books
 from ml_service.pulse.recommend.risk import RiskModel, feature_frame
@@ -70,11 +70,7 @@ def build(work_dir: Path, raw_dir: Path) -> Path:
     model = RiskModel.load(work_dir.joinpath(*MODEL_FILE))
     snaps = snapshots(work_dir, raw_dir)
     out = write_all(
-        Recommender(model),
-        snaps,
-        work_dir / "recommendations",
-        model.evaluation,
-        mirror_dir=web_mirror_dir() if work_dir == WORK_DIR else None,
+        Recommender(model), snaps, work_dir / "recommendations", model.evaluation
     )
     summary = json.loads((out / "summary.json").read_text())
     tops = [r["top_product"] or "ninguno" for r in summary["companies"]]
