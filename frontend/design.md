@@ -110,7 +110,8 @@ llevan etiqueta de severidad además de color.
   destacadas) (`--font-sans`). Cuerpo, tablas y enlaces de navegación.
 - Identifiers (`COMP_0001`) and raw figures use DM Sans with `tabular-nums`.
   There is no dedicated mono face.
-- Marca: en producto, icono de pulso sin texto (`src/app/icon.svg`, 40 px).
+- Marca: en producto, icono de pulso (`src/app/icon.svg`, 40 px) con el
+  wordmark `PulseWordmark` (`ui/wordmark`, 14 px) a su derecha.
   En el hero de `/`,
   `PulseHeroMark` SVG a escala de columna. El enlace de la nav se llama
   «Embat Pulse, inicio»; el `h1` de la landing es «Embat Pulse» y el SVG es
@@ -188,8 +189,10 @@ adding it to the codebase.
   en claro y oscuro; el pulso no representa una medición ni una banda de score.
 - `src/app/icon.svg` es el original vectorial compartido por favicon y header;
   `src/app/favicon.ico` contiene copias rasterizadas a 16, 32, 48 y 64 px.
-- El header muestra sólo el icono a 40 px en un enlace de 44 px con nombre
-  accesible «Embat Pulse, inicio» y foco visible. No añade animación.
+- El header muestra el icono a 40 px y el wordmark a su derecha, separados
+  por 8 px, en un enlace de 44 px de alto con nombre accesible «Embat Pulse, inicio» y foco visible. No añade animación.
+- Corrección, 2026-09-19: «sin texto» se refiere al dibujo del icono; el
+  header conserva el wordmark a su derecha. El favicon sigue siendo sólo icono.
 - Decisión conservada, 2026-09-19: mantener el dibujo como recurso estático
   compartido separa identidad y navegación (responsabilidad única), evita
   duplicar geometría en React y mantiene legible el favicon pequeño.

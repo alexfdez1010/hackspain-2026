@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { CompanySearch } from '@/components/layout/company-search';
+import { PulseWordmark } from '@/components/ui/wordmark';
 import type { CompanyOption } from '@/lib/company/options';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 import {
@@ -87,12 +88,12 @@ export function resolveNavCompany(
  * the company in context is searched right here, and switching it keeps the
  * reader on the section they were reading.
  *
- * On a phone the bar takes two rows: the product icon with the search filling
+ * On a phone the bar takes two rows: the product icon and wordmark with the search filling
  * the rest of the first one, and the section links on their own row with
  * touch-sized targets. From `sm` up everything sits on one row.
  *
  * @param props - The companies the search offers.
- * @returns The product icon, the company search and the section links.
+ * @returns The product icon and wordmark, the company search and the section links.
  */
 export function SiteNav({ companies }: SiteNavProps) {
   const pathname = usePathname();
@@ -114,9 +115,10 @@ export function SiteNav({ companies }: SiteNavProps) {
         <Link
           href="/"
           aria-label="Embat Pulse, inicio"
-          className="flex size-11 shrink-0 items-center justify-center rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="flex h-11 shrink-0 items-center gap-2 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
           <Image src="/icon.svg" alt="" width={40} height={40} unoptimized />
+          <PulseWordmark className="h-3.5" />
         </Link>
         <div className="min-w-0 flex-1 sm:flex-none">
           <CompanySearch
