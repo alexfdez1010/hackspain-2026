@@ -9,7 +9,6 @@ A **production-grade Next.js template** engineered with enterprise-level best pr
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.x-38bdf8)](https://tailwindcss.com/)
 [![HeroUI](https://img.shields.io/badge/HeroUI-v3-7c3aed)](https://heroui.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-6.7.0-2D3748)](https://www.prisma.io/)
 
 ## 🩻 Embat Pulse (HackSpain 2026, reto Embat X-Ray)
 
@@ -28,10 +27,8 @@ sin base de datos y sin backend obligatorio.
 
 ### Arrancar la demo
 
-El script `dev` del template levanta Postgres; Embat Pulse no lo necesita:
-
 ```bash
-npx next dev --turbopack -p 3000
+bun run dev
 ```
 
 ### Fuente de datos
@@ -113,14 +110,12 @@ See [AGENTS.md](./AGENTS.md) for complete development guidelines and principles 
 - **[TypeScript 5.x](https://www.typescriptlang.org/)** - Strict type safety
 - **[TailwindCSS 4.x](https://tailwindcss.com/)** - Utility-first CSS framework
 - **[HeroUI v3](https://heroui.com/en/docs/react/components)** - Accessible React components built on React Aria and Tailwind CSS 4
-- **[Prisma 6.7.0](https://www.prisma.io/)** - Type-safe database ORM
 
 ### Testing Infrastructure
 
 - **[Vitest](https://vitest.dev/)** - Fast unit and integration testing
 - **[Playwright](https://playwright.dev/)** - Reliable E2E testing across browsers
 - **Comprehensive test setup** - Separate unit, integration, and E2E test suites
-- **Docker-based test database** - Isolated test environment
 
 ### Code Quality Tools
 
@@ -129,18 +124,15 @@ See [AGENTS.md](./AGENTS.md) for complete development guidelines and principles 
 - **Pre-commit hooks** - Automated testing and formatting before commits
 - **Strict TypeScript** - Maximum type safety configuration
 
-### Database & Infrastructure
+### Infrastructure
 
-- **PostgreSQL** - Production-ready relational database
-- **Docker Compose** - Containerized development and test databases
-- **Prisma migrations** - Version-controlled database schema
-- **Environment management** - Secure configuration with `.env` files
+- **Environment management** - Configuration with `.env` files
+- **Dockerfile** - Multi-stage standalone image (see `../Makefile` `up`)
 
 ## 📋 Prerequisites
 
 - **Node.js** 22.22.0 or higher (required by the current HeroUI CLI)
 - **Bun** 1.x or higher ([install](https://bun.sh/))
-- **Docker** and **Docker Compose** (for database)
 - **Git** for version control
 
 ## 🚀 Getting Started
@@ -162,24 +154,11 @@ bun install
 # Copy environment template
 cp .env.example .env
 
-# Edit .env with your configuration
-# DATABASE_URL="postgresql://postgres:postgres@localhost:5432/db"
+# Optional: point XRAY_API_URL at the FastAPI service
+# XRAY_API_URL="http://localhost:8000"
 ```
 
-### 3. Database Setup
-
-```bash
-# Start PostgreSQL container
-bun run database
-
-# Run migrations (in another terminal)
-bun run database:dev
-
-# Stop database when done
-bun run database:down
-```
-
-### 4. Run Development Server
+### 3. Run Development Server
 
 ```bash
 # Start development server with Turbopack
@@ -257,14 +236,14 @@ bunx skills add heroui-inc/heroui --skill heroui-react --yes
 
 ### Development
 
-- **`bun run dev`** - Start development server with database
+- **`bun run dev`** - Start development server
 - **`bun run build`** - Build production bundle
 - **`bun run start`** - Start production server
-- **`bun run launch`** - Build and start with database
+- **`bun run launch`** - Build and start production server
 
 ### Code Quality
 
-- **`bun run lint`** - Run ESLint and Prisma formatting
+- **`bun run lint`** - Run ESLint
 - **`bun run format`** - Format code with Prettier
 - **`bun run lint-format`** - Lint and format (required before commits)
 - **`bun run heroui:doctor`** - Validate HeroUI dependencies and peer dependencies
@@ -278,15 +257,6 @@ bunx skills add heroui-inc/heroui --skill heroui-react --yes
 - **`bun run test:e2e`** - Run E2E tests with Playwright
 - **`bun run playwright`** - Open Playwright UI for debugging
 
-### Database
-
-- **`bun run database`** - Start PostgreSQL container
-- **`bun run database:down`** - Stop database container
-- **`bun run database:dev`** - Run migrations in development
-- **`bun run database:deploy`** - Deploy migrations to production
-- **`bun run database:studio`** - Open Prisma Studio
-- **`bun run database:test`** - Start test database
-
 ## 🏗️ Project Structure
 
 ```
@@ -296,18 +266,14 @@ frontend/
 │       ├── layout.tsx    # Root layout
 │       ├── page.tsx      # Home page
 │       └── globals.css   # Global styles
-├── prisma/
-│   └── schema.prisma     # Database schema
 ├── tests/
 │   ├── unit/             # Unit tests
 │   ├── integration/      # Integration tests
 │   ├── e2e/              # End-to-end tests
 │   └── setup.ts          # Test configuration
 ├── public/               # Static assets
-├── generated/            # Generated Prisma client
 ├── .vscode/              # VS Code settings
-├── compose.yml           # Development database
-├── compose-test.yml      # Test database (ephemeral)
+├── Dockerfile            # Production image (standalone Next.js)
 ├── eslint.config.mjs     # ESLint configuration
 ├── playwright.config.ts  # Playwright configuration
 ├── vitest.config.ts      # Vitest configuration
@@ -344,39 +310,15 @@ Located in `tests/e2e/`, these test complete user flows across browsers.
 bun run test:e2e
 ```
 
-## 🗄️ Database Management
-
-### Prisma Workflow
-
-```bash
-# Create a new migration
-bun run database:dev
-
-# Deploy migrations to production
-bun run database:deploy
-
-# Check migration status
-bun run database:check
-
-# Open Prisma Studio
-bun run database:studio
-```
-
-### Schema Changes
-
-1. Edit `prisma/schema.prisma`
-2. Run `bun run database:dev` to create migration
-3. Test with `bun run database:test`
-4. Commit schema and migration files
-
 ## 🚢 Deployment
 
 ### Environment Variables
 
-Ensure all required environment variables are set:
+No variable is required. Set `XRAY_API_URL` to read from the FastAPI service;
+leave it unset to serve the JSON bundled under `src/data`:
 
 ```bash
-DATABASE_URL="postgresql://user:password@host:5432/database"
+XRAY_API_URL="https://api.example.com"
 ```
 
 ### Build and Deploy
@@ -405,7 +347,6 @@ bun run start
 - [React Documentation](https://react.dev/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [TailwindCSS Documentation](https://tailwindcss.com/docs)
-- [Prisma Documentation](https://www.prisma.io/docs)
 - [Vitest Documentation](https://vitest.dev/)
 - [Playwright Documentation](https://playwright.dev/)
 

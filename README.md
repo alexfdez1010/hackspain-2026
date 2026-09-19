@@ -4,7 +4,7 @@ Monorepo with two applications:
 
 | Path                          | What it is                                                   |
 | ----------------------------- | ------------------------------------------------------------ |
-| [`frontend/`](./frontend)               | Next.js 16 app (React 19, TailwindCSS 4, HeroUI v3, Prisma)  |
+| [`frontend/`](./frontend)               | Next.js 16 app (React 19, TailwindCSS 4, HeroUI v3)          |
 | [`backend/`](./backend) | Python 3.12 service with the domain logic and ML analysis    |
 
 Each app is self-contained: it has its own dependencies, tests, lint setup and
@@ -14,7 +14,7 @@ README. Run commands from inside the app directory or through the root
 ## Quick start
 
 ```bash
-# Web (requires bun and docker)
+# Web (requires bun)
 cd frontend
 bun install
 cp .env.example .env

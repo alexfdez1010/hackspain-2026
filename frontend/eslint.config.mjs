@@ -19,8 +19,6 @@ const eslintConfig = [
       'build/**',
       'next-env.d.ts',
       '.agents/skills/**',
-      'generated/**',
-      'src/generated/**',
       '.heroui-docs/**',
     ],
   },

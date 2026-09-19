@@ -5,7 +5,7 @@ tooling, dependencies, tests and agent guidelines. Never mix them.
 
 | Path           | Stack                                             | Guidelines                        |
 | -------------- | ------------------------------------------------- | --------------------------------- |
-| `frontend/`    | Next.js 16, React 19, TailwindCSS 4, HeroUI v3, Prisma | [`frontend/CLAUDE.md`](./frontend/CLAUDE.md) |
+| `frontend/`    | Next.js 16, React 19, TailwindCSS 4, HeroUI v3         | [`frontend/CLAUDE.md`](./frontend/CLAUDE.md) |
 | `backend/`     | Python 3.12, uv, pytest, Ruff, FastAPI            | [`backend/AGENTS.md`](./backend/AGENTS.md) |
 
 ## Rules for every task

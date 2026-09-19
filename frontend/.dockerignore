@@ -1,13 +1,9 @@
 node_modules
 .next
 out
-pgdata
-generated
 coverage
 tests
 playwright-report
 test-results
 .env*
 Dockerfile
-compose.yml
-compose-test.yml

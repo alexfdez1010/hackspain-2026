@@ -3,8 +3,6 @@ node_modules
 out
 build
 coverage
-generated
-src/generated
 
 # Skills bundles — vendored docs, keep upstream formatting intact
 .agents/skills/

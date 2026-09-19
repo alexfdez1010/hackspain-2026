@@ -5,16 +5,13 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-COPY prisma ./prisma
-RUN npm ci --ignore-scripts && npx prisma generate
+RUN npm ci --ignore-scripts
 
 FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/generated ./generated
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED=1 \
-    DATABASE_URL="postgresql://build:build@localhost:5432/build"
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npx next build
 
 FROM node:22-alpine AS runtime
