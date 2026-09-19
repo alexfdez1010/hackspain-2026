@@ -128,8 +128,8 @@ export interface PulseCompanyRow {
   /** Share of the 100 points backed by data, between 0 and 1. */
   confidence: number | null;
   pillars: PulsePillars;
-  /** Six-month forecast, or `null` when it could not be computed. */
-  forecast6m: PulseForecastBand | null;
+  /** One-year (+12 month) forecast, or `null` when it could not be computed. */
+  forecast12m: PulseForecastBand | null;
 }
 
 /** Metadata plus one row per company. */
@@ -163,7 +163,7 @@ export interface PulseForecastPoint extends PulseForecastBand {
   contributions: PulseContributions;
 }
 
-/** A company with its monthly history and its six forecast horizons. */
+/** A company with its monthly history and its twelve forecast horizons. */
 export interface PulseCompany {
   companyId: string;
   groupId: string;
@@ -176,6 +176,6 @@ export interface PulseCompany {
   pillars: PulsePillars;
   /** Observed months, ascending. */
   series: PulseSeriesPoint[];
-  /** Horizons +1 to +6, ascending. */
+  /** Horizons +1 to +12, ascending. */
   forecast: PulseForecastPoint[];
 }

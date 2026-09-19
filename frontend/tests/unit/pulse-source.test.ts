@@ -60,7 +60,7 @@ describe('parsePulseSummary', () => {
           pulse_prev: 17.88,
           confidence: 0.82,
           pillars: { liquidez: 34.33 },
-          forecast_6m: {
+          forecast_12m: {
             pulse_pred: 31.07,
             pulse_p10: 15.58,
             pulse_p90: 48.35,
@@ -72,7 +72,7 @@ describe('parsePulseSummary', () => {
     expect(summary.meta.horizons).toEqual([1, 6]);
     expect(summary.meta.pillars).toHaveLength(1);
     expect(summary.companies).toHaveLength(1);
-    expect(summary.companies[0].forecast6m?.pulsePred).toBe(31.07);
+    expect(summary.companies[0].forecast12m?.pulsePred).toBe(31.07);
     expect(summary.companies[0].pillars.liquidez).toBe(34.33);
   });
 
@@ -84,9 +84,9 @@ describe('parsePulseSummary', () => {
 
   it('keeps a missing forecast as null', () => {
     const summary = parsePulseSummary({
-      companies: [{ company_id: 'COMP_0001', forecast_6m: null }],
+      companies: [{ company_id: 'COMP_0001', forecast_12m: null }],
     });
-    expect(summary.companies[0].forecast6m).toBeNull();
+    expect(summary.companies[0].forecast12m).toBeNull();
   });
 });
 

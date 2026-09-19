@@ -26,7 +26,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Embat Pulse — salud financiera mensual de la cartera',
   description:
-    'Score PULSE 0-100 con 11 variables en 4 pilares, historia mensual y previsión a seis meses sobre 1.285 pymes.',
+    'Score PULSE 0-100 con 11 variables en 4 pilares, historia mensual y previsión a un año sobre 1.285 pymes.',
 };
 
 /**

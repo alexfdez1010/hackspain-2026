@@ -42,7 +42,7 @@ export function PulseForecastPanel({
     label: formatHorizon(point.horizon),
   }));
   const [horizon, setHorizon] = useState(
-    String(forecast[forecast.length - 1]?.horizon ?? 6),
+    String(forecast[forecast.length - 1]?.horizon ?? 12),
   );
   const point =
     forecast.find((item) => String(item.horizon) === horizon) ??

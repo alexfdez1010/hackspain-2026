@@ -59,7 +59,7 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
     meta.variables,
     company?.series[company.series.length - 1] ?? null,
   );
-  const lastHorizon = meta.horizons[meta.horizons.length - 1] ?? 6;
+  const lastHorizon = meta.horizons[meta.horizons.length - 1] ?? 12;
 
   return (
     <PageShell
@@ -143,13 +143,16 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
       >
         <div className="flex flex-col gap-5">
           <p className="max-w-3xl text-sm text-muted">
-            Un modelo por horizonte predice el cambio del PULSE —el punto de
-            partida es que el score se quede donde está— y dos modelos de
-            cuantiles dibujan la banda p10-p90. Las contribuciones del modelo se
-            reparten entre las {formatNumber(meta.variables.length)} variables
-            más «contexto» y «base», de forma que las partes suman exactamente
-            el cambio previsto; el resultado es el PULSE actual más ese cambio,
-            acotado a 0-100.
+            Un único modelo predice el cambio del PULSE a cualquier horizonte
+            de +1 a +{formatNumber(lastHorizon)} meses: el horizonte es una
+            entrada más, así que ampliar la previsión no exige entrenar modelos
+            nuevos. El punto de partida es que el score se quede donde está, y
+            la banda p10-p90 se calibra con los errores fuera de muestra de cada
+            horizonte. Las contribuciones del modelo se reparten entre las{' '}
+            {formatNumber(meta.variables.length)} variables más «contexto» y
+            «base», de forma que las partes suman exactamente el cambio
+            previsto; el resultado es el PULSE actual más ese cambio, acotado a
+            0-100.
           </p>
           <MethodForecastTable
             horizons={meta.evaluation.forecast}

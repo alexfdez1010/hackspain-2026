@@ -178,7 +178,9 @@ describe('the products left out', () => {
       <DeclinedList declined={company.declined} />,
     );
     expect(markup).toContain('No elegible');
-    expect(markup).toContain('Poco encaje: encaje 15/100');
+    expect(markup).toContain('Poco encaje');
+    expect(markup).toContain('encaje 15/100 · se ofrece desde 40');
+    expect(markup).toContain('chip--danger');
     expect(markup).toContain('por debajo del mínimo de 60');
     expect(markup).toContain('Depósito de excedentes de tesorería');
   });
@@ -195,7 +197,9 @@ describe('a company with no offer', () => {
     expect(markup).toContain('Préstamo a plazo: se desbloquea con un PULSE');
     expect(markup).toContain('Pilar liquidez');
     expect(markup).toContain('mayor ahorro');
-    expect(markup).toContain('Si tu pilar de liquidez subiera');
+    expect(markup).not.toContain('Si tu pilar de liquidez subiera');
+    expect(markup).toContain('objetivo · Neutro (50-65)');
+    expect(markup).toContain('de prima de riesgo');
     expect(markup).not.toContain('NaN');
   });
 

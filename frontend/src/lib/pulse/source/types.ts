@@ -14,7 +14,7 @@ export interface PulseDataSource {
   /** Score metadata plus one row per company. */
   getSummary(): Promise<PulseSummary>;
   /**
-   * One company with its monthly history and its six forecast horizons.
+   * One company with its monthly history and its twelve forecast horizons.
    *
    * @param companyId - Identifier such as `COMP_0001`.
    */

@@ -169,7 +169,7 @@ export function PulseTrajectoryChart({
       </div>
       <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
         <span>Línea continua: PULSE observado.</span>
-        <span>Discontinua: previsión +1 a +6 meses.</span>
+        <span>Discontinua: previsión +1 a +12 meses.</span>
         <span>Área: banda p10-p90.</span>
         <span>Pasa el ratón o el foco por un mes para ver su valor.</span>
       </figcaption>

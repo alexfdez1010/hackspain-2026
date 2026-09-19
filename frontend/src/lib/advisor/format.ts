@@ -106,8 +106,8 @@ export function formatReasonValue(
   if (unit === 'EUR/mes') return `${formatEuroExact(value)}/mes`;
   if (unit === 'tipo anual') return formatRate(value);
   if (unit === 'PULSE') return `${formatNumber(value, 1)} PULSE`;
-  if (unit === 'puntos PULSE a +6 m') {
-    return `${formatSigned(value, 1)} puntos PULSE a +6 m`;
+  if (unit === 'puntos PULSE a +12 m') {
+    return `${formatSigned(value, 1)} puntos PULSE a +12 m`;
   }
   return formatRawValue(value, unit);
 }

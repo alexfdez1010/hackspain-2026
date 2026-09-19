@@ -15,7 +15,7 @@ interface PulseForecastTableProps {
 }
 
 /**
- * Lists the six predicted months with their band and the move they imply.
+ * Lists the twelve predicted months with their band and the move they imply.
  *
  * Nothing in these rows is a measurement: the month column says «previsto» on
  * every line, the band is printed next to the point prediction, and the change

@@ -190,7 +190,7 @@ describe('the method page renders on the server with the real export', () => {
     expect(markup).toContain('Anatomía de los 100 puntos');
     expect(markup).toContain('Del extracto al score');
     expect(markup).toContain('Qué anticipa el score');
-    expect(markup).toContain('Previsión a 6 meses');
+    expect(markup).toContain('Previsión a 12 meses');
     expect(markup).toContain('De la puntuación al producto');
     expect(markup).toContain('Qué no hace PULSE');
     expect(markup).toContain('Ver un PULSE: Atresmedia Labs');

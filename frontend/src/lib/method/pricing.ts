@@ -86,7 +86,7 @@ export function buildPriceSteps(
       label: 'Ajuste por tendencia',
       amount: `${formatSigned(params.trendDeclineBps, 0)} o ${formatSigned(params.trendImproveBps, 0)} pb`,
       detail:
-        'Encarece cuando la previsión a +6 meses cae 5 puntos o más, y abarata cuando sube 5 o más.',
+        'Encarece cuando la previsión a +12 meses cae 5 puntos o más, y abarata cuando sube 5 o más.',
     },
     {
       key: 'total',

@@ -26,13 +26,13 @@ export function monthlyChange(
 }
 
 /**
- * Change the six-month forecast implies against today's score.
+ * Change the one-year forecast implies against today's score.
  *
  * @param row - Portfolio row.
  * @returns The change in points, or `null` when there is no forecast.
  */
 export function forecastDelta(row: PulseCompanyRow): number | null {
-  const predicted = row.forecast6m?.pulsePred ?? null;
+  const predicted = row.forecast12m?.pulsePred ?? null;
   if (row.pulse === null || predicted === null) return null;
   return predicted - row.pulse;
 }
