@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PILLAR_KEYS } from '@/lib/xray/types';
 import { StaticJsonSource } from '@/lib/xray/source/static-json';
+import * as files from '@/lib/xray/source/files';
+import { parseCompany } from '@/lib/xray/parse';
 import {
   deriveCompanyDetail,
   deriveOfferRow,
@@ -87,6 +89,7 @@ describe('derive helpers', () => {
 
 describe('StaticJsonSource', () => {
   const source = new StaticJsonSource();
+  afterEach(() => vi.restoreAllMocks());
 
   it('loads the bundled dataset', async () => {
     expect(await source.health()).toBe(true);
@@ -105,6 +108,20 @@ describe('StaticJsonSource', () => {
   });
 
   it('loads one company with its series and priced line', async () => {
+    // Per-company exports are gitignored; supply the file boundary deterministically.
+    vi.spyOn(files, 'readCompanyFile').mockReturnValue(
+      parseCompany({
+        ...makeCompany(),
+        series: [
+          {
+            month: '2026-08',
+            score: 60,
+            p_stress: 0.2,
+            raw: { inflow: 50_000 },
+          },
+        ],
+      }),
+    );
     const detail = await source.getCompany('COMP_0001');
     expect(detail?.company.series?.length).toBeGreaterThan(0);
     expect(detail?.offerHistory.length).toBeGreaterThan(0);

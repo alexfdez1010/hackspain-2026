@@ -23,22 +23,24 @@
     "test": "bun run test:unit && bun run test:integration && bun run test:e2e",
     "test:unit": "vitest run --dir tests/unit --passWithNoTests",
     "test:integration": "vitest run --dir tests/integration --disable-console-intercept --passWithNoTests",
-    "test:e2e": "bun run build && start-server-and-test start http://localhost:3000 \"bunx playwright test\"",
+    "test:e2e": "ASSISTANT_MODE=mock bun run build && ASSISTANT_MODE=mock start-server-and-test start http://localhost:3000 \"bunx playwright test\"",
     "test:specific": "bunx playwright test -g",
     "playwright": "bunx playwright test --ui"
   },
   "dependencies": {
+    "@ai-sdk/react": "^4.0.110",
     "@heroui/react": "^3.2.4",
     "@heroui/styles": "^3.2.4",
     "@react-aria/i18n": "^3.13.1",
     "@react-aria/ssr": "^3.10.1",
     "@react-aria/utils": "^3.34.1",
+    "ai": "^7.0.107",
     "dotenv": "^17.2.3",
     "next": "^16.0.7",
-    "react": "19.1.0",
+    "react": "~19.1.2",
     "react-aria": "^3.51.0",
     "react-aria-components": "^1.20.0",
-    "react-dom": "19.1.0"
+    "react-dom": "~19.1.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -1,0 +1,112 @@
+/* Character animation is separate from UI layout, which uses Tailwind utilities. */
+.nexo-float {
+  animation: nexo-breathe 5s ease-in-out infinite;
+}
+.nexo-pose {
+  transform-origin: 50% 80%;
+  transition: transform 440ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nexo-expression {
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+.nexo-expression[data-visible='true'] {
+  opacity: 1;
+}
+.nexo-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nexo-blink 6.4s infinite;
+}
+.nexo-gaze {
+  transform: translate(var(--nexo-look-x, 0px), var(--nexo-look-y, 0px));
+  transition: transform 200ms ease-out;
+}
+.nexo[data-mood='listening'] .nexo-pose {
+  transform: rotate(-5deg) translateY(-2px);
+}
+.nexo[data-mood='thinking'] .nexo-pose {
+  transform: rotate(5deg);
+}
+.nexo[data-mood='happy'] .nexo-pose {
+  transform: rotate(-7deg) translateY(-5px);
+}
+.nexo[data-mood='error'] .nexo-pose {
+  transform: rotate(-4deg) translateY(2px);
+}
+.nexo-mouth {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nexo-talk 550ms ease-in-out infinite alternate;
+}
+.nexo-thoughts {
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+.nexo[data-mood='thinking'] .nexo-thoughts {
+  opacity: 1;
+}
+.nexo-thoughts span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: nexo-dot 1.4s ease-in-out infinite;
+}
+.nexo-thoughts span:nth-child(2) {
+  animation-delay: 160ms;
+}
+.nexo-thoughts span:nth-child(3) {
+  animation-delay: 320ms;
+}
+@keyframes nexo-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes nexo-blink {
+  0%,
+  43%,
+  47%,
+  100% {
+    transform: scaleY(1);
+  }
+  45% {
+    transform: scaleY(0.08);
+  }
+}
+@keyframes nexo-talk {
+  from {
+    transform: scaleY(0.5);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes nexo-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nexo *,
+  .nexo-panel,
+  .nexo-launcher {
+    animation: none !important;
+    transition: none !important;
+  }
+  .nexo .nexo-pose,
+  .nexo .nexo-gaze {
+    transform: none;
+  }
+}

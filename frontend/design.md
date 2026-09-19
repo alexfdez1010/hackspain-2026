@@ -116,25 +116,48 @@ llevan etiqueta de severidad además de color.
 ### Motion
 
 - Motion principles: la interfaz no anima datos. Sólo transiciones de estado de
-  control (hover, foco, apertura de popover).
+  control (hover, foco, apertura de popover). Nexo, solicitado como mascota
+  animada, es la excepción: respiración lenta, parpadeo y expresiones según el
+  estado del chat; nunca altera ni anima las cifras de la cartera.
 - Duration scale: 120 ms para hover y color; 200 ms para overlays.
 - Easing curves: las de HeroUI (`ease-out` a la entrada, `ease-in` a la salida).
-- Reduced-motion behavior: se respeta `prefers-reduced-motion`; no hay
-  animación propia que deshabilitar.
+- Reduced-motion behavior: `prefers-reduced-motion` desactiva todos los
+  movimientos y transiciones de Nexo. Las expresiones siguen identificando el
+  estado, acompañado siempre por texto accesible.
 
 ## 4. Component system
 
 Use HeroUI v3 components first. Document any wrapper or new primitive before
 adding it to the codebase.
 
-| Component/pattern | HeroUI primitive                    | Approved variants            | Usage guidance                                                            |
-| ----------------- | ----------------------------------- | ---------------------------- | ------------------------------------------------------------------------- |
-| Button            | `Button`                            | `secondary`, `tertiary`      | Sólo acciones de la propia vista (paginar, invertir orden).               |
-| Link              | `Link` / `next/link`                | por defecto                  | `next/link` para navegación interna; `Link` de HeroUI cuando lleva icono. |
-| Card              | `Card`                              | `secondary`                  | Únicamente la tarjeta de Embat Capital, que agrupa oferta y evolución.    |
-| Form field        | `SearchField`, `Select` + `ListBox` | por defecto                  | Filtros del radar; cada control lleva `aria-label`, no etiqueta visible.  |
-| Feedback          | `Chip`                              | `soft` con `color` semántico | Dirección, régimen, severidad y estado de la línea.                       |
-| Data              | `Table`                             | por defecto                  | Tabla de cartera, dentro de `Table.ScrollContainer`.                      |
+| Component/pattern | HeroUI primitive                    | Approved variants               | Usage guidance                                                            |
+| ----------------- | ----------------------------------- | ------------------------------- | ------------------------------------------------------------------------- |
+| Button            | `Button`                            | `secondary`, `tertiary`         | Sólo acciones de la propia vista (paginar, invertir orden).               |
+| Link              | `Link` / `next/link`                | por defecto                     | `next/link` para navegación interna; `Link` de HeroUI cuando lleva icono. |
+| Card              | `Card`                              | `secondary`                     | Únicamente la tarjeta de Embat Capital, que agrupa oferta y evolución.    |
+| Form field        | `SearchField`, `Select` + `ListBox` | por defecto                     | Filtros del radar; cada control lleva `aria-label`, no etiqueta visible.  |
+| Feedback          | `Chip`                              | `soft` con `color` semántico    | Dirección, régimen, severidad y estado de la línea.                       |
+| Data              | `Table`                             | por defecto                     | Tabla de cartera, dentro de `Table.ScrollContainer`.                      |
+| Asistente Nexo    | `Modal`, `Button`, `TextArea`       | `primary`, `secondary`, `ghost` | Diálogo lateral de 440 px; hoja inferior en móvil.                        |
+
+### Nexo
+
+- Personaje original de cerámica azul hielo, traje azul noche, camisa blanca y
+  corbata azul. La ilustración es una excepción al color exclusivamente semántico:
+  aporta identidad sin representar un score ni un estado financiero.
+- Ilustración transparente y expresiones SVG independientes; estados de reposo,
+  escucha, pensamiento, respuesta, saludo y error. Los componentes son
+  decorativos; el chat comunica sus estados mediante texto.
+- Acceso flotante de HeroUI en la esquina inferior derecha; panel con cabecera,
+  página consultada, conversación y editor fijo. Radios de 24 px para el overlay,
+  12 px para sugerencias y 16 px para el editor. Sombra sólo en el overlay y acceso.
+- Las sugerencias se agrupan en dos columnas; el cuerpo puede desplazarse en
+  alturas pequeñas sin ocultar el cierre ni el editor. Áreas seguras en móvil.
+- Escape cierra, el foco queda dentro del diálogo y vuelve al acceso al cerrar.
+  Enter envía, Shift+Enter añade línea y Ctrl/Cmd+J abre o cierra.
+- Se indica «DEMO» cuando las respuestas son simuladas. Nunca se sustituye un
+  error del proveedor por una respuesta simulada. El historial se mantiene sólo
+  en memoria durante la navegación, sin localStorage ni persistencia en servidor.
 
 Component rules:
 
@@ -193,6 +216,7 @@ patterns.
 | 2026-09-18 | Filtros de Monitor y Capital como enlaces con query string                            | Vistas compartibles durante la demo y funcionales sin JavaScript                               | Equipo Pulse |
 | 2026-09-19 | Observado y previsión en un solo gráfico, con banda p10-p90 y marca del último cierre | Comparar nivel y horizonte en la misma escala; la incertidumbre no puede quedar en otra figura | Equipo Pulse |
 | 2026-09-19 | Variable sin datos como «sin datos» y nunca como cero, junto a la confianza en %      | Un cero es una medición; la ausencia de evidencia cambia la decisión y debe verse              | Equipo Pulse |
+| 2026-09-19 | Nexo como mascota con traje y chat global, con animación decorativa independiente     | Petición de producto; permite explicar datos y consultar IA sin rehacer las vistas existentes  | Equipo Pulse |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce

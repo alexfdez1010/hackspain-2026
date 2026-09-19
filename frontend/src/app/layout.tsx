@@ -2,7 +2,10 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import { SiteNav } from '@/components/layout/site-nav';
+import { AssistantWidget } from '@/components/assistant/assistant-widget';
+import { getAssistantMode } from '@/lib/assistant/config';
 import './globals.css';
+import '@/styles/nexo.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -13,6 +16,9 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
+
+/** Resolve assistant credentials at request time, including keys added after a build. */
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Embat Pulse — salud financiera mensual de la cartera',
@@ -38,6 +44,7 @@ export default function RootLayout({
       >
         <SiteNav />
         {children}
+        <AssistantWidget mode={getAssistantMode()} />
       </body>
     </html>
   );

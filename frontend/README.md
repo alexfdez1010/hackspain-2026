@@ -31,6 +31,35 @@ sin base de datos y sin backend obligatorio.
 bun run dev
 ```
 
+### Nexo, asistente de Pulse
+
+Mascota con traje, expresiones animadas y chat global accesible desde el botón
+flotante o `Ctrl/Cmd+J`. Funciona sin clave con respuestas simuladas, streaming,
+contexto de la página, cancelación, reintento y enlaces a los datos originales.
+La conversación permanece en memoria al navegar y se elimina al recargar.
+
+Para conectar Vercel AI Gateway, define `AI_GATEWAY_API_KEY` en `.env.local`
+y reinicia Next.js. El modelo está fijado como `ASSISTANT_MODEL =
+'google/gemini-3.8-flash'` en `src/lib/assistant/config.ts`. No se configura desde
+el navegador. `ASSISTANT_MODE=mock` fuerza la demo; `ASSISTANT_MODE=gateway`
+exige una clave y devuelve un error claro si falta. Nunca se envía la clave al cliente.
+
+El frontend es propietario de `POST /api/assistant`; no añade endpoints a FastAPI.
+Acepta `{ messages: UIMessage[], pathname: string }` y devuelve SSE con el protocolo
+UI Message Stream de AI SDK 7. Sólo acepta texto y roles `user`/`assistant`, hasta
+20 mensajes, 2.000 caracteres por pregunta y 64 KiB por petición. El transporte
+del navegador limita el historial a los últimos 20 mensajes. La respuesta incluye
+metadata `{ mode: 'mock' | 'gateway', sources: { label, href }[] }`.
+Errores antes del stream: JSON `{ error: string }`, códigos 400/403/413/415/503;
+errores del modelo durante el stream: evento SDK `error` con mensaje seguro.
+El contexto se obtiene de los adaptadores de datos existentes, nunca del HTML
+enviado por el cliente. Ejemplo de invocación y contrato completo en
+[la documentación de Nexo](docs/nexo.md).
+
+Referencias: [Vercel AI Gateway](https://vercel.com/docs/ai-gateway/getting-started),
+[AI SDK Chatbot](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot),
+[Gemini 3.8 Flash](https://vercel.com/ai-gateway/models/gemini-3.8-flash).
+
 ### Fuente de datos
 
 La capa de datos (`src/lib/xray/data.ts`) expone la interfaz `XrayDataSource`
