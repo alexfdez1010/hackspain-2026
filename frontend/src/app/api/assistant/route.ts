@@ -4,7 +4,13 @@ import {
   streamText,
   toUIMessageStream,
 } from 'ai';
-import { getAssistantMode, ASSISTANT_MODEL } from '@/lib/assistant/config';
+import {
+  ASSISTANT_MAX_OUTPUT_TOKENS,
+  ASSISTANT_MODEL,
+  ASSISTANT_PROVIDER_OPTIONS,
+  ASSISTANT_TIMEOUT_MS,
+  getAssistantMode,
+} from '@/lib/assistant/config';
 import {
   assistantInstructions,
   getAssistantContext,
@@ -15,10 +21,10 @@ import {
   readAssistantRequest,
 } from '@/lib/assistant/request';
 import { mockStreamResponse } from '@/lib/assistant/stream';
-import { messageText } from '@/lib/assistant/types';
+import { messageText, type AssistantMetadata } from '@/lib/assistant/types';
 
 export const runtime = 'nodejs';
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 /** Accepts bounded text history; streams mock or Gateway output without exposing secrets. */
 export async function POST(request: Request): Promise<Response> {
@@ -33,7 +39,7 @@ export async function POST(request: Request): Promise<Response> {
     }
     const question = messageText(messages.at(-1)!);
     const context = await getAssistantContext(pathname, question);
-    const metadata = { mode, sources: context.sources };
+    const metadata: AssistantMetadata = { mode, sources: context.sources };
     if (mode === 'mock')
       return mockStreamResponse(
         getMockReply(question, context),
@@ -44,19 +50,24 @@ export async function POST(request: Request): Promise<Response> {
       model: ASSISTANT_MODEL,
       instructions: assistantInstructions(context),
       messages: await convertToModelMessages(messages),
+      providerOptions: ASSISTANT_PROVIDER_OPTIONS,
       abortSignal: AbortSignal.any([
         request.signal,
-        AbortSignal.timeout(25_000),
+        AbortSignal.timeout(ASSISTANT_TIMEOUT_MS),
       ]),
-      maxOutputTokens: 1_000,
-      maxRetries: 1,
+      maxOutputTokens: ASSISTANT_MAX_OUTPUT_TOKENS,
+      maxRetries: 2,
     });
     return createUIMessageStreamResponse({
       stream: toUIMessageStream({
         stream: result.stream,
         sendReasoning: false,
-        messageMetadata: ({ part }) =>
-          part.type === 'start' ? metadata : undefined,
+        messageMetadata: ({ part }): AssistantMetadata | undefined =>
+          part.type === 'start'
+            ? metadata
+            : part.type === 'finish'
+              ? { ...metadata, finishReason: part.finishReason }
+              : undefined,
         onError: () =>
           'No he podido conectar con el modelo. Vuelve a intentarlo.',
       }),

@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { AssistantIcon } from '@/components/assistant/assistant-icon';
 import { MessageContent } from '@/components/assistant/message-content';
-import { NexoMascot } from '@/components/assistant/nexo-mascot';
 import {
   messageText,
   type AssistantMessage as Message,
@@ -23,6 +22,7 @@ export function AssistantMessage({
   const [copyError, setCopyError] = useState(false);
   const text = messageText(message);
   const user = message.role === 'user';
+  const truncated = message.metadata?.finishReason === 'length';
   /** Copies only visible response text; reports denied clipboard access in place. */
   async function copy() {
     try {
@@ -36,51 +36,54 @@ export function AssistantMessage({
   if (!user && !text) return null;
   if (user)
     return (
-      <div className="ml-8 rounded-2xl rounded-br-md bg-accent/9 px-4 py-3 text-[13px] leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+      <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-accent px-4 py-2.5 text-[13px] leading-relaxed break-words whitespace-pre-wrap text-accent-foreground [overflow-wrap:anywhere]">
         <span className="sr-only">Tú: </span>
         {text}
       </div>
     );
   return (
-    <article className="min-w-0" aria-label="Respuesta de Nexo">
-      <div className="mb-2 flex items-center gap-2">
-        <NexoMascot mood={streaming ? 'speaking' : 'idle'} className="size-9" />
-        <span className="text-xs font-semibold">Nexo</span>
-        {message.metadata?.mode === 'mock' ? (
-          <span className="text-[10px] text-muted">DEMO</span>
-        ) : null}
-      </div>
+    <article className="min-w-0 max-w-[94%]" aria-label="Respuesta de Nexo">
       <MessageContent text={text} />
-      {!streaming && text ? (
-        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+      {streaming ? null : (
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
           {message.metadata?.sources.map((source) => (
             <Link
               key={source.href}
               href={source.href}
               onClick={onNavigate}
-              className="inline-flex items-center gap-1 text-[11px] text-muted underline decoration-muted/40 underline-offset-3 hover:text-foreground"
+              className="inline-flex items-center gap-0.5 text-[11px] text-muted underline decoration-muted/40 underline-offset-3 hover:text-foreground"
             >
               {source.label}
               <AssistantIcon name="chevron" className="size-2.5" />
             </Link>
           ))}
+          {message.metadata?.mode === 'mock' ? (
+            <span className="text-[10px] font-medium tracking-wide text-muted">
+              DEMO
+            </span>
+          ) : null}
           <Button
             isIconOnly
             variant="ghost"
             size="sm"
             aria-label={copied ? 'Respuesta copiada' : 'Copiar respuesta'}
             onPress={copy}
-            className="ml-auto size-8 min-w-8 text-muted"
+            className="ml-auto size-7 min-w-7 text-muted"
           >
             <AssistantIcon name={copied ? 'check' : 'copy'} />
           </Button>
+          {truncated ? (
+            <p role="status" className="w-full text-[11px] text-muted">
+              Respuesta recortada por longitud. Pídeme que continúe.
+            </p>
+          ) : null}
           {copyError ? (
             <span role="status" className="w-full text-xs text-danger">
               No se pudo copiar. Puedes seleccionar el texto.
             </span>
           ) : null}
         </div>
-      ) : null}
+      )}
     </article>
   );
 }

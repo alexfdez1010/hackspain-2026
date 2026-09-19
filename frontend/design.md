@@ -148,9 +148,14 @@ adding it to the codebase.
 - Ilustración transparente y expresiones SVG independientes; estados de reposo,
   escucha, pensamiento, respuesta, saludo y error. Los componentes son
   decorativos; el chat comunica sus estados mediante texto.
-- Acceso flotante de HeroUI en la esquina inferior derecha; panel con cabecera,
-  página consultada, conversación y editor fijo. Radios de 24 px para el overlay,
-  12 px para sugerencias y 16 px para el editor. Sombra sólo en el overlay y acceso.
+- Acceso flotante en la esquina inferior derecha: sólo la mascota y un
+  bocadillo «¿Necesitas ayuda? Escríbeme», sin fondo ni chip. Panel con
+  cabecera (mascota, nombre, estado en texto y página consultada), conversación
+  y editor fijo. Radios de 24 px para el overlay, 12 px para sugerencias y 16 px
+  para el editor. Sombra sólo en el overlay y en el bocadillo.
+- Mensajes del usuario en burbuja `accent` alineada a la derecha; respuestas de
+  Nexo a ancho completo sin avatar. La bienvenida usa un lavado radial de
+  `accent` tras la mascota: es la única superficie decorativa del producto.
 - Las sugerencias se agrupan en dos columnas; el cuerpo puede desplazarse en
   alturas pequeñas sin ocultar el cierre ni el editor. Áreas seguras en móvil.
 - Escape cierra, el foco queda dentro del diálogo y vuelve al acceso al cerrar.
@@ -208,15 +213,16 @@ Component rules:
 Record meaningful deviations from HeroUI defaults or previously approved
 patterns.
 
-| Date       | Decision                                                                              | Reason                                                                                         | Owner        |
-| ---------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------ |
-| 2026-09-18 | Gráficos SVG propios en lugar de una librería de charting                             | Formas muy específicas (changepoint, waterfall, curva de evento) y bundle mínimo               | Equipo Pulse |
-| 2026-09-18 | Tema oscuro por `prefers-color-scheme` redefiniendo tokens primitivos                 | HeroUI expone su paleta oscura tras `.dark`; sin conmutador no hay estado que guardar          | Equipo Pulse |
-| 2026-09-18 | Escala de color del score como único helper (`scoreBand`)                             | Un mismo score debe tener el mismo color en tabla, gráfico, mapa de calor y oferta             | Equipo Pulse |
-| 2026-09-18 | Filtros de Monitor y Capital como enlaces con query string                            | Vistas compartibles durante la demo y funcionales sin JavaScript                               | Equipo Pulse |
-| 2026-09-19 | Observado y previsión en un solo gráfico, con banda p10-p90 y marca del último cierre | Comparar nivel y horizonte en la misma escala; la incertidumbre no puede quedar en otra figura | Equipo Pulse |
-| 2026-09-19 | Variable sin datos como «sin datos» y nunca como cero, junto a la confianza en %      | Un cero es una medición; la ausencia de evidencia cambia la decisión y debe verse              | Equipo Pulse |
-| 2026-09-19 | Nexo como mascota con traje y chat global, con animación decorativa independiente     | Petición de producto; permite explicar datos y consultar IA sin rehacer las vistas existentes  | Equipo Pulse |
+| Date       | Decision                                                                                | Reason                                                                                         | Owner        |
+| ---------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------ |
+| 2026-09-18 | Gráficos SVG propios en lugar de una librería de charting                               | Formas muy específicas (changepoint, waterfall, curva de evento) y bundle mínimo               | Equipo Pulse |
+| 2026-09-18 | Tema oscuro por `prefers-color-scheme` redefiniendo tokens primitivos                   | HeroUI expone su paleta oscura tras `.dark`; sin conmutador no hay estado que guardar          | Equipo Pulse |
+| 2026-09-18 | Escala de color del score como único helper (`scoreBand`)                               | Un mismo score debe tener el mismo color en tabla, gráfico, mapa de calor y oferta             | Equipo Pulse |
+| 2026-09-18 | Filtros de Monitor y Capital como enlaces con query string                              | Vistas compartibles durante la demo y funcionales sin JavaScript                               | Equipo Pulse |
+| 2026-09-19 | Observado y previsión en un solo gráfico, con banda p10-p90 y marca del último cierre   | Comparar nivel y horizonte en la misma escala; la incertidumbre no puede quedar en otra figura | Equipo Pulse |
+| 2026-09-19 | Variable sin datos como «sin datos» y nunca como cero, junto a la confianza en %        | Un cero es una medición; la ausencia de evidencia cambia la decisión y debe verse              | Equipo Pulse |
+| 2026-09-19 | Nexo como mascota con traje y chat global, con animación decorativa independiente       | Petición de producto; permite explicar datos y consultar IA sin rehacer las vistas existentes  | Equipo Pulse |
+| 2026-09-19 | Acceso a Nexo reducido a mascota y bocadillo; estado del chat sólo en texto de cabecera | Menos elementos compitiendo con los datos; el personaje ya identifica la función               | Equipo Pulse |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce

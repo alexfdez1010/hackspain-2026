@@ -19,7 +19,7 @@ export function AssistantConversation({ chat }: { chat: AssistantController }) {
   return (
     <div
       ref={container}
-      className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5 sm:px-7"
+      className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 sm:px-6"
       onScroll={(event) => {
         const node = event.currentTarget;
         following.current =
@@ -31,7 +31,7 @@ export function AssistantConversation({ chat }: { chat: AssistantController }) {
         aria-label="Conversación con Nexo"
         aria-live="polite"
         aria-busy={chat.busy}
-        className="space-y-6"
+        className="flex flex-col gap-5"
       >
         {chat.messages.map((message, index) => (
           <AssistantMessage
@@ -45,23 +45,27 @@ export function AssistantConversation({ chat }: { chat: AssistantController }) {
       {waiting ? (
         <div
           role="status"
-          className="mt-4 flex items-center gap-3 text-xs text-muted"
+          className="mt-4 flex items-center gap-2 text-xs text-muted"
         >
-          <NexoMascot mood="thinking" className="size-12" />
+          <NexoMascot mood="thinking" className="size-10" />
           <span>Estoy revisando tu pregunta…</span>
         </div>
       ) : null}
       {chat.error ? (
-        <div role="alert" className="mt-5 rounded-xl bg-danger/7 p-4">
-          <p className="text-sm font-medium">No he podido responder.</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted">
-            Tu pregunta sigue aquí. Puedes volver a intentarlo.
-          </p>
+        <div
+          role="alert"
+          className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-danger/8 px-4 py-3"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">No he podido responder.</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-muted">
+              Tu pregunta sigue aquí.
+            </p>
+          </div>
           <Button
             size="sm"
             variant="secondary"
             onPress={() => void chat.retry()}
-            className="mt-3"
           >
             Reintentar
           </Button>
@@ -70,7 +74,7 @@ export function AssistantConversation({ chat }: { chat: AssistantController }) {
       {chat.stopped ? (
         <div
           role="status"
-          className="mt-4 flex items-center justify-between gap-2 text-xs text-muted"
+          className="mt-3 flex items-center justify-between gap-2 text-xs text-muted"
         >
           <span>Respuesta detenida.</span>
           <Button size="sm" variant="ghost" onPress={() => void chat.retry()}>

@@ -89,6 +89,31 @@ describe('safe streamed text rendering', () => {
     expect(markup).not.toContain('<script>');
     expect(markup).not.toContain('href=');
   });
+  it('renders numbered lists, headings and inline code as plain structure', () => {
+    const markup = renderToStaticMarkup(
+      <MessageContent
+        text={
+          '### Prioridades\n\n1. `COMP_0001` primero\n2. Después **COMP_0002**'
+        }
+      />,
+    );
+    expect(markup).toContain('<ol');
+    expect(markup).toContain('COMP_0001 primero');
+    expect(markup).not.toContain('`');
+    expect(markup).not.toContain('###');
+    expect(markup).toContain('font-semibold');
+  });
+  it('renders a bold caption followed by bullets as text plus a list', () => {
+    const markup = renderToStaticMarkup(
+      <MessageContent
+        text={'**Pilares:**\n* Actividad: 74\n* Cobros: 38 (*débil*)\nCierre.'}
+      />,
+    );
+    expect(markup).toMatch(/<p[^>]*><strong[^>]*>Pilares:<\/strong><\/p><ul/);
+    expect(markup).toContain('<em>débil</em>');
+    expect(markup).toContain('<p class="whitespace-pre-wrap">Cierre.</p>');
+    expect(markup).not.toContain('* Actividad');
+  });
   it('keeps incomplete emphasis visible during streaming', () => {
     expect(
       renderToStaticMarkup(<MessageContent text="**Todavía escribiendo" />),

@@ -33,9 +33,23 @@ externas aun con clave. El modo `gateway` sin clave responde 503.
 El endpoint usa AI SDK 7: `streamText`, `toUIMessageStream` y
 `createUIMessageStreamResponse`. Los mocks emiten el mismo protocolo mediante
 `createUIMessageStream`. La clave se obtiene con el proveedor Gateway por defecto
-del SDK; no hay un cliente Google ni una segunda clave. Máximo 1.000 tokens de
-salida, un reintento y cancelación del modelo a los 25 segundos o al abortar el
-cliente. Se omite el razonamiento interno del stream.
+del SDK; no hay un cliente Google ni una segunda clave. Máximo 10.000 tokens de
+salida, dos reintentos y cancelación del modelo a los 55 segundos
+(`maxDuration = 60`) o al abortar el cliente. Se omite el razonamiento interno
+del stream.
+
+Gemini 3.x razona antes de escribir y ese razonamiento consume el presupuesto
+de salida. Con el nivel por defecto, una respuesta corta gastaba unos 900 de los
+1.000 tokens en razonamiento y se cortaba a mitad de frase
+(`finishReason: length`). Por eso `ASSISTANT_PROVIDER_OPTIONS` fija
+`thinkingConfig.thinkingLevel = 'low'` (el nivel `minimal` no existe para este
+modelo). El servidor añade `finishReason` a la metadata del mensaje al terminar;
+si vale `length`, la interfaz lo indica bajo la respuesta en lugar de dejar el
+corte sin explicar.
+
+Las instrucciones incluyen un glosario construido desde `DIRECTION_LABELS` y
+`REGIME_LABELS` para que el modelo no repita identificadores del dataset
+(`pStress`, `structural_decline`) y use formato numérico español.
 
 Sólo se envían al modelo un resumen de cartera, tres movimientos y, cuando se
 pide, una empresa. La metadata de fuentes son rutas internas construidas por el
@@ -66,6 +80,17 @@ transición y desplazamiento de la mirada. No hay sonidos ni apertura automátic
 Los controles usan HeroUI v3. El diálogo gestiona foco, Escape y retorno al
 disparador. La conversación no fuerza el desplazamiento si se están leyendo
 mensajes anteriores. El editor respeta composición IME y el área segura móvil.
+
+2026-09-19 (revisión): el acceso flotante queda reducido a la mascota y un
+bocadillo «¿Necesitas ayuda? Escríbeme»; el botón de HeroUI se mantiene por
+accesibilidad pero sin fondo. La cabecera del panel reúne mascota, nombre, una
+línea de estado en texto (escucho, reviso, escribo, error, demo) y la página
+consultada; desaparecen el chip «CONECTADO», la fila de estado con mini mascota
+y el pie repetido. Los mensajes del usuario van en burbuja de acento a la
+derecha; las respuestas de Nexo ocupan el ancho sin avatar, con fuentes, marca
+DEMO y copia debajo. El renderizador de Markdown agrupa líneas: un título en
+negrita seguido de viñetas se muestra como texto más lista, y admite listas
+numeradas, cabeceras `#`, cursiva y código en línea como texto plano.
 
 ## Arte original
 
@@ -110,8 +135,12 @@ Documentación oficial consultada: [AI SDK](https://ai-sdk.dev/docs/ai-sdk-ui/ch
 ## Verificación
 
 - `bun run lint-format` y comprobación de tipos de Next.js.
-- `bun run test`: 224 pruebas unitarias, 5 de integración y 7 de navegador,
+- `bun run test`: 226 pruebas unitarias, 5 de integración y 7 de navegador,
   incluida build de producción. Las pruebas E2E fuerzan el modo mock.
+- 2026-09-19: llamada real a Gateway comprobada en local con la clave de
+  `.env`: dos preguntas (cartera y empresa) terminan con `finishReason: stop`
+  en unos 4 segundos; antes del ajuste terminaban con `length` a los 300
+  caracteres.
 - Revisión visual de la bienvenida y la conversación en navegador, escritorio
   1280 × 720 y móvil 390 × 844, temas claro/oscuro y movimiento reducido.
 - Se prueban validación del endpoint, streaming, contexto de ruta, cancelación,

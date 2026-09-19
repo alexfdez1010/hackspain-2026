@@ -38,11 +38,14 @@ flotante o `Ctrl/Cmd+J`. Funciona sin clave con respuestas simuladas, streaming,
 contexto de la página, cancelación, reintento y enlaces a los datos originales.
 La conversación permanece en memoria al navegar y se elimina al recargar.
 
-Para conectar Vercel AI Gateway, define `AI_GATEWAY_API_KEY` en `.env.local`
-y reinicia Next.js. El modelo está fijado como `ASSISTANT_MODEL =
-'google/gemini-3.8-flash'` en `src/lib/assistant/config.ts`. No se configura desde
-el navegador. `ASSISTANT_MODE=mock` fuerza la demo; `ASSISTANT_MODE=gateway`
-exige una clave y devuelve un error claro si falta. Nunca se envía la clave al cliente.
+Para conectar Vercel AI Gateway, define `AI_GATEWAY_API_KEY` en `.env` (o
+`.env.local`) y reinicia Next.js; el servidor la lee al arrancar y el SDK la
+toma del entorno. El modelo está fijado como `ASSISTANT_MODEL =
+'google/gemini-3.8-flash'` en `src/lib/assistant/config.ts`, con razonamiento
+en nivel bajo y 10.000 tokens de salida para que la respuesta llegue completa.
+No se configura desde el navegador. `ASSISTANT_MODE=mock` fuerza la demo;
+`ASSISTANT_MODE=gateway` exige una clave y devuelve un error claro si falta.
+Nunca se envía la clave al cliente.
 
 El frontend es propietario de `POST /api/assistant`; no añade endpoints a FastAPI.
 Acepta `{ messages: UIMessage[], pathname: string }` y devuelve SSE con el protocolo

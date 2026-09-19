@@ -16,53 +16,52 @@ export function AssistantWelcome({
   const suggestions = [
     {
       title: company ? 'Resume esta empresa' : 'Resume mi cartera',
-      detail: company ? 'Score y trayectoria' : 'Los últimos datos',
+      detail: company
+        ? 'Score, régimen y trayectoria'
+        : 'Cifras del último cierre',
     },
     {
       title: '¿Qué empresas revisaría primero?',
-      detail: 'Cambios a seis meses',
+      detail: 'Mayores caídas a seis meses',
     },
-    { title: 'Explícame el score', detail: 'Qué mide el modelo' },
+    { title: 'Explícame el score', detail: 'Qué mide y qué no' },
     {
       title: '¿Cómo puede ayudarme la IA?',
-      detail: 'Ideas para tu análisis',
+      detail: 'Del dato a la explicación',
     },
   ];
   return (
-    <div className="flex flex-col px-6 pt-2 pb-4 sm:px-8">
-      <div className="flex items-center justify-between gap-3 py-2">
-        <div className="max-w-48">
-          <h3 className="text-[26px] leading-tight font-semibold tracking-tight">
+    <div className="flex flex-col px-5 pt-1 pb-4 sm:px-6">
+      <div className="relative flex items-end justify-between gap-3 overflow-hidden rounded-2xl bg-radial-[at_85%_110%] from-accent/18 via-accent/6 to-transparent to-75% px-5 pt-5">
+        <div className="pb-6">
+          <h3 className="text-2xl leading-tight font-semibold tracking-tight sm:text-[26px]">
             Hola, soy Nexo.
           </h3>
-          <p className="mt-3 text-sm leading-relaxed text-muted">
-            Te ayudo a interpretar tus datos.
+          <p className="mt-2 max-w-52 text-sm leading-relaxed text-muted">
+            Te ayudo a interpretar la cartera con los datos de esta app.
           </p>
         </div>
-        <div className="relative flex size-32 shrink-0 items-center justify-center">
-          <div className="absolute inset-3 rounded-full bg-accent/6" />
-          <NexoMascot mood={mood} className="relative size-32" />
-        </div>
+        <NexoMascot mood={mood} className="-mb-2 size-28 sm:size-32" />
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-2">
         {suggestions.map(({ title, detail }) => (
           <Button
             key={title}
             variant="secondary"
             onPress={() => onSelect(title)}
-            className="group relative h-auto min-h-22 w-full items-start justify-start rounded-xl bg-surface-secondary/65 px-3.5 py-3 text-left hover:bg-accent/8"
+            className="group h-auto min-h-20 w-full items-start justify-start rounded-xl bg-surface-secondary/70 px-3.5 py-3 text-left [--button-bg-hover:var(--accent-soft)] [--button-bg-pressed:var(--accent-soft)]"
           >
-            <span className="min-w-0 whitespace-normal">
-              <span className="block pr-2 text-xs leading-snug font-medium text-foreground">
+            <span className="flex min-w-0 flex-1 flex-col gap-1.5 whitespace-normal">
+              <span className="text-xs leading-snug font-medium text-foreground">
                 {title}
               </span>
-              <span className="mt-1.5 block pr-2 text-[10px] leading-relaxed font-normal text-muted">
+              <span className="text-[11px] leading-snug font-normal text-muted">
                 {detail}
               </span>
             </span>
             <AssistantIcon
               name="chevron"
-              className="absolute right-2 bottom-3 size-3 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
+              className="mt-0.5 size-3 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
             />
           </Button>
         ))}

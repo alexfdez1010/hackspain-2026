@@ -13,6 +13,8 @@ export interface AssistantSource {
 export interface AssistantMetadata {
   mode: AssistantMode;
   sources: AssistantSource[];
+  /** Set by the server when the model finishes; `length` means the reply was cut. */
+  finishReason?: string;
 }
 
 export type AssistantMessage = UIMessage<AssistantMetadata>;

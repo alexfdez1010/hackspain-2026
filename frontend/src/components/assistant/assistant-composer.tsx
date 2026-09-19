@@ -21,14 +21,14 @@ export function AssistantComposer({
     input.current?.focus();
   }
   return (
-    <div className="shrink-0 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
+    <div className="shrink-0 px-4 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-5">
       <form
         aria-label="Preguntar a Nexo"
         onSubmit={(event) => {
           event.preventDefault();
           submit();
         }}
-        className="rounded-2xl bg-surface-secondary/75 p-2 ring-1 ring-border/60 transition-shadow focus-within:ring-2 focus-within:ring-accent/50"
+        className="nexo-composer flex items-end gap-2 rounded-2xl bg-surface-secondary/80 p-1.5 pl-3 ring-2 ring-transparent transition-shadow focus-within:ring-accent/60"
       >
         <TextArea
           ref={input}
@@ -40,8 +40,8 @@ export function AssistantComposer({
           onBlur={() => onFocusChange(false)}
           placeholder="Pregúntame sobre tu cartera…"
           maxLength={MAX_PROMPT_LENGTH}
-          rows={2}
-          className="max-h-32 min-h-15 w-full resize-none rounded-lg border-0 bg-transparent px-2 py-2 text-base shadow-none focus:outline-none sm:text-sm"
+          rows={1}
+          className="max-h-32 min-h-9 flex-1 resize-none rounded-none border-0 bg-transparent px-0 py-2 text-base shadow-none field-sizing-content focus:outline-none sm:text-sm"
           onKeyDown={(event) => {
             if (
               event.key === 'Enter' &&
@@ -53,41 +53,41 @@ export function AssistantComposer({
             }
           }}
         />
-        <div className="flex items-center justify-between px-1 pb-0.5">
-          <span id="nexo-composer-hint" className="text-[10px] text-muted">
-            {chat.input.length > 1800
-              ? `${chat.input.length}/${MAX_PROMPT_LENGTH}`
-              : 'Enter para enviar · ⇧ Enter nueva línea'}
-          </span>
-          {chat.busy ? (
-            <Button
-              isIconOnly
-              size="sm"
-              variant="secondary"
-              aria-label="Detener respuesta"
-              onPress={() => void chat.stop()}
-              className="size-9 rounded-xl"
-            >
-              <AssistantIcon name="stop" />
-            </Button>
-          ) : (
-            <Button
-              isIconOnly
-              type="submit"
-              size="sm"
-              aria-label="Enviar pregunta"
-              isDisabled={!chat.input.trim()}
-              className="size-9 rounded-xl"
-            >
-              <AssistantIcon name="arrow" className="size-4.5" />
-            </Button>
-          )}
-        </div>
+        {chat.busy ? (
+          <Button
+            isIconOnly
+            size="sm"
+            variant="secondary"
+            aria-label="Detener respuesta"
+            onPress={() => void chat.stop()}
+            className="size-9 shrink-0 rounded-xl"
+          >
+            <AssistantIcon name="stop" />
+          </Button>
+        ) : (
+          <Button
+            isIconOnly
+            type="submit"
+            size="sm"
+            aria-label="Enviar pregunta"
+            isDisabled={!chat.input.trim()}
+            className="size-9 shrink-0 rounded-xl"
+          >
+            <AssistantIcon name="arrow" className="size-4.5" />
+          </Button>
+        )}
       </form>
-      <p className="mt-2.5 text-center text-[10px] leading-relaxed text-muted">
-        {mode === 'mock'
-          ? 'Modo demo · Respuestas simuladas con datos de la app.'
-          : 'Nexo puede equivocarse. Contrasta los datos de origen.'}
+      <p className="mt-2 flex justify-between gap-3 px-1 text-[10px] leading-relaxed text-muted">
+        <span id="nexo-composer-hint" className="max-sm:sr-only">
+          Enter envía · ⇧ Enter nueva línea
+        </span>
+        <span>
+          {chat.input.length > 1800
+            ? `${chat.input.length}/${MAX_PROMPT_LENGTH}`
+            : mode === 'gateway'
+              ? 'Puede equivocarse: contrasta con los datos.'
+              : null}
+        </span>
       </p>
     </div>
   );

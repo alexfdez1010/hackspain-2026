@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { streamText } from 'ai';
+import { streamText, type TextStreamPart, type ToolSet } from 'ai';
 import { POST } from '@/app/api/assistant/route';
 import { getAssistantContext } from '@/lib/assistant/context';
 
@@ -76,21 +76,21 @@ describe('assistant streaming endpoint', () => {
     expect(response.status).toBe(503);
     expect(getAssistantContext).not.toHaveBeenCalled();
   });
-  it('passes the fixed Gemini model, trusted context, bounded tokens and abort signal to AI SDK', async () => {
+  it('passes the fixed Gemini model, low thinking, bounded tokens and abort signal to AI SDK', async () => {
     vi.stubEnv('ASSISTANT_MODE', 'gateway');
     vi.stubEnv('AI_GATEWAY_API_KEY', 'not-a-real-key');
     vi.mocked(getAssistantContext).mockResolvedValue(context);
+    const chunks = [
+      { type: 'start' },
+      { type: 'text-start', id: 't' },
+      { type: 'text-delta', id: 't', text: 'Respuesta de prueba' },
+      { type: 'text-end', id: 't' },
+      { type: 'finish', finishReason: 'length' },
+    ] as unknown as TextStreamPart<ToolSet>[];
     vi.mocked(streamText).mockReturnValue({
-      stream: new ReadableStream({
+      stream: new ReadableStream<TextStreamPart<ToolSet>>({
         start(controller) {
-          controller.enqueue({ type: 'start' });
-          controller.enqueue({ type: 'text-start', id: 't' });
-          controller.enqueue({
-            type: 'text-delta',
-            id: 't',
-            text: 'Respuesta de prueba',
-          });
-          controller.enqueue({ type: 'text-end', id: 't' });
+          for (const chunk of chunks) controller.enqueue(chunk);
           controller.close();
         },
       }),
@@ -101,11 +101,15 @@ describe('assistant streaming endpoint', () => {
       expect.objectContaining({
         model: 'google/gemini-3.8-flash',
         instructions: expect.stringContaining('Nexo'),
-        maxOutputTokens: 1000,
+        maxOutputTokens: 10000,
+        providerOptions: {
+          google: { thinkingConfig: { thinkingLevel: 'low' } },
+        },
         abortSignal: expect.any(AbortSignal),
       }),
     );
     expect(events).toContain('"mode":"gateway"');
+    expect(events).toContain('"finishReason":"length"');
     expect(events).toContain('Respuesta de prueba');
     expect(events).not.toContain('not-a-real-key');
   });
