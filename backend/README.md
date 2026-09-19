@@ -439,6 +439,7 @@ docker compose -f compose.api.yml up --build
 ```
 
 Interactive docs: `/docs` (Swagger) and `/openapi.json`.
+Full endpoint reference (params, request/response payloads, errors): [`API.md`](./API.md).
 
 ### Configuration
 
