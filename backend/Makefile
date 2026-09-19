@@ -59,3 +59,17 @@ api-docker:
 	@echo "Building and running $(API_IMAGE)..."
 	docker build -t $(API_IMAGE) .
 	docker run --rm -p $(API_PORT):8000 -e PORT=8000 $(API_IMAGE)
+
+pulse-build:
+	uv run python -m ml_service.pulse.cli build
+
+pulse-fit:
+	uv run python -m ml_service.pulse.cli fit
+
+pulse-evaluate:
+	uv run python -m ml_service.pulse.cli evaluate
+
+pulse-score:
+	uv run python -m ml_service.pulse.cli score --raw-dir $(RAW) $(if $(OUT),--out $(OUT),)
+
+pulse-all: pulse-build pulse-fit pulse-evaluate

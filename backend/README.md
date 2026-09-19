@@ -573,3 +573,88 @@ the image, so the container serves the demo with no volumes. `.dockerignore`
 keeps `data/raw` and the parquet cache out. `fly.toml` is a ready Fly.io config
 (health check on `/health`, `PORT=8080`); `compose.api.yml` runs the same image
 locally.
+
+---
+
+# PULSE: Payment, Underwriting, Liquidity & Solvency Estimate
+
+A second, fully transparent 0-100 company health score built **from scratch** in
+`src/ml_service/pulse/` with 11 variables and fixed percentage weights. It does
+not reuse the X-Ray feature pipeline: it has its own loader, cleaning layer and
+feature code, because the raw dataset is deliberately corrupted (currencies,
+sentinel amounts, impossible dates, duplicates).
+
+```bash
+uv run python -m ml_service.pulse.cli build     # clean + panel -> data/pulse/{panel.parquet,cleaning_report.md}
+uv run python -m ml_service.pulse.cli fit       # freeze normaliser + calibration -> data/pulse/models/
+uv run python -m ml_service.pulse.cli evaluate  # self-supervised anticipation check -> data/pulse/evaluation.json
+uv run python -m ml_service.pulse.cli score --raw-dir /path/to/hidden [--out FILE]   # hidden test
+```
+
+## The 11 variables and their weights
+
+| # | Variable | Pillar | Weight | Components (direction) | Source |
+|---|---|---|---|---|---|
+| 2 | Mínimo intramensual de caja | liquidez | 14 | lowest daily consolidated cash / avg monthly outflow (+), clipped ±12 | transactions + balances |
+| 1 | Días de caja | liquidez | 12 | month-end cash / (90-day operating outflow / 90) (+), capped 365 | transactions + balances |
+| 3 | Utilización de líneas | deuda | 12 | drawn / limit (−), and its Δ3m (−) | debt_products + line transactions |
+| 8 | Tramo +90 días | cobro | 12 | open receivables > 90 d past due / open receivables (−), Δ3m (−) | invoices (AR) |
+| 12 | Exposición a contrapartes | cobro | 10 | Σ billing share × Δ3m of that customer's on-time share (+) | invoices (AR) |
+| 9 | Caída del cliente top | cobro | 8 | billing growth to the top-12m customer, 3m vs previous 3m (+), clipped ±1 | invoices (AR) |
+| 10 | Vencimientos 6 m ÷ caja | deuda | 8 | 2 × trailing-3m debt service / month-end cash (−), 0 = best, capped 12 | transactions (debt_repayment, interest_charge) |
+| 4 | Aceleración de utilización | deuda | 6 | Δ3m of the utilisation Δ3m (−) | as #3 |
+| 5 | DPO real y su Δ | pago | 6 | payment − issuance on settled supplier invoices, value-weighted 3m (−), Δ3m (−) | invoices (AP) |
+| 6 | Plazo concedido por proveedores | pago | 6 | due − issuance on supplier invoices, value-weighted 6m (+), Δ6m (+) | invoices (AP) |
+| 7 | DSO real | cobro | 6 | payment − issuance on settled customer invoices, value-weighted 3m (−) | invoices (AR) |
+
+Pillars: liquidez 26, deuda 26, cobro 36, pago 12. `variables.py` is the single
+source of truth; the weights must sum to 100 (asserted at import).
+
+**Scoring.** Every component is mapped to its empirical percentile on the
+training panel (1,001-point grid, mid-rank ties, sign-aligned so higher is
+healthier; an exact 0 on #10 is the optimum). A variable is the mean of its known
+components; `pulse_raw` is the weighted mean of the known variables with the
+weights renormalised, so an unknown variable neither helps nor hurts. `confidence`
+is the share of the 100 points backed by data. `pulse` is the percentile of
+`pulse_raw` in the training population (frozen grid), so it spans 0-100 and a
+PULSE of 80 reads "healthier than 80 % of the fitted portfolio". `contrib_<key>`
+splits `pulse_raw` into the points each variable is responsible for. Everything
+after `build` is per company, so a hidden folder is scored exactly as the
+training one.
+
+## Cleaning rules (all logged in `data/pulse/cleaning_report.md`)
+
+| Trap | Rule |
+|---|---|
+| Currencies (44 of them; `exchange_rate` is 1.0 for 43 % of USD rows, has zeros and 6500s) | Every amount is divided by a **fixed FX table** (`fx.py`, units per EUR). Currency = product's, else company's, else EUR. `exchange_rate` columns are ignored. |
+| Duplicated transactions | Exact duplicates on (company, product, date, amount, description) dropped: 112,346 rows (4.4 %). |
+| Sentinel / absurd amounts | Transaction or invoice dropped when \|amount\| > 20 × the company's own p99 **and** > 1 M EUR (178 tx from 39 companies, 77 invoices worth 1.2 bn), or > 1 bn EUR outright. |
+| Balance snapshots (99,999,990,000 EUR, −1 bn) | Cash snapshot discarded (account treated as unanchored) when \|balance\| > 20 × the company's monthly gross flow and > 1 M EUR: 11 accounts. Unanchored accounts are floored so their lowest day is zero (conservative). |
+| `value_date` from 2022 to 2099 | Booking `date` is the only date used; `value_date` is replaced when > 30 days away. |
+| Invoice dates seeded with corruption | `due_date` kept only if 0 ≤ due − issuance ≤ 365 d (16,356 nulled). `payment_date` trusted only when `status = paid`, pending ≈ 0 and 0 ≤ payment − issuance ≤ 730 d (185 k "overdue" rows carry the due date as payment date; 30,552 settled rows had impossible dates). |
+| Document types | Only `invoice` and `invoiceGroup` (123,713 payment documents, notes, delivery notes dropped); `cancel` and zero amounts dropped. |
+| Sparse `counterparty_id` in transactions (90 % empty) | Customer variables (#7, #8, #9, #12) use invoice counterparties only (98.5 % populated). |
+| Pending / null status | Pending transactions dropped; null status kept (4 companies only have null-status rows). |
+
+Coverage after cleaning: 1,286 companies with transactions, 784 with invoices
+(718 with receivables). Median `confidence` is 0.52: a company without ERP data
+has only #1, #2 and #10 (34 points of evidence); one with a credit line and ERP
+reaches 1.0.
+
+**Counterparty network.** In this dataset a customer ID never appears under two
+companies (1 shared ID out of 55,052), so #12 collapses to the company's own
+customer-level deterioration. `features/network.py` already pools every company's
+invoices per counterparty; set `MIN_COMPANIES = 2` on real Embat data to make it
+a true network signal.
+
+## Evaluation (`data/pulse/evaluation.json`)
+
+Stress month = lowest daily cash below zero or a returned direct debit narrative;
+label = ≥ 2 stress months in the next 6 (rate 22.4 % over 14,521 company-months
+with an observable future). AUROC of PULSE for "no stress ahead": **0.823**
+(0.810 on months ≥ 2025-09; 0.829 in a company's first three months). Restricted
+to companies **not** stressed today, 0.642 — the honest anticipation number.
+By variable: #2 0.870, #1 0.859, #10 0.633; every ERP-side variable (#5-#9,
+#12) and the credit-line pair sit at 0.47-0.51, i.e. in this synthetic dataset
+they carry no signal about future bank stress. The 36 points on *cobro* and 12
+on *pago* are therefore a design choice, not something these data support.
