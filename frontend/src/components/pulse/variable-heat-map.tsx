@@ -4,19 +4,22 @@ import { PulseHeatRows } from '@/components/pulse/heat-rows';
 import { UNKNOWN_TEXT } from '@/lib/pulse/format';
 import { stackHeatMap, type PulseHeatMap } from '@/lib/pulse/heat-map';
 import { formatNumber } from '@/lib/format';
+import { companyVariableRoute } from '@/lib/routes';
 import { SCORE_BANDS } from '@/lib/score';
 
 interface PulseVariableHeatMapProps {
   map: PulseHeatMap;
+  /** Company whose variable pages the cells link to; without it they are inert. */
+  companyId?: string;
 }
 
 /**
  * The four pillar columns with their score on top of the map.
  *
- * @param props - The coloured layout of one month.
+ * @param props - The coloured layout of one month and the company in context.
  * @returns The pillar header and the map with its info buttons.
  */
-function HeatColumns({ map }: PulseVariableHeatMapProps) {
+function HeatColumns({ map, companyId }: PulseVariableHeatMapProps) {
   const gap =
     map.groups.length > 1
       ? map.groups[1].x - (map.groups[0].x + map.groups[0].width)
@@ -56,7 +59,15 @@ function HeatColumns({ map }: PulseVariableHeatMapProps) {
           aria-label="Score de cada variable en el último cierre"
         >
           {map.cells.map((cell) => (
-            <HeatCell key={cell.key} cell={cell} />
+            <HeatCell
+              key={cell.key}
+              cell={cell}
+              href={
+                companyId
+                  ? companyVariableRoute(companyId, cell.key)
+                  : undefined
+              }
+            />
           ))}
         </svg>
         <VariableInfoLayer
@@ -76,19 +87,23 @@ function HeatColumns({ map }: PulseVariableHeatMapProps) {
  *
  * Wide screens get the four pillars as columns; under `md` the same cells are
  * laid out as one row per pillar, so the map fits a phone without scrolling
- * sideways. Every cell carries an info button that explains the variable.
+ * sideways. Every cell carries an info button that explains the variable and,
+ * with a company in context, opens the page of that variable.
  *
- * @param props - The coloured layout of one month.
+ * @param props - The coloured layout of one month and the company in context.
  * @returns The map in both layouts and the legend.
  */
-export function PulseVariableHeatMap({ map }: PulseVariableHeatMapProps) {
+export function PulseVariableHeatMap({
+  map,
+  companyId,
+}: PulseVariableHeatMapProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="hidden overflow-x-auto md:block">
-        <HeatColumns map={map} />
+        <HeatColumns map={map} companyId={companyId} />
       </div>
       <div className="md:hidden">
-        <PulseHeatRows map={stackHeatMap(map)} />
+        <PulseHeatRows map={stackHeatMap(map)} companyId={companyId} />
       </div>
       <ul className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
         {SCORE_BANDS.map((band) => (

@@ -41,11 +41,27 @@ describe('assistant request boundary', () => {
     });
   });
   it.each([
+    '/company/COMP_0001',
+    '/company/COMP_0001/recommendations',
+    '/company/COMP_0001/variable/cash_days',
+    '/company/COMP_0001/variable/ar90',
+    '/method',
+    '/',
+  ])('keeps a known application path: %s', (pathname) => {
+    expect(
+      parseAssistantRequest({ pathname, messages: [message] }).pathname,
+    ).toBe(pathname);
+  });
+  it.each([
     'https://evil.test',
     '//evil.test',
     '/company/../../secret',
     '/unknown',
     '/pulse/COMP_0001',
+    '/company/COMP_0001/variable/../secret',
+    '/company/COMP_0001/variable/CASH_DAYS',
+    '/company/COMP_0001/variable/',
+    '/company/COMP_0001/variable/cash_days/raw',
   ])('does not use an untrusted path: %s', (pathname) => {
     expect(
       parseAssistantRequest({ pathname, messages: [message] }).pathname,
@@ -140,6 +156,9 @@ describe('assistant request boundary', () => {
     expect(getPageLabel('/company/COMP_0001')).toBe('PULSE · Atresmedia Labs');
     expect(getPageLabel('/company/COMP_0001/recommendations')).toBe(
       'Recomendaciones · Atresmedia Labs',
+    );
+    expect(getPageLabel('/company/COMP_0001/variable/cash_days')).toBe(
+      'Variable cash_days · Atresmedia Labs',
     );
     expect(getPageLabel('/method')).toBe('Método');
     expect(getPageLabel('/unknown')).toBe('Embat Pulse');

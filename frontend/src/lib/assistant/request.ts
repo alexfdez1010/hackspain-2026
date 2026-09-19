@@ -6,7 +6,9 @@ import {
 } from '@/lib/assistant/types';
 
 const MAX_BODY_BYTES = 65_536;
-const KNOWN_PATH = /^\/(?:company\/COMP_\d{4}(?:\/recommendations)?|method)?$/;
+/** The routes the assistant may be told it is on; mirrors `VARIABLE_KEY_PATTERN`. */
+const KNOWN_PATH =
+  /^\/(?:company\/COMP_\d{4}(?:\/recommendations|\/variable\/[a-z][a-z0-9_]{0,31})?|method)?$/;
 
 /** A safe public error; no provider details are exposed to the client. */
 export class AssistantRequestError extends Error {

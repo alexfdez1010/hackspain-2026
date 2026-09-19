@@ -104,11 +104,11 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
         title="Mapa de calor"
         note={
           lastPoint
-            ? `Cierre de ${formatMonth(lastPoint.month)}; el área es el peso y el color, el score de cada variable`
+            ? `Cierre de ${formatMonth(lastPoint.month)}; el área es el peso y el color, el score de cada variable; pulsa una variable para abrir su página`
             : 'Sin mes observado'
         }
       >
-        <PulseVariableHeatMap map={heatMap} />
+        <PulseVariableHeatMap map={heatMap} companyId={company.companyId} />
       </Section>
 
       <Section

@@ -10,6 +10,18 @@ const COMPANY_SUFFIXES: readonly string[] = [
   'Group',
 ];
 
+/** Variants that multiply the catalogue for customers and suppliers. */
+const COUNTERPARTY_SUFFIXES: readonly string[] = [
+  'S.L.',
+  'S.A.',
+  'Servicios',
+  'Distribución',
+  'Logística',
+  'Comercial',
+  'Industrial',
+  'Ingeniería',
+];
+
 /** Variants that multiply the group catalogue. */
 const GROUP_SUFFIXES: readonly string[] = ['', 'Holdings', 'International'];
 
@@ -95,4 +107,18 @@ export function companyName(companyId: string): string {
  */
 export function groupName(groupId: string): string {
   return hashedName(groupId, GROUP_NAMES, GROUP_SUFFIXES);
+}
+
+/**
+ * Names a customer or supplier after a famous company, deterministically.
+ *
+ * Counterparty identifiers are `COUNTERPARTY_xxxxx`, so the same hash serves
+ * them; the suffixes are trade forms rather than regions, so a counterparty
+ * never reads as one of the companies of the export.
+ *
+ * @param counterpartyId - Identifier such as `COUNTERPARTY_47797`.
+ * @returns A readable trade name, or the identifier when it is blank.
+ */
+export function counterpartyName(counterpartyId: string): string {
+  return hashedName(counterpartyId, COMPANY_NAMES, COUNTERPARTY_SUFFIXES);
 }

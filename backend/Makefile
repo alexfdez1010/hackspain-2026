@@ -62,6 +62,9 @@ pulse-forecast-evaluate:
 pulse-forecast:
 	uv run python -m ml_service.pulse.forecast.cli predict $(if $(RAW),--raw-dir $(RAW),) $(if $(OUT),--out $(OUT),)
 
+pulse-export-details:
+	uv run python -m ml_service.pulse.export_details
+
 # --- PULSE Advisor (product recommendations) ------------------------------
 pulse-reco-fit:
 	uv run python -m ml_service.pulse.recommend.cli fit

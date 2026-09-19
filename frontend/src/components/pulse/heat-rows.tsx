@@ -3,6 +3,7 @@ import { HeatCell } from '@/components/pulse/heat-cell';
 import { UNKNOWN_TEXT } from '@/lib/pulse/format';
 import type { PulseHeatMap } from '@/lib/pulse/heat-map';
 import { formatNumber } from '@/lib/format';
+import { companyVariableRoute } from '@/lib/routes';
 
 /** Font size of the row headings, in viewBox units. */
 const HEADING_SIZE = 12;
@@ -12,6 +13,8 @@ const HEADING_GAP = 8;
 interface PulseHeatRowsProps {
   /** The heat map already laid out as rows. */
   map: PulseHeatMap;
+  /** Company whose variable pages the cells link to; without it they are inert. */
+  companyId?: string;
 }
 
 /**
@@ -21,10 +24,10 @@ interface PulseHeatRowsProps {
  * The heading of every row names the pillar and its score inside the SVG, so
  * it scales with the cells and stays aligned with them at any width.
  *
- * @param props - The stacked layout of one month.
+ * @param props - The stacked layout of one month and the company in context.
  * @returns The rows with an info button per cell.
  */
-export function PulseHeatRows({ map }: PulseHeatRowsProps) {
+export function PulseHeatRows({ map, companyId }: PulseHeatRowsProps) {
   return (
     <div className="relative max-w-sm">
       <svg
@@ -58,7 +61,13 @@ export function PulseHeatRows({ map }: PulseHeatRowsProps) {
           </g>
         ))}
         {map.cells.map((cell) => (
-          <HeatCell key={cell.key} cell={cell} />
+          <HeatCell
+            key={cell.key}
+            cell={cell}
+            href={
+              companyId ? companyVariableRoute(companyId, cell.key) : undefined
+            }
+          />
         ))}
       </svg>
       <VariableInfoLayer

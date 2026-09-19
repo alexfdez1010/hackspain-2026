@@ -13,6 +13,14 @@ const NARROW_WIDTH = 120;
 const PAD = 8;
 /** Height of the solid band strip at the bottom of a cell. */
 const STRIP = 5;
+/** Deepens the tint of a linked cell while the pointer is over it. */
+const HOVER_CLASS = 'transition-[fill-opacity] group-hover:[fill-opacity:0.45]';
+
+interface HeatCellProps {
+  cell: PulseHeatCell;
+  /** Route of the variable page; without it the cell is not a link. */
+  href?: string;
+}
 
 /**
  * Splits the label of a cell into the lines its box can hold.
@@ -35,20 +43,35 @@ function labelLines(cell: PulseHeatCell): { size: number; lines: string[] } {
 }
 
 /**
- * Draws one variable: a cell tinted with the colour of its band, a solid
- * strip of that colour along the bottom, and the label with the score.
+ * Writes the sentence a screen reader hears on the cell itself.
  *
- * A variable without evidence keeps a neutral surface and a dashed outline,
- * so «sin datos» never looks like a low score. The geometry comes from the
- * cell, so the same drawing serves the column and the row layouts.
+ * @param cell - Cell being drawn.
+ * @returns The score, its band and the weight of the variable.
+ */
+function cellTitle(cell: PulseHeatCell): string {
+  const scoreText = cell.known ? formatNumber(cell.score, 0) : UNKNOWN_TEXT;
+  const reading = cell.known
+    ? `${scoreText} de 100, ${cell.band.label}`
+    : UNKNOWN_TEXT;
+  return `${cell.label}: ${reading}; ${formatNumber(cell.weight)} puntos del pilar ${cell.pillarLabel}`;
+}
+
+/**
+ * Draws the rectangles and the text of one cell.
  *
- * @param props - The cell to draw.
+ * @param props - The cell and whether it reacts to the pointer.
  * @returns The group of SVG elements of one cell.
  */
-export function HeatCell({ cell }: { cell: PulseHeatCell }) {
+function CellBody({
+  cell,
+  interactive,
+}: {
+  cell: PulseHeatCell;
+  interactive: boolean;
+}) {
   const { size, lines } = labelLines(cell);
   const scoreText = cell.known ? formatNumber(cell.score, 0) : UNKNOWN_TEXT;
-  const title = `${cell.label}: ${cell.known ? `${scoreText} de 100, ${cell.band.label}` : UNKNOWN_TEXT}; ${formatNumber(cell.weight)} puntos del pilar ${cell.pillarLabel}`;
+  const title = cellTitle(cell);
   return (
     <g role="img" aria-label={title}>
       <title>{title}</title>
@@ -63,6 +86,7 @@ export function HeatCell({ cell }: { cell: PulseHeatCell }) {
         stroke={cell.known ? 'none' : 'var(--muted)'}
         strokeDasharray={cell.known ? undefined : '4 3'}
         strokeOpacity={0.5}
+        className={interactive && cell.known ? HOVER_CLASS : undefined}
       />
       {cell.known && (
         <rect
@@ -94,5 +118,34 @@ export function HeatCell({ cell }: { cell: PulseHeatCell }) {
         {scoreText}
       </text>
     </g>
+  );
+}
+
+/**
+ * Draws one variable: a cell tinted with the colour of its band, a solid
+ * strip of that colour along the bottom, and the label with the score.
+ *
+ * A variable without evidence keeps a neutral surface and a dashed outline,
+ * so «sin datos» never looks like a low score. The geometry comes from the
+ * cell, so the same drawing serves the column and the row layouts.
+ *
+ * With a `href` the whole cell becomes a plain SVG anchor to the page of the
+ * variable — `next/link` cannot be used inside an SVG — and deepens its tint
+ * under the pointer. The info button laid over the cell stays on top and
+ * keeps working.
+ *
+ * @param props - The cell to draw and, optionally, the page it opens.
+ * @returns The cell, wrapped in a link when it has a destination.
+ */
+export function HeatCell({ cell, href }: HeatCellProps) {
+  if (!href) return <CellBody cell={cell} interactive={false} />;
+  return (
+    <a
+      href={href}
+      className="group cursor-pointer"
+      aria-label={`Abrir la página de ${cell.label}`}
+    >
+      <CellBody cell={cell} interactive />
+    </a>
   );
 }

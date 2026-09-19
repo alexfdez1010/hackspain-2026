@@ -1,7 +1,7 @@
 import type { UIMessage } from 'ai';
 
 import { companyName } from '@/lib/company/names';
-import { companyIdFromPath } from '@/lib/routes';
+import { companyIdFromPath, variableKeyFromPath } from '@/lib/routes';
 
 /** The server selects the provider; the browser never receives credentials. */
 export type AssistantMode = 'mock' | 'gateway';
@@ -40,6 +40,8 @@ export function getPageLabel(pathname: string): string {
   const companyId = companyIdFromPath(pathname);
   if (companyId) {
     const name = companyName(companyId);
+    const variableKey = variableKeyFromPath(pathname);
+    if (variableKey) return `Variable ${variableKey} · ${name}`;
     return pathname.endsWith('/recommendations')
       ? `Recomendaciones · ${name}`
       : `PULSE · ${name}`;

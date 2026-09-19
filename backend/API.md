@@ -17,6 +17,7 @@ Para el detalle de los modelos (PULSE, Advisor) ver [`README.md`](./README.md).
 | Meta | GET | [`/health`](#get-health) | Estado del servicio |
 | PULSE | GET | [`/api/pulse/summary`](#get-apipulsesummary) | Definición del score + PULSE actual de cada empresa |
 | PULSE | GET | [`/api/pulse/companies/{company_id}`](#get-apipulsecompaniescompany_id) | Serie mensual PULSE + forecast 6 meses |
+| PULSE | GET | [`/api/pulse/companies/{company_id}/details`](#get-apipulsecompaniescompany_iddetails) | Detalle por variable: contrapartes, cuentas, líneas y aging |
 | Advisor | GET | [`/api/pulse/recommendations/catalogue`](#get-apipulserecommendationscatalogue) | Catálogo de productos y parámetros de pricing |
 | Advisor | GET | [`/api/pulse/recommendations`](#get-apipulserecommendations) | Recomendación top de cada empresa |
 | Advisor | GET | [`/api/pulse/recommendations/{company_id}`](#get-apipulserecommendationscompany_id) | Recomendación completa y explicable |
@@ -162,6 +163,52 @@ Historia mensual del PULSE de una empresa, con el desglose por variable y contri
 ```
 
 **Errores:** `404` si no existe `pulse/web/companies/<id>.json`.
+
+---
+
+### `GET /api/pulse/companies/{company_id}/details`
+
+Lo que hay **detrás** de cada una de las 11 variables en el último mes observado de la empresa (2026-08): quién, cuánto y desde cuándo. Sirve los ficheros de `pulse/web/details/` que escribe `ml_service.pulse.export_details` (ver [README](./README.md#detail-behind-each-variable-pulseexport_detailspy)).
+
+**Envía:** `company_id` en la ruta.
+
+**Recibe:** las once claves de `variables` siempre están presentes; una empresa sin ese dato (sin ERP, sin líneas) recibe el bloque con listas vacías y cifras `null`. Importes en EUR redondeados a 2 decimales, rankings de 8 filas como máximo, `months` con los 12 últimos meses observados (las mismas cifras que la página del score).
+
+```jsonc
+{
+  "company_id": "COMP_0001",
+  "month": "2026-08",
+  "variables": {
+    "cash_days": {
+      "daily": [{"day": "2026-07-01", "balance": 14242.42}],      // 62 días hasta el fin de mes, ascendente
+      "daily_outflow": 2636.46,                                   // outflow_3m / 90
+      "accounts": [{"product_id": "PRODUCT_03496", "label": "CHECKING_01", "bank": "iberCaja", "type": "checking", "balance": 36300.52}],
+      "months": [{"month": "2026-08", "cash_end": 36982.49, "outflow_3m": 237281.5, "cash_days": 14.03}]
+    },
+    "cash_min":   {"daily": [], "months": [{"month": "2026-08", "cash_end": 0, "cash_min": 0, "outflow": 0, "ratio": 0}], "min_day": {"day": "2026-08-02", "balance": 8888.36}},
+    "loc_util":   {"lines": [{"product_id": "PRODUCT_07080", "label": "LINEOFCREDIT_03", "bank": "Banca March", "type": "lineofcredit", "limit": 1000000.0, "drawn": 977691.03, "util": 0.98}],
+                   "months": [{"month": "2026-08", "drawn": 0, "limit": 0, "util": 0}]},
+    "loc_accel":  {"months": [{"month": "2026-08", "util": 0, "util_d3": 0, "accel": 0}]},
+    "dpo":        {"suppliers": [{"counterparty_id": "COUNTERPARTY_09820", "paid_3m": 43560.0, "invoices": 3, "dpo_days": 10.0, "terms_days": 30.0, "late_days": -20.0}],
+                   "months": [{"month": "2026-08", "dpo_days": 0, "dpo_d3": 0}]},
+    "terms":      {"suppliers": [{"counterparty_id": "COUNTERPARTY_09820", "billed_6m": 95351.29, "invoices": 7, "terms_days": 30.0}],
+                   "months": [{"month": "2026-08", "terms_days": 0, "terms_d6": 0}]},
+    "dso":        {"customers": [{"counterparty_id": "COUNTERPARTY_03903", "collected_3m": 197447.68, "invoices": 21, "dso_days": 31.74, "terms_days": 0.0, "late_days": 31.74}],
+                   "months": [{"month": "2026-08", "dso_days": 0}]},
+    "ar90":       {"aging": [{"bucket": "al_dia", "amount": 0.0, "invoices": 0}],   // siempre al_dia, 1_30, 31_60, 61_90, mas_90
+                   "debtors": [{"counterparty_id": "COUNTERPARTY_03903", "open": 120662.52, "over_90": 26983.0, "share_over_90": 0.22}],
+                   "months": [{"month": "2026-08", "open": 0, "over_90": 0, "share": 0}]},
+    "top_client": {"customers": [{"counterparty_id": "COUNTERPARTY_03903", "billed_3m": 136902.53, "billed_prev_3m": 216231.17, "growth": -0.37, "share_12m": 0.83, "top": true}],
+                   "months": [{"month": "2026-08", "top_counterparty_id": "COUNTERPARTY_03903", "growth": 0}]},
+    "maturities": {"products": [{"product_id": "PRODUCT_07846", "label": "LOAN_01", "type": "loan", "bank": "Banco Sabadell", "outstanding": 3610098.62, "next_payment_date": null, "periods_left": null}],
+                   "months": [{"month": "2026-08", "debt_service": 0, "service_3m": 0, "cash_end": 0, "ratio": 0}]},
+    "network":    {"customers": [{"counterparty_id": "COUNTERPARTY_03903", "billed_6m": 353133.7, "share": 0.69, "health": 0.0, "health_d3": 0.0, "n_companies": 1}],
+                   "months": [{"month": "2026-08", "exposure": 0, "customers": 0}]}
+  }
+}
+```
+
+**Errores:** `404` si no existe `pulse/web/details/<id>.json`.
 
 ---
 

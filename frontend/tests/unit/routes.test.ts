@@ -4,7 +4,10 @@ import {
   companyIdFromPath,
   companyIdFromQuery,
   companyRoutes,
+  companyVariableRoute,
   sectionFromPath,
+  variableKeyFromParam,
+  variableKeyFromPath,
 } from '@/lib/routes';
 import {
   companySections,
@@ -27,10 +30,48 @@ describe('companyRoutes', () => {
   });
 });
 
+describe('companyVariableRoute', () => {
+  it('nests the variable under the PULSE page of the company', () => {
+    expect(companyVariableRoute('COMP_0001', 'cash_days')).toBe(
+      '/company/COMP_0001/variable/cash_days',
+    );
+    expect(companyVariableRoute('COMP 1', 'cash_days')).toBe(
+      '/company/COMP%201/variable/cash_days',
+    );
+  });
+});
+
+describe('variable keys in routes', () => {
+  it('accepts the snake_case keys of the export and nothing else', () => {
+    expect(variableKeyFromParam('cash_days')).toBe('cash_days');
+    expect(variableKeyFromParam('ar90')).toBe('ar90');
+    expect(variableKeyFromParam('../x')).toBeNull();
+    expect(variableKeyFromParam('CASH_DAYS')).toBeNull();
+    expect(variableKeyFromParam('9lives')).toBeNull();
+    expect(variableKeyFromParam('')).toBeNull();
+    expect(variableKeyFromParam(undefined)).toBeNull();
+    expect(variableKeyFromParam('a'.repeat(33))).toBeNull();
+  });
+
+  it('reads the variable a pathname opens', () => {
+    expect(variableKeyFromPath('/company/COMP_0001/variable/cash_days')).toBe(
+      'cash_days',
+    );
+    expect(variableKeyFromPath('/company/COMP_0001')).toBeNull();
+    expect(
+      variableKeyFromPath('/company/COMP_0001/variable/cash_days/extra'),
+    ).toBeNull();
+    expect(variableKeyFromPath('/company/COMP_0001/variable/..')).toBeNull();
+  });
+});
+
 describe('company identifiers in routes', () => {
   it('reads the company from company pages only', () => {
     expect(companyIdFromPath('/company/COMP_0001')).toBe('COMP_0001');
     expect(companyIdFromPath('/company/COMP_0001/recommendations')).toBe(
+      'COMP_0001',
+    );
+    expect(companyIdFromPath('/company/COMP_0001/variable/cash_days')).toBe(
       'COMP_0001',
     );
     expect(companyIdFromPath('/method')).toBeNull();
@@ -74,6 +115,9 @@ describe('sectionFromPath', () => {
     expect(sectionFromPath('/company/COMP_0001')).toBe('pulse');
     expect(sectionFromPath('/company/COMP_0001/recommendations')).toBe(
       'advisor',
+    );
+    expect(sectionFromPath('/company/COMP_0001/variable/cash_days')).toBe(
+      'pulse',
     );
     expect(sectionFromPath('/method')).toBe('method');
     expect(sectionFromPath('/')).toBe('pulse');

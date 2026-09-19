@@ -1,3 +1,5 @@
+import { parsePulseCompanyDetails } from '@/lib/pulse/details/parse';
+import type { PulseCompanyDetails } from '@/lib/pulse/details/types';
 import { parsePulseCompany } from '@/lib/pulse/parse-company';
 import { parsePulseSummary } from '@/lib/pulse/parse-summary';
 import type { PulseDataSource } from '@/lib/pulse/source/types';
@@ -37,6 +39,21 @@ export class ApiPulseSource implements PulseDataSource {
   async getCompany(companyId: string): Promise<PulseCompany | null> {
     return parsePulseCompany(
       await this.get(`/api/pulse/companies/${encodeURIComponent(companyId)}`),
+    );
+  }
+
+  /**
+   * @param companyId - Identifier such as `COMP_0001`.
+   * @returns The detail of every variable, or `null` when the service
+   * answers 404.
+   */
+  async getCompanyDetails(
+    companyId: string,
+  ): Promise<PulseCompanyDetails | null> {
+    return parsePulseCompanyDetails(
+      await this.get(
+        `/api/pulse/companies/${encodeURIComponent(companyId)}/details`,
+      ),
     );
   }
 }

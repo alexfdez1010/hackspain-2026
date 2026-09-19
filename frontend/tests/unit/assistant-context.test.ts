@@ -136,6 +136,19 @@ describe('trusted assistant context', () => {
     );
   });
 
+  it('names the variable page and keeps the company of the path', async () => {
+    const pulse = pulseSource(company());
+    const context = await getAssistantContext(
+      '/company/COMP_0001/variable/cash_days',
+      '¿Qué mide esta variable?',
+      pulse,
+      advisorSource(),
+    );
+    expect(pulse.getCompany).toHaveBeenCalledWith('COMP_0001');
+    expect(context.page).toBe('Variable cash_days · Atresmedia Labs');
+    expect(context.company?.name).toBe('Atresmedia Labs');
+  });
+
   it('answers product questions from the recommendation of the company', async () => {
     const context = await getAssistantContext(
       '/company/COMP_0001',

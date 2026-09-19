@@ -1,5 +1,7 @@
+import type { PulseCompanyDetails } from '@/lib/pulse/details/types';
 import {
   readPulseCompanyFile,
+  readPulseDetailsFile,
   readPulseSummaryFile,
 } from '@/lib/pulse/source/files';
 import type { PulseDataSource } from '@/lib/pulse/source/types';
@@ -25,5 +27,15 @@ export class StaticPulseSource implements PulseDataSource {
    */
   async getCompany(companyId: string): Promise<PulseCompany | null> {
     return readPulseCompanyFile(companyId);
+  }
+
+  /**
+   * @param companyId - Identifier such as `COMP_0001`.
+   * @returns The detail of every variable, or `null`.
+   */
+  async getCompanyDetails(
+    companyId: string,
+  ): Promise<PulseCompanyDetails | null> {
+    return readPulseDetailsFile(companyId);
   }
 }

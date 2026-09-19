@@ -206,6 +206,7 @@ uv run python -m ml_service.pulse.forecast.cli fit        # one model -> data/pu
 uv run python -m ml_service.pulse.forecast.cli evaluate   # OOF vs persistence/reversion -> forecast_evaluation.json
 uv run python -m ml_service.pulse.forecast.cli predict [--raw-dir DIR] [--all-months]   # -> data/pulse/forecast.{parquet,csv}
 uv run python -m ml_service.pulse.export_web              # -> data/pulse/web/ (+ mirror in ../frontend/src/data/pulse)
+uv run python -m ml_service.pulse.export_details          # after export_web -> data/pulse/web/details/ (+ mirror)
 # summary.json also carries an `evaluation` block (score, forecast and risk figures) read by the web app's method page
 ```
 
@@ -292,6 +293,54 @@ prediction time, so a company's trajectory is not forced to be monotone.
 **API.** `GET /api/pulse/summary` and `GET /api/pulse/companies/{company_id}`
 serve the files written by `export_web.py` (`routes_pulse.py`); the contract is
 the JSON described in the frontend data layer (`frontend/src/lib/pulse`).
+
+## Detail behind each variable (`pulse/export_details.py`)
+
+`export_web` publishes the score; `export_details` publishes **what is behind
+it**, so the web app can give every PULSE variable its own page: the customers,
+suppliers, bank accounts, credit lines, debt products and daily balances that
+produce the figure at the company's last observed month (2026-08).
+
+```bash
+make pulse-export-details   # uv run python -m ml_service.pulse.export_details, ~3 s for the 1,285 companies
+```
+
+It rebuilds the cleaned frames (`load_raw` + `clean_all`), reuses the feature
+helpers so every window matches the variable definition exactly, builds each
+table **once for the whole population** and then slices it per company. Output:
+`data/pulse/web/details/<company_id>.json`, one file per company already
+exported by `export_web` (1,285 files, 22 MB, ~18 kB each, no pretty-printing),
+mirrored into `../frontend/src/data/pulse/details`; the mirror replaces only
+that folder and leaves `companies/` and `recommendations/` untouched. **Run it
+after `export_web`**: the company list comes from `web/companies/`.
+
+Every payload is `{company_id, month, variables: {<key>: block}}` with the
+eleven keys always present. A company without the source data (no ERP, no
+credit lines, no debt) still gets its block, with empty lists and null figures,
+so the frontend never has to guess. Amounts are in EUR rounded to two decimals,
+rankings are capped at 8 rows, and `months` always holds the last 12 observed
+months taken from `scored_panel.parquet`, so the detail page quotes the same
+numbers as the score page.
+
+| variable | ranking / table (max 8, sorted by) | `months` (last 12) |
+|---|---|---|
+| `cash_days` | `accounts`: every cash account at the month end (balance) · `daily`: 62 days of company cash · `daily_outflow` = `outflow_3m`/90 | `cash_end`, `outflow_3m`, `cash_days` |
+| `cash_min` | the same `daily` series · `min_day`: lowest day of the month | `cash_end`, `cash_min`, `outflow`, `ratio` |
+| `loc_util` | `lines`: every credit line with `limit`, `drawn`, `util` (util) | `drawn`, `limit`, `util` |
+| `loc_accel` | — | `util`, `util_d3`, `accel` |
+| `dpo` | `suppliers`: invoices paid in the trailing quarter, `dpo_days`/`terms_days` value-weighted and `late_days` their difference (`paid_3m`) | `dpo_days`, `dpo_d3` |
+| `terms` | `suppliers`: invoices issued in the trailing half year with the granted `terms_days` (`billed_6m`) | `terms_days`, `terms_d6` |
+| `dso` | `customers`: invoices settled in the trailing quarter (`collected_3m`) | `dso_days` |
+| `ar90` | `aging`: the five buckets by days past due at the month end (`al_dia`, `1_30`, `31_60`, `61_90`, `mas_90`, always present) · `debtors`: `open`, `over_90`, `share_over_90` (over_90, then open) | `open`, `over_90`, `share` |
+| `top_client` | `customers`: `billed_3m` vs `billed_prev_3m`, `growth` clipped ±1, `share_12m`, and `top` on the one the variable tracks (yearly billing) | `top_counterparty_id`, `growth` |
+| `maturities` | `products`: every debt product with `outstanding` and, when `debt_schedule_config` has it, `next_payment_date` and `periods_left` (outstanding) | `debt_service`, `service_3m`, `cash_end`, `ratio` |
+| `network` | `customers`: the customers that entered the variable that month, with their `health`, `health_d3`, `n_companies` and their `share` of the 6-month billing (billed_6m) | `exposure`, `customers` |
+
+Amounts on credit lines and debt products come from the product tables in their
+own currency, exactly as the score reads them (99 % of the products are in EUR).
+
+**API.** `GET /api/pulse/companies/{company_id}/details` serves the file
+(`routes_pulse.py`), `404` when it does not exist.
 
 ## PULSE Advisor: product recommendations priced from PULSE (`pulse/recommend/`)
 

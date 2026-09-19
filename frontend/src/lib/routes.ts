@@ -74,3 +74,43 @@ export function sectionFromPath(pathname: string): CompanySection {
   }
   return 'pulse';
 }
+
+/** Variable keys accepted in a route: the snake_case keys of the export. */
+export const VARIABLE_KEY_PATTERN = /^[a-z][a-z0-9_]{0,31}$/;
+
+/**
+ * Builds the route of one variable of a company.
+ *
+ * @param companyId - Identifier such as `COMP_0001`.
+ * @param variableKey - Variable key of the export, such as `cash_days`.
+ * @returns The route of the variable page.
+ */
+export function companyVariableRoute(
+  companyId: string,
+  variableKey: string,
+): string {
+  return `${companyRoutes(companyId).pulse}/variable/${encodeURIComponent(variableKey)}`;
+}
+
+/**
+ * Validates a variable key coming from a route parameter.
+ *
+ * @param value - Raw route value.
+ * @returns The key, or `null` when it is absent or unsafe.
+ */
+export function variableKeyFromParam(
+  value: string | null | undefined,
+): string | null {
+  return value && VARIABLE_KEY_PATTERN.test(value) ? value : null;
+}
+
+/**
+ * Reads the variable a pathname opens.
+ *
+ * @param pathname - Current pathname, such as `/company/COMP_0001/variable/cash_days`.
+ * @returns The variable key, or `null` outside a variable page.
+ */
+export function variableKeyFromPath(pathname: string): string | null {
+  const match = /^\/company\/[^/]+\/variable\/([^/]+)$/.exec(pathname);
+  return match ? variableKeyFromParam(match[1]) : null;
+}

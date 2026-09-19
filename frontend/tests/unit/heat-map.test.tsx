@@ -93,6 +93,39 @@ describe('the heat map component', () => {
     expect(markup).not.toContain('NaN');
   });
 
+  it('links every cell to the page of its variable when a company is given', () => {
+    const map = buildVariableHeatMap(meta.pillars, meta.variables, last);
+    const markup = renderToStaticMarkup(
+      <PulseVariableHeatMap map={map} companyId="COMP_0001" />,
+    );
+    for (const variable of meta.variables) {
+      expect(markup).toContain(
+        `href="/company/COMP_0001/variable/${variable.key}"`,
+      );
+    }
+    expect(markup).toContain('aria-label="Abrir la página de Días de caja"');
+    expect(markup).toContain('group-hover:[fill-opacity:0.45]');
+    expect(markup).not.toContain('NaN');
+  });
+
+  it('links the phone rows too', () => {
+    const map = stackHeatMap(
+      buildVariableHeatMap(meta.pillars, meta.variables, last),
+    );
+    const markup = renderToStaticMarkup(
+      <PulseHeatRows map={map} companyId="COMP_0001" />,
+    );
+    expect(markup).toContain('href="/company/COMP_0001/variable/ar90"');
+    expect(markup).toContain('aria-label="Abrir la página de Días de caja"');
+  });
+
+  it('draws no anchor at all without a company in context', () => {
+    const map = buildVariableHeatMap(meta.pillars, meta.variables, last);
+    const markup = renderToStaticMarkup(<PulseVariableHeatMap map={map} />);
+    expect(markup).not.toContain('<a ');
+    expect(markup).not.toContain('/variable/');
+  });
+
   it('renders both layouts so CSS can pick one per breakpoint', () => {
     const map = buildVariableHeatMap(meta.pillars, meta.variables, last);
     const markup = renderToStaticMarkup(<PulseVariableHeatMap map={map} />);

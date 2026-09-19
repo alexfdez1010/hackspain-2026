@@ -115,6 +115,39 @@ test('keeps the company in the navigation across its pages', async ({
   expect(errors).toEqual([]);
 });
 
+test('opens a variable from the heat map and moves to the next one', async ({
+  page,
+}) => {
+  const errors = trackErrors(page);
+  await page.goto('/company/COMP_0001');
+  await page
+    .getByRole('link', { name: 'Abrir la página de Días de caja' })
+    .first()
+    .click();
+  await expect(page).toHaveURL('/company/COMP_0001/variable/cash_days');
+  await expect(page).toHaveTitle(/Días de caja · Atresmedia Labs/);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Días de caja' }),
+  ).toBeVisible();
+  const others = page.getByRole('navigation', { name: 'Otras variables' });
+  await expect(
+    others.getByRole('link', { name: 'Días de caja' }),
+  ).toHaveAttribute('aria-current', 'page');
+  await others
+    .getByRole('link', { name: 'Mínimo intramensual de caja' })
+    .click();
+  await expect(page).toHaveURL('/company/COMP_0001/variable/cash_min');
+  await expect(
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Mínimo intramensual de caja',
+    }),
+  ).toBeVisible();
+  await page.getByRole('link', { name: /Volver al PULSE de/ }).click();
+  await expect(page).toHaveURL('/company/COMP_0001');
+  expect(errors).toEqual([]);
+});
+
 test('answers 404 for an unknown company', async ({ page }) => {
   const response = await page.goto('/company/COMP_9999');
   expect(response?.status()).toBe(404);
