@@ -453,3 +453,20 @@ This is a template repository. To use it:
 2. Clone your new repository
 3. Remove or modify this README as needed
 4. Start building your application
+
+## Imagen social
+
+`src/app/opengraph-image.jpg` es la imagen Open Graph compartida por las rutas
+de la aplicación (1200 × 630). Incluye Embat Pulse, el icono del header y Nexo.
+Se generó con ImageGen usando `src/app/icon.svg` y
+`public/mascot/nexo-suit.png` como referencias de identidad. Su texto alternativo
+vive en `src/app/opengraph-image.alt.txt`.
+
+Decisión (2026-09-19): mantener el arte como recurso estático separa la identidad
+visual de los componentes y evita renderizar imágenes en cada petición.
+
+Next.js publica la imagen y sus metadatos automáticamente mediante su
+[convención de imágenes sociales](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image).
+Para verla localmente, arranca la aplicación con `bun run dev` y abre
+`http://localhost:3000/opengraph-image.jpg`. Las tarjetas de Twitter/X también
+heredan esta imagen desde Open Graph.
