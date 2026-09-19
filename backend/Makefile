@@ -82,3 +82,15 @@ pulse-forecast-evaluate:
 
 pulse-forecast:
 	uv run python -m ml_service.pulse.forecast.cli predict $(if $(RAW),--raw-dir $(RAW),) $(if $(OUT),--out $(OUT),)
+
+# --- PULSE Advisor (product recommendations) ------------------------------
+pulse-reco-fit:
+	uv run python -m ml_service.pulse.recommend.cli fit
+
+pulse-reco-build:
+	uv run python -m ml_service.pulse.recommend.cli build $(if $(RAW),--raw-dir $(RAW),)
+
+pulse-reco-show:
+	uv run python -m ml_service.pulse.recommend.cli show $(COMPANY)
+
+pulse-reco-all: pulse-reco-fit pulse-reco-build

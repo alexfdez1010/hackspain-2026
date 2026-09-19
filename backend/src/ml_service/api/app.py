@@ -14,6 +14,7 @@ from ml_service.api import (
     routes_meta,
     routes_offers,
     routes_pulse,
+    routes_recommend,
     routes_scoring,
 )
 from ml_service.api.settings import Settings, build_settings
@@ -33,6 +34,7 @@ ROUTERS: tuple[APIRouter, ...] = (
     routes_offers.router,
     routes_scoring.router,
     routes_pulse.router,
+    routes_recommend.router,
 )
 
 

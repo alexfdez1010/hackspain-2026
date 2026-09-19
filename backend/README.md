@@ -753,3 +753,158 @@ trajectory across horizons is not forced to be monotone.
 **API.** `GET /api/pulse/summary` and `GET /api/pulse/companies/{company_id}`
 serve the files written by `export_web.py` (`routes_pulse.py`); the contract is
 the JSON described in the frontend data layer (`frontend/src/lib/pulse`).
+
+## PULSE Advisor: product recommendations priced from PULSE (`pulse/recommend/`)
+
+Given a company's latest PULSE snapshot, the advisor decides **which financial
+products fit its situation, how much to offer and at what rate**, and explains
+every step in Spanish so the company understands why it is being offered what
+it is being offered. It is rule-based where the decision must be auditable
+(eligibility, sizing) and uses a small ML model where a probability is needed
+(the risk premium in the price).
+
+```bash
+uv run python -m ml_service.pulse.recommend.cli fit     # stress scorecard -> data/pulse/models/risk_model.json + risk_evaluation.json
+uv run python -m ml_service.pulse.recommend.cli build   # every company -> data/pulse/recommendations/{summary.json,companies/<id>.json}
+uv run python -m ml_service.pulse.recommend.cli show COMP_1030   # human-readable narrative for one company
+make pulse-reco-all                                     # fit + build
+```
+
+Inputs (`recommend/inputs.py`, `inputs_raw.py`): the last month of
+`scored_panel.parquet` (PULSE, pillars, the 11 variables with raw values,
+`cash_end`, trailing outflows/collections/debt service), the +6 month forecast,
+the company's current facilities from `debt_products.csv` and
+`debt_schedule_config.csv` (line limit and drawn, loans outstanding, median
+rate) and its open invoices from the cleaned ERP data (open and *current*
+receivables, monthly billing and purchases).
+
+### Catalogue (`recommend/catalogue.py`)
+
+The products are the ones the portfolio already uses (`debt_products.csv`:
+loan 1,022, lineofcredit 536, confirming 229, factoring 24) plus a deposit for
+the companies with idle cash. Each carries a base margin and a loss given
+default that the pricing quotes.
+
+| key | product | when it fits (rule file) | sizing |
+|---|---|---|---|
+| `credit_line` | Línea de crédito | cash days < 30 or intramonth minimum < 0.25 months, no idle line, PULSE ≥ 30 (`rules_liquidity.py`) | 0.35-1.5 months of outflow by PULSE band, net of available line |
+| `credit_line_increase` | Ampliación de línea | existing line drawn ≥ 80 %, PULSE ≥ 30 | +15/30/50 % of the limit by PULSE band |
+| `factoring` | Anticipo de facturas | ERP receivables ≥ 20 k€ not > 90 d overdue, +90 d bucket ≤ 40 %, DSO > 45 favours it, PULSE ≥ 20 (`rules_receivables.py`) | 75-85 % of current receivables, cap 3 months of billing |
+| `confirming` | Confirming de proveedores | ERP purchases ≥ 15 k€/month, short supplier terms (< 20 d) or paying late, PULSE ≥ 30 (`rules_payables.py`) | 1.5 months of purchases |
+| `term_loan` | Préstamo a plazo | PULSE ≥ 60, maturities/cash < 1, balanced cash (`rules_debt.py`) | 3 months of collections × 70-100 %, 48 months |
+| `refinancing` | Reestructuración de vencimientos | debt outstanding and 6-month service ≥ 1× cash (≥ 3× severe), PULSE ≥ 15 (`rules_refinancing.py`) | loans outstanding (or 12 months of service), 60 months |
+| `treasury_deposit` | Depósito de excedentes | cash days ≥ 180, intramonth minimum ≥ 1 month, no maturity pressure, excess ≥ 50 k€ after a 90-day buffer (`rules_treasury.py`) | cash − 90 days of outflow; 3/6/12 months by cash days |
+
+Every rule returns an `Assessment`: a list of `Reason`s (`pro`, `contra` or
+`bloqueo`), each tied to the PULSE variable, the raw value and the threshold it
+was compared against, and a **fit** = 30 + Σ points, 0-100. A product with a
+blocker is never offered; eligible products with fit ≥ 40 are ranked and the top
+three are priced. Blocked and low-fit products are reported under `declined`
+with their reasons, so the company also sees *why not* factoring, for example.
+Thresholds live in `recommend/config.py`.
+
+### Price (`recommend/pricing.py`)
+
+```
+diferencial = margen del producto             (90-200 pb by product)
+            + prima de riesgo                 = PD12m × 25 % (stress -> default) × LGD, cap 900 pb
+            + prima por incertidumbre de datos = 75 pb × (1 − confidence)
+            + ajuste por tendencia            (+25 pb if the +6 m forecast drops ≥ 5 points, −15 pb if it rises ≥ 5)
+            [+ 25 pb si la línea actual está al ≥ 90 %]
+tipo        = tipo sin riesgo + diferencial        (floored at 0)
+```
+
+The spread is computed and clamped to the product's band (`min/max_spread_bps`
+in the catalogue) **before** the reference rate is added, so it never depends
+on the Euríbor: the static export is priced over `PULSE_EURIBOR_12M` (default
+2.10 %) and any API call can re-quote the same recommendation over another
+risk-free rate with `?euribor=0.03`. The deposit reads the same table as a yield
+(Euríbor − 60 pb, +15 pb when cash covers a year of outflows, capped at the
+reference). The payload lists every component with its basis points and a
+one-line justification, and says when the clamp applied. For `plazo` products it also compares with the median
+rate of the company's current loans and gives the monthly instalment.
+
+**PD12m** comes from `recommend/risk.py`: a standardised logistic regression on
+the four pillars, `confidence` and log(months observed), trained on the same
+stress label as `evaluate.py` (≥ 2 stress months in the next 6) with
+GroupKFold(5) on `group_id`. Any coefficient whose sign would mean "healthier is
+riskier" is zeroed and the model refitted (monotone guard), so improving a pillar
+can never raise the premium. Out-of-fold AUROC **0.871** (PULSE alone: 0.823),
+mean predicted 0.223 vs observed 0.224 (`data/pulse/risk_evaluation.json`).
+Standardised coefficients: liquidez −1.91, deuda −0.15, cobro −0.10, pago 0
+(no signal in this dataset), confidence −0.03, log months −0.36. Being linear in
+log-odds, `risk.contributions` splits each company's logit exactly by input.
+
+### Levers (`recommend/levers.py`) and narrative (`recommend/explain.py`)
+
+For each offer, the pillars below 60 are moved to 60 one at a time through the
+risk model, and the payload reports the new stress probability and the premium
+saved in basis points, together with the weakest variables of that pillar (so
+the company reads "si tu pilar de liquidez subiera de 23 a 60, la prima bajaría
+502 pb; las variables que más pesan: días de caja (20/100)…"). The same levers
+plus the products blocked only by the PULSE minimum ("se desbloquea con un
+PULSE de 30, hoy 11") form the company-level `improvement_plan`, which is the
+answer for companies that get no product today.
+
+### Results on the hackathon data (`data/pulse/recommendations/`)
+
+| top product | companies | rate q1 / median / q3 |
+|---|---|---|
+| credit_line | 365 | 4.86 / 5.65 / 7.77 % |
+| treasury_deposit | 152 | 1.50 / 1.65 / 1.65 % (yield) |
+| confirming | 89 | 3.59 / 4.06 / 5.54 % |
+| refinancing | 80 | 6.43 / 8.15 / 10.67 % |
+| factoring | 49 | 3.96 / 4.85 / 5.97 % |
+| term_loan | 31 | 4.54 / 4.82 / 5.12 % |
+| credit_line_increase | 4 | 3.79 / 4.57 / 6.15 % |
+| none | 515 | 379 of them get at least one "unlock", 458 a quantified lever |
+
+Most companies without an offer have PULSE < 30 (403) or no activity in the
+window; that is by design (no new credit for a company already in stress),
+which is why the improvement plan is part of the payload.
+
+### API (`api/routes_recommend.py`)
+
+| Method | Path | Returns |
+|---|---|---|
+| GET | `/api/pulse/recommendations/catalogue` | products (with their spread bands), pricing parameters, reference rate, risk-model evaluation |
+| GET | `/api/pulse/recommendations?product=&limit=&euribor=` | one row per company (`top_product`, `top_amount`, `top_annual_rate`, `top_spread_bps`, `top_fit`, `p_stress_6m`, `headline`) sorted by fit, plus `by_top_product` counts |
+| GET | `/api/pulse/recommendations/{company_id}?euribor=` | the full payload below |
+
+`euribor` (annual decimal, −1 % to 25 %) re-prices on the fly: the API loads
+`recommendations/snapshots.json` (the inputs of every recommendation, written
+by `build`) and `models/risk_model.json` once per process
+(`api/advisor_runtime.py`) and recomputes the recommendation over that rate.
+Spreads, amounts, reasons and levers are identical; only the reference line,
+the final rate, the headline and the price story change, and the payload's
+`reference_rate.source` says `request` instead of `default`. Without the
+parameter the static files are served.
+
+```jsonc
+{
+  "company_id": "COMP_1030", "month": "2026-08", "pulse": 39.2, "confidence": 0.68, "pillars": {...},
+  "reference_rate": {"label": "Euríbor 12 m", "value": 0.021, "source": "default"},
+  "summary": "PULSE 39 (2026-08), cobertura de datos 68%: 2 producto(s) encajan con tu situación.",
+  "risk": {"p_stress_6m": 0.31, "base_rate": 0.22, "contributions": [{"feature": "pillar_liquidez", "label": "Pilar liquidez", "value": 23.1, "logit": 1.9}, ...]},
+  "recommendations": [{
+    "rank": 1, "product": "credit_line", "label": "Línea de crédito", "family": "circulante", "what": "...", "fit": 75,
+    "amount": 140000, "tenor_months": 12, "monthly_instalment": null, "rate_kind": "cost", "annual_rate": 0.097, "spread_bps": 760,
+    "headline": "Línea de crédito de 140.000 € a 12 meses, a un tipo del 9.70% anual.",
+    "why": ["Tu caja a cierre de mes cubre solo 3 días de pagos operativos (umbral 30).", ...],
+    "reasons": [{"code": "caja_corta", "text": "...", "kind": "pro", "points": 25, "variable": "cash_days", "value": 3.1, "unit": "días"}, ...],
+    "sizing": {"formula": "0.60 meses de pagos operativos (233.000 €/mes, PULSE 39) menos ...", "inputs": {...}},
+    "pricing": {"components": [{"key": "referencia", "label": "Euríbor 12 m", "bps": 210, "detail": "..."}, ...],
+                "clamped": false, "reference_rate": 0.021, "spread_band_bps": [40, 990], "annual_pd": 0.52, "expected_loss_bps": 586, "story": ["..."]},
+    "levers": [{"pillar": "liquidez", "current": 23.1, "target": 60, "p_stress_now": 0.31, "p_stress_then": 0.04, "premium_saving_bps": 502, "variables": [...]}],
+    "lever_story": ["Si tu pilar de liquidez subiera de 23 a 60, ..."]
+  }],
+  "declined": [{"product": "factoring", "label": "...", "status": "no_elegible", "reasons": ["No vemos facturas de clientes suficientes ..."]}, ...],
+  "improvement_plan": {"unlocks": ["Préstamo a plazo: se desbloquea con un PULSE de 60 (hoy 39)."], "levers": [...], "story": [...]},
+  "inputs": {"cash_end": ..., "monthly_outflow": ..., "holdings": {...}, "invoices": {...}, "outlook": {...}, "variables": {...}},
+  "disclaimer": "Propuesta orientativa ..."
+}
+```
+
+The files are static, like the PULSE export: rerun `recommend.cli build` after
+`pulse.cli fit` / `forecast.cli predict`. The older `/api/offers` endpoint
+(X-Ray working-capital line) is untouched.
