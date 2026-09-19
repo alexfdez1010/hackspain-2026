@@ -178,6 +178,10 @@ html:has([data-landing-snap][data-band-theme='light']) {
   --border: #ffffff1f;
   --separator: #ffffff1f;
   --backdrop: #05081ca6;
+  --score-critical: #ff8a8e;
+  --score-fragile: #f7b955;
+  --score-neutral: #8e9ab9;
+  --score-solid: #3dd68c;
   background-color: var(--background);
   color: var(--foreground);
 }
@@ -278,6 +282,12 @@ html:has([data-landing-snap]) .bg-separator {
  * (band 0 / first paint) and screens onto the dark band; the footer Heatmap
  * and list dither wait for band 2. The Heatmap uses a radial mask so it is
  * not a hard rectangle.
+ *
+ * The hero and feature dithers sit on a `score-quadrants` field, one score
+ * level per sparkle. Each canvas paints an opaque back and blends onto the
+ * field inside an isolated wrapper: the hero ink multiplies (black hides the
+ * field, the sparkle takes the level), the feature ink screens (white hides
+ * it). The wrapper then meets the page as before, so the field never shows.
  */
 .hero-dither,
 .footer-heatmap,
@@ -291,10 +301,16 @@ html:has([data-landing-snap]) .bg-separator {
 }
 
 .hero-dither-canvas {
+  position: relative;
+  isolation: isolate;
   height: 100%;
   width: 100%;
   opacity: 0;
   transition: opacity 500ms ease-out;
+}
+
+.hero-dither-ink {
+  mix-blend-mode: multiply;
 }
 
 .hero-dither-canvas[data-ready] {
@@ -302,11 +318,17 @@ html:has([data-landing-snap]) .bg-separator {
 }
 
 /*
- * One dither field behind the feature grid. No `screen` blend: light-band
- * ink on white. Hover and selected states are type, not an accent fill.
+ * One dither field behind the feature grid. The wrapper meets the white page
+ * with no blend: light-band ink, coloured by level, on white. Hover and
+ * selected states are type, not an accent fill.
  */
 .feature-dither {
-  opacity: 0.32;
+  isolation: isolate;
+  opacity: 0.45;
+}
+
+.feature-dither-ink {
+  mix-blend-mode: screen;
 }
 
 .feature-cell {

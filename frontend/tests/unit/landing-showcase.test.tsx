@@ -81,7 +81,7 @@ describe('LandingShowcase', () => {
       'utf8',
     );
     expect(css).toContain('.feature-dither');
-    expect(css).toContain('opacity: 0.32');
+    expect(css).toContain('opacity: 0.45');
     expect(css).toContain('.feature-lead');
     expect(css).toContain(":hover:not(:has([aria-pressed='true']))");
     expect(css).toContain('color-mix(in srgb, var(--foreground) 4%');
@@ -90,10 +90,16 @@ describe('LandingShowcase', () => {
     expect(css).not.toContain('background: var(--accent)');
     const featureBlock = css.slice(
       css.indexOf('.feature-dither {'),
+      css.indexOf('.feature-dither-ink {'),
+    );
+    expect(featureBlock).toContain('opacity: 0.45');
+    expect(featureBlock).toContain('isolation: isolate');
+    expect(featureBlock).not.toContain('mix-blend-mode');
+    const inkBlock = css.slice(
+      css.indexOf('.feature-dither-ink {'),
       css.indexOf('.feature-cell {'),
     );
-    expect(featureBlock).toContain('opacity: 0.32');
-    expect(featureBlock).not.toContain('mix-blend-mode');
+    expect(inkBlock).toContain('mix-blend-mode: screen');
   });
 
   it('uses the product palette on both bands, defined on the section', () => {

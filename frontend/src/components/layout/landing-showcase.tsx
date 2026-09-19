@@ -17,7 +17,7 @@ interface LandingShowcaseProps {
   initialBand: ScoreBandKey;
 }
 
-/** Rows of the feature grid: the catalogue in two columns. */
+/** Rows of the feature grid: the four pages in two columns. */
 const ROWS = Math.ceil(LANDING_FEATURES.length / 2);
 
 /**
@@ -25,10 +25,11 @@ const ROWS = Math.ceil(LANDING_FEATURES.length / 2);
  *
  * The pane is already boxed by the site frame. The left column splits at
  * mid-band into the page title and the band chart; the right column is a
- * two-column grid of every product page with 1px rules between the rows.
- * One dither field sits behind the cells so the sparkle continues under the
- * rules. Choosing a cell only changes the title and the lead: the chart is
- * the same PULSE trajectory for every page, coloured by score level.
+ * 2×2 of the four pages of the landing with 1px rules between the rows. One
+ * dither field sits behind the cells so the sparkle continues under the
+ * rules, one sparkle per cell in the colour of one score level. Choosing a
+ * cell only changes the title and the lead: the chart is the same PULSE
+ * trajectory for every page, coloured by score level.
  *
  * @param props - The band the chart opens on.
  * @returns The middle landing section.

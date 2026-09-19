@@ -3,6 +3,7 @@
 import { ImageDithering } from '@paper-design/shaders-react';
 import { useEffect, useState } from 'react';
 
+import { ScoreQuadrants } from '@/components/layout/score-quadrants';
 import { PULSE_HERO_DITHER } from '@/lib/landing/pulse-hero-dither';
 
 /**
@@ -35,9 +36,10 @@ export function PulseHeroDither() {
 
   return (
     <div className="hero-dither-canvas" data-ready={ready ? '' : undefined}>
+      <ScoreQuadrants />
       <ImageDithering
         aria-hidden
-        className="h-full w-full"
+        className="hero-dither-ink relative h-full w-full"
         width="100%"
         height="100%"
         image={PULSE_HERO_DITHER.image}

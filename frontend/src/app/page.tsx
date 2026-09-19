@@ -17,7 +17,7 @@ import { scoreBand } from '@/lib/score';
  *
  * The hero carries the product bar, a dithered sparkle field and the product
  * access. The webp is `preload`ed here so the fetch starts with the document;
- * Paper still owns the canvas. The middle band lists every product page and
+ * Paper still owns the canvas. The middle band lists four product pages and
  * plays the PULSE trajectory by score level, opening on the band of the demo
  * company's last close. The footer is heatmap and lists.
  *
