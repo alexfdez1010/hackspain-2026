@@ -1,4 +1,4 @@
-"""HTTP layer of the X-Ray service (FastAPI)."""
+"""HTTP layer of the PULSE service (FastAPI)."""
 
 from ml_service.api.settings import Settings, get_settings
 

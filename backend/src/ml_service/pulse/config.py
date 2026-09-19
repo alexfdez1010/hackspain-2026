@@ -22,6 +22,11 @@ DEBT_TYPES = ("loan", "leasing", "mortgage", "lineofcredit", "confirming", "fact
 DEBT_SERVICE_CATEGORIES = ("debt_repayment", "interest_charge")
 INVOICE_DOC_TYPES = ("invoice", "invoiceGroup")
 INTERCOMPANY_REGEX = r"(?i)traspaso|intercompany|intragrupo|transfer(encia)? (a|desde|entre) (cta|cuenta)"
+COUNTERPARTY_TOKEN_REGEX = (
+    r"(COUNTERPARTY_\d+)"  # narratives carry the ID even when the column is empty
+)
+COLLECTION_CATEGORIES = ("collection", "bulk_collection")
+RETURNED_COLLECTION_CATEGORIES = ("collection_refund",)
 
 
 @dataclass(frozen=True)

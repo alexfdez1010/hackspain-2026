@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+coverage
+tests
+playwright-report
+test-results
+.env*
+Dockerfile

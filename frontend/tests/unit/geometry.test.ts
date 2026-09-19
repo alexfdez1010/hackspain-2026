@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   areaPath,
+  bandPath,
   linePath,
   niceDomain,
   xAt,
@@ -89,5 +90,24 @@ describe('niceDomain', () => {
       min: 0,
       max: 1,
     });
+  });
+});
+
+describe('bandPath', () => {
+  it('closes the upper edge over the reversed lower edge', () => {
+    const upper = [
+      { x: 0, y: 1 },
+      { x: 10, y: 2 },
+    ];
+    const lower = [
+      { x: 0, y: 8 },
+      { x: 10, y: 9 },
+    ];
+    expect(bandPath(upper, lower)).toBe('M0 1 L10 2 L10 9 L0 8 Z');
+  });
+
+  it('draws nothing when the band has fewer than two points', () => {
+    expect(bandPath([{ x: 0, y: 1 }], [{ x: 0, y: 2 }])).toBe('');
+    expect(bandPath([], [])).toBe('');
   });
 });

@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  DIRECTION_LABELS,
-  REGIME_HINTS,
-  REGIME_LABELS,
-  SCORE_BANDS,
-  directionColor,
-  regimeColor,
-  scoreBand,
-  scoreColor,
-} from '@/lib/xray/score';
+import { SCORE_BANDS, SCORE_GUIDES, scoreBand, scoreColor } from '@/lib/score';
 
 describe('scoreBand', () => {
   it.each([
@@ -46,28 +37,8 @@ describe('scoreColor', () => {
   });
 });
 
-describe('semantic colours', () => {
-  it('maps directions to intent colours', () => {
-    expect(directionColor('improving')).toBe('success');
-    expect(directionColor('stable')).toBe('default');
-    expect(directionColor('deteriorating')).toBe('danger');
-  });
-
-  it('maps regimes to intent colours', () => {
-    expect(regimeColor('structural_decline')).toBe('danger');
-    expect(regimeColor('structural_improvement')).toBe('success');
-    expect(regimeColor('transient_dip')).toBe('warning');
-    expect(regimeColor('steady')).toBe('default');
-  });
-});
-
-describe('labels', () => {
-  it('translates every direction and regime', () => {
-    for (const label of Object.values(DIRECTION_LABELS)) {
-      expect(label.length).toBeGreaterThan(0);
-    }
-    for (const key of Object.keys(REGIME_LABELS)) {
-      expect(REGIME_HINTS[key as keyof typeof REGIME_HINTS]).toBeTruthy();
-    }
+describe('SCORE_GUIDES', () => {
+  it('matches the boundaries between bands', () => {
+    expect(SCORE_GUIDES).toEqual(SCORE_BANDS.slice(1).map((band) => band.min));
   });
 });

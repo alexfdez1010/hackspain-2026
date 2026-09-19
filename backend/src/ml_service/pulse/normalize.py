@@ -22,7 +22,7 @@ class Normalizer:
 
     @staticmethod
     def components() -> tuple[Component, ...]:
-        return tuple(c for v in VARIABLES for c in v.components)
+        return tuple(c for v in VARIABLES for c in (*v.components, *v.proxies))
 
     def fit(self, panel: pl.DataFrame) -> Normalizer:
         qs = np.linspace(0, 1, GRID_POINTS)

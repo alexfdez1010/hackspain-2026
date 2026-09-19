@@ -4,7 +4,7 @@
 
 help:
 	@echo "web-install   Install frontend dependencies (bun install)"
-	@echo "web-dev       Start the Next.js dev server with its database"
+	@echo "web-dev       Start the Next.js dev server"
 	@echo "web-test      Run frontend unit, integration and e2e tests"
 	@echo "web-lint      Lint and format the web app"
 	@echo "ml-install    Sync the backend virtualenv (uv sync)"
@@ -44,3 +44,10 @@ ml-format:
 pre-commit:
 	cd frontend && bun run pre-commit
 	$(MAKE) -C backend pre-commit
+
+.PHONY: up down
+up:
+	docker compose up --build
+
+down:
+	docker compose down

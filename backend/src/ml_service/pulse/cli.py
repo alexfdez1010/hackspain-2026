@@ -31,6 +31,7 @@ OUTPUT_COLUMNS = [
     "pulse",
     "pulse_raw",
     "confidence",
+    "confidence_from_proxies",
 ]
 
 
@@ -67,6 +68,7 @@ def score(raw_dir: Path, work_dir: Path, out: Path) -> pl.DataFrame:
     cols = (
         OUTPUT_COLUMNS
         + [f"var_{v.key}" for v in VARIABLES]
+        + [f"var_{v.key}__source" for v in VARIABLES if v.proxies]
         + [f"pillar_{p}" for p in ("liquidez", "deuda", "pago", "cobro")]
     )
     scored.select(cols).with_columns(pl.col("month").dt.strftime("%Y-%m")).write_csv(
