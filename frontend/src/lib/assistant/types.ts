@@ -63,6 +63,7 @@ export function getPageLabel(pathname: string): string {
     if (pathname.endsWith('/recommendations')) return `Financiación · ${name}`;
     if (pathname.endsWith('/signals')) return `Alertas · ${name}`;
     if (pathname.endsWith('/diagnosis')) return `Diagnóstico · ${name}`;
+    if (/\/action(\/[^/]+)?$/.test(pathname)) return `Acción · ${name}`;
     if (pathname.endsWith('/detail')) return `Detalle · ${name}`;
     return `PULSE · ${name}`;
   }

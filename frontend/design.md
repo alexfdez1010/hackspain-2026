@@ -66,17 +66,20 @@ unresolved placeholders. Keep them when completing or updating this document.
 - Site frame: cuatro columnas (`gutter | 1fr | 1fr | gutter`). El gutter es
   `clamp(1rem, 6vw, 4.5rem)` (`--site-gutter`). Líneas de `--separator` a todo
   el alto: interior de cada gutter y, en la landing, el eje central (oculto
-  bajo `lg`). La landing son tres bandas `h-dvh` (hero / features / pie). La
-  banda 1 (clara) parte el recuadro: título y trayectoria a la izquierda, 2×2
-  de superficies a la derecha. El plus es una cruz de 1px de gutter a gutter
-  (brazo horizontal a media banda; el vertical es el eje del marco). El 2×2
-  sólo añade el corte interior vertical. El marco ya cierra el recuadro, no se
-  dibuja una segunda caja. El hero llena la
-  primera banda: dither Paper de destellos a la izquierda (`fit: contain`);
-  `HeroAccess` a la derecha, sobre fondo plano. El pie llena la
-  tercera: heatmap a la izquierda; grano dither detrás de Platform / Docs y
-  legal a la derecha, con aire a eje y gutter.
-- `/` es marketing. El producto empieza en `/radar`.
+  bajo `lg`). La landing son tres bandas `h-dvh` (hero / producto / pie). La
+  banda 1 (clara) parte el recuadro: overline «Producto», título y la
+  trayectoria por nivel de score a la izquierda; a la derecha, todas las
+  páginas del producto (`companySections` de la empresa demo) en una rejilla
+  de dos columnas. Las reglas son de 1px: la columna izquierda se parte a
+  media banda; la rejilla lleva el eje del marco y una regla por fila. El
+  marco ya cierra el recuadro, no se dibuja una segunda caja. El hero llena
+  la primera banda: `LandingBar` (misma marca y alto que la nav de producto,
+  con el tagline del prototipo), dither Paper de destellos a la izquierda
+  (`fit: contain`); `HeroAccess` a la derecha, sobre fondo plano. El pie
+  llena la tercera: heatmap a la izquierda; grano dither detrás de Producto /
+  Documentación a la derecha, y la misma firma que el pie de producto sobre
+  una hairline, con el copyright.
+- `/` es marketing. El producto empieza en `/company/[id]`.
 
 ## 3. Foundations
 
@@ -131,17 +134,22 @@ llevan etiqueta de severidad además de color.
 
 ### Typography
 
-- **Una sola familia**: Inter (`next/font/google`, pesos 400/500/600), en
-  `--font-inter`. `--font-sans` y `--font-display` resuelven los dos a Inter:
-  no hay familia de display aparte. El stack de marca es
-  «Aeonik → General Sans → Inter»; Inter es el corte del que disponemos y el
-  que carga el prototipo.
+- **Una sola familia**: Haffer SQ XH (`next/font/local`, `src/fonts/`, cortes
+  400 y 500 tal como los sirve embat.io), en `--font-haffer`. `--font-sans` y
+  `--font-display` resuelven los dos a ella: no hay familia de display aparte.
+  Es la grotesca de la web de Embat; sustituye a Inter, que era el corte de
+  reserva del stack «Aeonik → General Sans → Inter». Los dos woff2 llevan
+  `comma` y `period` fuera de la función `tnum` (editado con fontTools):
+  Haffer sustituye la coma y el punto por variantes tabulares de 0,65 em y,
+  con `tabular-nums` en `body`, «45,6» se leía «45 , 6».
 - **Nunca bold**: los titulares van en 600 con tracking negativo; los botones,
-  etiquetas y enlaces de navegación en 500; el texto corrido en 400. El 700 no
-  aparece en ninguna pieza.
+  etiquetas y enlaces de navegación en 500; el texto corrido en 400. Sólo hay
+  dos cortes, así que el 600 apunta al archivo de 500 en `fonts.ts` para que
+  el navegador nunca sintetice una negrita. El 700 no aparece en ninguna
+  pieza.
 - Cuerpo: 15 px / 1,55, `font-variant-numeric: tabular-nums` y
   `text-wrap: pretty` en `body`. No hay monoespaciada: los importes y los
-  identificadores (`COMP_0001`) usan Inter con cifras tabulares.
+  identificadores (`COMP_0001`) usan Haffer con cifras tabulares.
 - Type scale (tamaño / interlineado / peso / tracking):
 
   | Estilo   | Valor                      | Uso                                        |
@@ -223,31 +231,37 @@ llevan etiqueta de severidad además de color.
 Use HeroUI v3 components first. Document any wrapper or new primitive before
 adding it to the codebase.
 
-| Component/pattern | HeroUI primitive                              | Approved variants               | Usage guidance                                                                                                     |
-| ----------------- | --------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Button            | `Button`                                      | `secondary`, `tertiary`         | Sólo acciones de la propia vista (cambiar mes u horizonte).                                                        |
-| Link              | `Link` / `next/link`                          | por defecto                     | `next/link` para navegación interna; `Link` de HeroUI cuando lleva icono.                                          |
-| Card              | `Card`                                        | `secondary`                     | Una tarjeta por producto recomendado, que agrupa oferta, precio y motivos.                                         |
-| Form field        | `ComboBox`, `Select` + `ListBox`              | por defecto                     | Selector de empresa en la nav; mes y horizonte en la empresa. Cada control lleva `aria-label`.                     |
-| Feedback          | `Chip`                                        | `soft` con `color` semántico    | Familia de producto, tipo de razón y estado de un producto descartado.                                             |
-| Data              | `Table` vía `DataTable`                       | por defecto                     | Toda tabla usa `DataTable`: cabeceras ordenables en ambos sentidos, «sin datos» siempre al final.                  |
-| Panel             | `Panel` (`ui/panel`)                          | `padding` `default` / `none`    | Contenedor único: hairline, radio 12 e inset 24. `none` cuando el contenido pone su propio inset.                  |
-| KPI               | `StatGrid` (`ui/stat-grid`)                   | 3, 4 o 5 columnas               | Tira de cifras de cabecera: un panel con hairline entre celdas, valor 32 y etiqueta debajo.                        |
-| Estado del score  | `ScoreBadge` (`ui/score-badge`)               | `score` (def.), `pill`, `lg`    | `score` es punto + cifra en tinta; `pill` es la píldora con el nombre de la banda.                                 |
-| Pie de producto   | `SiteFooter` (`layout/site-footer`)           | por defecto                     | Hairline superior, 13 px secundario; lo que mide Pulse a la izquierda y la firma a la derecha.                     |
-| Asistente Nexo    | `Modal`, `Button`, `TextArea`                 | `primary`, `secondary`, `ghost` | Diálogo lateral de 440 px; hoja inferior en móvil. Solo en rutas de producto.                                      |
-| Icono de marca    | SVG estático (`src/app/icon.svg`)             | paleta de Nexo                  | Nav de producto; el enlace lleva `aria-label="Embat Pulse, inicio"` y apunta a `/`.                                |
-| Hero dither       | Paper `ImageDithering` (`PulseHeroDither`)    | destellos locales, `contain`    | Columna izquierda de `/`; webp propio; `preload` RSC; fade `data-ready`; `maxPixelCount` 480 000; no `next/image`. |
-| Hero mark         | SVG propio (`PulseHeroMark`)                  | tokens de score + accent        | Geometría compartida; no se monta en `/`. El `h1` de la landing es «Embat Pulse» y es `sr-only`.                   |
-| Site frame        | `SiteFrame`                                   | `split`, `pulse`                | Gutters y eje; `pulse` solo en `/`, sobre la línea derecha existente.                                              |
-| Landing scroll    | `LandingScroll`                               | paging 900 ms                   | Un gesto, una banda; tween propio, no snap nativo.                                                                 |
-| Landing footer    | `LandingFooter`                               | cuadrante derecho               | Platform / Docs y legal; grano dither detrás de las listas; heatmap a la izquierda en `lg+`.                       |
-| Footer heatmap    | Paper `Heatmap` (`PulseFooterHeatmap`)        | rampa Embat                     | Columna izquierda, solo `lg+`; `aria-hidden`; `speed={0}` con reduced motion.                                      |
-| Footer dither     | Paper `ImageDithering` (`PulseFooterDither`)  | recorte rotado detrás de listas | Mismo `/hero-dither.webp`; `scale` 2.4, origin 0.68/0.32, 28°; tinta `#afafbb` a 0.22 `screen`; no Heatmap.        |
-| Hero access       | `HeroAccess`                                  | cuadrícula 2 columnas           | PULSE, Recomendaciones, Método (`HERO_SECTIONS`); subrayado animado.                                               |
-| Landing showcase  | `LandingShowcase`                             | 2×2 + trayectoria               | Banda 1: plus gutter a gutter; 2×2 sin `gap`; PULSE anima `COMP_0001`; el resto usa el gráfico de producto.        |
-| Feature dither    | Paper `ImageDithering` (`PulseFeatureDither`) | un campo detrás del 2×2         | Mismo `/hero-dither.webp`; tinta `#050b2c` a 0.32; hover/selected por tipo, no `--accent`; no Heatmap.             |
-| Showcase PULSE    | SVG vendido (`PulseShowcaseAnimation`)        | loop 7,2 s                      | Inline; `COMP_0001`; Arrow 2 animate no disponible en el plan; motion CSS local; freeze con reduced-motion.        |
+| Component/pattern | HeroUI primitive                              | Approved variants               | Usage guidance                                                                                                      |
+| ----------------- | --------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Button            | `Button`                                      | `secondary`, `tertiary`         | Sólo acciones de la propia vista (cambiar mes u horizonte).                                                         |
+| Link              | `Link` / `next/link`                          | por defecto                     | `next/link` para navegación interna; `Link` de HeroUI cuando lleva icono.                                           |
+| Card              | `Card`                                        | `secondary`                     | Una tarjeta por producto recomendado, que agrupa oferta, precio y motivos.                                          |
+| Form field        | `ComboBox`, `Select` + `ListBox`              | por defecto                     | Selector de empresa en la nav; mes y horizonte en la empresa. Cada control lleva `aria-label`.                      |
+| Feedback          | `Chip`                                        | `soft` con `color` semántico    | Familia de producto, tipo de razón y estado de un producto descartado.                                              |
+| Data              | `Table` vía `DataTable`                       | por defecto                     | Toda tabla usa `DataTable`: cabeceras ordenables en ambos sentidos, «sin datos» siempre al final.                   |
+| Panel             | `Panel` (`ui/panel`)                          | `padding` `default` / `none`    | Contenedor único: hairline, radio 12 e inset 24. `none` cuando el contenido pone su propio inset.                   |
+| KPI               | `StatGrid` (`ui/stat-grid`)                   | 3, 4 o 5 columnas               | Tira de cifras de cabecera: un panel con hairline entre celdas, valor 32 y etiqueta debajo.                         |
+| Hechos            | `FactGrid` (`pulse/fact-grid`)                | `2` o `auto` columnas           | Tira dentro de un panel: filete arriba y abajo y entre celdas, primera celda sin filete ni inset, cifra 24.         |
+| Estado del score  | `ScoreBadge` (`ui/score-badge`)               | `score` (def.), `pill`, `lg`    | `score` es punto + cifra en tinta; `pill` es la píldora con el nombre de la banda.                                  |
+| Pie de producto   | `SiteFooter` (`layout/site-footer`)           | por defecto                     | Hairline superior, 13 px secundario; sólo la firma, centrada.                                                       |
+| Asistente Nexo    | `Modal`, `Button`, `TextArea`                 | `primary`, `secondary`, `ghost` | Diálogo lateral de 440 px; hoja inferior en móvil. Solo en rutas de producto.                                       |
+| Icono de marca    | SVG estático (`src/app/icon.svg`)             | paleta de Nexo                  | Nav de producto; el enlace lleva `aria-label="Embat Pulse, inicio"` y apunta a `/`.                                 |
+| Hero dither       | Paper `ImageDithering` (`PulseHeroDither`)    | destellos locales, `contain`    | Columna izquierda de `/`; webp propio; `preload` RSC; fade `data-ready`; `maxPixelCount` 480 000; no `next/image`.  |
+| Hero mark         | SVG propio (`PulseHeroMark`)                  | tokens de score + accent        | Geometría compartida; no se monta en `/`. El `h1` de la landing es «Embat Pulse» y es `sr-only`.                    |
+| Site frame        | `SiteFrame`                                   | `split`, `pulse`                | Gutters y eje; `pulse` solo en `/`, sobre la línea derecha existente.                                               |
+| Landing scroll    | `LandingScroll`                               | paging 900 ms                   | Un gesto, una banda; tween propio, no snap nativo.                                                                  |
+| Landing footer    | `LandingFooter`                               | cuadrante derecho               | Producto / Documentación (todas las páginas); firma de producto y © sobre hairline; grano dither; heatmap en `lg+`. |
+| Landing bar       | `LandingBar`                                  | sobre el hero                   | Marca y alto de la nav de producto, tagline del prototipo, hairline; sólo en la banda 0.                            |
+| Footer heatmap    | Paper `Heatmap` (`PulseFooterHeatmap`)        | rampa Embat                     | Columna izquierda, solo `lg+`; `aria-hidden`; `speed={0}` con reduced motion.                                       |
+| Footer dither     | Paper `ImageDithering` (`PulseFooterDither`)  | recorte rotado detrás de listas | Mismo `/hero-dither.webp`; `scale` 2.4, origin 0.68/0.32, 28°; tinta `#afafbb` a 0.22 `screen`; no Heatmap.         |
+| Hero access       | `HeroAccess`                                  | cuadrícula 2 columnas           | Todas las páginas de la empresa demo (`HERO_SECTIONS` = `companySections`); subrayado animado.                      |
+| Landing showcase  | `LandingShowcase`                             | rejilla 2×n + trayectoria       | Banda 1: overline «Producto»; una celda por página, reglas por fila; la celda sólo cambia título y lead.            |
+| Feature dither    | Paper `ImageDithering` (`PulseFeatureDither`) | un campo detrás de la rejilla   | Mismo `/hero-dither.webp`; tinta `#0d1130` a 0.32; hover/selected por tipo, no `--accent`; no Heatmap.              |
+| Band showcase     | `PulseBandShowcase`                           | 4 niveles + loop 7,2 s          | Tira de niveles del score en su color; hover/foco/pulsación cambia a la trayectoria de esa banda, en su color.      |
+| Showcase PULSE    | SVG generado (`PulseShowcaseAnimation`)       | loop 7,2 s                      | Inline; `bandShowcaseTrajectory` por banda; motion CSS local; freeze con reduced-motion; hereda la fuente.          |
+| Cifra de cabecera | `PulseHeadlineTotal` (`pulse/headline-total`) | 52 px (40 en móvil)             | Cifra que contesta al `h1` en Acción y Recomendación, con la leyenda de qué cuenta a su derecha.                    |
+| Tabla de Acción   | `PulseGapTable` (`pulse/gap-table`)           | 4 columnas, apretadas bajo `md` | Los tres pasos: variable con punto de banda y barra de puntos, score, puntos y enlace al plan.                      |
+| Plan de variable  | `PulsePlanPanel` (`pulse/plan-panel`)         | 3 pasos numerados               | Por qué escrito con las cifras del mes, los tres pasos y las salidas a Acción y a Financiación.                     |
 
 ### Icono de marca
 
@@ -473,6 +487,20 @@ patterns.
 | 2026-09-19 | Hero dither: `preload` RSC del webp + fade al decode; `maxPixelCount` 480 000 | Paper no consume `next/image`; el destello no debe depender de que el archivo llegue tarde | Equipo Pulse |
 | 2026-09-19 | Nexo pasa a agente con siete herramientas de lectura y `show_chart`; los gráficos del chat son figuras con overline, título, el SVG del producto y «Abrir en la aplicación», entre dos hairlines | El asistente responde con la cifra exacta y la dibuja en vez de describirla; reutilizar los gráficos del producto hace que el chat y la página digan lo mismo con el mismo trazo | Equipo Pulse |
 | 2026-09-19 | Las barras del chat (`BarRow`) apilan etiqueta y cifra sobre la barra a ancho completo; las series de la comparación se distinguen por tinta y trazo, con leyenda | A 440 px la rejilla lateral truncaba las etiquetas; el color sigue reservado a banda y dirección, así que la identidad de una serie va en el trazo | Equipo Pulse |
+| 2026-09-19 | Haffer SQ XH autoalojada (400/500, 600→500) sustituye a Inter en todo el producto | Es la tipografía de embat.io; una sola familia y ninguna negrita sintetizada | Equipo Pulse |
+| 2026-09-19 | Landing lista todas las páginas del producto desde `companySections` (hero, rejilla y pie) | Faltaban Diagnóstico, Detalle y Alertas; una sola fuente evita que marketing y nav diverjan | Equipo Pulse |
+| 2026-09-19 | Gráfica de la landing por nivel de score: cuatro niveles en su color, hover/foco cambia a la trayectoria de esa banda | La paleta de severidad se lee antes de abrir el producto; sustituye al SVG vendido de `COMP_0001` | Equipo Pulse |
+| 2026-09-19 | Pie de landing sin Condiciones ni Privacidad; sólo © y la firma de producto | Petición del equipo; las páginas legales no aportan al demo | Equipo Pulse |
+| 2026-09-19 | Bandas de la landing con los tokens Embat del producto (claro/oscuro) y `LandingBar` con la marca de la nav | La landing no debe leerse como otro producto; cambios pequeños, no un rediseño | Equipo Pulse |
+| 2026-09-19 | `FactGrid` deja de ser una caja de celdas y pasa a tira de filetes: filete arriba y abajo, filete izquierdo entre celdas, la primera sin filete ni inset, cifra 24/600 y etiqueta 13 a 6 px | Dentro de un panel la caja repetía el borde que ya dibuja el panel; el filete separa dos lecturas y la primera celda alinea la tira con la columna de texto | Equipo Pulse |
+| 2026-09-19 | Las celdas del mosaico pierden el punto de color: fondo con el lavado de su banda al 12 % (22 % la seleccionada), filete neutro y `--brand-blue` sólo en la seleccionada | El punto repetía lo que ya dice el fondo y el borde teñido competía con la selección; así el borde sólo porta un estado y el color sigue siendo gravedad | Equipo Pulse |
+| 2026-09-19 | Cabecera de columna del mosaico: el pilar como overline de 13 px en mayúsculas y debajo su score a 24 px con el nombre de la banda al lado; desaparece «pts de peso» | El ancho de la columna ya es el peso, así que escribirlo era repetir el dibujo; el score del pilar es lo que se compara entre columnas y necesita el tamaño de una cifra | Equipo Pulse |
+| 2026-09-19 | Financiación abre con la medida que no cuesta nada (`SoftActionPanel`): la variable con mayor hueco, `peso · (100 − score) / peso con dato`, con su plan de `lib/pulse/plans.ts`; el catálogo pasa a «Si necesitas financiación» | Ofrecer producto antes de agotar lo gratuito es venderle deuda a quien puede mover una fecha de pago; el hueco es el espejo del aporte, así que la elección es aritmética y no opinión | Equipo Pulse |
+| 2026-09-19 | El pie de producto se queda sólo con «By humans for humans.», centrado | «Pulse · 11 variables en 4 pilares» ya está en Método y en la cabecera de cada cierre; el pie firma, no describe | Equipo Pulse |
+| 2026-09-19 | Séptima pestaña «Acción» (`/company/[id]/action`) entre Diagnóstico y Detalle, con la recomendación de una variable en `/action/[key]` | Diagnóstico dice dónde se pierde el score y Financiación qué producto encaja; faltaba la página que ordena qué hacer primero sin pedir dinero | Equipo Pulse |
+| 2026-09-19 | El total de Acción es la suma de los tres pasos mostrados, no de las nueve variables con dato | Una cifra de cabecera que no cuadre con la lista que tiene debajo se lee como un error, no como una lectura más amplia | Equipo Pulse |
+| 2026-09-19 | Con siete pestañas, el buscador de la nav baja a 176 px entre `lg` y `xl` y las pestañas a 10 px de inset lateral | La fila de 1240 px no admite el séptimo destino con 224 px de buscador; se recorta el control antes que esconder una sección | Equipo Pulse |
+| 2026-09-19 | Los puntos de cada paso se escriben a 17-20 px con «pts» en 13 px, y no a los 28 px del prototipo | La columna de puntos mide 96 px y «+12,34 pts» a 28 px no cabe; la barra de la fila ya da la magnitud de un vistazo | Equipo Pulse |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce

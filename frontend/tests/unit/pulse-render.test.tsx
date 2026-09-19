@@ -170,11 +170,12 @@ describe('the month-by-month view renders on the server', () => {
       <PulseVariableMosaic mosaic={mosaic} companyId="COMP_0001" />,
     );
     expect(markup).toContain('Calidad de cobro');
-    expect(markup).toContain('54,6 · neutro');
-    expect(markup).toContain('36 pts de peso');
+    expect(markup).toContain('>54,6</b>');
+    expect(markup).toContain('>neutro</em>');
+    expect(markup).not.toContain('pts de peso');
     expect(markup).toContain('Tramo +90 días');
     expect(markup).toContain('2 sin datos');
-    expect(markup).toContain('color-mix(in oklab, var(--score-critical) 8%');
+    expect(markup).toContain('color-mix(in oklab, var(--score-critical) 12%');
     expect(markup).toContain('Peso en el modelo');
     expect(markup).toContain('Ver la variable');
     expect(markup).toMatch(/href="\/company\/COMP_0001\/variable\/\w+"/);

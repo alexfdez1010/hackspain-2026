@@ -255,7 +255,12 @@ describe('the advisor page', () => {
     expect(markup).toContain('4 quedan fuera');
     expect(markup).toContain('Qué hacer ahora');
     expect(markup).toContain('Leyendo las cifras de la empresa…');
-    expect(markup).toContain('Aprobado con tu PULSE de hoy');
+    expect(markup).toContain('Antes de financiar · sin coste');
+    expect(markup).toContain('Efecto en el PULSE si la variable llega a 100');
+    expect(markup).toContain('Coste financiero de la medida');
+    expect(markup).toContain('Cuándo se ve en el PULSE');
+    expect(markup).toContain('Si necesitas financiación');
+    expect(markup).not.toContain('Aprobado con tu PULSE de hoy');
     expect(markup).toContain('Tu pilar más débil es deuda y servicio, en 34.');
     expect(markup).toContain('Línea de crédito');
     expect(markup).toContain('Anticipo de facturas');

@@ -4,11 +4,13 @@ import { notFound } from 'next/navigation';
 import { CompanyActionsSection } from '@/components/actions/company-actions-panel';
 import { AdvisorDetail } from '@/components/advisor/advisor-detail';
 import { ApprovedPanel } from '@/components/advisor/approved-panel';
+import { SoftActionPanel } from '@/components/advisor/soft-action-panel';
 import { PageShell } from '@/components/layout/page-shell';
-import { getAdvisorDataSource } from '@/lib/advisor/data';
 import { companyName } from '@/lib/company/names';
 import { formatNumber } from '@/lib/format';
-import { getPulseDataSource } from '@/lib/pulse/data';
+import { loadCompanyPage } from '@/lib/pulse/company-page';
+import { largestPulseGap } from '@/lib/pulse/gap';
+import { buildPulseMosaic } from '@/lib/pulse/mosaic';
 
 interface AdvisorPageProps {
   params: Promise<{ id: string }>;
@@ -55,26 +57,36 @@ function buildLead(fitting: number, declined: number): string {
 
 /**
  * What the company should do about its financing this month: the action
- * first, then the products it can sign today with their price and fit, and
- * the argument behind them folded away.
+ * first, then the operational measure that costs nothing, then the products it
+ * can sign today with their price and fit, and the argument behind them
+ * folded away.
+ *
+ * The free measure comes before the catalogue on purpose: the largest gap of
+ * the last close is worth points of PULSE that no product buys, so it has to
+ * be dismissed before an offer is read.
  *
  * @param props - Route parameters carrying the company identifier.
  * @returns The advisor page, or a 404 when the identifier is unknown.
  */
 export default async function CompanyAdvisorPage({ params }: AdvisorPageProps) {
   const { id } = await params;
-  const [company, summary] = await Promise.all([
-    getAdvisorDataSource().getCompany(id),
-    getPulseDataSource().getSummary(),
-  ]);
-  if (!company) notFound();
+  const data = await loadCompanyPage(id, true);
+  const company = data?.advisor;
+  if (!data || !company) notFound();
 
+  const { meta, company: scored } = data;
   const variableLabels = Object.fromEntries(
-    summary.meta.variables.map((variable) => [variable.key, variable.label]),
+    meta.variables.map((variable) => [variable.key, variable.label]),
   );
   const pillarLabels = Object.fromEntries(
-    summary.meta.pillars.map((pillar) => [pillar.key, pillar.label]),
+    meta.pillars.map((pillar) => [pillar.key, pillar.label]),
   );
+  const mosaic = buildPulseMosaic(
+    meta.pillars,
+    meta.variables,
+    scored.series.at(-1) ?? null,
+  );
+  const gap = largestPulseGap(mosaic.cells);
 
   return (
     <PageShell
@@ -86,6 +98,7 @@ export default async function CompanyAdvisorPage({ params }: AdvisorPageProps) {
         month={company.month}
         current="advisor"
       />
+      {gap && <SoftActionPanel gap={gap} />}
       <ApprovedPanel
         company={company}
         pillarLabels={pillarLabels}

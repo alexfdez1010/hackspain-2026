@@ -88,7 +88,7 @@ test('switches company from the navigation and stays on the section', async ({
   await page.goto('/company/COMP_0001/recommendations');
   const nav = page.getByRole('navigation', { name: 'Secciones' });
   await expect(
-    page.getByRole('heading', { name: 'Aprobado con tu PULSE de hoy' }),
+    page.getByRole('heading', { name: 'Si necesitas financiación' }),
   ).toBeVisible();
   const detail = page.getByRole('button', { name: 'Ver detalle' }).first();
   await expect(detail).toHaveAttribute('aria-expanded', 'false');

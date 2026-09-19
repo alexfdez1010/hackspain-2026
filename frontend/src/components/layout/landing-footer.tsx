@@ -2,12 +2,14 @@ import Link from 'next/link';
 
 import { PulseFooterDither } from '@/components/layout/pulse-footer-dither';
 import { PulseFooterHeatmap } from '@/components/layout/pulse-footer-heatmap';
-import { PRODUCT_SECTIONS } from '@/lib/landing/product-sections';
+import { footerGroup, PRODUCT_SECTIONS } from '@/lib/landing/product-sections';
 
 const PLATFORM = PRODUCT_SECTIONS.filter(
-  (section) => section.label !== 'Método',
+  (section) => footerGroup(section.key) === 'platform',
 );
-const DOCS = PRODUCT_SECTIONS.filter((section) => section.label === 'Método');
+const DOCS = PRODUCT_SECTIONS.filter(
+  (section) => footerGroup(section.key) === 'docs',
+);
 
 /**
  * One labelled column of footer links, left-aligned.
@@ -24,13 +26,15 @@ function FooterLinkGroup({
 }) {
   return (
     <div>
-      <p className="text-sm text-muted">{title}</p>
+      <p className="text-[13px] font-semibold uppercase leading-[1.2] tracking-[0.06em] text-muted">
+        {title}
+      </p>
       <ul className="mt-3 flex flex-col gap-2">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="text-sm text-foreground transition-colors hover:text-muted"
+              className="text-[15px] text-foreground transition-colors hover:text-muted"
             >
               {link.label}
             </Link>
@@ -45,6 +49,8 @@ function FooterLinkGroup({
  * Full-viewport footer: Heatmap in the left pane, dithered lists on the right.
  *
  * The left inner column is desktop-only. No product mark as a heading here.
+ * The bottom line is the same signature as the product footer, over a
+ * hairline, plus the copyright.
  *
  * @returns The framed footer band.
  */
@@ -67,24 +73,13 @@ export function LandingFooter() {
           className="relative z-[1] flex flex-1 items-center"
         >
           <div className="grid w-full grid-cols-2 gap-x-10">
-            <FooterLinkGroup title="Platform" links={PLATFORM} />
-            <FooterLinkGroup title="Docs" links={DOCS} />
+            <FooterLinkGroup title="Producto" links={PLATFORM} />
+            <FooterLinkGroup title="Documentación" links={DOCS} />
           </div>
         </nav>
-        <p className="relative z-[1] mt-auto flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted">
-          <span>© 2026 Pulse</span>
-          <Link
-            href="/condiciones"
-            className="transition-colors hover:text-foreground"
-          >
-            Condiciones de uso
-          </Link>
-          <Link
-            href="/privacidad"
-            className="transition-colors hover:text-foreground"
-          >
-            Política de privacidad
-          </Link>
+        <p className="relative z-[1] mt-auto flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-separator pt-6 text-[13px] leading-[1.45] text-muted">
+          <span>© 2026 Pulse · 11 variables en 4 pilares</span>
+          <span>By humans for humans.</span>
         </p>
       </div>
       <div className="col-start-3 lg:col-start-4" />

@@ -36,10 +36,10 @@ function buildFacts(cell: PulseMosaicCell): PulseFact[] {
       key: 'band',
       label: known ? `Banda ${bandRange(cell.band)}` : 'No puntúa este mes',
       value: (
-        <span className="inline-flex items-center gap-2">
+        <span className="flex items-center gap-2">
           <span
             aria-hidden
-            className="size-2 shrink-0 rounded-full"
+            className="size-2.5 shrink-0 rounded-full"
             style={{
               background: known ? cell.band.color : NO_DATA_COLOR,
             }}
@@ -77,14 +77,12 @@ export function MosaicDetail({ cell, companyId }: MosaicDetailProps) {
     <Panel>
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-5 gap-y-2">
         <span>
-          <b className="block text-xl font-semibold leading-snug">
-            {cell.label}
-          </b>
-          <span className="mt-0.5 block text-[13px] text-ink-secondary">
+          <b className="block font-medium">{cell.label}</b>
+          <span className="text-ink-secondary mt-0.5 block text-[13px]">
             Pilar de {cell.pillarLabel.toLowerCase()}
           </span>
         </span>
-        <span className="text-[13px] text-ink-secondary">
+        <span className="text-ink-secondary text-[13px]">
           Pulsa cualquier celda del mosaico para cambiar de variable
         </span>
       </div>

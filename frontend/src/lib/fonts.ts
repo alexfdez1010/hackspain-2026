@@ -1,16 +1,20 @@
-import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 
 /**
  * The single family of the product: headings, body, tables and figures.
  *
- * The brand stack is Aeonik → General Sans → Inter; Inter is the cut the
- * design prototype loads and the only one licensed here. Three weights are
- * enough for the whole scale: 400 running text, 500 labels and emphasis, 600
- * headings and figures. There is no bold: 700 never appears in the design.
+ * Haffer SQ XH is the grotesque embat.io sets its whole site in, self-hosted
+ * from the two cuts that site ships: 400 for running text and 500 for
+ * labels, emphasis and headings. The 600 the type scale names resolves to
+ * the 500 file on purpose, so the browser never synthesises a faux bold;
+ * there is no 700 anywhere in the design.
  */
-export const inter = Inter({
-  variable: '--font-inter',
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
+export const haffer = localFont({
+  variable: '--font-haffer',
   display: 'swap',
+  src: [
+    { path: '../fonts/haffer-sqxh-400.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/haffer-sqxh-500.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/haffer-sqxh-500.woff2', weight: '600', style: 'normal' },
+  ],
 });

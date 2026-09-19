@@ -42,6 +42,31 @@ export const DRAWABLE_BANDS = SCORE_BANDS.map((band) => ({
 /** Colour of a dot that stands for «no evidence this month». */
 export const NO_DATA_COLOR = 'var(--border-subtle, #d2d2db)';
 
+/** Share of the band colour a plain wash keeps, in percent. */
+const SURFACE_TINT = 8;
+
+/** Share of the band colour the border of a washed card keeps, in percent. */
+const BORDER_TINT = 30;
+
+/**
+ * Washes the raised surface with the colour of the band a score falls in.
+ *
+ * Mixing against `--surface-raised` instead of picking a colour per band keeps
+ * one definition of «severity» for every tinted surface of the product and
+ * lets the same call work in both themes.
+ *
+ * @param score - Score in the 0-100 range, or `null` when the month has none.
+ * @param percent - Share of the band colour to keep, in percent.
+ * @returns A `color-mix` background, or `undefined` without a score.
+ */
+export function bandTint(
+  score: number | null,
+  percent: number,
+): string | undefined {
+  if (score === null || !Number.isFinite(score)) return undefined;
+  return `color-mix(in oklab, ${scoreBand(score).color} ${percent}%, var(--surface-raised))`;
+}
+
 /**
  * Surface of a card that carries a score: a wash of its band behind the
  * figure and a border of the same hue, both mixed with the neutral tokens so
@@ -60,7 +85,7 @@ export function bandSurfaceStyle(
   if (score === null || !Number.isFinite(score)) return undefined;
   const tone = scoreBand(score).color;
   return {
-    borderColor: `color-mix(in oklab, ${tone} 30%, var(--border-subtle))`,
-    background: `color-mix(in oklab, ${tone} 8%, var(--surface-raised))`,
+    borderColor: `color-mix(in oklab, ${tone} ${BORDER_TINT}%, var(--border-subtle))`,
+    background: bandTint(score, SURFACE_TINT),
   };
 }

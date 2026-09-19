@@ -1,16 +1,9 @@
 import Link from 'next/link';
 
+import type { NavSection } from '@/lib/company/sections';
 import type { CompanySection } from '@/lib/routes';
 
-/** One destination of the navigation. */
-export interface NavSection {
-  /** Section the entry opens, as `sectionFromPath` names it. */
-  key: CompanySection;
-  href: string;
-  label: string;
-  /** Route prefix owned by the entry. */
-  match: string;
-}
+export type { NavSection } from '@/lib/company/sections';
 
 interface NavSectionLinksProps {
   sections: readonly NavSection[];
@@ -28,18 +21,22 @@ const LIST_CLASS = {
 } as const;
 
 const LINK_CLASS = {
-  row: 'flex min-h-10 items-center rounded-lg px-3 py-[11px] text-[15px] font-medium leading-none whitespace-nowrap transition-colors',
+  row: 'flex min-h-10 items-center rounded-lg px-2 py-[11px] text-[15px] font-medium leading-none whitespace-nowrap transition-colors xl:px-3',
   column:
     'flex min-h-12 items-center rounded-lg px-4 text-[17px] font-medium leading-none transition-colors',
 } as const;
 
 /**
- * The six sections of a company as links that look like tabs: the current
+ * The seven sections of a company as links that look like tabs: the current
  * one in link blue on `brand-subtle`, the rest in secondary ink.
  *
  * They stay `next/link` anchors with `aria-current`, so every section keeps
  * its own URL and can be opened in a new tab. The same list serves the wide
  * bar as a row and the phone menu as a column with 48 px targets.
+ *
+ * The row keeps 10 px of side padding up to `xl`: with seven tabs the strip
+ * and the company search share one 1240 px row, and the brand inset of 12 px
+ * only comes back where there is room for it.
  *
  * @param props - Sections, the current one, the layout and the close hook.
  * @returns The list of section links.
