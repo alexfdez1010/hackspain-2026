@@ -64,7 +64,7 @@ def flow_dynamics(df: pl.DataFrame) -> pl.DataFrame:
         ((pl.col("inflow_3m") - pl.col("outflow_3m")) / burn).alias("net_3m_ratio"),
         ((pl.col("inflow_6m") - pl.col("outflow_6m")) / burn).alias("net_6m_ratio"),
         (
-            pl.col("inflow_3m")
+            pl.max_horizontal(pl.col("inflow_3m"), 1.0)
             / pl.max_horizontal(pl.col("inflow_3m").shift(3).over("company_id"), 1.0)
         )
         .log()

@@ -9,8 +9,14 @@ BIG_MOVE = 15.0  # points; used by the evaluation to define "large" changes
 QUANTILE_LOW, QUANTILE_HIGH = 0.1, 0.9
 N_FOLDS = 5  # GroupKFold folds used both for the evaluation and for the band
 
+# ``alpha`` is the Huber threshold in points of PULSE. LightGBM's default (0.9) is
+# far below the target's scale (std 9 at +1, 19 at +12): every gradient gets clipped,
+# the leaves shrink towards zero and the trees stop splitting on the horizon past
+# +3, which draws a flat line from there on. 6 keeps the robustness to outliers
+# while letting the far horizons move (see the README evaluation table).
 POINT_PARAMS: dict = {
     "objective": "huber",
+    "alpha": 6.0,
     "learning_rate": 0.03,
     "num_leaves": 31,
     "min_data_in_leaf": 100,

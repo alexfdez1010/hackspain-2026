@@ -11,13 +11,18 @@ from ml_service.pulse.forecast.attribution import (
     aggregate,
     shares_of_feature,
 )
-from ml_service.pulse.forecast.config import HORIZON_FEATURE, HORIZONS
+from ml_service.pulse.forecast.config import (
+    HORIZON_FEATURE,
+    HORIZONS,
+    POINT_PARAMS,
+)
 from ml_service.pulse.forecast.engine import ForecastEngine
 from ml_service.pulse.forecast.features import (
     add_targets,
     feature_columns,
     stack_horizons,
 )
+from ml_service.pulse.forecast.features_flows import flow_dynamics
 from ml_service.pulse.forecast.model import band_quantiles
 from ml_service.pulse.variables import VARIABLES
 
@@ -131,3 +136,62 @@ def test_engine_fits_predicts_and_decomposes(tmp_path):
     assert "y_1" not in feature_columns(frame) and "group_id" not in feature_columns(
         frame
     )
+
+
+def _drift_frame(n_companies: int = 40, n_months: int = 24) -> pl.DataFrame:
+    """Companies whose PULSE drifts by a known amount per month, exposed as ``trend``."""
+    rng = np.random.default_rng(3)
+    rows = []
+    for i in range(n_companies):
+        level, drift = rng.uniform(30, 70), rng.uniform(-2, 2)
+        for m in range(n_months):
+            level = level + drift + rng.normal(0, 1)
+            rows.append(
+                {
+                    "company_id": f"C{i}",
+                    "group_id": f"G{i % 5}",
+                    "month": datetime(2024 + m // 12, 1 + m % 12, 1),
+                    "pulse": float(level),
+                    "trend": drift,
+                    "noise": rng.uniform(0, 1),
+                }
+            )
+    return add_targets(pl.DataFrame(rows).sort("company_id", "month"))
+
+
+def test_far_horizons_keep_moving_with_the_production_huber_threshold():
+    """Guards the Huber ``alpha``: with LightGBM's default (0.9) every gradient is clipped
+    and the forecast freezes past +3 (a flat line); on a rising company +12 must sit
+    clearly above +4."""
+    frame = _drift_frame()
+    params = {**FAST_PARAMS, "alpha": POINT_PARAMS["alpha"]}
+    out = ForecastEngine.fit(frame, params, rounds=60).predict(frame)
+    deltas = out.pivot(on="horizon", index="company_id", values="delta").join(
+        frame.group_by("company_id").agg(pl.col("trend").first()), on="company_id"
+    )
+    rising = deltas.filter(pl.col("trend") > 1)
+    assert len(rising) >= 5
+    assert ((rising["12"] - rising["4"]) > 3).all()
+
+
+def test_inflow_growth_is_finite_without_inflows():
+    months = [datetime(2025, m, 1) for m in range(1, 8)]
+    df = pl.DataFrame(
+        {
+            "company_id": ["C"] * 7,
+            "month": months,
+            "inflow": [100.0, 100.0, 100.0, 0.0, 0.0, 0.0, 50.0],
+            "inflow_intra": [0.0] * 7,
+            "outflow": [10.0] * 7,
+            "outflow_3m": [30.0] * 7,
+            "ev_returned": [0] * 7,
+            "ev_stress": [0] * 7,
+            "service_3m": [0.0] * 7,
+            "loc_util": [0.0] * 7,
+            "dpo_days": [None] * 7,
+            "cash_end": [1000.0] * 7,
+        }
+    )
+    growth = flow_dynamics(df)["inflow_growth_3m"]
+    assert growth.is_finite().all()
+    assert growth[5] < 0

@@ -206,12 +206,23 @@ uv run python -m ml_service.pulse.export_web              # -> data/pulse/web/ (
 # summary.json also carries an `evaluation` block (score, forecast and risk figures) read by the web app's method page
 ```
 
-**Design.** A **single LightGBM model** (`objective=huber`) predicts the *change*
+**Design.** A **single LightGBM model** (`objective=huber`, `alpha=6`) predicts the *change*
 of `pulse` between month *t* and *t+h*; the horizon `h` is an ordinary input
 column (`HORIZON_FEATURE`), so the training set is every (company-month, horizon)
 pair with an observed target stacked together (`features.stack_horizons`) and
 extending the horizon is a change in `config.HORIZONS`, not a new model. Persistence
-is the starting point and the model only learns deviations. The p10-p90 band is
+is the starting point and the model only learns deviations. The Huber threshold
+`alpha` is expressed in points of PULSE and must sit on the scale of the target
+(std 9 at +1, 19 at +12): with LightGBM's default (0.9) every gradient is clipped,
+the leaves shrink towards zero and the trees stop splitting on the horizon past
++3, so every trajectory turned into a flat line from +4 on (86 % of the companies
+had six or more identical horizons) and the model predicted a spread of 4 points
+at +12 against 19 observed. `alpha=6` removes the flat line (the spread at +12 is
+7 points, only the last two or three horizons coincide, where the training rows
+are scarcest), cuts the MAE from 9.29 to 8.97 and more than doubles the recall of
+large improvements; larger values (10, 15) or a plain `l2` objective are slightly
+worse, and a random forest on the same inputs (MAE 9.26) also flattens the far
+horizons. The p10-p90 band is
 **conformal**: the 10th/90th percentile of the out-of-fold residual at each horizon
 (GroupKFold(5) on `group_id`, computed inside `fit`) is added to the central
 forecast, which keeps the 80 % coverage honest without extra quantile models; the
@@ -234,38 +245,38 @@ clipped to 0-100, and the band is clipped the same way.
 `group_id`, one fit of the single model per fold, MAE in points of PULSE).
 "Reversion" is a one-parameter mean-reversion baseline fitted out of fold;
 anything that does not beat it is just percentiles drifting back to the middle.
-Over the 169,691 stacked (company-month, horizon) rows the model's MAE is 9.29
-against 11.11 for persistence (+16.4 %) and 10.59 for reversion (+12.3 %), with
+Over the 169,691 stacked (company-month, horizon) rows the model's MAE is 8.97
+against 11.11 for persistence (+19.2 %) and 10.59 for reversion (+15.3 %), with
 80.0 % of the outcomes inside the p10-p90 band.
 
 | horizon | rows | persist | reversion | ML | vs persist | vs reversion | direction on moves > 15 | recall declines | recall improvements | p10-p90 coverage |
 |---|---|---|---|---|---|---|---|---|---|---|
-| +1 | 20,932 | 5.72 | 5.89 | **5.45** | +4.6 % | +7.4 % | 0.85 | 0.45 | 0.03 | 0.80 |
-| +2 | 19,647 | 8.47 | 8.35 | **7.39** | +12.8 % | +11.5 % | 0.87 | 0.55 | 0.19 | 0.80 |
-| +3 | 18,362 | 10.52 | 9.99 | **8.70** | +17.3 % | +12.9 % | 0.89 | 0.63 | 0.31 | 0.80 |
-| +4 | 17,077 | 11.20 | 10.53 | **9.16** | +18.2 % | +13.0 % | 0.89 | 0.66 | 0.30 | 0.80 |
-| +5 | 15,795 | 11.83 | 11.02 | **9.66** | +18.3 % | +12.3 % | 0.89 | 0.67 | 0.29 | 0.80 |
-| +6 | 14,514 | 12.35 | 11.41 | **10.10** | +18.2 % | +11.5 % | 0.89 | 0.68 | 0.27 | 0.80 |
-| +7 | 13,240 | 12.70 | 11.66 | **10.45** | +17.7 % | +10.4 % | 0.88 | 0.67 | 0.28 | 0.80 |
-| +8 | 12,044 | 12.97 | 11.87 | **10.75** | +17.1 % | +9.4 % | 0.88 | 0.68 | 0.28 | 0.80 |
-| +9 | 10,980 | 13.27 | 12.06 | **11.01** | +17.0 % | +8.7 % | 0.87 | 0.68 | 0.26 | 0.80 |
-| +10 | 9,980 | 13.67 | 12.30 | **11.33** | +17.1 % | +7.9 % | 0.86 | 0.69 | 0.22 | 0.80 |
-| +11 | 9,018 | 14.00 | 12.46 | **11.55** | +17.5 % | +7.3 % | 0.86 | 0.70 | 0.22 | 0.80 |
-| +12 | 8,102 | 14.27 | 12.62 | **11.71** | +18.0 % | +7.2 % | 0.87 | 0.71 | 0.22 | 0.80 |
+| +1 | 20,932 | 5.72 | 5.89 | **5.66** | +1.1 % | +4.0 % | 0.86 | 0.53 | 0.46 | 0.80 |
+| +2 | 19,647 | 8.47 | 8.35 | **7.30** | +13.7 % | +12.5 % | 0.89 | 0.67 | 0.56 | 0.80 |
+| +3 | 18,362 | 10.52 | 9.99 | **8.39** | +20.3 % | +16.0 % | 0.90 | 0.74 | 0.62 | 0.80 |
+| +4 | 17,077 | 11.20 | 10.53 | **8.81** | +21.4 % | +16.4 % | 0.90 | 0.76 | 0.62 | 0.80 |
+| +5 | 15,795 | 11.83 | 11.02 | **9.24** | +21.9 % | +16.1 % | 0.90 | 0.77 | 0.61 | 0.80 |
+| +6 | 14,514 | 12.35 | 11.41 | **9.64** | +21.9 % | +15.6 % | 0.90 | 0.79 | 0.60 | 0.80 |
+| +7 | 13,240 | 12.70 | 11.66 | **10.00** | +21.3 % | +14.3 % | 0.89 | 0.79 | 0.63 | 0.80 |
+| +8 | 12,044 | 12.97 | 11.87 | **10.32** | +20.4 % | +13.1 % | 0.89 | 0.79 | 0.63 | 0.80 |
+| +9 | 10,980 | 13.27 | 12.06 | **10.59** | +20.2 % | +12.3 % | 0.89 | 0.80 | 0.62 | 0.80 |
+| +10 | 9,980 | 13.67 | 12.30 | **10.83** | +20.8 % | +12.0 % | 0.89 | 0.80 | 0.57 | 0.80 |
+| +11 | 9,018 | 14.00 | 12.46 | **11.02** | +21.3 % | +11.6 % | 0.90 | 0.81 | 0.58 | 0.80 |
+| +12 | 8,102 | 14.27 | 12.62 | **11.10** | +22.2 % | +12.1 % | 0.90 | 0.81 | 0.58 | 0.80 |
 
-The single model matches or beats the previous one-model-per-horizon setup at
-every horizon from +2 on (for example 10.10 vs 10.33 at +6) and doubles the recall
-of large improvements, because the horizons share what they learn; it gives up
-about 0.1 points at +1. The temporal backtest (fit on months up to 2025-08, test
-from 2025-09) tells the same story: MAE 5.42 vs 5.69 persistence at +1, 10.51 vs
-12.14 at +6, 12.72 vs 14.25 at +11 (+12 has no observable future after the cut).
-Declines are still seen far better than recoveries (recall 0.71 vs 0.22 at one
-year): read the forecast as an early warning, not as a promise of improvement.
+The single model beats the previous one-model-per-horizon setup at every horizon
+(for example 9.64 vs 10.33 at +6) because the horizons share what they learn,
+and it sees recoveries almost as well as declines (recall 0.58 vs 0.81 at one
+year); at +1 it only matches persistence. The temporal backtest (fit on months up
+to 2025-08, test from 2025-09) tells the same story: MAE 5.67 vs 5.69 persistence
+at +1, 10.02 vs 12.14 at +6, 12.08 vs 14.25 at +11 (+12 has no observable future
+after the cut). Read the forecast as an early warning with a wide band, not as a
+promise: the p10-p90 band spans about 35 points at one year.
 A preliminary experiment forecasting each pillar separately showed that *cobro*
 and *pago* pillar forecasts do not beat the reversion baseline, which is why only
 PULSE itself is modelled and the breakdown comes from attribution rather than
-from per-variable models. The `horizon` input ranks fourth by gain (4.6 %) after
-`pulse`, `pillar_cobro` and `pulse_d3`. Horizons are scored independently at
+from per-variable models. The `horizon` input ranks third by gain (4.9 %) after
+`pulse` and `pillar_cobro`. Horizons are scored independently at
 prediction time, so a company's trajectory is not forced to be monotone.
 
 **API.** `GET /api/pulse/summary` and `GET /api/pulse/companies/{company_id}`
