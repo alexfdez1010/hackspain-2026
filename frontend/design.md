@@ -110,8 +110,8 @@ llevan etiqueta de severidad además de color.
   destacadas) (`--font-sans`). Cuerpo, tablas y enlaces de navegación.
 - Identifiers (`COMP_0001`) and raw figures use DM Sans with `tabular-nums`.
   There is no dedicated mono face.
-- Wordmark: en producto, `public/pulse-wordmark.png` como máscara CSS sobre
-  `foreground` (`PulseWordmark` en `ui/wordmark`, 14 px). En el hero de `/`,
+- Marca: en producto, icono de pulso sin texto (`src/app/icon.svg`, 40 px).
+  En el hero de `/`,
   `PulseHeroMark` SVG a escala de columna. El enlace de la nav se llama
   «Embat Pulse, inicio»; el `h1` de la landing es «Embat Pulse» y el SVG es
   presentacional.
@@ -171,13 +171,28 @@ adding it to the codebase.
 | Feedback          | `Chip`                                 | `soft` con `color` semántico    | Familia de producto, tipo de razón y estado de un producto descartado.                            |
 | Data              | `Table` vía `DataTable`                | por defecto                     | Toda tabla usa `DataTable`: cabeceras ordenables en ambos sentidos, «sin datos» siempre al final. |
 | Asistente Nexo    | `Modal`, `Button`, `TextArea`          | `primary`, `secondary`, `ghost` | Diálogo lateral de 440 px; hoja inferior en móvil. Solo en rutas de producto.                     |
-| Wordmark          | PNG máscara (`ui/wordmark`)            | `foreground`                    | Nav de producto; el enlace lleva `aria-label="Embat Pulse, inicio"` y apunta a `/`.               |
+| Icono de marca    | SVG estático (`src/app/icon.svg`)      | paleta de Nexo                  | Nav de producto; el enlace lleva `aria-label="Embat Pulse, inicio"` y apunta a `/`.               |
 | Hero mark         | SVG propio (`PulseHeroMark`)           | tokens de score + accent        | Solo en `/`. El `h1` es «Embat Pulse»; el SVG es `aria-hidden`.                                   |
 | Site frame        | `SiteFrame`                            | `split`, `pulse`                | Gutters y eje; `pulse` solo en `/`, sobre la línea derecha existente.                             |
 | Landing scroll    | `LandingScroll`                        | paging 900 ms                   | Un gesto, una banda; tween propio, no snap nativo.                                                |
 | Landing footer    | `LandingFooter`                        | cuadrante derecho               | Platform (PULSE, Recomendaciones) y Docs (Método); copyright y legal abajo.                       |
 | Footer heatmap    | Paper `Heatmap` (`PulseFooterHeatmap`) | rampa Embat                     | Columna izquierda, solo `lg+`; `aria-hidden`; `speed={0}` con reduced motion.                     |
 | Hero access       | `HeroAccess`                           | cuadrícula 2 columnas           | PULSE, Recomendaciones, Método (`HERO_SECTIONS`); subrayado animado.                              |
+
+### Icono de marca
+
+- Icono sin texto: pulso geométrico azul hielo sobre un cuadrado azul noche,
+  con un acento azul al final. Identidad financiera sobria, sin rasgos de
+  personaje. Paleta de Nexo: `#DCEEF9`, `#10264B` y `#78BCFF`.
+- Excepción de identidad al color semántico, igual que la mascota. Paleta fija
+  en claro y oscuro; el pulso no representa una medición ni una banda de score.
+- `src/app/icon.svg` es el original vectorial compartido por favicon y header;
+  `src/app/favicon.ico` contiene copias rasterizadas a 16, 32, 48 y 64 px.
+- El header muestra sólo el icono a 40 px en un enlace de 44 px con nombre
+  accesible «Embat Pulse, inicio» y foco visible. No añade animación.
+- Decisión conservada, 2026-09-19: mantener el dibujo como recurso estático
+  compartido separa identidad y navegación (responsabilidad única), evita
+  duplicar geometría en React y mantiene legible el favicon pequeño.
 
 ### Nexo
 
