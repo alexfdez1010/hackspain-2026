@@ -23,6 +23,7 @@ import {
   sortLevers,
   sortReasons,
   topLeverPillar,
+  weakestPillar,
 } from '@/lib/advisor/view';
 
 /**
@@ -277,5 +278,26 @@ describe('shared labels', () => {
     expect(formatSignedBps(707)).toBe('+707 pb');
     expect(formatSignedBps(-60)).toBe('−60 pb');
     expect(DECLINE_STATUS_LABELS.poco_encaje).toBe('Poco encaje');
+  });
+});
+
+describe('weakestPillar', () => {
+  it('names the pillar with the lowest score, with its own label', () => {
+    expect(
+      weakestPillar(
+        { liquidez: 52, deuda: 34, cobro: 61, pago: 70 },
+        { liquidez: 'Liquidez', deuda: 'Deuda y servicio' },
+      ),
+    ).toEqual({ key: 'deuda', label: 'Deuda y servicio', score: 34 });
+  });
+
+  it('falls back to the key when the metadata has no label', () => {
+    expect(weakestPillar({ cobro: 12 }, {})?.label).toBe('cobro');
+  });
+
+  it('ignores a pillar the month could not score', () => {
+    expect(weakestPillar({ liquidez: null, deuda: 40 }, {})?.key).toBe('deuda');
+    expect(weakestPillar({ liquidez: null }, {})).toBeNull();
+    expect(weakestPillar({}, {})).toBeNull();
   });
 });

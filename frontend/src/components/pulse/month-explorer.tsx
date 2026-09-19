@@ -2,13 +2,14 @@
 
 import { useMemo, useState } from 'react';
 
-import { ContributionBars } from '@/components/charts/contribution-bars';
+import { ChipRow } from '@/components/pulse/chip-row';
+import { FactGrid } from '@/components/pulse/fact-grid';
+import { MonthContributions } from '@/components/pulse/month-contributions';
 import { PulsePillarList } from '@/components/pulse/pillar-list';
-import { PulseVariableTable } from '@/components/pulse/variable-table';
-import { FacetSelect } from '@/components/ui/facet-select';
-import { ScoreBadge } from '@/components/ui/score-badge';
+import { ScoreHeadline } from '@/components/pulse/score-headline';
+import { Panel } from '@/components/ui/panel';
 import { buildVariableRows } from '@/lib/pulse/company-view';
-import { formatConfidence, formatConfidencePoints } from '@/lib/pulse/format';
+import { formatConfidence, formatWeightPoints } from '@/lib/pulse/format';
 import {
   buildMonthOptions,
   findMonth,
@@ -32,14 +33,15 @@ interface PulseMonthExplorerProps {
 /**
  * Opens any observed month and shows how its score was built.
  *
- * The selector defaults to the last close, which is the month every other
- * figure of the page refers to; choosing an earlier one re-reads the four
- * pillars, the points each variable contributed and the eleven raw figures of
- * that month, so a fall can be traced to the variable that caused it.
+ * The chips default to the last close, which is the month every other figure
+ * of the page refers to; choosing an earlier one re-reads the four pillars and
+ * the points each variable contributed that month, so a fall can be traced to
+ * the variable that caused it. The contributions add up to the PULSE of the
+ * month, and the footnote says so with the figure.
  *
  * @param props - The observed months and the score metadata.
- * @returns The month selector with the pillars, the contributions and the
- * variable table of the selected month.
+ * @returns The month chips with the pillars and the contributions of the
+ * selected month.
  */
 export function PulseMonthExplorer({
   series,
@@ -59,67 +61,66 @@ export function PulseMonthExplorer({
     [variables, point, pillarLabels],
   );
   const byContribution = useMemo(() => sortByContribution(rows), [rows]);
-  const unknown = rows.filter((row) => !row.known).length;
 
   if (!point) {
     return (
-      <p className="text-sm text-muted">
-        Sin meses observados: las variables aparecerán con el primer cierre.
-      </p>
+      <Panel>
+        <p className="text-sm text-ink-secondary">
+          Sin meses observados: las variables aparecerán con el primer cierre.
+        </p>
+      </Panel>
     );
   }
 
+  const unknown = rows.filter((row) => !row.known).length;
+  const label = formatMonth(point.month);
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
-        <FacetSelect
+    <Panel>
+      <div className="mb-6">
+        <ChipRow
           label="Mes observado"
           options={options}
           selected={point.month}
           onSelect={setMonth}
-          className="w-36"
         />
-        <div className="flex flex-col gap-0.5">
-          <span className="text-2xl font-semibold tabular-nums tracking-tight">
-            <ScoreBadge score={point.pulse} />
-          </span>
-          <span className="text-sm text-muted">
-            PULSE de {formatMonth(point.month)}
-          </span>
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-2xl font-semibold tabular-nums tracking-tight">
-            {formatConfidence(point.confidence)}
-          </span>
-          <span className="text-sm text-muted">
-            {formatConfidencePoints(point.confidence)}
-            {unknown > 0 &&
-              ` · ${formatNumber(unknown)} de ${formatNumber(rows.length)} variables sin datos`}
-          </span>
-        </div>
       </div>
-
-      <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
-        <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold">Pilares del mes</h3>
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1fr)]">
+        <div>
+          <ScoreHeadline score={point.pulse} caption={`PULSE de ${label}`} />
+          <div className="mt-6">
+            <FactGrid
+              columns={2}
+              items={[
+                {
+                  key: 'confidence',
+                  value: formatConfidence(point.confidence),
+                  label: `Confianza: ${formatWeightPoints(point.confidence)}`,
+                },
+                {
+                  key: 'unknown',
+                  value: `${formatNumber(unknown)} de ${formatNumber(rows.length)}`,
+                  label: `Variables sin dato en ${label}`,
+                },
+              ]}
+            />
+          </div>
+          <h3 className="mb-4 mt-8 text-sm font-medium text-ink-secondary">
+            Pilares del mes
+          </h3>
           <PulsePillarList pillars={pillars} scores={point.pillars} />
         </div>
-        <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold">
-            Puntos que aporta cada variable
+        <div>
+          <h3 className="mb-4 text-sm font-medium text-ink-secondary">
+            Aporte de cada variable, en puntos de PULSE
           </h3>
-          <ContributionBars
-            rows={byContribution}
-            emptyText="Ninguna variable tiene datos este mes."
-          />
-          <p className="text-sm text-muted">
-            Los aportes suman {formatNumber(sumVariableContributions(rows), 2)},
-            que es el PULSE de {formatMonth(point.month)}.
+          <MonthContributions rows={byContribution} />
+          <p className="mt-4 text-[13px] text-ink-secondary">
+            Suman {formatNumber(sumVariableContributions(rows), 2)}, el PULSE de{' '}
+            {label}.
           </p>
         </div>
       </div>
-
-      <PulseVariableTable rows={rows} />
-    </div>
+    </Panel>
   );
 }

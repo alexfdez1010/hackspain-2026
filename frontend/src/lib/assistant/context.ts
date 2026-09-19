@@ -86,7 +86,7 @@ export async function getAssistantContext(
         href: routes.pulse,
       },
       { label: 'Señales', href: routes.signals },
-      { label: 'Recomendaciones', href: routes.advisor },
+      { label: 'Financiación', href: routes.advisor },
     );
   }
   const last = company?.series[company.series.length - 1] ?? null;

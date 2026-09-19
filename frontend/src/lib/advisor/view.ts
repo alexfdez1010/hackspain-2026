@@ -132,3 +132,32 @@ export function formatRiskDriverValue(
   if (feature.startsWith('pillar_')) return `${formatNumber(value, 1)}/100`;
   return formatNumber(value, 2);
 }
+
+/** The pillar that holds the score back, with the label the page prints. */
+export interface WeakestPillar {
+  key: string;
+  label: string;
+  score: number;
+}
+
+/**
+ * Reads the pillar with the lowest score, the one worth naming once next to
+ * the offers: it is what the price is charging for.
+ *
+ * @param pillars - Pillar scores of the last close, keyed by pillar.
+ * @param labels - Spanish label of every pillar, keyed by pillar.
+ * @returns The weakest pillar, or `null` when no pillar has a score.
+ */
+export function weakestPillar(
+  pillars: Readonly<Record<string, number | null>>,
+  labels: Readonly<Record<string, string>>,
+): WeakestPillar | null {
+  let worst: WeakestPillar | null = null;
+  for (const [key, score] of Object.entries(pillars)) {
+    if (score === null || !Number.isFinite(score)) continue;
+    if (worst === null || score < worst.score) {
+      worst = { key, label: labels[key] ?? key, score };
+    }
+  }
+  return worst;
+}

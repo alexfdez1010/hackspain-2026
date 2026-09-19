@@ -14,13 +14,14 @@ unresolved placeholders. Keep them when completing or updating this document.
   already clear. Text must help users understand content, make a decision, take
   an action, or understand a state. Remove text that serves none of these
   purposes; preserve necessary instructions and accessible labels.
-- **Every border or line must have a purpose.** Avoid unnecessary card outlines,
-  panel borders, dividers, and decorative rules. Establish hierarchy with spacing,
-  alignment, typography, and grouping first. Use a border or separator only when
-  it materially improves comprehension or control recognition. The marketing
-  `SiteFrame` is the exception: its 1px gutters and center axis are the page
-  columns (sangría), not card chrome. Preserve visible focus indicators and
-  boundaries needed for accessibility.
+- **Separate with a line, never with a shadow.** The brand separates with a
+  1px hairline of `--border-subtle` and nothing else: panels, table rows, KPI
+  cells, the nav and the footer all carry one. There are no elevation levels
+  and no decorative outlines — a line is drawn where two readings meet, not
+  around anything that merely needs grouping; for that, spacing, alignment and
+  typography come first. The marketing `SiteFrame` follows the same rule: its
+  gutters and center axis are the page columns (sangría), not card chrome.
+  Preserve visible focus indicators and boundaries needed for accessibility.
 - **Treat space as part of the design.** Use a consistent spacing scale and
   deliberate padding, gaps, margins, and line heights. Keep related elements
   closer together than unrelated groups. Balance density and breathing room;
@@ -74,67 +75,106 @@ unresolved placeholders. Keep them when completing or updating this document.
 
 ### Color
 
-Tokens semánticos de HeroUI v3 (`background`, `foreground`, `surface`, `muted`,
-`accent`, `danger`…), más una escala propia del score. El tema oscuro se activa
-con `prefers-color-scheme` redefiniendo únicamente los tokens primitivos en
-`globals.css`; los derivados de HeroUI se recalculan solos. En la landing el
-esquema no sigue al sistema: banda 0 (hero) y 2 (pie) fuerzan oscuro; la banda
-1 (medio) fuerza claro, vía `data-band-theme` en el scroller.
+Tokens de marca de Embat (brief y juego de tokens de 2026-09-19) en dos capas.
+Los primitivos nombran el papel del color; los tokens de HeroUI v3
+(`background`, `foreground`, `surface`, `muted`, `accent`, `border`,
+`separator`, campos y segmentos) apuntan a ellos, de modo que todo lo ya
+escrito sigue funcionando. El tema oscuro se activa con `prefers-color-scheme`
+redefiniendo únicamente los primitivos en `globals.css`; lo derivado se
+recalcula solo. En la landing el esquema no sigue al sistema: banda 0 (hero) y
+2 (pie) fuerzan oscuro; la banda 1 (medio) fuerza claro, vía `data-band-theme`
+en el scroller.
 
-| Token               | Light value            | Dark value             | Usage                        |
-| ------------------- | ---------------------- | ---------------------- | ---------------------------- |
-| `background`        | `#fbfbfc`              | `#050b2c`              | Lienzo de la aplicación      |
-| `foreground`        | `#050b2c`              | `#ffffff`              | Texto principal              |
-| `surface`           | `#ffffff`              | `#232845`              | Tarjetas y paneles           |
-| `surface-secondary` | `#f3f4f6`              | `#41465f`              | Fondo de barras y celdas     |
-| `accent`            | `#3878f6`              | `#5c92fe`              | Acción primaria y foco       |
-| `muted`             | `#6e707c`              | `#afafbb`              | Texto secundario y etiquetas |
-| `danger`            | `#c2401f`              | `#c2401f`              | Estados destructivos         |
-| `--separator`       | `#d2d2db`              | `#373c56`              | Guías de columna y ejes      |
-| `--score-critical`  | `oklch(0.6 0.21 26)`   | `oklch(0.68 0.2 26)`   | Score < 35                   |
-| `--score-fragile`   | `oklch(0.72 0.15 72)`  | `oklch(0.79 0.15 76)`  | Score 35-50                  |
-| `--score-neutral`   | `oklch(0.62 0.03 262)` | `oklch(0.72 0.03 262)` | Score 50-65                  |
-| `--score-solid`     | `oklch(0.63 0.15 156)` | `oklch(0.74 0.16 157)` | Score > 65                   |
+| Token                    | Light     | Dark        | Tailwind                 | Uso                                     |
+| ------------------------ | --------- | ----------- | ------------------------ | --------------------------------------- |
+| `--surface-page`         | `#FFFFFF` | `#050B2C`   | `bg-page`                | Lienzo de la página                     |
+| `--surface-deep`         | `#F7F8FA` | `#05081C`   | `bg-deep`                | Marco y fondos hundidos                 |
+| `--surface-raised`       | `#FFFFFF` | `#111A46`   | `bg-raised`              | Paneles y tarjetas                      |
+| `--surface-brand-subtle` | `#EFF4FF` | `#111A46`   | `bg-brand-subtle`        | Fila señalada y hover de tabla          |
+| `--border-subtle`        | `#E4E7EE` | `#FFFFFF1F` | `border-hairline`        | El hairline de todo                     |
+| `--border-strong`        | `#CFD4E0` | `#FFFFFF52` | `border-hairline-strong` | Contorno de control                     |
+| `--text-primary`         | `#0D1130` | `#FFFFFF`   | `text-ink`               | Titulares, cifras y texto principal     |
+| `--text-secondary`       | `#6E7488` | `#C3CADA`   | `text-ink-secondary`     | Notas, etiquetas de tabla y pie         |
+| `--text-muted`           | `#9AA1B4` | `#8E9AB9`   | `text-ink-muted`         | Texto atenuado y placeholders           |
+| `--brand-blue`           | `#3878F6` | `#3878F6`   | `bg-accent`              | La acción: un solo azul, sólo el botón  |
+| `--text-link-accent`     | `#1F5FE0` | `#86AEF9`   | —                        | Azul mínimo legible sobre la superficie |
+| `--brand-sky`            | `#8ED1FC` | `#8ED1FC`   | `text-sky`               | Acento sobre oscuro y previsión         |
+| `--focus-ring`           | `#8ED1FC` | `#8ED1FC`   | `outline-focus`          | Anillo de foco, 2 px con 2 px de offset |
+| `--feedback-success`     | `#12A150` | `#3DD68C`   | `text-feedback-success`  | Estado favorable                        |
+| `--feedback-warning`     | `#B06F00` | `#F7B955`   | `text-feedback-warning`  | Aviso                                   |
+| `--feedback-danger`      | `#C62A2F` | `#FF8A8E`   | `text-feedback-danger`   | Error y estado destructivo              |
+| `--score-critical`       | `#C62A2F` | `#FF8A8E`   | `text-score-critical`    | Score < 35                              |
+| `--score-fragile`        | `#B06F00` | `#F7B955`   | `text-score-fragile`     | Score 35-50                             |
+| `--score-neutral`        | `#6E7488` | `#8E9AB9`   | `text-score-neutral`     | Score 50-65                             |
+| `--score-solid`          | `#12A150` | `#3DD68C`   | `text-score-solid`       | Score > 65                              |
 
-Contrast requirements: WCAG AA (4,5:1) para texto sobre `background` y
-`surface`; 3:1 para bordes de control y elementos gráficos portadores de
-información. El color nunca es el único portador de significado: el score
+`--gradient-hero`
+(`radial-gradient(120% 95% at 72% 8%, #16266B 0%, #0A1033 48%, #05081C 100%)`)
+es el fondo de toda sección oscura, disponible como `.bg-gradient-hero`. Es el
+único degradado del producto.
+
+Contrast requirements: WCAG AA (4,5:1) para texto sobre `--surface-page` y
+`--surface-raised`; 3:1 para bordes de control y elementos gráficos portadores
+de información. El color nunca es el único portador de significado: el score
 siempre se acompaña del número y de la banda en texto accesible, y las alertas
 llevan etiqueta de severidad además de color.
 
 ### Typography
 
-- Display family and weights: Aktiv Grotesk 700 en `h1`/`h2`, 500 en `h3`
-  (`--font-display`), `tracking-tight`. No hay SemiBold: 600 resuelve a Bold.
-- Body family and weights: DM Sans 400 (texto), 500 (énfasis) y 600 (cifras
-  destacadas) (`--font-sans`). Cuerpo, tablas y enlaces de navegación.
-- Identifiers (`COMP_0001`) and raw figures use DM Sans with `tabular-nums`.
-  There is no dedicated mono face.
+- **Una sola familia**: Inter (`next/font/google`, pesos 400/500/600), en
+  `--font-inter`. `--font-sans` y `--font-display` resuelven los dos a Inter:
+  no hay familia de display aparte. El stack de marca es
+  «Aeonik → General Sans → Inter»; Inter es el corte del que disponemos y el
+  que carga el prototipo.
+- **Nunca bold**: los titulares van en 600 con tracking negativo; los botones,
+  etiquetas y enlaces de navegación en 500; el texto corrido en 400. El 700 no
+  aparece en ninguna pieza.
+- Cuerpo: 15 px / 1,55, `font-variant-numeric: tabular-nums` y
+  `text-wrap: pretty` en `body`. No hay monoespaciada: los importes y los
+  identificadores (`COMP_0001`) usan Inter con cifras tabulares.
+- Type scale (tamaño / interlineado / peso / tracking):
+
+  | Estilo   | Valor                      | Uso                                        |
+  | -------- | -------------------------- | ------------------------------------------ |
+  | display  | 40 / 1,15 / 600 / −0,015em | `h1` de página (30 px en móvil)            |
+  | metric   | 32 / 1,1 / 600 / −0,01em   | Cifra de la tira de KPI                    |
+  | h3       | 20 / 1,35 / 600            | Título dentro de un panel                  |
+  | body-lg  | 17 / 1,6 / 400             | Entradilla sobre fondo oscuro              |
+  | body     | 15 / 1,55 / 400            | Texto corrido, tablas y menús              |
+  | label    | 14 / 1,2 / 500             | Etiquetas y cabeceras de tabla             |
+  | caption  | 13 / 1,45 / 400            | Notas, pies y matices                      |
+  | overline | 13 / 1,2 / 600 / 0,06em    | MAYÚSCULAS: títulos de sección (`Section`) |
+  | nav      | 16 / 1 / 500               | Pestañas de la barra y botones             |
+
 - Marca: en producto, icono de pulso (`src/app/icon.svg`, 40 px) con el
-  wordmark `PulseWordmark` (`ui/wordmark`, 14 px) a su derecha.
-  En el hero de `/`,
-  `PulseHeroMark` SVG a escala de columna. El enlace de la nav se llama
-  «Embat Pulse, inicio»; el `h1` de la landing es «Embat Pulse» y el SVG es
-  presentacional.
-- Type scale: 12 / 14 / 16 / 18 / 24 / 30 / 36 px (`text-xs` … `text-4xl`).
-  Toda cifra comparable usa `tabular-nums`.
-- Line-height rules: 1,5 en texto corrido; 1,25 en titulares y cifras.
-- Maximum readable line length: 70-75 caracteres (`max-w-3xl`).
+  wordmark `PulseWordmark` (`ui/wordmark`, 14 px) a su derecha, y a
+  continuación un hairline vertical y el claim «La inteligencia que impulsa tu
+  tesorería» (oculto bajo `md`). En el hero de `/`, `PulseHeroMark` SVG a
+  escala de columna. El enlace de la nav se llama «Embat Pulse, inicio»; el
+  `h1` de la landing es «Embat Pulse» y el SVG es presentacional.
+- Line-height rules: 1,55 en texto corrido; 1,1-1,2 en titulares y cifras.
+- Maximum readable line length: 70-75 caracteres (720 px).
 
 ### Spacing, shape, and elevation
 
 - Base spacing unit: 4 px (`--spacing` de HeroUI).
 - Spacing scale: 2, 3, 4, 5, 6, 8, 10 → gaps dentro de un grupo ≤ 4; entre
   grupos 6-8; entre secciones de página 10.
-- Border radii: `--radius` 0,5 rem en controles; 2 px en celdas de datos.
-- Border treatment: sin contornos decorativos en el producto. En marketing, las
-  únicas líneas son las del `SiteFrame` (gutters, eje, cortes entre bandas).
-  En datos, sólo se dibuja una línea cuando separa lecturas (guías 35/50/65,
-  changepoint, eje cero).
-- Shadow/elevation levels: sólo la sombra propia de HeroUI en `Card` y en
-  overlays; ningún nivel adicional.
-- Focus ring treatment: anillo de HeroUI (`--focus`, 2 px de offset), nunca
-  suprimido.
+- Retícula: contenido 1240 px, inset lateral 32 px (16 en móvil), 96 px de
+  padding inferior y 48 px entre secciones (`PageShell`).
+- Border radii: 8 px en botones e inputs (`--radius`, el radio más visible de
+  la marca); 12 px en tarjetas, paneles y la tira de KPI (`rounded-xl`); 16 px
+  en bloques grandes y marcos de captura (`rounded-2xl`); píldora en estados;
+  2 px en celdas de datos.
+- Border treatment: hairline de 1 px de `--border-subtle` (`border-hairline`)
+  en paneles, filas de tabla, celdas de KPI, nav y pie. `--border-strong` sólo
+  contornea controles. En marketing, las líneas del `SiteFrame` (gutters, eje,
+  cortes entre bandas) usan el mismo hairline. En datos, sólo se dibuja una
+  línea cuando separa lecturas (guías 35/50/65, changepoint, eje cero).
+- Shadow/elevation levels: ninguno. La separación es por línea, no por sombra;
+  sólo los overlays de HeroUI (popover, modal) conservan la suya.
+- Focus ring treatment: anillo de 2 px en `--focus-ring` (`#8ED1FC`) con 2 px
+  de offset, nunca suprimido.
 
 ### Motion
 
@@ -171,6 +211,10 @@ adding it to the codebase.
 | Form field        | `ComboBox`, `Select` + `ListBox`       | por defecto                     | Selector de empresa en la nav; mes y horizonte en la empresa. Cada control lleva `aria-label`.    |
 | Feedback          | `Chip`                                 | `soft` con `color` semántico    | Familia de producto, tipo de razón y estado de un producto descartado.                            |
 | Data              | `Table` vía `DataTable`                | por defecto                     | Toda tabla usa `DataTable`: cabeceras ordenables en ambos sentidos, «sin datos» siempre al final. |
+| Panel             | `Panel` (`ui/panel`)                   | `padding` `default` / `none`    | Contenedor único: hairline, radio 12 e inset 24. `none` cuando el contenido pone su propio inset. |
+| KPI               | `StatGrid` (`ui/stat-grid`)            | 3, 4 o 5 columnas               | Tira de cifras de cabecera: un panel con hairline entre celdas, valor 32 y etiqueta debajo.       |
+| Estado del score  | `ScoreBadge` (`ui/score-badge`)        | `score` (def.), `pill`, `lg`    | `score` es punto + cifra en tinta; `pill` es la píldora con el nombre de la banda.                |
+| Pie de producto   | `SiteFooter` (`layout/site-footer`)    | por defecto                     | Hairline superior, 13 px secundario; lo que mide Pulse a la izquierda y la firma a la derecha.    |
 | Asistente Nexo    | `Modal`, `Button`, `TextArea`          | `primary`, `secondary`, `ghost` | Diálogo lateral de 440 px; hoja inferior en móvil. Solo en rutas de producto.                     |
 | Icono de marca    | SVG estático (`src/app/icon.svg`)      | paleta de Nexo                  | Nav de producto; el enlace lleva `aria-label="Embat Pulse, inicio"` y apunta a `/`.               |
 | Hero mark         | SVG propio (`PulseHeroMark`)           | tokens de score + accent        | Solo en `/`. El `h1` es «Embat Pulse»; el SVG es `aria-hidden`.                                   |
@@ -229,7 +273,9 @@ Component rules:
   `src/components/charts`, sin librería externa; reciben datos ya calculados y
   no acceden a la fuente de datos.
 - Loading and pending states: las páginas son Server Components que leen datos
-  locales; no hay estados de carga que mostrar.
+  locales; no hay estados de carga que mostrar. Única excepción: el bloque
+  «Qué hacer ahora» espera al modelo dentro de un `Suspense` y mientras tanto
+  muestra el mismo bloque con «Leyendo las cifras de la empresa…».
 - Empty states: siempre texto que explica qué falta y qué aparecerá cuando
   llegue (feed de alertas, anticipación, historial de límite).
 - Error states: una empresa desconocida devuelve 404 de Next.js; un backend
@@ -267,13 +313,18 @@ Component rules:
   corrido. La landing usa el `SiteFrame` a viewport completo, no `max-w-7xl`.
 - Breakpoints: los de Tailwind (`sm` 640, `lg` 1024).
 - Navigation behavior by breakpoint: en `/` no hay `SiteNav`; el acceso es
-  `HeroAccess`. En producto, barra superior fija con el wordmark (a `/`), el
-  buscador de empresa y tres destinos —PULSE, Recomendaciones, Método—; envuelve
-  en varias líneas en móvil, sin menú colapsable. En `lg` el hero es 50/50 y el
-  pie ocupa el cuadrante derecho; por debajo de `lg`, wordmark, accesos y pie
-  se apilan dentro de los gutters.
+  `HeroAccess`. En producto, barra superior fija con hairline inferior: marca
+  (a `/`), hairline vertical y claim, el buscador de empresa y cuatro pestañas
+  —PULSE, Señales, Financiación, Método—. Las pestañas son enlaces con aspecto
+  de tab: 16/500, padding 11/14, radio 8, la actual en azul de enlace sobre
+  `brand-subtle` y el resto en secundario sobre transparente. El claim se
+  oculta bajo `md`; en móvil la barra son dos filas (marca y buscador arriba,
+  pestañas debajo, 40 px de alto) y envuelve, sin menú colapsable. En `lg` el
+  hero es 50/50 y el pie ocupa el cuadrante derecho; por debajo de `lg`,
+  wordmark, accesos y pie se apilan dentro de los gutters.
 - Mobile-first exceptions: las tablas mes a mes y de variables mantienen su
-  ancho mínimo y scrollan; los SVG escalan con `viewBox`.
+  ancho mínimo y scrollan; los SVG escalan con `viewBox`. El bloque oscuro
+  (`.bg-gradient-hero`) baja a 28/20 de padding bajo `md`.
 - Table/data-density strategy: una empresa tiene como máximo 24 meses, así que
   las tablas se muestran completas; el mes y el horizonte se eligen en cliente
   sobre datos ya calculados en el servidor.
@@ -331,6 +382,29 @@ patterns.
 | 2026-09-19 | Tokens de producto tomados de embat.io (azul `#3878f6`, tinta `#050b2c`) | Pulse debe integrarse con Embat; las bandas de score no se retintan | Equipo Pulse |
 | 2026-09-19 | Pie de landing: Platform/Docs + legal; heatmap Paper a la izquierda | Solo rutas que existen; la marca de marketing es Pulse | Equipo Pulse |
 | 2026-09-19 | Hero: accesos PULSE / Recomendaciones / Método con subrayado wipe izquierda→derecha | Las tres superficies de la app de empresa; la línea se esconde in situ | Equipo Pulse |
+| 2026-09-19 | Juego de tokens de marca de Embat en lugar de la paleta anterior: primitivos (`--surface-*`, `--border-*`, `--text-*`, feedback) y los tokens de HeroUI apuntando a ellos | Una sola fuente de color para producto y marketing, con claro y oscuro definidos por el brief; lo ya escrito sigue funcionando sin reescribir clases | Equipo Pulse |
+| 2026-09-19 | Bandas de score en los hex de estado de la marca (`#C62A2F`, `#B06F00`, `#6E7488`, `#12A150` y sus variantes oscuras) en vez de `oklch` propios | El score es un estado más de la marca; dos escalas de rojo y verde en la misma pantalla no se sostienen | Equipo Pulse |
+| 2026-09-19 | Inter como única familia: `--font-sans` y `--font-display` resuelven a ella; Aktiv Grotesk y DM Sans retirados, 700 eliminado del producto | El brief pide una sola grotesca y peso medio; dos familias y un bold no aportaban jerarquía que no diera ya el tamaño | Equipo Pulse |
+| 2026-09-19 | Títulos de sección como overline (13 px, mayúsculas, 600, 0,06em) en `Section` | El `h2` competía con las cifras del panel; en overline ordena sin pesar | Equipo Pulse |
+| 2026-09-19 | `Panel` como único contenedor: hairline de 1 px, radio 12, inset 24, sin sombra | «Se separa con borde, no con sombra»: un solo contenedor evita que cada página invente el suyo | Equipo Pulse |
+| 2026-09-19 | `StatGrid` como tira de KPI: un panel con hairlines entre celdas, no cifras sueltas separadas por espacio | Las cifras de cabecera son una sola lectura comparable; la línea vertical es la separación de la marca | Equipo Pulse |
+| 2026-09-19 | Banda del score como píldora con punto de 8 px y nombre (`ScoreBadge variant="pill"`); la cifra se queda en tinta con el punto delante | El color no va solo y la cifra nunca se tiñe de azul ni de rojo: el punto y el texto portan la banda | Equipo Pulse |
+| 2026-09-19 | Pie de producto (`SiteFooter`) con hairline superior: «Pulse · 11 variables en 4 pilares» y «By humans for humans.» | Cierra la página con lo que mide el score y quién lo firma, sin repetir la navegación | Equipo Pulse |
+| 2026-09-19 | Destinos de la nav como pestañas (radio 8, la actual en azul de enlace sobre `brand-subtle`) sin dejar de ser enlaces con `aria-current`; «Recomendaciones» pasa a «Financiación» | La barra agrupa las vistas de una misma empresa y se leen como pestañas; el nombre dice qué se decide allí, no qué hace el sistema | Equipo Pulse |
+| 2026-09-19 | La página de variable elimina el párrafo «qué mide» repetido; el bloque pasa a ser «Ficha de la variable» | La entradilla ya es esa frase; copia que repite el título no añade nada | Equipo Pulse |
+| 2026-09-19 | Método abre con la caja de fórmulas (`surface-deep`, hairline, radio 8) y la «Ficha del modelo»; después un panel por bloque explicativo | Reproduce el par «Cómo se calcula» del mock y pone la regla antes que sus ilustraciones | Equipo Pulse |
+| 2026-09-19 | Los tipos de señal usan una píldora punto + etiqueta teñida con el color de feedback de la dirección; la alerta pierde el borde izquierdo de color | El brief reserva el color a bandas, series y estados, y prohíbe tarjetas con borde lateral de color | Equipo Pulse |
+| 2026-09-19 | Las celdas del treemap de pesos son `surface-deep` con hairline de 1 px y radio 6 | Separar con línea, no con relleno: el mapa se lee como una rejilla de paneles igual que el resto del producto | Equipo Pulse |
+| 2026-09-19 | Nexo enlaza la sección de productos como «Financiación», igual que la nav | Un solo nombre para la misma superficie en toda la aplicación | Equipo Pulse |
+| 2026-09-19 | La página de financiación abre con el bloque navy «Qué hacer ahora»: la primera acción es el titular (h2) y las otras dos van en dos columnas bajo una línea | La pregunta es «¿y ahora qué?»; una sola acción grande obliga a priorizar y nada más de la página compite con ella | Equipo Pulse |
+| 2026-09-19 | Las acciones las redacta el mismo modelo de Nexo (máximo tres, con cifra y enlace validado) y, sin clave o si falla, un generador determinista con las mismas cifras | Recomendaciones específicas y accionables sin inventar datos; la página siempre responde aunque el modelo no | Equipo Pulse |
+| 2026-09-19 | `AdvisorHeader`, «Plan de mejora», «Riesgo» y «Datos usados» salen de la primera pantalla y bajan a un acordeón «Más detalle», plegado | Eran cifras que no responden «y qué»; siguen en el documento y son auditables | Equipo Pulse |
+| 2026-09-19 | Cada oferta pasa de tarjeta a una fila (nombre + familia + qué es, importe/plazo, tipo/diferencial, encaje) con el argumento plegado en «Ver detalle» | Tres ofertas caben en una pantalla y se comparan de un vistazo; el argumento se lee sólo cuando se pide | Equipo Pulse |
+| 2026-09-19 | El modo `mock` se marca con una etiqueta `DEMO` junto al overline, como hace Nexo, y no en la nota | Una sola señal reutilizable; la frase gastaba una línea del bloque en algo que no es una acción | Equipo Pulse |
+| 2026-09-19 | El treemap del mapa de calor se sustituye por un mosaico por pilar: ancho de columna = peso del pilar, alto de celda = 13 px por punto de peso, color sólo en el punto de 8 px | El área como peso no se leía con 11 celdas; el alto conserva el orden y la superficie queda lisa, así la banda se gasta una vez por celda | Equipo Pulse |
+| 2026-09-19 | Elegir una variable abre una tira de detalle bajo el mosaico en vez de navegar; la página de la variable queda a un «Ver la variable →» | El lector compara varias variables de un mes antes de profundizar en una; navegar en cada clic hacía perder el mapa | Equipo Pulse |
+| 2026-09-19 | La trayectoria ajusta el dominio vertical a los datos, conteniendo siempre 35 y 65, en lugar de la escala fija 0-100 | Una empresa entre 38 y 48 era una línea plana en 0-100; las guías de banda siguen en pantalla y el zoom no engaña | Equipo Pulse |
+| 2026-09-19 | `PulseCompanyLinks` desaparece de la página de empresa; cada ruta se enlaza junto a la cifra que la motiva (acciones, alerta, detalle del mosaico, ficha del modelo) | El mock no tiene aside y un enlace suelto no dice por qué ir | Equipo Pulse |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce

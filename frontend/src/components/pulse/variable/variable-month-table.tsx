@@ -40,7 +40,7 @@ function buildColumns(
       sortBy: (row) => row.score,
       cell: (row) =>
         row.score === null ? (
-          <span className="text-muted">{UNKNOWN_TEXT}</span>
+          <span className="text-ink-muted">{UNKNOWN_TEXT}</span>
         ) : (
           <ScoreBadge score={row.score} />
         ),
@@ -105,7 +105,7 @@ export function PulseVariableMonthTable({
   const columns = useMemo(() => buildColumns(unit), [unit]);
   if (points.length === 0) {
     return (
-      <p className="text-sm text-muted">
+      <p className="text-[15px] leading-[1.55] text-ink-secondary">
         Sin meses observados: la tabla se llena con el primer cierre exportado.
       </p>
     );

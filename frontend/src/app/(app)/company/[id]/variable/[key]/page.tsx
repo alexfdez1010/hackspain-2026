@@ -13,6 +13,7 @@ import { PulseVariableHeader } from '@/components/pulse/variable/variable-header
 import { PulseVariableLinks } from '@/components/pulse/variable/variable-links';
 import { PulseVariableMonthTable } from '@/components/pulse/variable/variable-month-table';
 import { PulseVariableNav } from '@/components/pulse/variable/variable-nav';
+import { Panel } from '@/components/ui/panel';
 import { companyName } from '@/lib/company/names';
 import { getPulseDataSource } from '@/lib/pulse/data';
 import { detailTitle } from '@/lib/pulse/details/view';
@@ -98,77 +99,93 @@ export default async function CompanyVariablePage({
         title="Score mes a mes"
         note="Escala 0-100 con guías en 35, 50 y 65; el pilar y el PULSE, en gris"
       >
-        <VariableScoreChart
-          points={view.points}
-          label={variable.label}
-          pillarLabel={view.pillar.label}
-        />
+        <Panel>
+          <VariableScoreChart
+            points={view.points}
+            label={variable.label}
+            pillarLabel={view.pillar.label}
+          />
+        </Panel>
       </Section>
 
       {details && detailHeading && (
         <Section
           title={detailHeading}
-          note={`Detalle del cierre de ${formatMonth(details.month)}`}
+          note={`Cierre de ${formatMonth(details.month)}`}
         >
-          <PulseVariableDetail variableKey={variable.key} details={details} />
+          <Panel>
+            <PulseVariableDetail variableKey={variable.key} details={details} />
+          </Panel>
         </Section>
       )}
 
-      <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Section title="Valor observado" note={`Cifra en ${variable.unit}`}>
-          <VariableRawChart
-            points={view.points}
-            unit={variable.unit}
-            better={view.doc?.better ?? null}
-            label={variable.label}
-          />
+          <Panel>
+            <VariableRawChart
+              points={view.points}
+              unit={variable.unit}
+              better={view.doc?.better ?? null}
+              label={variable.label}
+            />
+          </Panel>
         </Section>
         <Section
           title="Puntos ganados"
           note={`De los ${formatNumber(variable.weight)} que puede aportar`}
         >
-          <VariableContributionChart
-            points={view.points}
-            weight={variable.weight}
-            label={variable.label}
-          />
+          <Panel>
+            <VariableContributionChart
+              points={view.points}
+              weight={variable.weight}
+              label={variable.label}
+            />
+          </Panel>
         </Section>
       </div>
 
-      <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Section
           title="Frente al resto de variables"
           note={
             view.last
-              ? `Cierre de ${formatMonth(view.last.month)}; ${standingNote(view.standing.rankByScore, view.standing.knownCount)}`
+              ? standingNote(
+                  view.standing.rankByScore,
+                  view.standing.knownCount,
+                )
               : 'Sin mes observado'
           }
         >
-          <VariableStandingBars
-            standing={view.standing}
-            companyId={company.companyId}
-          />
+          <Panel>
+            <VariableStandingBars
+              standing={view.standing}
+              companyId={company.companyId}
+            />
+          </Panel>
         </Section>
         <Section
           title="Peso en la previsión"
           note={forecastNote(view.forecast)}
         >
-          <VariableForecastChart forecast={view.forecast} />
+          <Panel>
+            <VariableForecastChart forecast={view.forecast} />
+          </Panel>
         </Section>
       </div>
 
       <Section
         title="Mes a mes"
-        note={`${formatNumber(view.stats.total)} cierres observados, del más reciente al más antiguo`}
+        note={`${formatNumber(view.stats.total)} cierres observados`}
       >
-        <PulseVariableMonthTable points={view.points} unit={variable.unit} />
+        <Panel>
+          <PulseVariableMonthTable points={view.points} unit={variable.unit} />
+        </Panel>
       </Section>
 
-      <Section
-        title="Qué mide"
-        note={`Variable del pilar ${view.pillar.label}`}
-      >
-        <PulseVariableDefinition view={view} />
+      <Section title="Ficha de la variable" note={`Pilar ${view.pillar.label}`}>
+        <Panel>
+          <PulseVariableDefinition view={view} />
+        </Panel>
       </Section>
     </PageShell>
   );

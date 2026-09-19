@@ -40,7 +40,7 @@ export function MethodWeightMap({ pillars, variables }: MethodWeightMapProps) {
 
   if (!active) {
     return (
-      <p className="text-sm text-muted">
+      <p className="text-[15px] leading-[1.55] text-ink-secondary">
         El export no publica las variables del score.
       </p>
     );

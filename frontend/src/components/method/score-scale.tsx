@@ -21,9 +21,9 @@ export function MethodScoreScale({ caption }: MethodScoreScaleProps) {
     .map((span) => `${span.name} ${span.range}`)
     .join(', ');
   return (
-    <figure className="flex max-w-3xl flex-col gap-2">
+    <figure className="flex max-w-[720px] flex-col gap-3">
       <div
-        className="flex h-3 w-full overflow-hidden rounded-sm"
+        className="flex h-2.5 w-full overflow-hidden rounded-sm"
         role="img"
         aria-label={`Escala de PULSE de 0 a 100 con cuatro bandas: ${description}`}
       >
@@ -35,19 +35,23 @@ export function MethodScoreScale({ caption }: MethodScoreScaleProps) {
           />
         ))}
       </div>
-      <div className="flex w-full text-xs">
+      <div className="flex w-full">
         {spans.map((span) => (
           <div
             key={span.key}
-            className="flex min-w-0 flex-col pr-2"
+            className="flex min-w-0 flex-col pr-2 text-[13px] leading-[1.45]"
             style={{ width: `${span.width}%` }}
           >
             <span className="font-medium">{span.name}</span>
-            <span className="tabular-nums text-muted">{span.range}</span>
+            <span className="tabular-nums text-ink-secondary">
+              {span.range}
+            </span>
           </div>
         ))}
       </div>
-      <figcaption className="text-xs text-muted">{caption}</figcaption>
+      <figcaption className="text-[13px] leading-[1.45] text-ink-secondary">
+        {caption}
+      </figcaption>
     </figure>
   );
 }

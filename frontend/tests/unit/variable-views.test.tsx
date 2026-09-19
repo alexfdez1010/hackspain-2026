@@ -96,11 +96,11 @@ describe('the variable navigation', () => {
 });
 
 describe('the variable definition', () => {
-  it('states the direction, the origin and the weight of the variable', () => {
+  it('states the direction, the origin and the weight without repeating the lead', () => {
     const markup = renderToStaticMarkup(
       <PulseVariableDefinition view={view} />,
     );
-    expect(markup).toContain('Dispuesto entre límite');
+    expect(markup).not.toContain('Dispuesto entre límite');
     expect(markup).toContain('Más bajo, más sano');
     expect(markup).toContain('% del límite');
     expect(markup).toContain('12 de 100 puntos');

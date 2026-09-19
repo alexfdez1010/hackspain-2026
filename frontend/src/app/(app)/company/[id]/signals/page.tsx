@@ -5,6 +5,7 @@ import { PageShell, Section } from '@/components/layout/page-shell';
 import { PulseSignalKindLegend } from '@/components/pulse/signal-kind-legend';
 import { PulseSignalTimeline } from '@/components/pulse/signal-timeline';
 import { PulseSignalsHeader } from '@/components/pulse/signals-header';
+import { Panel } from '@/components/ui/panel';
 import { companyName } from '@/lib/company/names';
 import { getPulseDataSource } from '@/lib/pulse/data';
 import { buildSignalsView } from '@/lib/pulse/signals-view';
@@ -77,27 +78,30 @@ export default async function CompanySignalsPage({ params }: SignalsPageProps) {
 
       <Section
         title="Alertas abiertas"
-        note="Aún sin tres meses de seguimiento; la probabilidad es la que dio el modelo al abrirse"
+        note="Sin tres meses de seguimiento todavía; la probabilidad es la que dio el modelo al abrirse"
       >
-        {view.open.length > 0 ? (
-          <PulseSignalTimeline signals={view.open} />
-        ) : (
-          <p className="text-sm text-muted">
-            Nada abierto: en los últimos tres meses la nota no se ha alejado de
-            su media.
-          </p>
-        )}
+        <Panel>
+          {view.open.length > 0 ? (
+            <PulseSignalTimeline signals={view.open} />
+          ) : (
+            <p className="text-[15px] leading-[1.55] text-ink-secondary">
+              Nada abierto: en los últimos tres meses la nota no se ha alejado
+              de su media.
+            </p>
+          )}
+        </Panel>
       </Section>
 
-      <Section
-        title="Histórico"
-        note="Episodios cerrados, del más reciente al más antiguo, con lo que fueron"
-      >
-        {view.settled.length > 0 ? (
-          <PulseSignalTimeline signals={view.settled} />
-        ) : (
-          <p className="text-sm text-muted">Ningún episodio cerrado todavía.</p>
-        )}
+      <Section title="Histórico" note="Episodios cerrados, con lo que fueron">
+        <Panel>
+          {view.settled.length > 0 ? (
+            <PulseSignalTimeline signals={view.settled} />
+          ) : (
+            <p className="text-[15px] leading-[1.55] text-ink-secondary">
+              Ningún episodio cerrado todavía.
+            </p>
+          )}
+        </Panel>
       </Section>
     </PageShell>
   );

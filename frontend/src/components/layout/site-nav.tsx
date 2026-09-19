@@ -45,17 +45,17 @@ export function isActive(pathname: string, match: string): boolean {
  * Builds the sections of the navigation for one company.
  *
  * The advisor entry matches only its own route, so the PULSE entry is not
- * marked as current while the recommendations are open.
+ * marked as current while the financing page is open.
  *
  * @param companyId - Company in context.
- * @returns PULSE, signals, recommendations and method, in reading order.
+ * @returns PULSE, signals, financing and method, in reading order.
  */
 export function companySections(companyId: string): NavSection[] {
   const routes = companyRoutes(companyId);
   return [
     { href: routes.pulse, label: 'PULSE', match: routes.pulse },
     { href: routes.signals, label: 'Señales', match: routes.signals },
-    { href: routes.advisor, label: 'Recomendaciones', match: routes.advisor },
+    { href: routes.advisor, label: 'Financiación', match: routes.advisor },
     { href: routes.method, label: 'Método', match: '/method' },
   ];
 }
@@ -89,12 +89,21 @@ export function resolveNavCompany(
  * the company in context is searched right here, and switching it keeps the
  * reader on the section they were reading.
  *
- * On a phone the bar takes two rows: the product icon and wordmark with the search filling
- * the rest of the first one, and the section links on their own row with
- * touch-sized targets. From `sm` up everything sits on one row.
+ * The bar follows the prototype: mark, a vertical hairline and the product
+ * tagline on the left, the search and the sections on the right, and a
+ * hairline underneath. Nothing floats on a shadow.
+ *
+ * The sections read as tabs — 8 px of radius, the current one in link blue on
+ * `brand-subtle` — but they stay `next/link` anchors with `aria-current`, so
+ * every section keeps its own URL and can be opened in a new tab.
+ *
+ * On a phone the bar takes two rows: the product icon and wordmark with the
+ * search filling the rest of the first one, and the section links on their own
+ * row with 40 px targets. The tagline is dropped below `md`, where it would
+ * push the search onto a third row. From `sm` up the rest sits on one row.
  *
  * @param props - The companies the search offers.
- * @returns The product icon and wordmark, the company search and the section links.
+ * @returns The mark and tagline, the company search and the section links.
  */
 export function SiteNav({ companies }: SiteNavProps) {
   const pathname = usePathname();
@@ -108,20 +117,23 @@ export function SiteNav({ companies }: SiteNavProps) {
   };
 
   return (
-    <header className="sticky top-0 z-20 bg-background/85 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-hairline bg-page/85 backdrop-blur">
       <nav
         aria-label="Secciones"
-        className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-4 pt-2 sm:gap-x-6 sm:gap-y-2 sm:px-8 sm:py-3"
+        className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-x-4 gap-y-1 px-4 pt-2 sm:gap-x-6 sm:px-8 sm:py-4"
       >
         <Link
           href="/"
           aria-label="Embat Pulse, inicio"
-          className="flex h-11 shrink-0 items-center gap-2 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="flex h-11 shrink-0 items-center gap-2 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
           <Image src="/icon.svg" alt="" width={40} height={40} unoptimized />
           <PulseWordmark className="h-3.5" />
         </Link>
-        <div className="min-w-0 flex-1 sm:flex-none">
+        <span className="hidden border-l border-hairline pl-4 text-[15px] leading-[1.55] text-ink-secondary md:block">
+          La inteligencia que impulsa tu tesorería
+        </span>
+        <div className="min-w-0 flex-1 sm:ml-auto sm:flex-none">
           <CompanySearch
             key={companyId}
             companies={companies}
@@ -129,7 +141,7 @@ export function SiteNav({ companies }: SiteNavProps) {
             onSelect={switchCompany}
           />
         </div>
-        <ul className="flex basis-full items-baseline gap-x-5 text-sm sm:basis-auto">
+        <ul className="-mx-3.5 flex basis-full flex-wrap items-center gap-1 sm:basis-auto">
           {sections.map((section, index) => {
             const active =
               index === 0
@@ -140,10 +152,10 @@ export function SiteNav({ companies }: SiteNavProps) {
                 <Link
                   href={section.href}
                   aria-current={active ? 'page' : undefined}
-                  className={`inline-block py-2.5 sm:py-0 ${
+                  className={`flex min-h-10 items-center rounded-lg px-3.5 py-[11px] text-base font-medium leading-none transition-colors ${
                     active
-                      ? 'text-foreground underline decoration-2 underline-offset-8'
-                      : 'text-muted transition-colors hover:text-foreground'
+                      ? 'text-link-accent bg-brand-subtle'
+                      : 'text-ink-secondary hover:text-ink'
                   }`}
                 >
                   {section.label}

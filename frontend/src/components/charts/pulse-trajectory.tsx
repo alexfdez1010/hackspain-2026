@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from 'react';
 
-import { linePath, type ChartBox } from '@/components/charts/geometry';
-import { ScoreGuides } from '@/components/charts/score-guides';
+import { linePath, yAt, type ChartBox } from '@/components/charts/geometry';
+import { BRAND_BLUE, BRAND_SKY, HAIRLINE } from '@/components/charts/tokens';
 import { TrajectoryMarkers } from '@/components/charts/trajectory-markers';
 import {
   TrajectoryHover,
@@ -12,18 +12,21 @@ import {
 import { useElementWidth } from '@/components/charts/use-element-width';
 import type { PulseTrajectoryPoint } from '@/lib/pulse/company-view';
 import { signalsByIndex } from '@/lib/pulse/signals';
-import { layoutTrajectory } from '@/lib/pulse/trajectory-layout';
+import {
+  layoutTrajectory,
+  trajectoryDomain,
+} from '@/lib/pulse/trajectory-layout';
 import type { PulseSignal } from '@/lib/pulse/types';
-import { formatMonth, formatMonthShort, formatNumber } from '@/lib/format';
-import { scoreColor } from '@/lib/score';
+import { formatMonth, formatMonthShort } from '@/lib/format';
+import { SCORE_GUIDES } from '@/lib/score';
 
 /** Fixed pixel geometry; the width is measured from the container. */
 const BASE: Omit<ChartBox, 'width'> = {
-  height: 288,
-  padLeft: 28,
-  padRight: 34,
-  padTop: 22,
-  padBottom: 28,
+  height: 220,
+  padLeft: 26,
+  padRight: 6,
+  padTop: 14,
+  padBottom: 24,
 };
 /** Width assumed before the container is measured. */
 const FALLBACK_WIDTH = 960;
@@ -38,14 +41,13 @@ interface PulseTrajectoryChartProps {
 }
 
 /**
- * Draws the monthly PULSE history and the six-month forecast on one axis.
+ * Draws the monthly PULSE history and the forecast on one axis.
  *
- * The chart fills its container: the SVG takes the measured width as its
- * viewBox, so the text keeps a real pixel size. The observed line is solid and
- * the forecast dashed, separated by the mark at the last close; the shaded
- * area is the p10-p90 band. Hovering, tapping or focusing a month opens a
- * tooltip with its value, and the last close and the farthest horizon stay
- * printed. A triangle flags every month where a signal opened.
+ * Observed months are a solid brand-blue line with a dot on every close;
+ * the forecast is a dashed sky line over its p10-p90 band, so a prediction can
+ * never be read as a measurement. The only rules are the three band
+ * boundaries; there is no vertical axis. Hovering, tapping or focusing a month
+ * opens its value, and a triangle flags every month where a signal opened.
  *
  * @param props - The merged trajectory, its boundary and the signals.
  * @returns The chart, or an empty state when there is no history.
@@ -58,9 +60,10 @@ export function PulseTrajectoryChart({
   const [container, width] = useElementWidth<HTMLDivElement>(FALLBACK_WIDTH);
   const [activeIndex, setActiveIndex] = useState(-1);
   const box = useMemo<ChartBox>(() => ({ ...BASE, width }), [width]);
+  const domain = useMemo(() => trajectoryDomain(points), [points]);
   const layout = useMemo(
-    () => layoutTrajectory(points, boundaryIndex, box),
-    [points, boundaryIndex, box],
+    () => layoutTrajectory(points, boundaryIndex, box, domain),
+    [points, boundaryIndex, box, domain],
   );
   const markers = useMemo(
     () =>
@@ -72,124 +75,115 @@ export function PulseTrajectoryChart({
   );
   const count = points.length;
   if (count === 0 || boundaryIndex < 0) {
-    return <p className="text-sm text-muted">Sin historial mensual.</p>;
+    return <p className="text-sm text-ink-secondary">Sin historial mensual.</p>;
   }
 
   const { placed, observed, projected, band, labels } = layout;
   const last = placed[count - 1];
   const boundary = placed[boundaryIndex];
-  const stroke = scoreColor(boundary.value);
-  const forecastStroke = scoreColor(last.value);
   const active = placed[activeIndex];
 
   return (
-    <figure className="flex flex-col gap-2">
-      <div ref={container} className="relative w-full">
-        <svg
-          viewBox={`0 0 ${box.width} ${box.height}`}
-          width="100%"
-          height={box.height}
-          className="block"
-          role="img"
-          aria-label={`PULSE mensual desde ${formatMonth(points[0].month)} hasta ${formatMonth(boundary.month)} y previsión hasta ${formatMonth(last.month)}`}
+    <div ref={container} className="relative w-full">
+      <svg
+        viewBox={`0 0 ${box.width} ${box.height}`}
+        width="100%"
+        height={box.height}
+        className="block"
+        role="img"
+        aria-label={`PULSE mensual desde ${formatMonth(points[0].month)} hasta ${formatMonth(boundary.month)} y previsión hasta ${formatMonth(last.month)}`}
+      >
+        {SCORE_GUIDES.map((guide) => {
+          const y = yAt(guide, domain.min, domain.max, box);
+          return (
+            <g key={guide}>
+              <line
+                x1={box.padLeft}
+                x2={box.width}
+                y1={y}
+                y2={y}
+                stroke={HAIRLINE}
+                strokeWidth={1}
+              />
+              <text
+                x={box.padLeft - 6}
+                y={y + 3.5}
+                textAnchor="end"
+                fontSize={10.5}
+                className="fill-muted"
+              >
+                {guide}
+              </text>
+            </g>
+          );
+        })}
+        {band && <path d={band} fill={BRAND_SKY} fillOpacity={0.34} />}
+        <path
+          d={linePath(observed)}
+          fill="none"
+          stroke={BRAND_BLUE}
+          strokeWidth={2.4}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        <path
+          d={linePath(projected)}
+          fill="none"
+          stroke={BRAND_SKY}
+          strokeWidth={2}
+          strokeDasharray="5 4"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        <line
+          x1={boundary.x}
+          x2={boundary.x}
+          y1={box.padTop}
+          y2={box.height - box.padBottom}
+          stroke={HAIRLINE}
+          strokeWidth={1}
+        />
+        <text
+          x={boundary.x + 6}
+          y={box.padTop + 9}
+          fontSize={10.5}
+          className="fill-muted"
         >
-          <ScoreGuides box={box} />
-          {band && <path d={band} fill={forecastStroke} fillOpacity={0.16} />}
-          <path
-            d={linePath(observed)}
-            fill="none"
-            stroke={stroke}
-            strokeWidth={2.2}
-            strokeLinejoin="round"
-            strokeLinecap="round"
+          previsión
+        </text>
+        {observed.map((point, index) => (
+          <circle
+            key={point.month}
+            cx={point.x}
+            cy={point.y}
+            r={index === observed.length - 1 ? 4 : 3.5}
+            fill={BRAND_BLUE}
           />
-          <path
-            d={linePath(projected)}
-            fill="none"
-            stroke={forecastStroke}
-            strokeWidth={2}
-            strokeDasharray="6 4"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-          <line
-            x1={boundary.x}
-            x2={boundary.x}
-            y1={box.padTop}
-            y2={box.height - box.padBottom}
-            stroke="var(--foreground)"
-            strokeWidth={1.2}
-            strokeDasharray="3 3"
-            opacity={0.45}
-          />
-          <text
-            x={boundary.x + 4}
-            y={box.padTop - 8}
-            className="fill-muted text-[10px]"
-          >
-            previsión
-          </text>
-          {boundary.y !== null && (
-            <g>
-              <circle cx={boundary.x} cy={boundary.y} r={3.6} fill={stroke} />
-              <text
-                x={boundary.x - 6}
-                y={boundary.y - 9}
-                textAnchor="end"
-                className="text-[11px] font-medium tabular-nums"
-                fill={stroke}
-              >
-                {formatNumber(boundary.value, 1)}
-              </text>
-            </g>
-          )}
-          {last.y !== null && boundaryIndex < count - 1 && (
-            <g>
-              <circle cx={last.x} cy={last.y} r={3.2} fill={forecastStroke} />
-              <text
-                x={last.x}
-                y={last.y - 9}
-                textAnchor="end"
-                className="text-[11px] font-medium tabular-nums"
-                fill={forecastStroke}
-              >
-                {formatNumber(last.value, 1)}
-              </text>
-            </g>
-          )}
-          {placed.map((point, index) =>
-            labels.has(index) ? (
-              <text
-                key={`label-${point.month}`}
-                x={point.x}
-                y={box.height - 8}
-                textAnchor="middle"
-                className="fill-muted text-[10px]"
-              >
-                {formatMonthShort(point.month)}
-              </text>
-            ) : null,
-          )}
-          <TrajectoryMarkers placed={placed} signals={markers} />
-          <TrajectoryHover
-            placed={placed}
-            activeIndex={activeIndex}
-            box={box}
-            onHover={setActiveIndex}
-            onLeave={() => setActiveIndex(-1)}
-          />
-        </svg>
-        {active && <TrajectoryTooltip point={active} box={box} />}
-      </div>
-      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
-        <span>Línea continua: PULSE observado.</span>
-        <span>Discontinua: previsión +1 a +6 meses.</span>
-        <span>Área: banda p10-p90.</span>
-        {markers.size > 0 && (
-          <span>Triángulo: mes en que se abrió una señal.</span>
+        ))}
+        {placed.map((point, index) =>
+          labels.has(index) ? (
+            <text
+              key={`label-${point.month}`}
+              x={point.x}
+              y={box.height - 6}
+              textAnchor="middle"
+              fontSize={10.5}
+              className="fill-muted"
+            >
+              {formatMonthShort(point.month)}
+            </text>
+          ) : null,
         )}
-        <span>Toca o pasa el ratón por un mes para ver su valor.</span>
-      </figcaption>
-    </figure>
+        <TrajectoryMarkers placed={placed} signals={markers} />
+        <TrajectoryHover
+          placed={placed}
+          activeIndex={activeIndex}
+          box={box}
+          onHover={setActiveIndex}
+          onLeave={() => setActiveIndex(-1)}
+        />
+      </svg>
+      {active && <TrajectoryTooltip point={active} box={box} />}
+    </div>
   );
 }

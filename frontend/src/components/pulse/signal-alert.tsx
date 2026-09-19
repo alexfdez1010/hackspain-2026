@@ -1,6 +1,6 @@
-import { Chip } from '@heroui/react';
 import Link from 'next/link';
 
+import { SignalKindChip } from '@/components/pulse/signal-kind-legend';
 import {
   activeSignal,
   describeSignalAge,
@@ -30,37 +30,46 @@ export function PulseSignalAlert({ company, href }: PulseSignalAlertProps) {
   const signal = activeSignal(company);
   if (!signal) return null;
   const meta = SIGNAL_KINDS[signal.kind];
+  const tone =
+    meta.tone === 'negative'
+      ? 'var(--feedback-danger)'
+      : 'var(--feedback-success)';
   return (
     <aside
       role="status"
       aria-label={`Señal: ${signal.headline}`}
-      className="flex flex-col gap-2 rounded-xl px-4 py-3 sm:flex-row sm:items-start sm:gap-5 sm:px-5"
+      className="flex flex-col gap-3 rounded-xl border p-6 sm:flex-row sm:items-start sm:gap-8"
       style={{
-        background: `color-mix(in oklab, ${meta.color} 12%, transparent)`,
-        borderLeft: `4px solid ${meta.color}`,
+        borderColor: `color-mix(in oklab, ${tone} 28%, var(--border-subtle))`,
+        background: `color-mix(in oklab, ${tone} 6%, var(--surface-raised))`,
       }}
     >
-      <div className="flex shrink-0 items-center gap-2 sm:pt-0.5">
-        <Chip
-          size="sm"
-          variant="soft"
-          color={meta.tone === 'negative' ? 'danger' : 'success'}
-        >
-          <Chip.Label>{meta.label}</Chip.Label>
-        </Chip>
-        <span className="text-xs text-muted">
+      <div className="flex shrink-0 flex-wrap items-center gap-3">
+        <SignalKindChip kind={signal.kind} />
+        <span className="text-[13px] leading-[1.45] text-ink-secondary">
           {describeSignalAge(signal, company.month)} ·{' '}
           {describeSignalStatus(signal)}
         </span>
       </div>
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <p className="font-semibold">{signal.headline}</p>
-        <p className="text-sm text-muted">{signal.detail}</p>
+      <div className="flex min-w-0 flex-col gap-1">
+        <p className="text-[15px] font-medium leading-[1.55]">
+          {signal.headline}
+        </p>
+        <p className="text-[15px] leading-[1.55] text-ink-secondary">
+          {signal.detail}
+        </p>
         <Link
+          data-arrow
           href={href}
-          className="text-sm text-accent underline-offset-4 hover:underline"
+          className="group mt-2 inline-flex w-fit items-center gap-1.5 text-[15px] font-medium leading-[1.2] text-ink"
         >
           Ver todas las señales
+          <i
+            aria-hidden
+            className="not-italic transition-transform group-hover:translate-x-1"
+          >
+            →
+          </i>
         </Link>
       </div>
     </aside>

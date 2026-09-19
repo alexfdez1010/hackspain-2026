@@ -95,7 +95,7 @@ describe('the variable page', () => {
   it('drills into the counterparties behind the variable of the month', async () => {
     const markup = await render('COMP_0001', 'network');
     expect(markup).toContain('Salud de pago de los clientes');
-    expect(markup).toContain('Detalle del cierre de ago 2026');
+    expect(markup).toContain('Cierre de ago 2026');
     expect(markup).not.toContain('COUNTERPARTY_03903<');
   });
 

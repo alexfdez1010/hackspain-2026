@@ -1,7 +1,42 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 import { companyName } from '@/lib/company/names';
 import { companyRoutes } from '@/lib/routes';
+
+interface ArrowLinkProps {
+  href: string;
+  /** Secondary link of the pair, one step back in the ink scale. */
+  muted?: boolean;
+  children: ReactNode;
+}
+
+/**
+ * A section link of the brand: ink, never blue, closed by an arrow that steps
+ * 4 px to the right on hover.
+ *
+ * @param props - Target, emphasis and the label of the link.
+ * @returns The link with its arrow.
+ */
+function ArrowLink({ href, muted = false, children }: ArrowLinkProps) {
+  return (
+    <Link
+      data-arrow
+      href={href}
+      className={`group inline-flex items-center gap-1.5 text-[15px] font-medium leading-[1.2] ${
+        muted ? 'text-ink-secondary' : 'text-ink'
+      }`}
+    >
+      {children}
+      <i
+        aria-hidden
+        className="not-italic transition-transform group-hover:translate-x-1"
+      >
+        →
+      </i>
+    </Link>
+  );
+}
 
 interface PulseVariableLinksProps {
   companyId: string;
@@ -19,20 +54,14 @@ export function PulseVariableLinks({ companyId }: PulseVariableLinksProps) {
   return (
     <nav
       aria-label="Volver a la empresa"
-      className="flex flex-col gap-1 text-sm"
+      className="flex flex-col items-start gap-2"
     >
-      <Link
-        className="text-accent underline-offset-4 hover:underline"
-        href={routes.pulse}
-      >
+      <ArrowLink href={routes.pulse}>
         Volver al PULSE de {companyName(companyId)}
-      </Link>
-      <Link
-        className="text-muted underline-offset-4 hover:underline"
-        href={routes.method}
-      >
+      </ArrowLink>
+      <ArrowLink href={routes.method} muted>
         Cómo se calcula el PULSE
-      </Link>
+      </ArrowLink>
     </nav>
   );
 }

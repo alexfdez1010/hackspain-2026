@@ -27,7 +27,7 @@ import { scoreBand, scoreColor } from '@/lib/score';
  */
 function HealthCell({ health }: { health: number | null }) {
   if (health === null || !Number.isFinite(health)) {
-    return <span className="text-muted">sin datos</span>;
+    return <span className="text-ink-muted">sin datos</span>;
   }
   const score = health * 100;
   const band = scoreBand(score);

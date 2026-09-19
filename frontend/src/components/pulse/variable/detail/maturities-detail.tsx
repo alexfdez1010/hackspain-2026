@@ -39,7 +39,7 @@ const PRODUCT_COLUMNS: readonly DataTableColumn<DebtProduct>[] = [
     sortBy: (row) => row.nextPaymentDate,
     cell: (row) =>
       row.nextPaymentDate === null ? (
-        <span className="text-muted">sin calendario</span>
+        <span className="text-ink-muted">sin calendario</span>
       ) : (
         formatDay(row.nextPaymentDate)
       ),

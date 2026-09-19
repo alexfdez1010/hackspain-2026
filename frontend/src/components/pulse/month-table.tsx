@@ -41,7 +41,7 @@ function pillarColumns(
       cell: (row) => {
         const value = row.pillars[pillar.key] ?? null;
         return value === null ? (
-          <span className="text-muted">{UNKNOWN_TEXT}</span>
+          <span className="text-ink-secondary">{UNKNOWN_TEXT}</span>
         ) : (
           formatNumber(value, 1)
         );
@@ -80,7 +80,7 @@ function buildColumns(
       sortBy: (row) => row.change,
       cell: (row) =>
         row.change === null ? (
-          <span className="text-muted">primer mes</span>
+          <span className="text-ink-secondary">primer mes</span>
         ) : (
           formatSigned(row.change)
         ),
@@ -94,8 +94,8 @@ function buildColumns(
         <>
           {formatConfidence(row.confidence)}
           {row.unknownCount > 0 && (
-            <span className="block text-xs text-muted">
-              {formatNumber(row.unknownCount)} var. sin datos
+            <span className="block text-[13px] text-ink-secondary">
+              {formatNumber(row.unknownCount)} sin datos
             </span>
           )}
         </>
@@ -104,7 +104,7 @@ function buildColumns(
     ...pillarColumns(pillars),
     {
       id: 'cash',
-      header: 'Caja a fin de mes',
+      header: 'Caja fin de mes',
       cellClassName: 'tabular-nums',
       sortBy: (row) => row.cashEnd,
       cell: (row) => formatEuro(row.cashEnd),
@@ -128,7 +128,7 @@ export function PulseMonthTable({ rows, pillars }: PulseMonthTableProps) {
   const columns = useMemo(() => buildColumns(pillars), [pillars]);
   if (rows.length === 0) {
     return (
-      <p className="text-sm text-muted">
+      <p className="text-sm text-ink-secondary">
         Sin meses observados: la tabla se llena con el primer cierre exportado.
       </p>
     );

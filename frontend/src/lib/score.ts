@@ -4,8 +4,10 @@ export type ScoreBandKey = 'critical' | 'fragile' | 'neutral' | 'solid';
 /** Visual and textual description of a score band. */
 export interface ScoreBand {
   key: ScoreBandKey;
-  /** Spanish label used in filters and legends. */
+  /** Spanish label used in filters and legends, with the range of the band. */
   label: string;
+  /** Spanish name of the band on its own, for pills and captions. */
+  name: string;
   /** Inclusive lower bound of the band. */
   min: number;
   /** Exclusive upper bound of the band. */
@@ -22,6 +24,7 @@ export interface ScoreBand {
 export const SCORE_BANDS: readonly ScoreBand[] = [
   {
     key: 'critical',
+    name: 'Crítico',
     label: 'Crítico (<35)',
     min: Number.NEGATIVE_INFINITY,
     max: 35,
@@ -31,6 +34,7 @@ export const SCORE_BANDS: readonly ScoreBand[] = [
   },
   {
     key: 'fragile',
+    name: 'Frágil',
     label: 'Frágil (35-50)',
     min: 35,
     max: 50,
@@ -40,6 +44,7 @@ export const SCORE_BANDS: readonly ScoreBand[] = [
   },
   {
     key: 'neutral',
+    name: 'Neutro',
     label: 'Neutro (50-65)',
     min: 50,
     max: 65,
@@ -49,6 +54,7 @@ export const SCORE_BANDS: readonly ScoreBand[] = [
   },
   {
     key: 'solid',
+    name: 'Sólido',
     label: 'Sólido (>65)',
     min: 65,
     max: Number.POSITIVE_INFINITY,

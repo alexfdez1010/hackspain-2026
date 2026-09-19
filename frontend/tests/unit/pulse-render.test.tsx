@@ -1,18 +1,17 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import { PillarSparklines } from '@/components/charts/pillar-sparklines';
 import { PulseCompanyHeader } from '@/components/pulse/company-header';
-import { PulseCompanyLinks } from '@/components/pulse/company-links';
 import { PulseForecastPanel } from '@/components/pulse/forecast-panel';
 import { PulseForecastTable } from '@/components/pulse/forecast-table';
+import { PulseMethodCards } from '@/components/pulse/method-cards';
 import { PulseMonthExplorer } from '@/components/pulse/month-explorer';
 import { PulseMonthTable } from '@/components/pulse/month-table';
+import { PulsePillarCards } from '@/components/pulse/pillar-cards';
 import { PulsePillarList } from '@/components/pulse/pillar-list';
-import { ScoreLegend } from '@/components/pulse/score-legend';
-import { PulseVariableTable } from '@/components/pulse/variable-table';
-import { buildVariableRows } from '@/lib/pulse/company-view';
+import { PulseVariableMosaic } from '@/components/pulse/variable-mosaic';
 import { buildForecastRows, buildMonthRows } from '@/lib/pulse/history';
+import { buildPulseMosaic } from '@/lib/pulse/mosaic';
 import { buildPillarSeries } from '@/lib/pulse/pillar-series';
 import { StaticPulseSource } from '@/lib/pulse/source/static-json';
 import type { PulseCompany } from '@/lib/pulse/types';
@@ -39,48 +38,39 @@ const COMPANY: PulseCompany = {
   pulsePrev: 17.88,
   confidence: 0.82,
   pillars: { liquidez: 34.33, deuda: 33.97, cobro: 54.58, pago: 51.12 },
-  series: [makeSeriesPoint()],
+  series: [makeSeriesPoint({ month: '2026-07' }), makeSeriesPoint()],
   forecast: [makeForecastPoint()],
 };
 
 describe('PULSE views render on the server', () => {
-  it('opens the company with score, change and confidence', () => {
+  it('opens the company with the score, the ruler and the four qualifiers', () => {
     const markup = renderToStaticMarkup(
-      <PulseCompanyHeader company={COMPANY} />,
+      <PulseCompanyHeader
+        company={COMPANY}
+        pStress6m={0.28}
+        baseRate={0.22}
+        cashEnd={36_982.49}
+      />,
     );
     expect(markup).toContain('32,8');
+    expect(markup).toContain('PULSE del cierre de ago 2026');
+    expect(markup).toContain('sobre la escala de bandas');
     expect(markup).toContain('+14,9');
-    expect(markup).toContain('82 de 100 puntos con datos');
-    expect(markup).toContain('Grupo Ebro');
-    expect(markup).not.toContain('GROUP_0147');
-  });
-
-  it('publishes the weights of the pillars and of the variables', () => {
-    const markup = renderToStaticMarkup(
-      <ScoreLegend pillars={PILLARS} variables={VARIABLE_META} />,
-    );
-    expect(markup).toContain('Calidad de cobro');
-    expect(markup).toContain('36 pts');
+    expect(markup).toContain('Desde 17,9 puntos en jul 2026');
+    expect(markup).toContain('82 de 100 puntos de peso con datos');
+    expect(markup).toContain('Tensión a 6 meses');
+    expect(markup).toContain('Media de la cartera 22\u00a0%');
     expect(markup).toContain('Días de caja');
+    expect(markup).not.toContain('NaN');
   });
 
-  it('shows each pillar next to the points it owns', () => {
+  it('shows each pillar as a bar on the same scale', () => {
     const markup = renderToStaticMarkup(
       <PulsePillarList pillars={PILLARS} scores={COMPANY.pillars} />,
     );
-    expect(markup).toContain('36 de 100 puntos');
-    expect(markup).toContain('54,6');
-  });
-
-  it('marks a variable without evidence as «sin datos»', () => {
-    const rows = buildVariableRows(VARIABLE_META, COMPANY.series[0], {
-      liquidez: 'Liquidez',
-      deuda: 'Deuda y servicio',
-    });
-    const markup = renderToStaticMarkup(<PulseVariableTable rows={rows} />);
-    expect(markup).toContain('Utilización de líneas');
-    expect(markup).toContain('sin datos');
-    expect(markup).toContain('14,0 días');
+    expect(markup).toContain('Calidad de cobro');
+    expect(markup).toContain('>54,6</b>');
+    expect(markup).toContain('width:54.58%');
   });
 
   it('decomposes the default horizon of the forecast', () => {
@@ -91,11 +81,12 @@ describe('PULSE views render on the server', () => {
         pulseNow={COMPANY.pulse}
       />,
     );
-    expect(markup).toContain('feb 2027');
+    expect(markup).toContain('PULSE previsto en feb 2027');
     expect(markup).toContain('20,0-55,0');
+    expect(markup).toContain('Frente a los 32,8 de hoy');
     expect(markup).toContain('Base del modelo');
-    expect(markup).toContain('las 4 suman −1,50');
-    expect(markup).toContain('previsto de −1,50');
+    expect(markup).toContain('Las 4 barras suman −1,50 puntos');
+    expect(markup).toContain('el cambio previsto a +6 m');
   });
 });
 
@@ -110,12 +101,9 @@ describe('the month-by-month view renders on the server', () => {
     );
     expect(markup).toContain('ago 2026');
     expect(markup).toContain('primer mes');
-    expect(markup).toContain('2 var. sin datos');
-    expect(markup).toContain('Calidad de cobro');
+    expect(markup).toContain('2 sin datos');
+    expect(markup).toContain('Caja fin de mes');
     expect(markup).not.toContain('NaN');
-    expect(markup.match(/2026<\/td>|2025<\/td>/g)?.length ?? 0).toBeGreaterThan(
-      0,
-    );
   });
 
   it('explains what is missing when there is no observed month', () => {
@@ -124,15 +112,16 @@ describe('the month-by-month view renders on the server', () => {
     ).toContain('Sin meses observados');
   });
 
-  it('names every predicted month as such, next to its band', () => {
+  it('names every predicted month next to its band and its move', () => {
     const rows = buildForecastRows(COMPANY.forecast, COMPANY.pulse);
     const markup = renderToStaticMarkup(
       <PulseForecastTable rows={rows} baseMonth={COMPANY.month} />,
     );
     expect(markup).toContain('feb 2027');
-    expect(markup).toContain('previsto');
+    expect(markup).toContain('PULSE previsto');
     expect(markup).toContain('20,0-55,0');
     expect(markup).toContain('+5,2');
+    expect(markup).not.toContain('Δ previsto');
   });
 
   it('says what a company without forecast is missing', () => {
@@ -143,10 +132,10 @@ describe('the month-by-month view renders on the server', () => {
     ).toContain('Sin previsión publicada');
   });
 
-  it('draws one small multiple per pillar with its weight', async () => {
+  it('draws one card per pillar with its weight and its sparkline', async () => {
     const company = await source.getCompany('COMP_0051');
     const series = buildPillarSeries(PILLARS, company?.series ?? []);
-    const markup = renderToStaticMarkup(<PillarSparklines series={series} />);
+    const markup = renderToStaticMarkup(<PulsePillarCards series={series} />);
     expect(markup.match(/role="img"/g)).toHaveLength(4);
     expect(markup).toContain('36 de 100 puntos');
     expect(markup).toContain('Comportamiento de pago');
@@ -164,19 +153,43 @@ describe('the month-by-month view renders on the server', () => {
       />,
     );
     expect(markup).toContain('PULSE de ago 2026');
-    expect(markup).toContain('82 de 100 puntos con datos');
-    expect(markup).toContain('2 de 11 variables sin datos');
+    expect(markup).toContain('Confianza: 82 de 100 puntos de peso con datos');
+    expect(markup).toContain('Variables sin dato en ago 2026');
     expect(markup).toContain('Tramo +90 días');
-    expect(markup).toContain('10,51 pts');
+    expect(markup).toContain('10,51');
     expect(markup).toContain('45,64');
   });
 
-  it('points at the recommendations and at the method of the company', () => {
+  it('draws the mosaic of the last close and opens its heaviest variable', async () => {
+    const company = await source.getCompany('COMP_0001');
+    const { meta } = await source.getSummary();
+    const last = company?.series[company.series.length - 1] ?? null;
+    const mosaic = buildPulseMosaic(meta.pillars, meta.variables, last);
     const markup = renderToStaticMarkup(
-      <PulseCompanyLinks companyId="COMP_0001" />,
+      <PulseVariableMosaic mosaic={mosaic} companyId="COMP_0001" />,
     );
-    expect(markup).toContain('href="/company/COMP_0001/recommendations"');
+    expect(markup).toContain('Calidad de cobro');
+    expect(markup).toContain('54,6 · neutro');
+    expect(markup).toContain('36 pts de peso');
+    expect(markup).toContain('Tramo +90 días');
+    expect(markup).toContain('2 sin datos');
+    expect(markup).toContain('Peso en el modelo');
+    expect(markup).toContain('Ver la variable');
+    expect(markup).toMatch(/href="\/company\/COMP_0001\/variable\/\w+"/);
+    expect(markup).not.toContain('NaN');
+  });
+
+  it('states the model with the weights of the export', async () => {
+    const company = await source.getCompany('COMP_0001');
+    const { meta } = await source.getSummary();
+    const markup = renderToStaticMarkup(
+      <PulseMethodCards meta={meta} company={company!} />,
+    );
+    expect(markup).toContain('PULSE = Σ(peso · score) / Σ(pesos con dato)');
+    expect(markup).toContain('36 · 26 · 26 · 12 de 100');
+    expect(markup).toContain('ene 2026 – ago 2026');
+    expect(markup).toContain('6 meses, hasta feb 2027');
+    expect(markup).toContain('2 de 11 variables');
     expect(markup).toContain('href="/method?company=COMP_0001"');
-    expect(markup).toContain('Ver productos recomendados');
   });
 });

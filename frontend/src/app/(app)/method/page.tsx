@@ -4,15 +4,19 @@ import Link from 'next/link';
 import { PageShell, Section } from '@/components/layout/page-shell';
 import { MethodConfidenceBar } from '@/components/method/confidence-bar';
 import { MethodExamplePanel } from '@/components/method/example-panel';
+import { MethodFormulaPanel } from '@/components/method/formula-panel';
+import { MethodModelCard } from '@/components/method/model-card';
 import { MethodOutlookList } from '@/components/method/outlook-list';
 import { MethodPipelineFlow } from '@/components/method/pipeline-flow';
 import { MethodScoreScale } from '@/components/method/score-scale';
 import { MethodWeightMap } from '@/components/method/weight-map';
+import { Panel } from '@/components/ui/panel';
 import { companyName } from '@/lib/company/names';
 import {
   buildConfidenceSegments,
   buildMethodExample,
 } from '@/lib/method/example';
+import { buildModelFacts } from '@/lib/method/facts';
 import { getPulseDataSource } from '@/lib/pulse/data';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 import { PULSE_FORECAST_MONTHS } from '@/lib/pulse/types';
@@ -32,9 +36,9 @@ interface MethodPageProps {
 }
 
 /**
- * How the PULSE of a month is built, in plain words: the scale, the 100
- * points, the four steps of the calculation, a real month added by hand, and
- * four sentences on what the score does beyond the month.
+ * How the PULSE of a month is built, in plain words: the formula and the model
+ * card first, then the scale, the 100 points, the four steps, a real month
+ * added by hand and what the score does beyond the month.
  *
  * @param props - Query parameters of the route.
  * @returns The method page.
@@ -43,10 +47,11 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
   const { company: companyQuery } = await searchParams;
   const contextId = companyIdFromQuery(companyQuery);
   const pulse = getPulseDataSource();
-  const [{ meta }, requested] = await Promise.all([
+  const [summary, requested] = await Promise.all([
     pulse.getSummary(),
     pulse.getCompany(contextId ?? PULSE_DEMO_COMPANY_ID),
   ]);
+  const { meta } = summary;
   const company =
     requested ??
     (contextId ? await pulse.getCompany(PULSE_DEMO_COMPANY_ID) : null);
@@ -59,6 +64,12 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
     meta.horizons[meta.horizons.length - 1] ?? PULSE_FORECAST_MONTHS,
     PULSE_FORECAST_MONTHS,
   );
+  const facts = buildModelFacts(meta, {
+    companies: summary.companies.length,
+    lastHorizon,
+    example,
+    observedFrom: company?.series[0]?.month ?? null,
+  });
 
   return (
     <PageShell
@@ -66,34 +77,58 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
       lead={`${meta.scoreName} (${meta.scoreExpansion}) es una nota de 0 a 100 de la salud financiera de una empresa. Cada mes se miran ${formatNumber(meta.variables.length)} variables agrupadas en ${formatNumber(meta.pillars.length)} pilares —cobrar a tiempo, tener caja, deber poco y pagar bien—, cada una recibe su nota y cada nota vale unos puntos. La suma es el PULSE.`}
       aside={
         <Link
-          className="text-sm text-accent underline-offset-4 hover:underline"
+          data-arrow
           href={companyRoutes(contextId ?? PULSE_DEMO_COMPANY_ID).pulse}
+          className="group inline-flex items-center gap-1.5 text-[15px] font-medium leading-[1.2] text-ink"
         >
           {contextId
             ? `Volver a ${companyName(contextId)}`
             : `Ver un PULSE: ${companyName(PULSE_DEMO_COMPANY_ID)}`}
+          <i
+            aria-hidden
+            className="not-italic transition-transform group-hover:translate-x-1"
+          >
+            →
+          </i>
         </Link>
       }
     >
-      <Section
-        title="La escala"
-        note="Cuatro bandas, las mismas en toda la aplicación"
-      >
-        <MethodScoreScale
-          caption={`Último cierre publicado: ${formatMonth(meta.lastMonth)}.`}
-        />
+      <Section title="Cómo se calcula">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <Panel>
+            <MethodFormulaPanel variables={meta.variables.length} />
+          </Panel>
+          <Panel>
+            <MethodModelCard facts={facts} />
+          </Panel>
+        </div>
+      </Section>
+
+      <Section title="La escala" note="Las mismas cuatro bandas en toda la app">
+        <Panel>
+          <MethodScoreScale
+            caption={`Último cierre publicado: ${formatMonth(meta.lastMonth)}.`}
+          />
+        </Panel>
       </Section>
 
       <Section
         title="Los 100 puntos"
         note="El tamaño de cada celda son sus puntos; pulsa una para ver qué mide"
       >
-        <MethodWeightMap pillars={meta.pillars} variables={meta.variables} />
+        <Panel>
+          <MethodWeightMap pillars={meta.pillars} variables={meta.variables} />
+        </Panel>
       </Section>
 
-      <Section title="Cómo se calcula" note="Cuatro pasos, cada mes">
-        <div className="flex flex-col gap-8">
+      <Section title="Paso a paso" note="Lo que ocurre cada mes, en ese orden">
+        <Panel>
           <MethodPipelineFlow />
+        </Panel>
+      </Section>
+
+      <Section title="Con qué datos" note="Los 100 puntos, según su evidencia">
+        <Panel>
           <MethodConfidenceBar
             segments={coverage}
             confidence={example?.confidence ?? null}
@@ -103,7 +138,7 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
                 : 'Sin mes observado para ilustrar la cobertura.'
             }
           />
-        </div>
+        </Panel>
       </Section>
 
       <Section
@@ -114,19 +149,18 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
             : 'Sin empresa de ejemplo'
         }
       >
-        {example ? (
-          <MethodExamplePanel example={example} />
-        ) : (
-          <p className="text-sm text-muted">
-            El export no trae ninguna empresa con meses observados.
-          </p>
-        )}
+        <Panel>
+          {example ? (
+            <MethodExamplePanel example={example} />
+          ) : (
+            <p className="text-[15px] leading-[1.55] text-ink-secondary">
+              El export no trae ninguna empresa con meses observados.
+            </p>
+          )}
+        </Panel>
       </Section>
 
-      <Section
-        title="Previsión, precio y límites"
-        note="Lo demás, en cuatro frases"
-      >
+      <Section title="Previsión, precio y límites">
         <MethodOutlookList
           forecast={meta.evaluation.forecast}
           lastHorizon={lastHorizon}

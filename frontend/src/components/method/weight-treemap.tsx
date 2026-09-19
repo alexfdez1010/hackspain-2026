@@ -32,7 +32,7 @@ export function MethodWeightTreemap({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex w-full text-xs">
+      <div className="flex w-full text-[13px] leading-[1.45]">
         {map.groups.map((group, index) => (
           <div
             key={group.key}
@@ -45,7 +45,7 @@ export function MethodWeightTreemap({
             <span className="block font-medium leading-tight">
               {group.label}
             </span>
-            <span className="block tabular-nums text-muted">
+            <span className="block tabular-nums text-ink-secondary">
               {formatNumber(group.weight)} de {formatNumber(map.totalWeight)}
             </span>
           </div>

@@ -1,3 +1,4 @@
+import { pillarOrderIndex } from '@/lib/pulse/mosaic';
 import { UNKNOWN_TEXT } from '@/lib/pulse/format';
 import type { PulsePillarMeta, PulsePillars } from '@/lib/pulse/types';
 import { formatNumber } from '@/lib/format';
@@ -11,45 +12,44 @@ interface PulsePillarListProps {
 }
 
 /**
- * Shows the four pillar scores next to the points they own of the 100.
+ * The four pillar scores of one month as bars on the same 0-100 scale.
  *
- * The weight is part of the reading: a 30 in a pillar worth 36 points moves the
- * score far more than the same 30 in a pillar worth 12.
+ * The bar is the score and the order is the model's, from the money coming in
+ * to the money going out, so two months can be compared row by row.
  *
  * @param props - Pillar metadata and the scores of the month.
- * @returns A list of pillar bars ordered by weight.
+ * @returns The pillar rows.
  */
 export function PulsePillarList({ pillars, scores }: PulsePillarListProps) {
-  const ordered = [...pillars].sort((a, b) => b.weight - a.weight);
+  const ordered = [...pillars].sort(
+    (a, b) => pillarOrderIndex(a.key) - pillarOrderIndex(b.key),
+  );
   return (
-    <ul className="flex flex-col gap-3">
+    <ul>
       {ordered.map((pillar) => {
         const value = scores[pillar.key] ?? null;
         return (
           <li
             key={pillar.key}
-            className="grid grid-cols-[11rem_1fr_4rem] items-center gap-3 text-sm max-sm:grid-cols-[8rem_1fr_3.5rem]"
+            className="grid grid-cols-[minmax(0,1fr)_56px] items-center gap-4 border-b border-hairline py-3 last:border-b-0"
           >
             <span className="min-w-0">
-              <span className="block truncate">{pillar.label}</span>
-              <span className="block text-xs text-muted">
-                {formatNumber(pillar.weight)} de 100 puntos
+              <b className="block text-[15px] font-medium">{pillar.label}</b>
+              <span className="mt-2 block h-1.5 rounded bg-surface-secondary">
+                {value !== null && (
+                  <span
+                    className="block h-full rounded"
+                    style={{
+                      width: `${Math.min(Math.max(value, 0), 100)}%`,
+                      background: scoreColor(value),
+                    }}
+                  />
+                )}
               </span>
             </span>
-            <span className="relative block h-2 rounded-full bg-surface-secondary">
-              {value !== null && (
-                <span
-                  className="absolute inset-y-0 left-0 rounded-full"
-                  style={{
-                    width: `${Math.min(Math.max(value, 0), 100)}%`,
-                    backgroundColor: scoreColor(value),
-                  }}
-                />
-              )}
-            </span>
-            <span className="text-right tabular-nums">
+            <b className="text-right text-xl font-semibold leading-snug tabular-nums">
               {value === null ? UNKNOWN_TEXT : formatNumber(value, 1)}
-            </span>
+            </b>
           </li>
         );
       })}

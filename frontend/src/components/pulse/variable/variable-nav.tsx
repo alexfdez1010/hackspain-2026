@@ -20,9 +20,9 @@ interface PulseVariableNavProps {
  * to the score.
  *
  * The links are grouped by pillar because that is how the score is built: a
- * reader following a weak pillar wants its other variables first. The current
- * one keeps the same underline the section navigation uses, so «where am I»
- * reads the same everywhere.
+ * reader following a weak pillar wants its other variables first. Each one is
+ * a category chip and the open one is the only filled chip on the page, so
+ * «where am I» is answered without an underline or a colour.
  *
  * @param props - Company, variable metadata, current key and pillars.
  * @returns The grouped list of variable links.
@@ -37,7 +37,7 @@ export function PulseVariableNav({
   return (
     <nav
       aria-label="Otras variables"
-      className="flex flex-wrap gap-x-10 gap-y-5 text-sm"
+      className="flex flex-wrap gap-x-8 gap-y-5"
     >
       {pillars.map((pillar) => {
         const items = ordered.filter(
@@ -45,9 +45,11 @@ export function PulseVariableNav({
         );
         if (items.length === 0) return null;
         return (
-          <div key={pillar.key} className="flex min-w-0 flex-col gap-1.5">
-            <span className="text-xs text-muted">{pillar.label}</span>
-            <ul className="flex flex-wrap gap-x-4 gap-y-1">
+          <div key={pillar.key} className="flex min-w-0 flex-col gap-2">
+            <span className="text-[13px] font-semibold uppercase leading-[1.2] tracking-[0.06em] text-ink-muted">
+              {pillar.label}
+            </span>
+            <ul className="flex flex-wrap gap-1.5">
               {items.map((variable) => {
                 const current = variable.key === currentKey;
                 return (
@@ -55,11 +57,11 @@ export function PulseVariableNav({
                     <Link
                       href={companyVariableRoute(companyId, variable.key)}
                       aria-current={current ? 'page' : undefined}
-                      className={
+                      className={`inline-block rounded-md px-2.5 py-1.5 text-xs font-medium leading-[1.2] transition-colors ${
                         current
-                          ? 'inline-block py-1 underline decoration-2 underline-offset-8 sm:py-0'
-                          : 'inline-block py-1 text-muted transition-colors hover:text-foreground sm:py-0'
-                      }
+                          ? 'bg-ink text-page'
+                          : 'bg-surface-secondary text-ink-secondary hover:text-ink'
+                      }`}
                     >
                       {variable.label}
                     </Link>

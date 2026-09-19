@@ -1,16 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { AdvisorHeader } from '@/components/advisor/advisor-header';
-import { DeclinedList } from '@/components/advisor/declined-list';
-import { ImprovementPlanPanel } from '@/components/advisor/improvement-plan';
-import { InputsPanel } from '@/components/advisor/inputs-panel';
-import { OfferCard } from '@/components/advisor/offer-card';
-import { RiskPanel } from '@/components/advisor/risk-panel';
-import { PageShell, Section } from '@/components/layout/page-shell';
+import { CompanyActionsSection } from '@/components/actions/company-actions-panel';
+import { AdvisorDetail } from '@/components/advisor/advisor-detail';
+import { ApprovedPanel } from '@/components/advisor/approved-panel';
+import { PageShell } from '@/components/layout/page-shell';
 import { getAdvisorDataSource } from '@/lib/advisor/data';
 import { companyName } from '@/lib/company/names';
-import { formatMonth, formatNumber } from '@/lib/format';
+import { formatNumber } from '@/lib/format';
 import { getPulseDataSource } from '@/lib/pulse/data';
 
 interface AdvisorPageProps {
@@ -30,12 +27,12 @@ export async function generateMetadata({
   params,
 }: AdvisorPageProps): Promise<Metadata> {
   const { id } = await params;
-  return { title: `${companyName(id)} — Recomendaciones · Embat Pulse` };
+  return { title: `${companyName(id)} — Financiación · Embat Pulse` };
 }
 
 /**
  * Writes the lead sentence from the counts, so it never repeats the score and
- * the confidence the header already shows.
+ * the confidence the rest of the page can quote.
  *
  * @param fitting - Products that fit.
  * @param declined - Products left out.
@@ -43,7 +40,7 @@ export async function generateMetadata({
  */
 function buildLead(fitting: number, declined: number): string {
   if (fitting === 0) {
-    return 'Hoy ningún producto supera el encaje mínimo; el plan de mejora dice qué lo desbloquearía.';
+    return `Los ${formatNumber(declined)} productos del catálogo quedan hoy fuera por sus reglas.`;
   }
   const fit =
     fitting === 1
@@ -57,9 +54,9 @@ function buildLead(fitting: number, declined: number): string {
 }
 
 /**
- * Financial products recommended for one company: which ones fit, how much,
- * at what price, what would make that price cheaper and which products were
- * left out.
+ * What the company should do about its financing this month: the action
+ * first, then the products it can sign today with their price and fit, and
+ * the argument behind them folded away.
  *
  * @param props - Route parameters carrying the company identifier.
  * @returns The advisor page, or a 404 when the identifier is unknown.
@@ -75,65 +72,22 @@ export default async function CompanyAdvisorPage({ params }: AdvisorPageProps) {
   const variableLabels = Object.fromEntries(
     summary.meta.variables.map((variable) => [variable.key, variable.label]),
   );
-  const { recommendations, declined, improvementPlan } = company;
-  const catalogueSize = recommendations.length + declined.length;
-  const showPlan =
-    improvementPlan.unlocks.length > 0 || improvementPlan.story.length > 0;
+  const pillarLabels = Object.fromEntries(
+    summary.meta.pillars.map((pillar) => [pillar.key, pillar.label]),
+  );
 
   return (
     <PageShell
       title={companyName(company.companyId)}
-      lead={buildLead(recommendations.length, declined.length)}
+      lead={buildLead(company.recommendations.length, company.declined.length)}
     >
-      <AdvisorHeader company={company} />
-      {recommendations.length > 0 && (
-        <Section
-          title="Productos recomendados"
-          note={`${formatNumber(recommendations.length)} de ${formatNumber(catalogueSize)} del catálogo, por orden de encaje`}
-        >
-          <div className="flex flex-col gap-6">
-            {recommendations.map((offer) => (
-              <OfferCard
-                key={offer.product}
-                offer={offer}
-                referenceLabel={company.referenceRate.label}
-                variableLabels={variableLabels}
-              />
-            ))}
-          </div>
-        </Section>
-      )}
-      {showPlan && (
-        <Section
-          title="Plan de mejora"
-          note={
-            recommendations.length === 0
-              ? `Ningún producto supera el encaje mínimo de 40 con el PULSE de ${formatMonth(company.month)}`
-              : 'Qué desbloquearía el resto del catálogo'
-          }
-        >
-          <ImprovementPlanPanel plan={improvementPlan} />
-        </Section>
-      )}
-      <Section
-        title="Productos descartados"
-        note="Con la regla que los deja fuera"
-      >
-        <DeclinedList declined={declined} />
-      </Section>
-      <Section
-        title="Riesgo"
-        note="Aportes al logit del modelo de tensión a seis meses"
-      >
-        <RiskPanel risk={company.risk} />
-      </Section>
-      <Section
-        title="Datos usados"
-        note={`Cierre de ${formatMonth(company.month)}`}
-      >
-        <InputsPanel inputs={company.inputs} />
-      </Section>
-      <p className="max-w-3xl text-xs text-muted">{company.disclaimer}</p>
+      <CompanyActionsSection companyId={company.companyId} current="advisor" />
+      <ApprovedPanel
+        company={company}
+        pillarLabels={pillarLabels}
+        variableLabels={variableLabels}
+      />
+      <AdvisorDetail company={company} />
     </PageShell>
   );
 }

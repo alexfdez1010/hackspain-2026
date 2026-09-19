@@ -33,12 +33,11 @@ test('fits a phone: two-row navigation, no sideways scroll and stacked maps', as
     viewport: window.innerWidth,
   }));
   expect(scroll.width).toBe(scroll.viewport);
-  const heatMap = page.getByRole('group', {
-    name: 'Score de cada variable en el último cierre',
-  });
-  await expect(heatMap).toHaveCount(1);
   await expect(
-    heatMap.getByText('Calidad de cobro', { exact: true }),
+    page.getByRole('heading', { level: 2, name: 'Dónde se decide' }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Calidad de cobro', { exact: true }).first(),
   ).toBeVisible();
   await expect(page.getByText('¿Necesitas ayuda? Escríbeme')).toBeHidden();
   await search.fill('atlassian glo');

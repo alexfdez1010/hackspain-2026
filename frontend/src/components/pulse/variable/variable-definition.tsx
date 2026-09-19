@@ -1,5 +1,3 @@
-import { Fragment } from 'react';
-
 import { directionText } from '@/lib/method/variables';
 import type { PulseVariableView } from '@/lib/pulse/variable-view';
 import { formatNumber, formatPercent } from '@/lib/format';
@@ -43,28 +41,36 @@ function definitionRows(view: PulseVariableView): [string, string][] {
 }
 
 /**
- * Explains what the variable measures and on which rules and data it rests.
+ * States the rules and the data the variable rests on, as the hairline rows
+ * of a specification card.
+ *
+ * What it measures is not repeated here: the page opens with that sentence,
+ * so this block only carries what the heading and the lead cannot.
  *
  * @param props - The variable of one company.
- * @returns The definition paragraph and its specification rows.
+ * @returns The specification rows, or the note of an undocumented variable.
  */
 export function PulseVariableDefinition({
   view,
 }: PulseVariableDefinitionProps) {
   const { doc } = view;
   return (
-    <div className="flex max-w-3xl flex-col gap-3">
-      <p className={doc ? 'text-sm' : 'text-sm text-muted'}>
-        {doc
-          ? doc.measures
-          : 'El método aún no documenta esta variable: el export la publica con su peso, pero sin definición ni origen.'}
-      </p>
-      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-sm">
+    <div className="flex max-w-[720px] flex-col gap-4">
+      {!doc && (
+        <p className="text-[15px] leading-[1.55] text-ink-secondary">
+          El método aún no documenta esta variable: el export la publica con su
+          peso, pero sin definición ni origen.
+        </p>
+      )}
+      <dl>
         {definitionRows(view).map(([term, value]) => (
-          <Fragment key={term}>
-            <dt className="text-muted">{term}</dt>
-            <dd>{value}</dd>
-          </Fragment>
+          <div
+            key={term}
+            className="grid grid-cols-[10rem_minmax(0,1fr)] items-baseline gap-5 border-b border-hairline py-3 text-[15px] leading-[1.55] first:pt-0 last:border-0 last:pb-0"
+          >
+            <dt className="text-ink-secondary">{term}</dt>
+            <dd className="font-medium">{value}</dd>
+          </div>
         ))}
       </dl>
     </div>

@@ -22,28 +22,40 @@ const COLUMN_CLASS: Record<number, string> = {
 };
 
 /**
- * Renders the headline figures of a page as a plain grid.
+ * Renders the headline figures of a page as the brand KPI strip: one bordered
+ * panel whose cells are separated by hairlines, never by gaps.
  *
- * Figures carry no card outline: the grouping comes from spacing and from the
- * label sitting directly under its value.
+ * Every cell carries its own left and top hairline and the grid is pulled one
+ * pixel up and left inside the panel, so the outer lines are clipped by the
+ * rounded border and the count of columns can change with the viewport
+ * without any cell needing to know where it sits.
  *
  * @param props - The figures and the wide-screen column count.
- * @returns A responsive grid of figures.
+ * @returns A bordered strip of figures.
  */
 export function StatGrid({ items, columns = 4 }: StatGridProps) {
   return (
-    <dl className={`grid grid-cols-2 gap-x-6 gap-y-5 ${COLUMN_CLASS[columns]}`}>
-      {items.map((item) => (
-        <div key={item.key} className="flex flex-col gap-0.5">
-          <dt className="order-2 text-sm text-muted">{item.label}</dt>
-          <dd className="order-1 text-2xl font-semibold tabular-nums tracking-tight">
-            {item.value}
-          </dd>
-          {item.hint && (
-            <p className="order-3 text-xs text-muted">{item.hint}</p>
-          )}
-        </div>
-      ))}
-    </dl>
+    <div className="overflow-hidden rounded-xl border border-hairline bg-raised">
+      <dl className={`-ml-px -mt-px grid grid-cols-2 ${COLUMN_CLASS[columns]}`}>
+        {items.map((item) => (
+          <div
+            key={item.key}
+            className="flex flex-col border-l border-t border-hairline px-6 py-5"
+          >
+            <dt className="order-2 mt-2 text-sm font-medium leading-[1.2]">
+              {item.label}
+            </dt>
+            <dd className="order-1 text-[32px] font-semibold leading-[1.1] tracking-[-0.01em] tabular-nums">
+              {item.value}
+            </dd>
+            {item.hint && (
+              <p className="order-3 text-[13px] leading-[1.45] text-ink-secondary">
+                {item.hint}
+              </p>
+            )}
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }

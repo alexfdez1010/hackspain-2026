@@ -1,7 +1,7 @@
-import { ScoreBadge } from '@/components/ui/score-badge';
+import { ScoreHeadline } from '@/components/pulse/score-headline';
 import { StatGrid, type StatItem } from '@/components/ui/stat-grid';
 import { directionText } from '@/lib/method/variables';
-import { formatRawValue, UNKNOWN_TEXT } from '@/lib/pulse/format';
+import { formatRawValue } from '@/lib/pulse/format';
 import type { PulseVariableView } from '@/lib/pulse/variable-view';
 import {
   formatMonth,
@@ -9,7 +9,6 @@ import {
   formatPercent,
   formatSigned,
 } from '@/lib/format';
-import { scoreBand } from '@/lib/score';
 
 interface PulseVariableHeaderProps {
   view: PulseVariableView;
@@ -109,30 +108,17 @@ function historyStats(view: PulseVariableView): StatItem[] {
 export function PulseVariableHeader({ view }: PulseVariableHeaderProps) {
   const { last, variable } = view;
   const score = last?.score ?? null;
-  const band = scoreBand(score);
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end gap-x-12 gap-y-6">
-        <div className="flex flex-col gap-1">
-          {score === null ? (
-            <span className="text-5xl font-semibold tracking-tight text-muted">
-              {UNKNOWN_TEXT}
-            </span>
-          ) : (
-            <ScoreBadge score={score} size="lg" />
-          )}
-          <p className="text-sm text-muted">
-            {last
-              ? `Score de ${variable.label} en ${formatMonth(last.month)}${
-                  score === null ? '' : ` · ${band.label}`
-                }`
-              : `Sin meses observados para ${variable.label}`}
-          </p>
-        </div>
-        <div className="min-w-0 flex-1">
-          <StatGrid items={lastMonthStats(view)} columns={4} />
-        </div>
-      </div>
+    <div className="flex flex-col gap-5">
+      <ScoreHeadline
+        score={score}
+        caption={
+          last
+            ? `Score de ${variable.label} en ${formatMonth(last.month)}`
+            : `Sin meses observados para ${variable.label}`
+        }
+      />
+      <StatGrid items={lastMonthStats(view)} columns={4} />
       <StatGrid items={historyStats(view)} columns={4} />
     </div>
   );

@@ -14,5 +14,9 @@ interface DetailNoteProps {
  * @returns The note paragraph.
  */
 export function DetailNote({ children }: DetailNoteProps) {
-  return <p className="text-sm text-muted">{children}</p>;
+  return (
+    <p className="max-w-[720px] text-[15px] leading-[1.55] text-ink-secondary">
+      {children}
+    </p>
+  );
 }

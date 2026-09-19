@@ -25,6 +25,12 @@ export interface DataTableColumn<Row extends object> {
   isRowHeader?: boolean;
   /** Class applied to every cell of the column, e.g. `tabular-nums`. */
   cellClassName?: string;
+  /**
+   * Alignment of the header and the cells. Columns of figures default to
+   * `end`, which is how a numeric column is recognised: their cells carry
+   * `tabular-nums`.
+   */
+  align?: 'start' | 'end';
 }
 
 interface DataTableProps<Row extends object> {
@@ -40,6 +46,18 @@ interface DataTableProps<Row extends object> {
    */
   defaultSort?: SortDescriptor;
 }
+
+/* Slot classes. Nothing here may repeat a property: HeroUI concatenates the
+   strings without merging them, so two padding utilities would both survive. */
+const HEADER_BASE =
+  'whitespace-nowrap border-b border-hairline bg-transparent pt-0 pb-2.5 pl-5 first:pl-0 text-sm font-medium leading-[1.2] text-ink-secondary after:hidden';
+
+const CELL_BASE =
+  'border-b-0 bg-transparent py-3 pl-5 first:pl-0 align-top text-[15px] leading-[1.55]';
+
+const START_CLASS = 'pr-4 text-left';
+
+const END_CLASS = 'pr-0 text-right';
 
 /**
  * Collects the sort accessors of the sortable columns, keyed by column id.
@@ -60,8 +78,27 @@ function collectAccessors<Row extends object>(
 }
 
 /**
+ * Resolves the alignment of one column: explicit first, otherwise `end` when
+ * the column renders figures.
+ *
+ * @param column - The column being rendered.
+ * @returns `true` when header and cells are right aligned.
+ */
+function isEndAligned<Row extends object>(
+  column: DataTableColumn<Row>,
+): boolean {
+  if (column.align) return column.align === 'end';
+  return column.cellClassName?.includes('tabular-nums') ?? false;
+}
+
+/**
  * Renders a HeroUI table whose columns the reader can sort by clicking their
  * header, in either direction.
+ *
+ * The table follows the brand rules: headers in 14/500 secondary ink over a
+ * hairline, rows separated by hairlines with none under the last one, the
+ * hovered row tinted `brand-subtle`, figures right aligned, and a horizontal
+ * scroller so a wide table never widens the page.
  *
  * Sorting happens in the client on rows the server already computed; the
  * component never touches the data source. Rows with no value for the chosen
@@ -86,12 +123,13 @@ export function DataTable<Row extends object>({
   );
 
   return (
-    <Table>
+    <Table variant="secondary">
       <Table.ScrollContainer>
         <Table.Content
           aria-label={ariaLabel}
           sortDescriptor={sort}
           onSortChange={setSort}
+          className="w-full border-collapse"
         >
           <Table.Header columns={columns}>
             {(column) => (
@@ -99,6 +137,7 @@ export function DataTable<Row extends object>({
                 id={column.id}
                 isRowHeader={column.isRowHeader}
                 allowsSorting={column.sortBy !== undefined}
+                className={`${HEADER_BASE} ${isEndAligned(column) ? END_CLASS : START_CLASS}`}
               >
                 {({ sortDirection }) =>
                   column.sortBy ? (
@@ -114,9 +153,15 @@ export function DataTable<Row extends object>({
           </Table.Header>
           <Table.Body items={sorted}>
             {(row) => (
-              <Table.Row id={rowId(row)} columns={columns}>
+              <Table.Row
+                id={rowId(row)}
+                columns={columns}
+                className="border-b border-hairline last:border-b-0 hover:bg-brand-subtle"
+              >
                 {(column) => (
-                  <Table.Cell className={column.cellClassName}>
+                  <Table.Cell
+                    className={`${CELL_BASE} ${isEndAligned(column) ? END_CLASS : START_CLASS} ${column.cellClassName ?? ''}`}
+                  >
                     {column.cell(row)}
                   </Table.Cell>
                 )}

@@ -1,3 +1,4 @@
+import { Panel } from '@/components/ui/panel';
 import {
   describeAnticipation,
   describeHits,
@@ -27,7 +28,7 @@ interface MethodOutlookListProps {
  * score warns of declines far better than it promises recoveries.
  *
  * @param props - The evaluated horizons and the furthest one.
- * @returns The list of four items.
+ * @returns The four panels.
  */
 export function MethodOutlookList({
   forecast,
@@ -64,13 +65,15 @@ export function MethodOutlookList({
     },
   ];
   return (
-    <dl className="grid max-w-3xl gap-x-8 gap-y-5 sm:grid-cols-[8rem_1fr]">
+    <div className="grid gap-5 lg:grid-cols-2">
       {items.map((item) => (
-        <div key={item.key} className="contents">
-          <dt className="text-sm font-semibold">{item.title}</dt>
-          <dd className="text-sm text-muted">{item.text}</dd>
-        </div>
+        <Panel key={item.key}>
+          <h3 className="text-xl font-semibold leading-[1.3]">{item.title}</h3>
+          <p className="mt-3 text-[15px] leading-[1.55] text-ink-secondary">
+            {item.text}
+          </p>
+        </Panel>
       ))}
-    </dl>
+    </div>
   );
 }

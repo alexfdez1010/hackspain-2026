@@ -85,25 +85,65 @@ function drawable(points: readonly PlacedTrajectoryPoint[]) {
   );
 }
 
+/** Vertical domain of a trajectory, in score points. */
+export interface TrajectoryDomain {
+  min: number;
+  max: number;
+}
+
+/** Full extent of the score scale, the domain used when none is given. */
+export const FULL_DOMAIN: TrajectoryDomain = { min: 0, max: 100 };
+
+/**
+ * Narrows the vertical domain to the data, keeping the three band guides in
+ * view.
+ *
+ * A company that lives between 38 and 48 would be a flat line on the whole
+ * 0-100 scale; zooming in shows the shape of its months, and forcing 35 and 65
+ * to stay inside keeps the reader's anchors on screen.
+ *
+ * @param points - Observed months followed by the forecast horizons.
+ * @param margin - Points of headroom added above and below the data.
+ * @returns The domain to draw, clamped to the 0-100 scale.
+ */
+export function trajectoryDomain(
+  points: readonly PulseTrajectoryPoint[],
+  margin = 6,
+): TrajectoryDomain {
+  const values = points.flatMap((point) =>
+    [point.value, point.p10, point.p90].filter(
+      (value): value is number => value !== null && Number.isFinite(value),
+    ),
+  );
+  if (values.length === 0) return FULL_DOMAIN;
+  return {
+    min: Math.max(0, Math.min(...values, 35) - margin),
+    max: Math.min(100, Math.max(...values, 65) + margin),
+  };
+}
+
 /**
  * Places the trajectory in a chart box.
  *
  * @param points - Observed months followed by the forecast horizons.
  * @param boundaryIndex - Index of the last observed month.
  * @param box - Chart box, whose width is the measured pixel width.
+ * @param domain - Vertical domain; the whole scale by default.
  * @returns The placed points, the two lines and the band.
  */
 export function layoutTrajectory(
   points: readonly PulseTrajectoryPoint[],
   boundaryIndex: number,
   box: ChartBox,
+  domain: TrajectoryDomain = FULL_DOMAIN,
 ): TrajectoryLayout {
   const count = points.length;
+  const place = (value: number) => yAt(value, domain.min, domain.max, box);
   const placed = points.map((point, index) => ({
     ...point,
     index,
     x: xAt(index, count, box),
-    y: point.value === null ? null : yAt(point.value, 0, 100, box),
+    y: point.value === null ? null : place(point.value),
   }));
   const banded = placed.filter(
     (point): point is PlacedTrajectoryPoint & { p10: number; p90: number } =>
@@ -115,8 +155,8 @@ export function layoutTrajectory(
     observed: drawable(placed.slice(0, boundaryIndex + 1)),
     projected: drawable(placed.slice(boundaryIndex)),
     band: bandPath(
-      banded.map((point) => ({ x: point.x, y: yAt(point.p90, 0, 100, box) })),
-      banded.map((point) => ({ x: point.x, y: yAt(point.p10, 0, 100, box) })),
+      banded.map((point) => ({ x: point.x, y: place(point.p90) })),
+      banded.map((point) => ({ x: point.x, y: place(point.p10) })),
     ),
     labelStep: step,
     labels: labelIndices(

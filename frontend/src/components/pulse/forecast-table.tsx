@@ -32,12 +32,7 @@ function buildColumns(
       isRowHeader: true,
       cellClassName: 'whitespace-nowrap',
       sortBy: (row) => row.targetMonth,
-      cell: (row) => (
-        <>
-          {formatMonth(row.targetMonth)}
-          <span className="block text-xs text-muted">previsto</span>
-        </>
-      ),
+      cell: (row) => formatMonth(row.targetMonth),
     },
     {
       id: 'horizon',
@@ -66,13 +61,6 @@ function buildColumns(
       sortBy: (row) => row.change,
       cell: (row) => formatSigned(row.change),
     },
-    {
-      id: 'delta',
-      header: 'Δ previsto',
-      cellClassName: 'tabular-nums',
-      sortBy: (row) => row.delta,
-      cell: (row) => formatSigned(row.delta, 2),
-    },
   ];
 }
 
@@ -94,7 +82,7 @@ export function PulseForecastTable({
   const columns = useMemo(() => buildColumns(baseMonth), [baseMonth]);
   if (rows.length === 0) {
     return (
-      <p className="text-sm text-muted">
+      <p className="text-sm text-ink-secondary">
         Sin previsión publicada: hacen falta más meses observados para
         estimarla.
       </p>

@@ -51,14 +51,14 @@ export function MethodConfidenceBar({
   const total = segments.reduce((sum, segment) => sum + segment.weight, 0);
   if (total <= 0) {
     return (
-      <p className="text-sm text-muted">
+      <p className="text-[15px] leading-[1.55] text-ink-secondary">
         El export no publica la cobertura de este mes.
       </p>
     );
   }
   const covered = segments.filter((segment) => segment.coverage !== 'unknown');
   return (
-    <figure className="flex max-w-3xl flex-col gap-3">
+    <figure className="flex max-w-[720px] flex-col gap-4">
       <div
         className="flex h-8 w-full gap-0.5"
         role="img"
@@ -76,12 +76,10 @@ export function MethodConfidenceBar({
           />
         ))}
       </div>
-      <p className="text-sm">
-        <span className="font-medium tabular-nums">
-          {formatConfidencePoints(confidence)}
-        </span>
+      <p className="text-xl font-semibold leading-[1.3] tabular-nums">
+        {formatConfidencePoints(confidence)}
       </p>
-      <ul className="flex flex-col gap-1.5 text-xs text-muted">
+      <ul className="flex flex-col gap-2 text-[13px] leading-[1.45] text-ink-secondary">
         {LEGEND.map((item) => (
           <li key={item.coverage} className="flex items-center gap-2">
             <span
@@ -92,7 +90,9 @@ export function MethodConfidenceBar({
           </li>
         ))}
       </ul>
-      <figcaption className="text-xs text-muted">{caption}</figcaption>
+      <figcaption className="text-[13px] leading-[1.45] text-ink-secondary">
+        {caption}
+      </figcaption>
     </figure>
   );
 }

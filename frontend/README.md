@@ -22,7 +22,7 @@ obligatorio.
 | `/company/[id]`                 | PULSE de la empresa: score del mes, trayectoria con previsión +1..+6 m y banda p10-p90, mapa de calor de las 11 variables, mes a mes, evolución de pilares, explorador mensual y desglose.                                                                                                                                                                                                                                                                                                      |
 | `/company/[id]/variable/[key]`  | Una variable del PULSE de la empresa: score, valor y aporte del último cierre, estadísticas del historial, score mes a mes frente al pilar y al PULSE, valor observado, puntos ganados, posición frente al resto, peso en la previsión, el detalle propio de la variable (ranking de clientes por salud de pago, proveedores por DPO y plazo, líneas de crédito, deuda y vencimientos, antigüedad de la cartera, caja diaria) y la tabla mes a mes. Se abre desde cada celda del mapa de calor. |
 | `/company/[id]/signals`         | Señales: alertas abiertas (episodios sin tres meses de seguimiento, con la probabilidad de que duren) e histórico de episodios cerrados con lo que fueron (bache o caída, repunte o mejora), contadores de caídas y mejoras confirmadas y de aciertos al abrirse. La página de PULSE muestra la señal más reciente de los últimos seis meses como alerta y marca cada señal con un triángulo en la trayectoria.                                                                                 |
-| `/company/[id]/recommendations` | Advisor: productos financieros que encajan, importe, tipo y por qué; precio desglosado, palancas, descartados, plan de mejora, riesgo y datos usados.                                                                                                                                                                                                                                                                                                                                           |
+| `/company/[id]/recommendations` | Financiación: «Qué hacer ahora» (hasta tres acciones escritas por el modelo), los productos aprobados en una fila cada uno con importe, tipo, encaje y su argumento plegado en «Ver detalle», «Fuera de alcance hoy» con la regla que deja fuera cada producto, y «Más detalle» con plan de mejora, riesgo y datos usados, todo plegado.                                                                                                                                                        |
 | `/method?company=[id]`          | Método: cómo se calcula el PULSE del mes en palabras llanas (escala, 100 puntos, cuatro pasos, confianza y un mes real sumado a mano); previsión, señales, precio y límites en cuatro frases.                                                                                                                                                                                                                                                                                                   |
 
 Las empresas y los grupos del export son anónimos (`COMP_0001`, `GROUP_0147`).
@@ -69,6 +69,25 @@ enviado por el cliente. Ejemplo de invocación y contrato completo en
 Referencias: [Vercel AI Gateway](https://vercel.com/docs/ai-gateway/getting-started),
 [AI SDK Chatbot](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot),
 [Gemini 3.8 Flash](https://vercel.com/ai-gateway/models/gemini-3.8-flash).
+
+### Qué hacer ahora (acciones)
+
+Cada página de empresa abre con el bloque navy «Qué hacer ahora»: como máximo
+tres acciones, de mayor a menor impacto, escritas por el mismo modelo de
+Gateway que Nexo (`ASSISTANT_MODEL`) con salida tipada `Output.object` y 30 s
+de plazo. La primera acción es el titular de la página; las otras dos van bajo
+una línea, y cada una enlaza a la página donde se ejecuta o se comprueba.
+
+El modelo sólo recibe las cifras de esa empresa —score, pilares, variables
+flojas y sin datos, señal abierta, previsión, tensión a seis meses, caja,
+ofertas con su palanca y descartados—; nunca la cartera. Los destinos que
+escribe se validan contra las rutas conocidas: cualquier otro cae en la página
+de recomendaciones. Las acciones se memorizan en el proceso por empresa durante
+una hora, así que navegar entre las páginas de una empresa no paga una segunda
+llamada. Con `ASSISTANT_MODE=mock`, si el modelo falla o si no devuelve nada
+utilizable, el bloque escribe las acciones deterministas a partir de las mismas
+cifras y se marca con la etiqueta `DEMO`. Contrato y ejemplo de la respuesta en
+[la documentación de acciones](docs/actions.md).
 
 ### Fuente de datos
 

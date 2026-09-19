@@ -89,16 +89,17 @@ export function MethodWeightCell({
         y={segment.y}
         width={segment.width}
         height={segment.height}
-        rx={2}
-        fill={active ? 'var(--foreground)' : 'var(--surface-secondary)'}
+        rx={6}
+        fill={active ? 'var(--text-primary)' : 'var(--surface-deep)'}
+        stroke="var(--border-subtle)"
       />
       {lines.map((line, index) => (
         <text
           key={`${segment.key}-${index}`}
           x={segment.x + PAD}
           y={segment.y + PAD + size + index * (size + 2)}
-          fill={active ? 'var(--background)' : 'var(--foreground)'}
-          style={{ fontSize: size }}
+          fill={active ? 'var(--surface-page)' : 'var(--text-primary)'}
+          style={{ fontSize: size, fontWeight: 500 }}
         >
           {line}
         </text>
@@ -106,7 +107,7 @@ export function MethodWeightCell({
       <text
         x={segment.x + PAD}
         y={segment.y + segment.height - PAD}
-        fill={active ? 'var(--background)' : 'var(--muted)'}
+        fill={active ? 'var(--surface-page)' : 'var(--text-secondary)'}
         className="tabular-nums"
         style={{ fontSize: NARROW_SIZE }}
       >

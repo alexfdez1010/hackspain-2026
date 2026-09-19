@@ -101,7 +101,7 @@ describe('navigation', () => {
     expect(sections.map((section) => section.label)).toEqual([
       'PULSE',
       'Señales',
-      'Recomendaciones',
+      'Financiación',
       'Método',
     ]);
     expect(

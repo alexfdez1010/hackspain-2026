@@ -1,23 +1,26 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { PillarSparklines } from '@/components/charts/pillar-sparklines';
+import { CompanyActionsSection } from '@/components/actions/company-actions-panel';
 import { PulseTrajectoryChart } from '@/components/charts/pulse-trajectory';
 import { PageShell, Section } from '@/components/layout/page-shell';
 import { PulseCompanyHeader } from '@/components/pulse/company-header';
-import { PulseCompanyLinks } from '@/components/pulse/company-links';
-import { PulseVariableHeatMap } from '@/components/pulse/variable-heat-map';
 import { PulseForecastPanel } from '@/components/pulse/forecast-panel';
 import { PulseForecastTable } from '@/components/pulse/forecast-table';
+import { PulseMethodCards } from '@/components/pulse/method-cards';
 import { PulseMonthExplorer } from '@/components/pulse/month-explorer';
 import { PulseMonthTable } from '@/components/pulse/month-table';
+import { PulsePillarCards } from '@/components/pulse/pillar-cards';
 import { PulseSignalAlert } from '@/components/pulse/signal-alert';
-import { companyName } from '@/lib/company/names';
+import { PulseVariableMosaic } from '@/components/pulse/variable-mosaic';
+import { Panel } from '@/components/ui/panel';
+import { getAdvisorDataSource } from '@/lib/advisor/data';
+import { companyName, groupName } from '@/lib/company/names';
 import { companyRoutes } from '@/lib/routes';
 import { buildTrajectory } from '@/lib/pulse/company-view';
 import { getPulseDataSource } from '@/lib/pulse/data';
-import { buildVariableHeatMap } from '@/lib/pulse/heat-map';
 import { buildForecastRows, buildMonthRows } from '@/lib/pulse/history';
+import { buildPulseMosaic } from '@/lib/pulse/mosaic';
 import { buildPillarSeries } from '@/lib/pulse/pillar-series';
 import { formatMonth, formatNumber } from '@/lib/format';
 
@@ -58,10 +61,11 @@ function buildLead(
 }
 
 /**
- * PULSE of one company, month by month: the score of the last close, the
- * alert when the score really moved recently, the full observed history with
- * its four pillars, the six predicted months and the decomposition of both
- * the current score and the prediction.
+ * PULSE of one company, month by month: the score of the last close on the
+ * band scale, the alert when the score really moved, what to do now, where the
+ * score is being decided, the four pillars, any observed month opened in full,
+ * the predicted months with their decomposition and the arithmetic behind all
+ * of it.
  *
  * @param props - Route parameters carrying the company identifier.
  * @returns The company page, or a 404 when the identifier is unknown.
@@ -69,9 +73,10 @@ function buildLead(
 export default async function CompanyPulsePage({ params }: CompanyPageProps) {
   const { id } = await params;
   const source = getPulseDataSource();
-  const [company, summary] = await Promise.all([
+  const [company, summary, advisor] = await Promise.all([
     source.getCompany(id),
     source.getSummary(),
+    getAdvisorDataSource().getCompany(id),
   ]);
   if (!company) notFound();
 
@@ -86,71 +91,56 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
   const horizonMonth =
     company.forecast[company.forecast.length - 1]?.targetMonth ?? '';
   const lastPoint = company.series[company.series.length - 1] ?? null;
-  const heatMap = buildVariableHeatMap(meta.pillars, meta.variables, lastPoint);
+  const mosaic = buildPulseMosaic(meta.pillars, meta.variables, lastPoint);
 
   return (
     <PageShell
       title={companyName(company.companyId)}
       lead={buildLead(company.monthsObserved, company.month, horizonMonth)}
-      aside={<PulseCompanyLinks companyId={company.companyId} />}
+      aside={
+        company.groupId ? (
+          <span className="whitespace-nowrap rounded-full border border-hairline px-3 py-1.5 text-sm font-medium text-ink-secondary">
+            {groupName(company.groupId)}
+          </span>
+        ) : undefined
+      }
     >
-      <PulseCompanyHeader company={company} />
+      <PulseCompanyHeader
+        company={company}
+        pStress6m={advisor?.risk.pStress6m ?? null}
+        baseRate={advisor?.risk.baseRate ?? null}
+        cashEnd={advisor?.inputs.cashEnd ?? lastPoint?.cashEnd ?? null}
+      />
       <PulseSignalAlert
         company={company}
         href={companyRoutes(company.companyId).signals}
       />
 
-      <Section
-        title="Trayectoria"
-        note="Escala 0-100; 50 es el umbral de vigilancia"
-      >
-        <PulseTrajectoryChart
-          points={points}
-          boundaryIndex={boundaryIndex}
-          signals={company.signals}
-        />
+      <Section title="Trayectoria">
+        <Panel>
+          <PulseTrajectoryChart
+            points={points}
+            boundaryIndex={boundaryIndex}
+            signals={company.signals}
+          />
+          <p className="mt-4 max-w-3xl text-[13px] text-ink-secondary">
+            {formatNumber(monthRows.length)} cierres observados y{' '}
+            {formatNumber(forecastRows.length)} meses de previsión.
+          </p>
+        </Panel>
       </Section>
 
-      <Section
-        title="Mapa de calor"
-        note={
-          lastPoint
-            ? `Cierre de ${formatMonth(lastPoint.month)}; el área es el peso y el color, el score de cada variable; pulsa una variable para abrir su página`
-            : 'Sin mes observado'
-        }
-      >
-        <PulseVariableHeatMap map={heatMap} companyId={company.companyId} />
+      <CompanyActionsSection companyId={company.companyId} current="pulse" />
+
+      <Section title="Dónde se decide">
+        <PulseVariableMosaic mosaic={mosaic} companyId={company.companyId} />
       </Section>
 
-      <Section
-        title="Mes a mes"
-        note={`${formatNumber(monthRows.length)} cierres observados y ${formatNumber(forecastRows.length)} meses previstos`}
-      >
-        <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold">
-            Meses observados, del más reciente al más antiguo
-          </h3>
-          <PulseMonthTable rows={monthRows} pillars={meta.pillars} />
-        </div>
-        <div className="flex flex-col gap-3 pt-4">
-          <h3 className="text-sm font-semibold">
-            Meses previstos, aún sin cerrar
-          </h3>
-          <PulseForecastTable rows={forecastRows} baseMonth={company.month} />
-        </div>
+      <Section title="Evolución por pilar">
+        <PulsePillarCards series={pillarSeries} />
       </Section>
 
-      <Section
-        title="Evolución por pilar"
-        note="Guías en 35, 50 y 65; misma escala en los cuatro"
-      >
-        <PillarSparklines series={pillarSeries} />
-      </Section>
-
-      <Section
-        title="Detalle de un mes"
-        note="Pilares, aportes y las 11 variables del mes elegido"
-      >
+      <Section title="Detalle de un mes">
         <PulseMonthExplorer
           series={company.series}
           pillars={meta.pillars}
@@ -158,15 +148,29 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
         />
       </Section>
 
-      <Section
-        title="Previsión desglosada"
-        note="Aportes en puntos de PULSE, positivos a la derecha"
-      >
+      <Section title="Previsión desglosada">
         <PulseForecastPanel
           forecast={company.forecast}
           variables={meta.variables}
           pulseNow={company.pulse}
         />
+      </Section>
+
+      <Section title="Mes a mes">
+        <Panel>
+          <h3 className="mb-4 text-sm font-medium text-ink-secondary">
+            Meses observados, del más reciente al más antiguo
+          </h3>
+          <PulseMonthTable rows={monthRows} pillars={meta.pillars} />
+          <h3 className="mb-4 mt-8 border-t border-hairline pt-6 text-sm font-medium text-ink-secondary">
+            Meses previstos, aún sin cerrar
+          </h3>
+          <PulseForecastTable rows={forecastRows} baseMonth={company.month} />
+        </Panel>
+      </Section>
+
+      <Section title="Cómo se calcula">
+        <PulseMethodCards meta={meta} company={company} />
       </Section>
     </PageShell>
   );

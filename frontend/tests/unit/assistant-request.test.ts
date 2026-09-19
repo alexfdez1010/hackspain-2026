@@ -155,7 +155,7 @@ describe('assistant request boundary', () => {
   it('labels company and section context without interpreting arbitrary URLs', () => {
     expect(getPageLabel('/company/COMP_0001')).toBe('PULSE · Atresmedia Labs');
     expect(getPageLabel('/company/COMP_0001/recommendations')).toBe(
-      'Recomendaciones · Atresmedia Labs',
+      'Financiación · Atresmedia Labs',
     );
     expect(getPageLabel('/company/COMP_0001/variable/cash_days')).toBe(
       'Variable cash_days · Atresmedia Labs',

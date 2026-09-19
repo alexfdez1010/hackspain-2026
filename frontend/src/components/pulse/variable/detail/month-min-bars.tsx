@@ -127,7 +127,7 @@ export function MonthMinBars({ months }: MonthMinBarsProps) {
           <MonthAxis months={months.map((row) => row.month)} box={box} />
         </svg>
       </div>
-      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
+      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] leading-[1.45] text-ink-secondary">
         <span>Barra: caja al cierre del mes.</span>
         <span>Marca: saldo del peor día de ese mes.</span>
         <span>Cifra bajo el mes: el mínimo en salidas mensuales.</span>

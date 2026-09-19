@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Suspense } from 'react';
 
 import { AssistantWidget } from '@/components/assistant/assistant-widget';
+import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteNav } from '@/components/layout/site-nav';
 import { getAssistantMode } from '@/lib/assistant/config';
 import { buildCompanyOptions } from '@/lib/company/options';
@@ -17,7 +18,7 @@ export const dynamic = 'force-dynamic';
  * the summary is read here once per request instead of on every page.
  *
  * @param props - Nested product pages.
- * @returns The nav, the routed page and the assistant.
+ * @returns The nav, the routed page, the footer and the assistant.
  */
 export default async function AppLayout({
   children,
@@ -32,6 +33,7 @@ export default async function AppLayout({
         <SiteNav companies={options} />
       </Suspense>
       {children}
+      <SiteFooter />
       <AssistantWidget mode={getAssistantMode()} />
     </>
   );

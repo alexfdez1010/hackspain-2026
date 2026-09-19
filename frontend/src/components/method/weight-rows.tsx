@@ -36,7 +36,7 @@ export function MethodWeightRows({
             <text
               x={group.x}
               y={group.y - HEADING_GAP}
-              fill="var(--foreground)"
+              fill="var(--text-primary)"
               style={{ fontSize: HEADING_SIZE, fontWeight: 500 }}
             >
               {group.label}
@@ -45,7 +45,7 @@ export function MethodWeightRows({
               x={group.x + group.width}
               y={group.y - HEADING_GAP}
               textAnchor="end"
-              fill="var(--muted)"
+              fill="var(--text-secondary)"
               className="tabular-nums"
               style={{ fontSize: HEADING_SIZE }}
             >

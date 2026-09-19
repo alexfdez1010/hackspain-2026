@@ -42,8 +42,7 @@ export function getPageLabel(pathname: string): string {
     const name = companyName(companyId);
     const variableKey = variableKeyFromPath(pathname);
     if (variableKey) return `Variable ${variableKey} · ${name}`;
-    if (pathname.endsWith('/recommendations'))
-      return `Recomendaciones · ${name}`;
+    if (pathname.endsWith('/recommendations')) return `Financiación · ${name}`;
     if (pathname.endsWith('/signals')) return `Señales · ${name}`;
     return `PULSE · ${name}`;
   }

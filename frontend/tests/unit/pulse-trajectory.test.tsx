@@ -35,20 +35,22 @@ describe('PulseTrajectoryChart', () => {
     );
     expect(markup).toContain('role="img"');
     expect(markup).toContain('aria-label="PULSE mensual desde jul 2026');
-    expect(markup).toContain('stroke-dasharray="6 4"');
+    expect(markup).toContain('stroke-dasharray="5 4"');
     expect(markup.match(/Z"/g)).toHaveLength(1);
+    expect(markup).toContain('previsión');
     expect(markup).not.toContain('NaN');
   });
 
-  it('prints the last close and the farthest horizon next to their point', () => {
+  it('names the months on the axis and rules the three band boundaries', () => {
     const { points, boundaryIndex } = buildTrajectory(SERIES, FORECAST);
     const markup = renderToStaticMarkup(
       <PulseTrajectoryChart points={points} boundaryIndex={boundaryIndex} />,
     );
-    expect(markup).toContain('>32,8</text>');
-    expect(markup).toContain('>31,1</text>');
     expect(markup).toContain('>jul</text>');
     expect(markup).toContain('>feb</text>');
+    expect(markup).toContain('>35</text>');
+    expect(markup).toContain('>50</text>');
+    expect(markup).toContain('>65</text>');
   });
 
   it('explains what is missing when there is no history', () => {

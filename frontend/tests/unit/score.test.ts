@@ -21,6 +21,15 @@ describe('scoreBand', () => {
     expect(scoreBand(Number.NaN).key).toBe('neutral');
   });
 
+  it('names every band on its own, and with its range', () => {
+    for (const band of SCORE_BANDS) {
+      expect(band.name).not.toContain('(');
+      expect(band.label.startsWith(band.name)).toBe(true);
+    }
+    expect(scoreBand(20).name).toBe('Crítico');
+    expect(scoreBand(90).name).toBe('Sólido');
+  });
+
   it('exposes one colour token per band', () => {
     const colors = SCORE_BANDS.map((band) => band.color);
     expect(new Set(colors).size).toBe(SCORE_BANDS.length);

@@ -1,5 +1,3 @@
-import { Fragment } from 'react';
-
 import { directionText, methodVariableDoc } from '@/lib/method/variables';
 import type { MethodWeightSegment } from '@/lib/method/weights';
 import { formatNumber } from '@/lib/format';
@@ -32,28 +30,35 @@ export function MethodVariableDetail({
       : []),
   ];
   return (
-    <div className="flex max-w-3xl flex-col gap-3" aria-live="polite">
+    <div className="flex max-w-[720px] flex-col gap-3" aria-live="polite">
       <div className="flex flex-col gap-1">
-        <h3 className="text-base font-semibold tracking-tight">
-          <span className="mr-2 font-mono text-sm text-muted">
+        <h3 className="text-xl font-semibold leading-[1.3]">
+          <span className="mr-2 text-[15px] font-medium tabular-nums text-ink-muted">
             {formatNumber(segment.number)}
           </span>
           {segment.label}
         </h3>
-        <p className="text-sm text-muted">
+        <p className="text-sm font-medium leading-[1.2] text-ink-secondary">
           <span className="tabular-nums">
             {formatNumber(segment.weight)} de {formatNumber(total)} puntos
           </span>{' '}
           · {segment.pillarLabel}
         </p>
       </div>
-      {doc && <p className="text-sm">{doc.measures}</p>}
-      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-sm">
+      {doc && (
+        <p className="text-[15px] leading-[1.55] text-ink-secondary">
+          {doc.measures}
+        </p>
+      )}
+      <dl>
         {rows.map(([term, value]) => (
-          <Fragment key={term}>
-            <dt className="text-muted">{term}</dt>
-            <dd>{value}</dd>
-          </Fragment>
+          <div
+            key={term}
+            className="grid grid-cols-[10rem_minmax(0,1fr)] items-baseline gap-5 border-b border-hairline py-2.5 text-[15px] leading-[1.55] last:border-0 last:pb-0"
+          >
+            <dt className="text-ink-secondary">{term}</dt>
+            <dd className="font-medium">{value}</dd>
+          </div>
         ))}
       </dl>
     </div>

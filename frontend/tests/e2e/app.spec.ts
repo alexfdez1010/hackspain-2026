@@ -40,25 +40,24 @@ test('lands on the demo company without browser errors', async ({ page }) => {
     page.getByRole('heading', { level: 1, name: 'Atresmedia Labs' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('group', {
-      name: 'Score de cada variable en el último cierre',
-    }),
+    page.getByRole('heading', { level: 2, name: 'Dónde se decide' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('img', { name: /sobre la escala de bandas/ }),
   ).toBeVisible();
   await page.getByRole('img', { name: /PULSE mensual/ }).hover();
-  await expect(page.getByRole('status')).toContainText(/\d,\d/);
-  const info = page.getByRole('button', { name: 'Qué mide Días de caja' });
-  await info.hover();
   await expect(
-    page.getByRole('dialog', { name: /Días de caja/ }),
-  ).toContainText('Caja a fin de mes');
-  await page.getByRole('heading', { level: 2, name: 'Mapa de calor' }).hover();
-  await expect(page.getByRole('dialog', { name: /Días de caja/ })).toBeHidden();
-  await info.click();
-  await expect(
-    page.getByRole('dialog', { name: /Días de caja/ }),
+    page.getByRole('status').filter({ hasText: /\d,\d/ }),
   ).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog', { name: /Días de caja/ })).toBeHidden();
+  const cell = page.getByRole('button', { name: /Días de caja/ }).first();
+  await cell.click();
+  await expect(cell).toHaveAttribute('aria-pressed', 'true');
+  await expect(
+    page
+      .locator('section')
+      .filter({ hasText: 'Dónde se decide' })
+      .getByRole('link', { name: /Ver la variable/ }),
+  ).toHaveAttribute('href', '/company/COMP_0001/variable/cash_days');
   await expect(
     page.getByRole('button', { name: 'Abrir Nexo, asistente de Pulse' }),
   ).toBeVisible();
@@ -70,10 +69,14 @@ test('switches company from the navigation and stays on the section', async ({
 }) => {
   await page.goto('/company/COMP_0001/recommendations');
   const nav = page.getByRole('navigation', { name: 'Secciones' });
+  await expect(
+    page.getByRole('heading', { name: 'Aprobado con tu PULSE de hoy' }),
+  ).toBeVisible();
+  const detail = page.getByRole('button', { name: 'Ver detalle' }).first();
+  await expect(detail).toHaveAttribute('aria-expanded', 'false');
+  await detail.click();
   const why = page.getByRole('button', { name: 'Por qué encaja' }).first();
-  await expect(why).toHaveAttribute('aria-expanded', 'false');
   await why.click();
-  await expect(why).toHaveAttribute('aria-expanded', 'true');
   await expect(page.getByText('A favor').first()).toBeVisible();
   const search = nav.getByRole('combobox', { name: 'Empresa' });
   await expect(search).toHaveValue('Atresmedia Labs');
@@ -96,7 +99,7 @@ test('keeps the company in the navigation across its pages', async ({
   const errors = trackErrors(page);
   await page.goto('/company/COMP_0001');
   const nav = page.getByRole('navigation', { name: 'Secciones' });
-  await nav.getByRole('link', { name: 'Recomendaciones', exact: true }).click();
+  await nav.getByRole('link', { name: 'Financiación', exact: true }).click();
   await expect(page).toHaveURL('/company/COMP_0001/recommendations');
   await expect(nav.getByRole('combobox', { name: 'Empresa' })).toHaveValue(
     'Atresmedia Labs',
@@ -115,15 +118,16 @@ test('keeps the company in the navigation across its pages', async ({
   expect(errors).toEqual([]);
 });
 
-test('opens a variable from the heat map and moves to the next one', async ({
+test('opens a variable from the mosaic and moves to the next one', async ({
   page,
 }) => {
   const errors = trackErrors(page);
   await page.goto('/company/COMP_0001');
   await page
-    .getByRole('link', { name: 'Abrir la página de Días de caja' })
+    .getByRole('button', { name: /Días de caja/ })
     .first()
     .click();
+  await page.getByRole('link', { name: /Ver la variable/ }).click();
   await expect(page).toHaveURL('/company/COMP_0001/variable/cash_days');
   await expect(page).toHaveTitle(/Días de caja · Atresmedia Labs/);
   await expect(

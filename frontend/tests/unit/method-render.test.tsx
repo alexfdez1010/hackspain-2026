@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 
 import MethodPage from '@/app/(app)/method/page';
 import { MethodConfidenceBar } from '@/components/method/confidence-bar';
+import { MethodFormulaPanel } from '@/components/method/formula-panel';
+import { MethodModelCard } from '@/components/method/model-card';
 import { MethodExamplePanel } from '@/components/method/example-panel';
 import { MethodOutlookList } from '@/components/method/outlook-list';
 import { MethodPipelineFlow } from '@/components/method/pipeline-flow';
@@ -12,6 +14,7 @@ import {
   buildConfidenceSegments,
   buildMethodExample,
 } from '@/lib/method/example';
+import { buildModelFacts } from '@/lib/method/facts';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 import { StaticPulseSource } from '@/lib/pulse/source/static-json';
 
@@ -65,6 +68,29 @@ describe('the method page renders on the server with the real export', () => {
       <MethodWeightMap pillars={[]} variables={[]} />,
     );
     expect(markup).toContain('El export no publica las variables del score.');
+  });
+
+  it('states the calculation as three formulas and the facts behind it', () => {
+    const formula = renderToStaticMarkup(
+      <MethodFormulaPanel variables={meta.variables.length} />,
+    );
+    expect(formula).toContain('PULSE = Σ(peso · score) / Σ(pesos con dato)');
+    expect(formula).toContain('confianza = Σ(pesos con dato) / 100');
+    expect(formula).toContain('media de las 11 variables');
+
+    const facts = buildModelFacts(meta, {
+      companies: 120,
+      lastHorizon: 6,
+      example,
+      observedFrom: company?.series[0]?.month ?? null,
+    });
+    const card = renderToStaticMarkup(<MethodModelCard facts={facts} />);
+    expect(card).toContain('Ficha del modelo');
+    expect(card).toContain('11 en 4 pilares');
+    expect(card).toContain('26 · 26 · 12 · 36 de 100');
+    expect(card).toContain('6 meses');
+    expect(card).toContain('120 empresas');
+    expect(card).not.toContain('NaN');
   });
 
   it('lists the pipeline and the coverage of the demo month', () => {
@@ -124,6 +150,8 @@ describe('the method page renders on the server with the real export', () => {
     expect(markup).toContain('Payment, Underwriting, Liquidity &amp; Solvency');
     expect(markup).toContain('Los 100 puntos');
     expect(markup).toContain('Cómo se calcula');
+    expect(markup).toContain('Ficha del modelo');
+    expect(markup).toContain('Σ(pesos con dato)');
     expect(markup).toContain('Un mes real, sumado a mano');
     expect(markup).toContain('Previsión, precio y límites');
     expect(markup).not.toContain('AUROC');

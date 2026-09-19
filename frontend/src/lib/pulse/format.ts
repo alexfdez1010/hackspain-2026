@@ -49,6 +49,23 @@ export function formatConfidencePoints(confidence: number | null): string {
 }
 
 /**
+ * Renders the confidence as points of weight, naming what the 100 are.
+ *
+ * The company view repeats this sentence under every confidence figure, so it
+ * says «puntos de peso» in full: the 100 are the weights of the eleven
+ * variables, not a percentage of anything else.
+ *
+ * @param confidence - Ratio between 0 and 1.
+ * @returns A sentence such as `82 de 100 puntos de peso con datos`.
+ */
+export function formatWeightPoints(confidence: number | null): string {
+  if (confidence === null || !Number.isFinite(confidence)) {
+    return 'Sin cobertura conocida';
+  }
+  return `${formatNumber(confidence * 100)} de 100 puntos de peso con datos`;
+}
+
+/**
  * Renders a forecast horizon.
  *
  * @param horizon - Horizon in months.

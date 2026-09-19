@@ -22,7 +22,7 @@ interface LateDaysCellProps {
 export function LateDaysCell({ days, subject }: LateDaysCellProps) {
   const hint = lateDaysHint(days, subject);
   if (days === null || !Number.isFinite(days)) {
-    return <span className="text-muted">—</span>;
+    return <span className="text-ink-muted">—</span>;
   }
   const color = days > 0 ? 'var(--score-critical)' : 'var(--score-solid)';
   return (

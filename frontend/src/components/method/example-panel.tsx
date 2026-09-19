@@ -24,9 +24,9 @@ interface MethodExamplePanelProps {
 export function MethodExamplePanel({ example }: MethodExamplePanelProps) {
   const { rows, pulse, contributionSum, unknownLabels } = example;
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <MethodExampleTable rows={rows} />
-      <div className="flex max-w-3xl flex-col gap-2 text-sm">
+      <div className="flex max-w-[720px] flex-col gap-3 text-[15px] leading-[1.55]">
         <p>
           Los {formatNumber(rows.length)} aportes suman{' '}
           <span className="font-medium tabular-nums">
@@ -39,7 +39,7 @@ export function MethodExamplePanel({ example }: MethodExamplePanelProps) {
           . No hay nada más que sumar.
         </p>
         {unknownLabels.length > 0 && (
-          <p className="text-muted">
+          <p className="text-ink-secondary">
             Sin datos en {formatMonth(example.month)}:{' '}
             {unknownLabels.join(', ')} — {formatNumber(example.unknownWeight)}{' '}
             puntos que se quedan fuera de la cuenta, sin sumar ni restar; por
@@ -47,10 +47,17 @@ export function MethodExamplePanel({ example }: MethodExamplePanelProps) {
           </p>
         )}
         <Link
-          className="w-fit text-accent underline-offset-4 hover:underline"
+          data-arrow
           href={companyRoutes(example.companyId).pulse}
+          className="group mt-1 inline-flex w-fit items-center gap-1.5 font-medium leading-[1.2] text-ink"
         >
           Ver el PULSE completo de {companyName(example.companyId)}
+          <i
+            aria-hidden
+            className="not-italic transition-transform group-hover:translate-x-1"
+          >
+            →
+          </i>
         </Link>
       </div>
     </div>

@@ -19,7 +19,7 @@ const COLUMNS: readonly DataTableColumn<MethodExampleRow>[] = [
     sortBy: (row) => row.number,
     cell: (row) => (
       <>
-        <span className="mr-1.5 font-mono text-xs text-muted">
+        <span className="mr-2 text-[13px] tabular-nums text-ink-muted">
           {formatNumber(row.number)}
         </span>
         {row.label}
@@ -29,7 +29,7 @@ const COLUMNS: readonly DataTableColumn<MethodExampleRow>[] = [
   {
     id: 'pillar',
     header: 'Pilar',
-    cellClassName: 'text-muted',
+    cellClassName: 'text-ink-secondary',
     sortBy: (row) => row.pillarLabel,
     cell: (row) => row.pillarLabel,
   },

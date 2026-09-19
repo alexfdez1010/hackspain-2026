@@ -27,13 +27,13 @@ test('streams a demo, preserves the conversation through navigation, and starts 
   ).toBeHidden();
   await page
     .getByRole('dialog')
-    .getByRole('link', { name: 'Recomendaciones' })
+    .getByRole('link', { name: 'Financiación' })
     .click();
   await expect(page).toHaveURL('/company/COMP_0001/recommendations');
   await openAssistant(page);
   await expect(page.getByRole('log')).toContainText('Atresmedia Labs · PULSE');
   await expect(page.getByRole('dialog')).toContainText(
-    'Viendo: Recomendaciones · Atresmedia Labs',
+    'Viendo: Financiación · Atresmedia Labs',
   );
   await page.getByRole('button', { name: 'Nueva conversación' }).click();
   await expect(

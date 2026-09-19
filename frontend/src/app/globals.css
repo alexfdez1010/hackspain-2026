@@ -2,150 +2,201 @@
 @import '@heroui/styles';
 
 /*
- * Score scale. One token per band so that every chart, chip and cell in the
- * product reads the same colour for the same score.
+ * Embat brand tokens (brief and token set of 2026-09-19). Two layers:
+ * the primitives below, which name colour by role, and the HeroUI tokens
+ * further down, which point at them so every component already written keeps
+ * working. Score bands live in the same set: one token per band.
  */
 :root {
   color-scheme: light;
   --site-gutter: clamp(1rem, 6vw, 4.5rem);
-  --score-critical: oklch(0.6 0.21 26);
-  --score-fragile: oklch(0.72 0.15 72);
-  --score-neutral: oklch(0.62 0.03 262);
-  --score-solid: oklch(0.63 0.15 156);
 
-  /* Embat marketing tokens (embat.io/es, Jul 2026). Score bands stay separate. */
-  --background: #fbfbfc;
-  --foreground: #050b2c;
-  --surface: #ffffff;
-  --surface-secondary: #f3f4f6;
-  --surface-tertiary: #e8e8ed;
-  --overlay: #ffffff;
-  --muted: #6e707c;
-  --accent: #3878f6;
-  --danger: #c2401f;
-  --default: #e8e8ed;
-  --default-foreground: #050b2c;
-  --field-background: #ffffff;
-  --field-foreground: #050b2c;
-  --segment: #ffffff;
-  --segment-foreground: #050b2c;
-  --border: #d2d2db;
-  --separator: #d2d2db;
+  --surface-page: #ffffff;
+  --surface-deep: #f7f8fa;
+  --surface-raised: #ffffff;
+  --surface-brand-subtle: #eff4ff;
+  --border-subtle: #e4e7ee;
+  --border-strong: #cfd4e0;
+  --text-primary: #0d1130;
+  --text-secondary: #6e7488;
+  --text-muted: #9aa1b4;
+  --text-link-accent: #1f5fe0;
+  --brand-blue: #3878f6;
+  --brand-sky: #8ed1fc;
+  --interactive-primary-hover: #1f5fe0;
+  --feedback-success: #12a150;
+  --feedback-warning: #b06f00;
+  --feedback-danger: #c62a2f;
+  --focus-ring: #8ed1fc;
+
+  --score-critical: #c62a2f;
+  --score-fragile: #b06f00;
+  --score-neutral: #6e7488;
+  --score-solid: #12a150;
+
+  --gradient-hero: radial-gradient(
+    120% 95% at 72% 8%,
+    #16266b 0%,
+    #0a1033 48%,
+    #05081c 100%
+  );
+
+  /* HeroUI primitives, resolved from the Embat set above. */
+  --background: var(--surface-page);
+  --foreground: var(--text-primary);
+  --surface: var(--surface-raised);
+  --surface-secondary: #eff1f5;
+  --surface-tertiary: var(--border-subtle);
+  --overlay: var(--surface-raised);
+  --muted: var(--text-secondary);
+  --accent: var(--brand-blue);
+  --danger: var(--feedback-danger);
+  --default: #eff1f5;
+  --default-foreground: var(--text-primary);
+  --field-background: var(--surface-raised);
+  --field-foreground: var(--text-primary);
+  --field-placeholder: var(--text-muted);
+  --segment: var(--surface-raised);
+  --segment-foreground: var(--text-primary);
+  --border: var(--border-subtle);
+  --separator: var(--border-subtle);
+  --focus: var(--focus-ring);
 }
 
 /*
  * HeroUI ships its dark palette behind `.dark` / `[data-theme="dark"]`. The app
- * has no theme switch, so the system preference drives it: only the primitive
- * tokens are redefined here and HeroUI's derived tokens (hover, soft, borders)
- * recompute from them.
+ * has no theme switch, so the system preference drives it: only the Embat
+ * primitives are redefined here and both the HeroUI tokens above and their
+ * derived values (hover, soft, borders) recompute from them.
  */
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
 
-    --background: #050b2c;
-    --foreground: #ffffff;
-    --surface: #232845;
-    --surface-secondary: #41465f;
-    --surface-tertiary: #373c56;
-    --overlay: #232845;
-    --muted: #afafbb;
-    --accent: #5c92fe;
-    --danger: #c2401f;
-    --default: #41465f;
-    --default-foreground: #ffffff;
-    --field-background: #232845;
-    --field-foreground: #ffffff;
-    --field-placeholder: #afafbb;
-    --segment: #41465f;
-    --segment-foreground: #ffffff;
-    --border: #373c56;
-    --separator: #373c56;
-    --backdrop: #0e1431a6;
+    --surface-page: #050b2c;
+    --surface-deep: #05081c;
+    --surface-raised: #111a46;
+    --surface-brand-subtle: #111a46;
+    --border-subtle: #ffffff1f;
+    --border-strong: #ffffff52;
+    --text-primary: #ffffff;
+    --text-secondary: #c3cada;
+    --text-muted: #8e9ab9;
+    --text-link-accent: #86aef9;
+    --interactive-primary-hover: #5e93f7;
+    --feedback-success: #3dd68c;
+    --feedback-warning: #f7b955;
+    --feedback-danger: #ff8a8e;
 
-    --score-critical: oklch(0.68 0.2 26);
-    --score-fragile: oklch(0.79 0.15 76);
-    --score-neutral: oklch(0.72 0.03 262);
-    --score-solid: oklch(0.74 0.16 157);
+    --score-critical: #ff8a8e;
+    --score-fragile: #f7b955;
+    --score-neutral: #8e9ab9;
+    --score-solid: #3dd68c;
+
+    --surface-secondary: #1b2759;
+    --surface-tertiary: #27356e;
+    --default: #1b2759;
+    --accent: #86aef9;
+    --backdrop: #05081ca6;
   }
 }
 
 /*
  * Landing ignores the system scheme: hero and footer are dark, the middle
- * band is light. `html:has` wins over `:root` and the media query. Score
- * tokens stay on the product palette.
+ * band is light. `html:has` wins over `:root` and the media query. Only the
+ * primitives are switched; everything derived follows.
  */
 html:has([data-landing-snap]:not([data-band-theme='light'])) {
   color-scheme: dark;
-  --background: #050b2c;
-  --foreground: #ffffff;
-  --surface: #232845;
-  --surface-secondary: #41465f;
-  --surface-tertiary: #373c56;
-  --overlay: #232845;
-  --muted: #afafbb;
-  --accent: #5c92fe;
-  --danger: #c2401f;
-  --default: #41465f;
-  --default-foreground: #ffffff;
-  --field-background: #232845;
-  --segment: #41465f;
-  --segment-foreground: #ffffff;
-  --border: #373c56;
-  --separator: #373c56;
-  --backdrop: #0e1431a6;
+  --surface-page: #050b2c;
+  --surface-deep: #05081c;
+  --surface-raised: #111a46;
+  --surface-brand-subtle: #111a46;
+  --border-subtle: #ffffff1f;
+  --border-strong: #ffffff52;
+  --text-primary: #ffffff;
+  --text-secondary: #c3cada;
+  --text-muted: #8e9ab9;
+  --text-link-accent: #86aef9;
+  --interactive-primary-hover: #5e93f7;
+  --feedback-success: #3dd68c;
+  --feedback-warning: #f7b955;
+  --feedback-danger: #ff8a8e;
+  --surface-secondary: #1b2759;
+  --surface-tertiary: #27356e;
+  --default: #1b2759;
+  --accent: #86aef9;
+  --backdrop: #05081ca6;
 }
 
 html:has([data-landing-snap][data-band-theme='light']) {
   color-scheme: light;
-  --background: #fbfbfc;
-  --foreground: #050b2c;
-  --surface: #ffffff;
-  --surface-secondary: #f3f4f6;
-  --surface-tertiary: #e8e8ed;
-  --overlay: #ffffff;
-  --muted: #6e707c;
+  --surface-page: #ffffff;
+  --surface-deep: #f7f8fa;
+  --surface-raised: #ffffff;
+  --surface-brand-subtle: #eff4ff;
+  --border-subtle: #e4e7ee;
+  --border-strong: #cfd4e0;
+  --text-primary: #0d1130;
+  --text-secondary: #6e7488;
+  --text-muted: #9aa1b4;
+  --text-link-accent: #1f5fe0;
+  --interactive-primary-hover: #1f5fe0;
+  --feedback-success: #12a150;
+  --feedback-warning: #b06f00;
+  --feedback-danger: #c62a2f;
+  --surface-secondary: #eff1f5;
+  --surface-tertiary: #e4e7ee;
+  --default: #eff1f5;
   --accent: #3878f6;
-  --danger: #c2401f;
-  --default: #e8e8ed;
-  --default-foreground: #050b2c;
-  --field-background: #ffffff;
-  --field-foreground: #050b2c;
-  --segment: #ffffff;
-  --segment-foreground: #050b2c;
-  --border: #d2d2db;
-  --separator: #d2d2db;
 }
 
 @theme inline {
-  --font-sans: var(--font-dm-sans);
-  --font-display: var(--font-aktiv);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-inter);
+
+  --color-page: var(--surface-page);
+  --color-deep: var(--surface-deep);
+  --color-raised: var(--surface-raised);
+  --color-brand-subtle: var(--surface-brand-subtle);
+  --color-hairline: var(--border-subtle);
+  --color-hairline-strong: var(--border-strong);
+  --color-ink: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+  --color-sky: var(--brand-sky);
+  --color-link-accent: var(--text-link-accent);
+  --color-feedback-success: var(--feedback-success);
+  --color-feedback-warning: var(--feedback-warning);
+  --color-feedback-danger: var(--feedback-danger);
+
   --color-score-critical: var(--score-critical);
   --color-score-fragile: var(--score-fragile);
   --color-score-neutral: var(--score-neutral);
   --color-score-solid: var(--score-solid);
 }
 
+/* The only dark background of the product: hero panels and marketing bands. */
+@utility bg-gradient-hero {
+  background-image: var(--gradient-hero);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
   font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  text-wrap: pretty;
 }
 
 h1,
 h2,
-h3 {
-  font-family: var(--font-aktiv), var(--font-dm-sans), sans-serif;
-}
-
-h1,
-h2 {
-  font-weight: 700;
-}
-
-h3 {
-  font-weight: 500;
+h3,
+h4 {
+  font-weight: 600;
 }
 
 html:has([data-landing-snap]),

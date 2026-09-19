@@ -2,19 +2,17 @@
 
 import { useMemo, useState } from 'react';
 
-import { ImpactBars } from '@/components/charts/impact-bars';
-import { FacetSelect, type FacetOption } from '@/components/ui/facet-select';
-import { ScoreBadge } from '@/components/ui/score-badge';
+import { ChipRow } from '@/components/pulse/chip-row';
+import { ForecastDrivers } from '@/components/pulse/forecast-drivers';
+import { PlainFact } from '@/components/pulse/plain-fact';
+import { ScoreHeadline } from '@/components/pulse/score-headline';
+import { Panel } from '@/components/ui/panel';
 import {
   buildContributionItems,
   sumContributions,
 } from '@/lib/pulse/company-view';
 import { formatBand, formatHorizon } from '@/lib/pulse/format';
-import {
-  PULSE_FORECAST_MONTHS,
-  type PulseForecastPoint,
-  type PulseVariableMeta,
-} from '@/lib/pulse/types';
+import type { PulseForecastPoint, PulseVariableMeta } from '@/lib/pulse/types';
 import { formatMonth, formatNumber, formatSigned } from '@/lib/format';
 
 interface PulseForecastPanelProps {
@@ -29,11 +27,13 @@ interface PulseForecastPanelProps {
 /**
  * Decomposes the forecast of one horizon into the drivers that build it.
  *
- * The horizon is selectable because the mix changes with distance: the nearest
- * months are carried by the variables, the farthest by the model base.
+ * The horizon is a chip because the mix changes with distance: the nearest
+ * months are carried by the company's own variables, the farthest by the model
+ * base. The bars always sum to the predicted change, and the footnote prints
+ * that sum so the decomposition can be checked rather than believed.
  *
  * @param props - Forecast horizons, variable labels and today's score.
- * @returns The horizon selector, the predicted score with its band and the
+ * @returns The horizon chips, the predicted score with its band and the
  * diverging bars of the decomposition.
  */
 export function PulseForecastPanel({
@@ -41,17 +41,10 @@ export function PulseForecastPanel({
   variables,
   pulseNow,
 }: PulseForecastPanelProps) {
-  const options: FacetOption[] = forecast.map((point) => ({
-    id: String(point.horizon),
-    label: formatHorizon(point.horizon),
-  }));
-  const [horizon, setHorizon] = useState(
-    String(forecast[forecast.length - 1]?.horizon ?? PULSE_FORECAST_MONTHS),
-  );
+  const last = forecast[forecast.length - 1];
+  const [horizon, setHorizon] = useState(String(last?.horizon ?? ''));
   const point =
-    forecast.find((item) => String(item.horizon) === horizon) ??
-    forecast[forecast.length - 1];
-
+    forecast.find((item) => String(item.horizon) === horizon) ?? last;
   const items = useMemo(
     () => (point ? buildContributionItems(point, variables) : []),
     [point, variables],
@@ -59,9 +52,11 @@ export function PulseForecastPanel({
 
   if (!point) {
     return (
-      <p className="text-sm text-muted">
-        Sin previsión publicada para esta empresa.
-      </p>
+      <Panel>
+        <p className="text-sm text-ink-secondary">
+          Sin previsión publicada para esta empresa.
+        </p>
+      </Panel>
     );
   }
 
@@ -71,45 +66,43 @@ export function PulseForecastPanel({
       : null;
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-end gap-x-10 gap-y-4">
-        <FacetSelect
+    <Panel>
+      <div className="mb-6">
+        <ChipRow
           label="Horizonte de previsión"
-          options={options}
-          selected={horizon}
+          options={forecast.map((item) => ({
+            id: String(item.horizon),
+            label: formatHorizon(item.horizon),
+          }))}
+          selected={String(point.horizon)}
           onSelect={setHorizon}
-          className="w-28"
         />
-        <div className="flex flex-col gap-0.5">
-          <span className="text-2xl font-semibold tabular-nums tracking-tight">
-            <ScoreBadge score={point.pulsePred} />
-          </span>
-          <span className="text-sm text-muted">
-            PULSE previsto en {formatMonth(point.targetMonth)} · banda p10-p90{' '}
-            {formatBand(point.pulseP10, point.pulseP90)}
-          </span>
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-2xl font-semibold tabular-nums tracking-tight">
-            {formatSigned(change)}
-          </span>
-          <span className="text-sm text-muted">
-            Frente a los {formatNumber(pulseNow, 1)} puntos de hoy
-          </span>
+      </div>
+      <div className="flex flex-wrap items-end justify-between gap-8 border-b border-hairline pb-6">
+        <ScoreHeadline
+          score={point.pulsePred}
+          caption={`PULSE previsto en ${formatMonth(point.targetMonth)}`}
+        />
+        <div className="flex flex-wrap gap-10">
+          <PlainFact
+            value={formatSigned(change)}
+            label={`Frente a los ${formatNumber(pulseNow, 1)} de hoy`}
+          />
+          <PlainFact
+            value={formatBand(point.pulseP10, point.pulseP90)}
+            label="Banda p10-p90"
+          />
         </div>
       </div>
-
-      <ImpactBars
-        items={items}
-        digits={2}
-        emptyText="El modelo no publicó descomposición para este horizonte."
-      />
-
-      <p className="max-w-3xl text-sm text-muted">
-        Cada barra son puntos de PULSE; las {formatNumber(items.length)} suman{' '}
-        {formatSigned(sumContributions(point), 2)}, que es exactamente el cambio
-        previsto de {formatSigned(point.delta, 2)}.
+      <h3 className="mb-4 mt-6 text-sm font-medium text-ink-secondary">
+        De dónde sale el cambio previsto
+      </h3>
+      <ForecastDrivers items={items} />
+      <p className="mt-4 text-[13px] text-ink-secondary">
+        Las {formatNumber(items.length)} barras suman{' '}
+        {formatSigned(sumContributions(point), 2)} puntos, el cambio previsto a{' '}
+        {formatHorizon(point.horizon)}.
       </p>
-    </div>
+    </Panel>
   );
 }

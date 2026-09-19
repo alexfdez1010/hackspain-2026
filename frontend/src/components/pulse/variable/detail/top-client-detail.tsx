@@ -16,7 +16,9 @@ import { growthText } from '@/lib/pulse/details/view';
 const CUSTOMER_COLUMNS: readonly DataTableColumn<CustomerBilling>[] = [
   counterpartyColumn<CustomerBilling>('Cliente', {
     suffix: (row) =>
-      row.top ? <span className="text-xs text-muted">Principal</span> : null,
+      row.top ? (
+        <span className="text-xs text-ink-secondary">Principal</span>
+      ) : null,
   }),
   {
     id: 'billed',
@@ -39,7 +41,7 @@ const CUSTOMER_COLUMNS: readonly DataTableColumn<CustomerBilling>[] = [
     sortBy: (row) => row.growth,
     cell: (row) =>
       row.growth === null ? (
-        <span className="text-muted">{growthText(null)}</span>
+        <span className="text-ink-muted">{growthText(null)}</span>
       ) : (
         growthText(row.growth)
       ),
