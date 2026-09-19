@@ -1,3 +1,4 @@
+import { VariableInfoLayer } from '@/components/charts/variable-info-layer';
 import { charsPerLine, wrapLabel } from '@/lib/method/text';
 import type { PulseHeatCell, PulseHeatMap } from '@/lib/pulse/heat-map';
 import { UNKNOWN_TEXT } from '@/lib/pulse/format';
@@ -107,7 +108,9 @@ interface PulseVariableHeatMapProps {
  * where the company is strong and red where it is losing points.
  *
  * @param props - The coloured layout of one month.
- * @returns The pillar header, the map and the colour legend.
+ * Every cell carries an info button that explains the variable.
+ *
+ * @returns The pillar header, the map with its info buttons and the legend.
  */
 export function PulseVariableHeatMap({ map }: PulseVariableHeatMapProps) {
   const gap =
@@ -143,16 +146,23 @@ export function PulseVariableHeatMap({ map }: PulseVariableHeatMapProps) {
               </div>
             ))}
           </div>
-          <svg
-            viewBox={`0 0 ${map.width} ${map.height}`}
-            className="h-auto w-full"
-            role="group"
-            aria-label="Score de cada variable en el último cierre"
-          >
-            {map.cells.map((cell) => (
-              <HeatCell key={cell.key} cell={cell} />
-            ))}
-          </svg>
+          <div className="relative">
+            <svg
+              viewBox={`0 0 ${map.width} ${map.height}`}
+              className="h-auto w-full"
+              role="group"
+              aria-label="Score de cada variable en el último cierre"
+            >
+              {map.cells.map((cell) => (
+                <HeatCell key={cell.key} cell={cell} />
+              ))}
+            </svg>
+            <VariableInfoLayer
+              cells={map.cells}
+              width={map.width}
+              height={map.height}
+            />
+          </div>
         </div>
       </div>
       <ul className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">

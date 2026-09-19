@@ -1,5 +1,6 @@
 import type { KeyboardEvent } from 'react';
 
+import { VariableInfoLayer } from '@/components/charts/variable-info-layer';
 import { charsPerLine, wrapLabel } from '@/lib/method/text';
 import type {
   MethodWeightMap,
@@ -90,7 +91,7 @@ function labelLines(segment: MethodWeightSegment): {
  * can be reached with the mouse and with the keyboard alike.
  *
  * @param props - The layout, the selected variable and the selection handler.
- * @returns The pillar header and the treemap.
+ * @returns The pillar header and the treemap with an info button per cell.
  */
 export function MethodWeightTreemap({
   map,
@@ -129,49 +130,58 @@ export function MethodWeightTreemap({
           </div>
         ))}
       </div>
-      <svg
-        viewBox={`0 0 ${map.width} ${map.height}`}
-        className="h-auto w-full"
-        role="group"
-        aria-label="Reparto de los 100 puntos entre pilares y variables"
-      >
-        {map.segments.map((segment) => {
-          const active = segment.key === selectedKey;
-          return (
-            <g
-              key={segment.key}
-              role="button"
-              tabIndex={0}
-              aria-pressed={active}
-              aria-label={`${segment.label}, ${formatNumber(segment.weight)} de ${formatNumber(map.totalWeight)} puntos, pilar ${segment.pillarLabel}`}
-              className="cursor-pointer"
-              onMouseEnter={() => onSelect(segment.key)}
-              onFocus={() => onSelect(segment.key)}
-              onClick={() => onSelect(segment.key)}
-              onKeyDown={(event) => handleKey(event, segment.key)}
-            >
-              <rect
-                x={segment.x}
-                y={segment.y}
-                width={segment.width}
-                height={segment.height}
-                rx={2}
-                fill={active ? 'var(--foreground)' : 'var(--surface-secondary)'}
-              />
-              <CellLabel segment={segment} active={active} />
-              <text
-                x={segment.x + PAD}
-                y={segment.y + segment.height - PAD}
-                fill={active ? 'var(--background)' : 'var(--muted)'}
-                className="tabular-nums"
-                style={{ fontSize: NARROW_SIZE }}
+      <div className="relative">
+        <svg
+          viewBox={`0 0 ${map.width} ${map.height}`}
+          className="h-auto w-full"
+          role="group"
+          aria-label="Reparto de los 100 puntos entre pilares y variables"
+        >
+          {map.segments.map((segment) => {
+            const active = segment.key === selectedKey;
+            return (
+              <g
+                key={segment.key}
+                role="button"
+                tabIndex={0}
+                aria-pressed={active}
+                aria-label={`${segment.label}, ${formatNumber(segment.weight)} de ${formatNumber(map.totalWeight)} puntos, pilar ${segment.pillarLabel}`}
+                className="cursor-pointer"
+                onMouseEnter={() => onSelect(segment.key)}
+                onFocus={() => onSelect(segment.key)}
+                onClick={() => onSelect(segment.key)}
+                onKeyDown={(event) => handleKey(event, segment.key)}
               >
-                {formatNumber(segment.weight)} pts
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+                <rect
+                  x={segment.x}
+                  y={segment.y}
+                  width={segment.width}
+                  height={segment.height}
+                  rx={2}
+                  fill={
+                    active ? 'var(--foreground)' : 'var(--surface-secondary)'
+                  }
+                />
+                <CellLabel segment={segment} active={active} />
+                <text
+                  x={segment.x + PAD}
+                  y={segment.y + segment.height - PAD}
+                  fill={active ? 'var(--background)' : 'var(--muted)'}
+                  className="tabular-nums"
+                  style={{ fontSize: NARROW_SIZE }}
+                >
+                  {formatNumber(segment.weight)} pts
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+        <VariableInfoLayer
+          cells={map.segments}
+          width={map.width}
+          height={map.height}
+        />
+      </div>
     </div>
   );
 }

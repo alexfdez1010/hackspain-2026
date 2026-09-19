@@ -25,6 +25,19 @@ test('lands on the demo company without browser errors', async ({ page }) => {
   ).toBeVisible();
   await page.getByRole('img', { name: /PULSE mensual/ }).hover();
   await expect(page.getByRole('status')).toContainText(/\d,\d/);
+  const info = page.getByRole('button', { name: 'Qué mide Días de caja' });
+  await info.hover();
+  await expect(
+    page.getByRole('dialog', { name: /Días de caja/ }),
+  ).toContainText('Caja a fin de mes');
+  await page.getByRole('heading', { level: 2, name: 'Mapa de calor' }).hover();
+  await expect(page.getByRole('dialog', { name: /Días de caja/ })).toBeHidden();
+  await info.click();
+  await expect(
+    page.getByRole('dialog', { name: /Días de caja/ }),
+  ).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: /Días de caja/ })).toBeHidden();
   await expect(
     page.getByRole('button', { name: 'Abrir Nexo, asistente de Pulse' }),
   ).toBeVisible();
@@ -72,6 +85,10 @@ test('keeps the company in the navigation across its pages', async ({
   await expect(
     page.getByRole('heading', { level: 1, name: /Método|PULSE/ }),
   ).toBeVisible();
+  await page.getByRole('button', { name: 'Qué mide Días de caja' }).hover();
+  await expect(
+    page.getByRole('dialog', { name: /Días de caja/ }),
+  ).toContainText('Más alto, más sano');
   await nav.getByRole('link', { name: 'PULSE', exact: true }).click();
   await expect(page).toHaveURL('/company/COMP_0001');
   expect(errors).toEqual([]);

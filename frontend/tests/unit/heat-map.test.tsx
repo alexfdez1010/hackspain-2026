@@ -69,6 +69,7 @@ describe('the heat map component', () => {
     expect(markup).toContain('var(--score-critical)');
     expect(markup).toContain('stroke-dasharray="4 3"');
     expect(markup).toContain('2 sin datos');
+    expect(markup).toContain('aria-label="Qué mide Días de caja"');
     expect(markup).toContain('Crítico (&lt;35)');
     expect(markup).toContain('34 · Crítico (&lt;35)');
     expect(markup).not.toContain('NaN');
