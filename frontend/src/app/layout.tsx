@@ -1,13 +1,21 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
 import { aktivGrotesk, dmSans } from '@/lib/fonts';
 import './globals.css';
+import '@/styles/nexo.css';
+
+/** Lets the fixed launcher and the bottom sheet respect the safe areas of a phone. */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   title: 'Embat Pulse — salud financiera mensual de la cartera',
   description:
-    'Score X-Ray 0-100, trayectoria, régimen y línea de circulante dinámica sobre 1.286 pymes.',
+    'Score PULSE 0-100 con 11 variables en 4 pilares, historia mensual y previsión a un año sobre 1.285 pymes.',
 };
 
 /**

@@ -7,7 +7,7 @@ import { SiteFrame } from '@/components/layout/site-frame';
 /**
  * Marketing landing: three viewport-tall bands inside the site frame.
  *
- * The hero splits branding and dashboard access. The middle band is an empty
+ * The hero splits branding and product access. The middle band is an empty
  * placeholder. The footer is lists and legal in the right pane only.
  *
  * @returns The framed landing page.

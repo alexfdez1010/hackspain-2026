@@ -3,7 +3,7 @@
  *
  * Pages import `getPulseDataSource()` from here and never touch the filesystem
  * or `fetch` directly, so the backing store is an environment decision: set
- * `XRAY_API_URL` to read `/api/pulse` from the FastAPI service, leave it unset
+ * `PULSE_API_URL` to read `/api/pulse` from the FastAPI service, leave it unset
  * to read the JSON files bundled in `src/data/pulse`.
  */
 export {

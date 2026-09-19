@@ -14,7 +14,7 @@ from pathlib import Path
 import polars as pl
 
 from ml_service.pulse.forecast.attribution import BASE, CONTEXT
-from ml_service.pulse.forecast.config import HORIZONS
+from ml_service.pulse.forecast.config import HORIZONS, MAX_HORIZON
 from ml_service.pulse.variables import PILLARS, VARIABLES
 
 GENERATED_FOR = "HackSpain 2026 · Embat PULSE"
@@ -52,6 +52,18 @@ UNITS = {
     "network": "pts de salud de clientes",
 }
 CONTRIB_KEYS = [v.key for v in VARIABLES] + [CONTEXT, BASE]
+FORECAST_EVAL_KEYS = (
+    "n",
+    "mae_persist",
+    "mae_reversion",
+    "mae_ml",
+    "gain_vs_persist_pct",
+    "gain_vs_reversion_pct",
+    "direction_accuracy_big_moves",
+    "recall_declines",
+    "recall_improvements",
+    "band_p10_p90_coverage",
+)
 
 
 def _num(x) -> float | None:
@@ -60,7 +72,48 @@ def _num(x) -> float | None:
     return round(float(x), 2)
 
 
-def metadata() -> dict:
+def _read_json(path: Path) -> dict:
+    return json.loads(path.read_text()) if path.exists() else {}
+
+
+def evaluation_payload(work_dir: Path) -> dict:
+    """Published evaluation figures of the score, the forecast and the risk model.
+
+    Everything is read from the JSON files the ``evaluate`` commands write, so the
+    method page of the web app quotes the same numbers as the backend docs. A
+    missing file leaves its block empty instead of failing the export.
+    """
+    score = _read_json(work_dir / "evaluation.json")
+    forecast = _read_json(work_dir / "forecast_evaluation.json")
+    risk = _read_json(work_dir / "risk_evaluation.json")
+    return {
+        "score": {
+            "rows": score.get("rows"),
+            "stress_rate": score.get("stress_rate"),
+            "auroc": score.get("auroc_pulse"),
+            "auroc_excluding_current_stress": score.get(
+                "auroc_pulse_excluding_current_stress"
+            ),
+            "auroc_temporal": score.get("auroc_temporal_from_2025_09"),
+            "auroc_by_variable": score.get("auroc_by_variable", {}),
+        },
+        "forecast": {
+            "horizons": {
+                str(h): {k: v.get(k) for k in FORECAST_EVAL_KEYS}
+                for h, v in forecast.get("horizons", {}).items()
+            }
+        },
+        "risk": {
+            "rows": risk.get("rows"),
+            "stress_rate": risk.get("stress_rate"),
+            "auroc": risk.get("oof_auroc"),
+            "coefficients_std": risk.get("coefficients_std", {}),
+        },
+    }
+
+
+def metadata(work_dir: Path | None = None) -> dict:
+    """Score metadata shared by every export; ``work_dir`` adds the evaluation block."""
     return {
         "generated_for": GENERATED_FOR,
         "score_name": "PULSE",
@@ -87,6 +140,7 @@ def metadata() -> dict:
             for v in VARIABLES
         ],
         "contribution_keys": CONTRIB_KEYS,
+        "evaluation": evaluation_payload(work_dir) if work_dir else {},
     }
 
 
@@ -94,7 +148,6 @@ def _series_row(r: dict) -> dict:
     return {
         "month": r["month"].strftime("%Y-%m"),
         "pulse": _num(r["pulse"]),
-        "pulse_raw": _num(r["pulse_raw"]),
         "confidence": _num(r["confidence"]),
         "pillars": {p: _num(r[f"pillar_{p}"]) for p in PILLARS},
         "variables": {
@@ -117,7 +170,7 @@ def _forecast_row(r: dict) -> dict:
         "pulse_pred": _num(r["pulse_pred"]),
         "pulse_p10": _num(r["pulse_p10"]),
         "pulse_p90": _num(r["pulse_p90"]),
-        "delta_raw": _num(r["delta_raw"]),
+        "delta": _num(r["delta"]),
         "contributions": {k: _num(r[f"contrib_{k}"]) for k in CONTRIB_KEYS},
     }
 
@@ -156,7 +209,9 @@ def write_all(work_dir: Path, mirror_dir: Path | None = None) -> Path:
         (web / "companies" / f"{cid}.json").write_text(
             json.dumps(payload, ensure_ascii=False)
         )
-        h6 = next((f for f in payload["forecast"] if f["horizon"] == 6), None)
+        last = next(
+            (f for f in payload["forecast"] if f["horizon"] == MAX_HORIZON), None
+        )
         summary_rows.append(
             {
                 "company_id": cid,
@@ -166,23 +221,36 @@ def write_all(work_dir: Path, mirror_dir: Path | None = None) -> Path:
                 "pulse_prev": payload["pulse_prev"],
                 "confidence": payload["confidence"],
                 "pillars": payload["pillars"],
-                "forecast_6m": {
-                    k: h6[k] for k in ("pulse_pred", "pulse_p10", "pulse_p90")
+                "forecast_12m": {
+                    k: last[k] for k in ("pulse_pred", "pulse_p10", "pulse_p90")
                 }
-                if h6
+                if last
                 else None,
             }
         )
     summary = {
-        **metadata(),
+        **metadata(work_dir),
         "last_month": scored["month"].max().strftime("%Y-%m"),
         "companies": summary_rows,
     }
     (web / "summary.json").write_text(json.dumps(summary, ensure_ascii=False))
     if mirror_dir is not None:
-        shutil.rmtree(mirror_dir, ignore_errors=True)
-        shutil.copytree(web, mirror_dir)
+        mirror(web, mirror_dir)
     return web
+
+
+def mirror(web: Path, mirror_dir: Path) -> Path:
+    """Copy ``summary.json`` and ``companies/`` into the frontend data folder.
+
+    Only the two PULSE artefacts are replaced: the ``recommendations/`` folder
+    the advisor mirrors next to them is left untouched, whatever the order the
+    two exports run in.
+    """
+    mirror_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy(web / "summary.json", mirror_dir / "summary.json")
+    shutil.rmtree(mirror_dir / "companies", ignore_errors=True)
+    shutil.copytree(web / "companies", mirror_dir / "companies")
+    return mirror_dir
 
 
 if __name__ == "__main__":

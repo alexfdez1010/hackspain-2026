@@ -1,10 +1,12 @@
 # backend (ml-service)
 
-Python service of HackSpain 2026. It implements the domain logic and the
-ML-based analysis consumed by the web app in [`../frontend`](../frontend).
+Python service of HackSpain 2026. It implements PULSE, the transparent
+0-100 financial-health score for SMEs, its one-year forecast and the PULSE
+Advisor (priced product recommendations), and serves them over HTTP to the web
+app in [`../frontend`](../frontend).
 
-Stack: Python 3.12, [uv](https://docs.astral.sh/uv/), pytest, Ruff. Guidelines
-for AI coding assistants live in [`AGENTS.md`](./AGENTS.md).
+Stack: Python 3.12, [uv](https://docs.astral.sh/uv/), pytest, Ruff, FastAPI.
+Guidelines for AI coding assistants live in [`AGENTS.md`](./AGENTS.md).
 
 ## Setup
 
@@ -17,419 +19,33 @@ uv sync          # creates .venv and installs runtime + dev dependencies
 cp .env.example .env
 ```
 
+The raw hackathon CSVs are expected under `data/raw/xray/` (override with
+`PULSE_DATA_DIR=<dir>`, which moves the whole `data/` root). Every derived
+artefact is written under `data/pulse/`; nothing in `data/` is versioned.
+
 ## Commands
 
 ```bash
-make main              # Run the service entry point
 make test              # Unit + integration tests
 make test-unit         # Unit tests only (tests/unit)
 make format            # Ruff format
 make lint              # Ruff check
 make pre-commit        # Unit tests + format + lint
 
-make xray-panel        # Build the monthly feature panel from data/raw/xray
-make xray-train        # Fit + persist the score engine (group-wise CV on)
-make xray-evaluate     # Group CV + temporal backtest + stability report
-make xray-score RAW=/path/to/hidden_test   # Score an unseen dataset folder
-make xray-all          # panel -> train -> evaluate
-```
-
----
-
-# X-Ray: SME financial-health score
-
-A 0-100 financial-health score per company and per month, built from 24 months
-of bank transactions, ERP invoices, debt products and balance snapshots
-(2024-09 → 2026-08, 1,286 companies, 250 groups). There are no labels in the
-dataset: the forward-looking part of the score is **self-supervised** on stress
-events the companies themselves exhibit later in their own history.
-
-## Architecture
-
-```
-data/raw/xray/*.csv                       (8 tables, see data_dictionary.md)
-        │
-        │  io.Dataset            CSV -> Parquet cache (per raw folder)
-        ▼
- features/transactions.py   flows, reconstructed daily/monthly balances,
- features/invoices.py       DSO/DPO, point-in-time overdue stock, HHI
- features/debt.py           outstanding, granted, rates
-        │
-        │  features/panel.py     dense company x month grid + rolling windows
-        ▼  features/ratios.py    scale-free ratios  -> data/features/panel.parquet
- ┌──────────────────────────────────────────────────────────────────────┐
- │  score/normalize.py   raw feature -> empirical percentile (0-1),     │
- │                       sign-aligned "higher = healthier", ties at the  │
- │                       mid-rank, unknowns -> 0.5 + `__known` flag      │
- │  score/composite.py   6 weighted pillars -> `composite` (0-100)       │
- │  score/targets.py     self-supervised y_stress / y_future_composite   │
- │  score/model.py       2 LightGBM boosters, monotone constraints,      │
- │                       GroupKFold(5) on group_id -> honest OOF         │
- │  score/scoring.py     blend level + forward + risk, PDO scaling,      │
- │                       percentile calibration, EWMA, Theil-Sen trend   │
- │  score/regime.py      PELT changepoints -> transient vs structural    │
- └──────────────────────────────────────────────────────────────────────┘
-        │  score/pipeline.py  ScoreEngine.fit / .score / .save / .load
-        ▼
- data/models/{normalizer.json,stress.txt,future.txt,calibration.json}
- data/output/{scored_panel.parquet,oof.parquet,submission.csv,xray_export.json}
-        │
-        ├─ evaluate.py + metrics.py + backtest.py + stability.py -> evaluation.json
-        ├─ explain/  monitor/  anticipation/   (reasons, alerts, lead time)
-        └─ export.py -> JSON contract consumed by ../frontend
-```
-
-Everything downstream of the panel is **per company**: a company's score depends
-only on its own rows plus the frozen artefacts in `data/models/`. That is what
-makes scoring an unseen folder (the hidden test) exactly reproducible.
-
-## Pillars and features
-
-`composite` is a weighted mean of six pillar sub-scores; each pillar is a
-weighted mean of its normalised features (features with no data are skipped and
-their weight is removed from the denominator). `direction` is +1 when a higher
-raw value is healthier and -1 otherwise; normalisation flips the -1 features so
-that every normalised column reads "higher = healthier".
-
-| Pillar (weight) | Feature | Dir | Meaning |
-|---|---|---|---|
-| **liquidity** (0.26) | `cash_runway_months` | +1 | cash / average monthly outflow (3m) |
-| | `cash_to_inflow` | +1 | cash / average monthly inflow (3m) |
-| | `neg_balance_share` | −1 | share of days with a negative balance |
-| | `min_balance_ratio` | +1 | lowest intra-month balance / outflow |
-| | `cash_change_3m` | +1 | cash change over 3 months, scaled |
-| **cashflow** (0.20) | `net_margin` | +1 | (inflow − outflow) / (inflow + outflow) |
-| | `net_margin_3m` | +1 | same over a trailing quarter |
-| | `inflow_growth_3m` | +1 | log growth of 3m inflows vs previous 3m |
-| | `inflow_growth_6m` | +1 | log growth of 6m inflows vs previous 6m |
-| | `inflow_volatility` | −1 | std of net cash flow / average inflow |
-| | `net_positive_share_6m` | +1 | months with positive net cash in the last 6 |
-| **payments** (0.20) | `returned_debit_rate` | −1 | returned direct debits per 100 transactions |
-| | `stress_event_rate` | −1 | overdraft / late-fee / seizure narratives |
-| | `supplier_delay_days` | −1 | value-weighted days beyond terms paid to suppliers |
-| | `payables_overdue_share` | −1 | overdue payables / payables issued (6m) |
-| | `tax_regularity` | +1 | share of the last 6 months with tax/TGSS payments |
-| **receivables** (0.14) | `dso_days` | −1 | value-weighted collection delay |
-| | `receivables_overdue_share` | −1 | overdue receivables / receivables issued (6m) |
-| | `customer_concentration` | −1 | HHI of customers over a 3-month window |
-| | `collection_growth_3m` | +1 | log growth of collections |
-| **debt** (0.12) | `loc_utilization` | −1 | drawn / granted on credit lines |
-| | `debt_service_ratio` | −1 | debt repayments / inflows (3m) |
-| | `financing_cost_ratio` | −1 | interest + fees / inflows (3m) |
-| | `leverage_ratio` | −1 | debt outstanding / annualised inflows |
-| | `loc_util_change_3m` | −1 | change in credit-line utilisation |
-| **activity** (0.08) | `activity_growth_3m` | +1 | log growth of transaction count |
-| | `payroll_growth_3m` | +1 | log growth of payroll |
-| | `counterparty_growth_3m` | +1 | log growth of distinct counterparties |
-
-Features that carry more evidence get a higher weight inside their pillar
-(`neg_balance_share`, `payables_overdue_share`, `loc_utilization` ×2;
-`cash_runway_months`, `min_balance_ratio`, `returned_debit_rate`,
-`receivables_overdue_share`, `net_positive_share_6m` ×1.5).
-
-## The self-supervised target
-
-No labels ship with the dataset, so the forward view is trained on stress the
-company itself shows later (`score/targets.py`, horizon **H = 6 months**):
-
-- a month is **stressful** if any of: negative month-end cash, ≥1 returned
-  direct debit, ≥1 overdraft/late-fee/seizure narrative, payables overdue share
-  > 0.75, credit-line utilisation > 0.95, or > 50 % of days with a negative
-  balance (a missing input reads as "no stress", never as null);
-- `y_stress` = **at least two** stressful months inside `(t, t+6]` (two months,
-  not one, so that an isolated bad month is not a label);
-- `y_future_composite` = the pillar composite at `t+6`;
-- `has_future` marks the rows whose full horizon is observable — only those are
-  trained on. The label never includes month `t` itself.
-
-## How the score is built
-
-1. **Normalise** every feature to its empirical percentile on the training
-   distribution (1,001-point quantile grid). Ties use the *mid-rank*, so a
-   feature that is 0 for 90 % of companies (e.g. returned debits) maps a zero to
-   ≈ 0.55 — "typical", not "perfect". Unknowns become 0.5 and are flagged.
-2. **Pillars → composite** (0-100), the transparent, model-free level.
-3. **Two LightGBM boosters** (`objective=binary` for `y_stress`,
-   `objective=regression` for `y_future_composite`), both with **monotone
-   constraints** in each feature's economic direction, so the model can never
-   learn that more overdue payables is healthier. Validation is `GroupKFold(5)`
-   **on `group_id`**, which mimics the hidden test of unseen companies.
-4. **Blend** (`score/scoring.py`):
-   `score_raw = 0.45 · composite + 0.35 · E[composite at t+6] + 0.20 · PDO(p_stress)`
-   where `PDO(p) = 60 + (12/ln 2) · ln((1−p)/p) − (12/ln 2) · ln 3` clipped to
-   0-100 — the classic scorecard scaling: every 12 points doubles the odds of
-   *not* hitting stress.
-5. **Calibrate** the blend to its training percentile and stretch it to 3-97, so
-   the portfolio always uses the full range.
-6. **Smooth**: `score` is an EWMA (α = 0.6) of `score_raw` per company — one bad
-   month moves the score less than a persistent deterioration.
-7. **Trajectory**: `trend_6m` is a **Theil-Sen** (robust) slope over the trailing
-   6 scores, discretised into `direction` ∈ {improving, stable, deteriorating}
-   at ±1.5 points/month.
-8. **Regimes**: PELT (`ruptures`, L2 cost, penalty 250) re-estimated **on the
-   prefix of each month**, so the label at month *m* never uses later data. A
-   shift ≥ 8 points that persists ≥ 2 months is `structural_decline` /
-   `structural_improvement`; a dip that reverts within 3 months is
-   `transient_dip` / `transient_spike`; otherwise `steady`.
-
-## Evaluation protocol and results
-
-`evaluate.py` (`make xray-evaluate`, writes `data/output/evaluation.json`) runs
-three blocks. Numbers below are from the full 1,286-company panel.
-
-**1. Group-wise cross-validation** — `GroupKFold(5)` on `group_id`, so every
-prediction is made for a company whose *whole group* was held out. This is the
-honest proxy for the hidden test set.
-
-**2. Temporal backtest** — the engine (normaliser, pillars, boosters,
-calibration) is refitted on months **≤ 2025-08 only**, with targets built on the
-truncated panel: a training row is labelled only when its whole 6-month horizon
-falls inside the training window, so the last labelled training month is
-**2025-02** and the first evaluated month is **2025-09** — a 6-month purge gap
-between the training labels and the test rows. Evaluation rows: 2025-09 → 2026-02
-(the last months have no observable future).
-
-| split | rows | stress rate | AUROC | PR-AUC | ρ(future composite) | ρ(6m change) | sign agr. | improver recall | decliner recall |
-|---|---|---|---|---|---|---|---|---|---|
-| group CV (5-fold on group_id) | 17,244 | 0.389 | **0.872** | 0.836 | 0.519 | 0.611 | 0.714 | 0.752 (n=3,412) | 0.863 (n=5,814) |
-| temporal backtest (train ≤ 2025-08) | 6,974 | 0.383 | **0.874** | 0.834 | 0.520 | 0.612 | 0.716 | 0.705 (n=1,526) | 0.898 (n=2,298) |
-
-"improver / decliner recall" is the both-directions check: among rows whose
-realised 6-month composite change was **> +5 points** (improvers) or
-**< −5 points** (decliners), the share the model also called in that direction.
-The engine is better at calling deteriorations than recoveries, which is the
-useful asymmetry for a treasury early-warning product.
-
-The backtest matches the cross-validated numbers, so the engine does not depend
-on having seen the months it scores. Naive baselines on the same OOF rows
-(AUROC for `y_stress`): current stress state alone 0.778, pillar composite alone
-0.703, `cash_runway_months` 0.616 — the forward model adds ~0.09 AUROC over "the
-company is already in trouble". All numbers above are the contents of
-`data/output/evaluation.json`; rerun `make xray-evaluate` after any refit to
-refresh them.
-
-**Calibration** (deciles of `p_stress`, group CV):
-
-| decile | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
-|---|---|---|---|---|---|---|---|---|---|---|
-| mean p | 0.033 | 0.065 | 0.095 | 0.131 | 0.189 | 0.289 | 0.469 | 0.731 | 0.896 | 0.957 |
-| realised | 0.054 | 0.094 | 0.114 | 0.132 | 0.205 | 0.300 | 0.479 | 0.700 | 0.859 | 0.955 |
-
-Monotone throughout and close to the diagonal in every decile (largest gap:
-0.731 predicted vs 0.700 realised). The temporal backtest is visibly more
-over-confident in the middle deciles (e.g. 0.566 predicted vs 0.476 realised,
-0.814 vs 0.699) — ranking transfers across time better than absolute
-probabilities do, so the demo should lean on the score and the ordering rather
-than on `p_stress` read as a literal percentage.
-
-**3. Stability** of the published score:
-
-| metric | value |
-|---|---|
-| PSI of the score distribution, month over month | mean 0.011, max 0.027 (2024-11) |
-| mean absolute month-over-month score change | 5.50 points (p95 17.0, max 57.5) |
-| companies flipping `direction` more than 3× in 12 months | 32.2 % (mean 2.86 flips) |
-
-No month comes anywhere near the usual 0.1 PSI alarm line, so the population is
-stable end to end. Individual scores are still jumpy though: 5.5 points of
-average monthly movement and a third of the portfolio changing trend label more
-than three times a year. If the demo needs calmer trajectories, lower
-`SMOOTH_ALPHA` (0.6) or widen the ±1.5 points/month `direction` band.
-
-### Hidden-test simulation
-
-`make xray-score RAW=...` was validated end to end on a 30-company copy of the
-raw folder (every CSV filtered to 30 `company_id`s). Result: 640 company-months,
-and **every score, `p_stress`, `direction` and `regime` identical to the
-full-panel run (max absolute difference 0.0)**. Nothing in the scoring path is
-population-relative at inference time — the quantile grids and the calibration
-grid are frozen inside `data/models/` — so a 60-80 company hidden set is scored
-exactly as if those companies had been part of the training folder.
-
-### Known data artefacts (read before trusting a number)
-
-Fixed since the first evaluation round (kept here because they explain the jump
-in the numbers above):
-
-- **`payment_date` on unpaid invoices** — the ERP fills it with the due date on
-  documents that were never settled (only 6 of 897,894 rows are null, yet
-  192,556 carry `status = "overdue"` with `pending_amount = amount`).
-  `features/invoices.py` now trusts a payment date only when
-  `status == "paid"` **and** `pending_amount ≈ 0`.
-- **Final-month score inflation** — the old rule made the overdue stock
-  evaporate at the edge of the panel and inflated the mean score to 56.3 in
-  2026-08. With the fix, `overdue_ar` stays at ~17 M in 2026-08 and the mean
-  score ends at 47.2 (overall mean 50.4): the last month is no longer a
-  systematic free pass.
-- **Overdue-window off-by-one** — the month range stopped one month early;
-  the stop index is now `+1`, so an invoice is overdue up to and including the
-  month before it settles, and an invoice still open at extraction counts in
-  2026-08.
-- **Pivot fragility** — `features/panel.py` gained `_ensure_columns` guards, so
-  a hidden folder without payable invoices, without debt products or with one
-  invoice side missing no longer raises `ColumnNotFoundError` (the ratios moved
-  to `features/ratios.py::add_ratios` in the same change).
-
-Still live, by design or by data limitation:
-
-- **Onboarding ramp.** Products are connected progressively: mean transactions
-  per company-month go from ~58 (2024-09) to ~107 (2026-08), and the panel
-  starts at each company's first active month (median 23 months, min 4). The
-  6-month denominators (`issued_ap_6m`, `issued_ar_6m`) and the rolling windows
-  are therefore thin at the start, which makes early months look clean: the mean
-  score is 59.4 at month 1 and decays to ~54 by month 6 against an overall mean
-  of 50.4. `months_observed` is a model feature with a neutral monotone
-  constraint, but it only partly absorbs this — treat a company's first months
-  as low-confidence, not as healthy.
-- **Unanchored balance floor.** Accounts whose `balances.csv` snapshot is
-  missing (209 cash products) or exactly zero while still active (968) have no
-  anchor for the reconstructed series, so `reconstruct_balances` shifts them up
-  until their lowest daily balance is zero. That is deliberately conservative,
-  but it means those accounts can never show an overdraft: `neg_balance_share`,
-  `min_balance_ratio` and the `cash_end < 0` stress rule under-report stress for
-  them (panel-wide, 16.1 % of company-months have any negative day and 5.0 % end
-  the month negative).
-- **Sparse inputs.** `loc_utilization` is unknown for 90.9 % of company-months
-  (`loc_util_change_3m` 92.7 %), so the debt pillar rests mostly on
-  `debt_service_ratio` / `leverage_ratio`. `dso_days` is unknown for 59.9 %
-  (stricter now that only genuinely settled invoices carry a delay) and
-  `customer_concentration` for 44.2 %. Unknowns score a neutral 0.5 and are
-  excluded from their pillar's weight, so they neither help nor hurt — but a
-  company with three pillars of unknowns has a score built on thin evidence.
-
-## CLI
-
-```bash
-uv run python -m ml_service.xray.cli build-panel [--raw-dir DIR] [--cache-dir DIR] [--out FILE]
-uv run python -m ml_service.xray.cli train [--panel FILE] [--models DIR] [--no-cv]
-uv run python -m ml_service.xray.cli score --raw-dir DIR [--cache-dir DIR] [--models DIR] \
-        [--out-json FILE] [--out-csv FILE] [--no-explain]
-uv run python -m ml_service.xray.cli evaluate [--panel FILE] [--out FILE]
-```
-
-`score` is the hidden-test entry point: it needs **only** the unseen CSV folder
-and `data/models/`, never the training data. It builds that folder's panel,
-loads the persisted engine, writes the leaderboard CSV
-(`company_id, month, score, p_stress, trend_6m, direction, regime`) and the full
-JSON export. `--no-explain` skips the SHAP pass when only the CSV is needed.
-
-It writes to `data/output/submission.csv` and `data/output/xray_export.json` by
-default, which would overwrite the demo export of the training run — pass
-`OUT_CSV=` / `OUT_JSON=` (or `--out-csv` / `--out-json`) to keep them apart, and
-`--cache-dir` to keep the hidden folder's Parquet cache separate.
-
-## JSON contract consumed by `../frontend`
-
-`export.py` writes one payload (`data/output/xray_export.json`); `run_export.py`
-additionally splits it into `summary.json` + `companies/<company_id>.json` under
-`data/output/web/` and mirrors it into `frontend/src/data/xray/`.
-
-```jsonc
-{
-  "generated_for": "HackSpain 2026 · Embat X-Ray",
-  "pillar_labels":  { "liquidity": "Liquidez", ... },      // es-ES labels
-  "feature_labels": { "cash_runway_months": "Meses de caja disponibles", ... },
-  "regime_labels":  { "structural_decline": "...", ... },
-  "companies": [
-    {
-      "company_id": "COMP_0001",
-      "group_id": "GROUP_001",
-      "months_observed": 24,
-      "score": 69.02,            // latest month, 0-100
-      "score_prev": 47.93,       // previous month
-      "score_6m_ago": 48.69,
-      "trend_6m": 3.1,           // Theil-Sen slope, points per month
-      "direction": "improving",  // improving | stable | deteriorating
-      "regime": "structural_improvement",
-      "p_stress": 0.07,          // P(stress in the next 6 months)
-      "pillars": { "liquidity": 61.2, "cashflow": 55.0, ... },
-      "reasons": [               // SHAP, harmful first; empty without explain_rows
-        { "feature": "dso_days", "label": "Retraso medio de cobro (DSO)",
-          "pillar": "receivables", "impact": -1.64, "value": 12.17 }
-      ],
-      "explanation": {           // added by explain/ (other agent)
-        "month": "2026-08", "score": 69.02, "score_prev": 47.93,
-        "score_ref": 48.69, "reference_month": "2026-02", "window_months": 6,
-        "waterfall": [ { "feature": "payables_overdue_share", "label": "...",
-                         "pillar": "payments", "delta_points": 5.35,
-                         "value_before": 0.13, "value_after": 0.0 } ],
-        "waterfall_1m": [ ... ],
-        "narrative_es": "El score subió 20 puntos (49→69) desde febrero de 2026.",
-        "narrative_1m_es": "...",
-        "regime_text_es": "Mejora estructural: ..."
-      },
-      "series": [                // one entry per month, oldest first
-        {
-          "month": "2024-09",
-          "score": 57.05, "score_raw": 57.05, "composite": 54.1,
-          "p_stress": 0.21, "trend_6m": null,
-          "direction": "stable", "regime": "steady",
-          "regime_shift": 0.0, "changepoint_month": null,
-          "pillars": { "liquidity": 52.0, ... },
-          "raw": { "inflow": 1.2e5, "outflow": 9.8e4, "net": 2.2e4,
-                   "cash_end": 3.1e4, "cash_min": 1.0e4, "dso_days": 12.2,
-                   "supplier_delay_days": 4.0, "overdue_ar": 0.0,
-                   "overdue_ap": 0.0, "loc_utilization": null,
-                   "returned_debit_n": 0, "stress_n": 0, "n_tx": 88,
-                   "n_counterparties": 9, "debt_outstanding": 0.0,
-                   "payroll": 2.0e4, "tax_paid": 5.0e3 },
-          "reasons": [ ... ],
-          "stress_now": 0
-        }
-      ]
-    }
-  ]
-}
-```
-
-The `alerts`, `anticipation` and `explanation` keys are produced by the
-`monitor/`, `anticipation/` and `explain/` packages and are added to the payload
-by `run_export.py`; `export.py` merges anything passed in its `extra` argument
-at the top level. Numbers are rounded to 4 decimals and `NaN` is emitted as
-`null`.
-
-## Structure
-
-```
-backend/
-├── src/ml_service/
-│   ├── main.py             # service entry point
-│   └── xray/               # the X-Ray engine
-│       ├── config.py       # paths, FEATURE_SPECS, PILLARS, stress regexes
-│       ├── io.py           # Dataset: raw CSV folder -> Parquet cache
-│       ├── features/       # transactions, invoices, debt, ratios, panel
-│       ├── score/          # normalize, composite, targets, model, scoring,
-│       │                   # regime, pipeline (ScoreEngine)
-│       ├── explain/        # SHAP attribution, reasons, es-ES narratives
-│       ├── monitor/        # alerts
-│       ├── anticipation/   # lead-time measurement
-│       ├── metrics.py      # AUROC / PR-AUC / Spearman / calibration
-│       ├── stability.py    # PSI, score churn, direction flips
-│       ├── backtest.py     # purged temporal backtest
-│       ├── evaluate.py     # evaluate_all() -> data/output/evaluation.json
-│       ├── export.py       # JSON + submission CSV
-│       └── cli.py          # build-panel | train | score | evaluate
-├── tests/unit/             # fast, deterministic unit tests
-├── data/                   # raw (symlink), parquet, features, models, output
-├── pyproject.toml
-├── Makefile
-└── AGENTS.md
-```
-
-`data/` is git-ignored; `data/raw/xray` is a symlink to the challenge CSV folder.
-
-## Dependencies
-
-```bash
-uv add <package>          # runtime dependency
-uv add --dev <package>    # dev dependency
-uv lock --upgrade         # refresh the lock file
+make pulse-all         # build (clean + panel) -> fit -> evaluate
+make pulse-score RAW=/path/to/hidden_test   # Score an unseen dataset folder
+make pulse-forecast-fit && make pulse-forecast   # +1..+12 month forecasts
+make pulse-reco-all    # fit the risk model + build the Advisor export
+make api-dev           # uvicorn --reload on :8000
 ```
 
 ## API (FastAPI)
 
 The HTTP layer lives in `src/ml_service/api/` and is the **cross-app contract**
-with [`../frontend`](../frontend): every payload the Next.js app renders is served here.
+with [`../frontend`](../frontend): every payload the Next.js app renders is
+served here. It only reads the static exports written by the PULSE CLIs
+(`data/pulse/web` and `data/pulse/recommendations`); there is no scoring over
+HTTP. Full endpoint reference (params, payloads, errors): [`API.md`](./API.md).
 
 ```bash
 make api-dev                       # uvicorn --reload on :8000
@@ -438,155 +54,31 @@ make api-docker                    # docker build + run (port 8000)
 docker compose -f compose.api.yml up --build
 ```
 
-Interactive docs: `/docs` (Swagger) and `/openapi.json`.
-
-### Configuration
-
-| Env var | Default | Meaning |
+| Variable | Default | Use |
 |---|---|---|
-| `XRAY_DATA_DIR` | `backend/data` | Root of the artefact folder |
-| `XRAY_CORS_ORIGINS` | `http://localhost:3000,http://127.0.0.1:3000` | Comma-separated allowed origins |
-| `XRAY_API_KEY` | *(unset)* | When set, `POST` endpoints require `Authorization: Bearer <key>` (or `X-API-Key`) |
-| `PORT` | `8000` | Port used by the container / `python -m ml_service.api` |
-
-At start-up `api/store.py` loads, in order: `data/output/web/summary.json` +
-`data/output/web/companies/<id>.json` (written by `run_export.py`); if those are
-absent it falls back to `data/output/scored_panel.parquet` and rebuilds the
-records with `export.company_records` (in that fallback `reasons` and
-`explanation` are empty, because they need the SHAP-enriched frame). Alerts come
-from `summary.alerts`, else from `monitor.build_alerts` computed on the fly. The
-store sits behind a `RecordStore` Protocol, so tests inject a fake and touch no
-disk.
-
-### Endpoints
-
-| Method | Path | Returns |
-|---|---|---|
-| `GET` | `/health` | `{status, n_companies, models_loaded, generated_at}` |
-| `GET` | `/api/meta` | `{pillar_labels, feature_labels, evaluation, anticipation}` |
-| `GET` | `/api/companies` | Paginated company summaries **without** `series` + totals |
-| `GET` | `/api/companies/{company_id}` | `{company (incl. series), alerts, explanation, offer}` |
-| `GET` | `/api/movers` | Top improvers / decliners over a window |
-| `GET` | `/api/alerts` | Filtered alert list |
-| `GET` | `/api/alerts/counts` | Alert counts by type / severity / month |
-| `GET` | `/api/offers` | Working-capital offers for every company + portfolio totals |
-| `GET` | `/api/offers/{company_id}` | `{offer, history}` — 12-month limit history |
-| `POST` | `/api/score` | Multipart ZIP of the challenge CSVs → scored records + `submission_csv` |
-| `POST` | `/api/score/path` | `{"raw_dir": "..."}` — same, for a folder on the server |
-| `GET` | `/api/submission.csv` | Training-set submission CSV (`text/csv` download) |
-
-Query parameters:
-
-- `/api/companies?direction=&regime=&min_score=&max_score=&q=&sort=&limit=&offset=`
-  — `sort` is `score`, `p_stress`, `trend_6m` or `company_id`, prefixed with `-`
-  for descending (default `-score`); `limit` ≤ 500; `q` matches the company id.
-- `/api/movers?window=6&limit=10` — `window` in months (≤ 24).
-- `/api/alerts?type=&severity=&month=YYYY-MM&limit=`
-- `/api/offers?status=preaprobada|en_vigilancia|cerrada&limit=`
-
-Errors are JSON `{"detail": "..."}`: `404` unknown company, `400` bad upload or
-folder, `401` missing API key, `503` artefacts unavailable.
-
-### Sample responses (truncated)
-
-```jsonc
-// GET /health
-{"status":"ok","n_companies":1286,"models_loaded":true,
- "generated_at":"2026-09-18T18:27:05+00:00"}
-
-// GET /api/companies?limit=3
-{"items":[{"company_id":"COMP_1136","group_id":"GROUP_0222","months_observed":22,
-           "score":96.7406,"score_prev":96.6124,"score_6m_ago":96.3667,
-           "trend_6m":0.0349,"direction":"stable","regime":"structural_improvement",
-           "p_stress":0.0065,"pillars":{"liquidity":80.83, "...":0},"reasons":[]}],
- "total":1286,"limit":3,"offset":0,
- "totals":{"n_companies":1286,"avg_score":56.29,
-           "by_direction":{"improving":518,"stable":462,"deteriorating":306},
-           "by_regime":{"structural_improvement":637,"steady":239,
-                        "structural_decline":402,"transient_dip":4,"transient_spike":4},
-           "at_risk":138}}
-
-// GET /api/offers/COMP_0001
-{"offer":{"company_id":"COMP_0001","month":"2026-08","score":69.02,"p_stress":0.0276,
-          "regime":"structural_improvement","avg_monthly_inflow_3m":69341.21,
-          "k":0.92,"limit":63793.92,"spread_bps":283,"status":"preaprobada"},
- "history":[{"month":"2025-09","k":0.125,"limit":0.0,"spread_bps":416,
-             "status":"en_vigilancia"}]}
-
-// GET /api/alerts/counts
-{"total":9566,
- "by_type":{"liquidity_squeeze":3283,"improvement":2199,"score_drop":1407,
-            "structural_decline":1047,"stress_risk_high":857,"payment_stress":773},
- "by_severity":{"critical":5789,"info":2199,"warning":1578},
- "by_month":{"2026-08":525,"...":0}}
-```
-
-### Dynamic working-capital offer (source of truth)
-
-`api/offers.py` owns the product formula; the web app must mirror it, never
-reimplement it differently:
-
-```
-k = 0     if score < 35
-    0.25  if 35 <= score < 50
-    0.5   if 50 <= score < 65
-    0.8   if 65 <= score < 80
-    1.0   if score >= 80
-
-k *= 0.5   if regime == "structural_decline"
-k *= 1.15  if regime == "structural_improvement"   (capped at k = 1.0)
-
-limit       = clamp(k * avg_monthly_inflow_3m, 0, 2_000_000)
-spread_bps  = 250 + round(1200 * p_stress)
-status      = "preaprobada"    if score >= 50 and p_stress < 0.35
-              "en_vigilancia"  if 35 <= score < 50 or 0.35 <= p_stress < 0.6
-              "cerrada"        otherwise
-```
-
-`avg_monthly_inflow_3m` is the mean of `series[-3:].raw.inflow`; the history
-endpoint recomputes the same formula month by month with each month's trailing
-3-month inflow, score, `p_stress` and regime.
-
-### Scoring an unseen dataset over HTTP
-
-```bash
-zip -j hidden.zip /path/to/hidden_test/*.csv
-curl -X POST http://localhost:8000/api/score \
-     -H "Authorization: Bearer $XRAY_API_KEY" \
-     -F file=@hidden.zip | jq '.n_companies, .n_rows'
-```
-
-The ZIP may contain the nine challenge CSVs or a subset, at minimum
-`transactions.csv`, `balances.csv` and `companies.csv`, at the archive root or
-inside a single folder. The response is
-`{n_companies, n_rows, companies[], submission_csv}` where `companies[]` has the
-same shape as `/api/companies/{id}.company` and `submission_csv` is the
-leaderboard CSV as a string. Archives are extracted into a temp dir (path
-traversal rejected, 200 MB cap) and deleted afterwards.
-
-### Deployment
+| `PULSE_DATA_DIR` | `backend/data` | Root of the data folder (`pulse/web`, `pulse/recommendations`) |
+| `PULSE_CORS_ORIGINS` | `http://localhost:3000,http://127.0.0.1:3000` | Allowed browser origins |
+| `PORT` | `8000` | Port for the container / `python -m ml_service.api` |
 
 `Dockerfile` is a two-stage build on `python:3.12-slim` (`uv sync --frozen
---no-dev`, `libgomp1` for LightGBM) and bakes `data/models` plus
-`data/output/{web,scored_panel.parquet,evaluation.json,anticipation.json}` into
-the image, so the container serves the demo with no volumes. `.dockerignore`
-keeps `data/raw` and the parquet cache out. `fly.toml` is a ready Fly.io config
-(health check on `/health`, `PORT=8080`); `compose.api.yml` runs the same image
-locally.
+--no-dev`, `libgomp1` for LightGBM) that bakes `data/pulse/{web,recommendations,models}`
+into the image, so the container serves the demo with no volumes.
+`.dockerignore` keeps `data/raw` and the parquet caches out. `fly.toml` is a
+ready Fly.io config (health check on `/health`, `PORT=8080`);
+`compose.api.yml` runs the same image locally.
 
 ---
 
 # PULSE: Payment, Underwriting, Liquidity & Solvency Estimate
 
-A second, fully transparent 0-100 company health score built **from scratch** in
-`src/ml_service/pulse/` with 11 variables and fixed percentage weights. It does
-not reuse the X-Ray feature pipeline: it has its own loader, cleaning layer and
-feature code, because the raw dataset is deliberately corrupted (currencies,
-sentinel amounts, impossible dates, duplicates).
+A fully transparent 0-100 company health score built in `src/ml_service/pulse/`
+with 11 variables and fixed percentage weights. It has its own loader, cleaning
+layer and feature code, because the raw dataset is deliberately corrupted
+(currencies, sentinel amounts, impossible dates, duplicates).
 
 ```bash
 uv run python -m ml_service.pulse.cli build     # clean + panel -> data/pulse/{panel.parquet,cleaning_report.md}
-uv run python -m ml_service.pulse.cli fit       # freeze normaliser + calibration -> data/pulse/models/
+uv run python -m ml_service.pulse.cli fit       # freeze normaliser -> data/pulse/models/
 uv run python -m ml_service.pulse.cli evaluate  # self-supervised anticipation check -> data/pulse/evaluation.json
 uv run python -m ml_service.pulse.cli score --raw-dir /path/to/hidden [--out FILE]   # hidden test
 ```
@@ -613,15 +105,16 @@ source of truth; the weights must sum to 100 (asserted at import).
 **Scoring.** Every component is mapped to its empirical percentile on the
 training panel (1,001-point grid, mid-rank ties, sign-aligned so higher is
 healthier; an exact 0 on #10 is the optimum). A variable is the mean of its known
-components; `pulse_raw` is the weighted mean of the known variables with the
+components; `pulse` is the weighted mean of the known variables with the
 weights renormalised, so an unknown variable neither helps nor hurts. `confidence`
 is the share of the 100 points backed by data (a proxy-backed variable counts
 only part of its weight, see below; `confidence_from_proxies` is the share that
 comes from proxies and `var_<key>__source` says `primary`, `proxy` or null).
-`pulse` is the percentile of
-`pulse_raw` in the training population (frozen grid), so it spans 0-100 and a
-PULSE of 80 reads "healthier than 80 % of the fitted portfolio". `contrib_<key>`
-splits `pulse_raw` into the points each variable is responsible for. Everything
+No further calibration is applied: PULSE reads directly in the 0-100 scale of
+the variables, so 80 means the known variables average a score of 80 (the
+distribution is concentrated: half the companies sit between 41 and 64).
+`contrib_<key>` splits `pulse` into the points each variable is responsible for.
+Everything
 after `build` is per company, so a hidden folder is scored exactly as the
 training one.
 
@@ -702,54 +195,234 @@ the cobro variables came from invoices (0.771), bank proxies (0.841) or nothing
 
 ## Forecast layer (`pulse/forecast/`)
 
-Monthly PULSE forecasts for +1..+6 months, each with a p10-p90 band and an
-exact decomposition of the predicted change into the 11 variables.
+Monthly PULSE forecasts for +1..+12 months (one year), each with a p10-p90 band
+and an exact decomposition of the predicted change into the 11 variables.
 
 ```bash
-uv run python -m ml_service.pulse.forecast.cli fit        # 6 horizon models -> data/pulse/models/forecast/
+uv run python -m ml_service.pulse.forecast.cli fit        # one model -> data/pulse/models/forecast/{model.txt,model.json}
 uv run python -m ml_service.pulse.forecast.cli evaluate   # OOF vs persistence/reversion -> forecast_evaluation.json
 uv run python -m ml_service.pulse.forecast.cli predict [--raw-dir DIR] [--all-months]   # -> data/pulse/forecast.{parquet,csv}
 uv run python -m ml_service.pulse.export_web              # -> data/pulse/web/ (+ mirror in ../frontend/src/data/pulse)
+# summary.json also carries an `evaluation` block (score, forecast and risk figures) read by the web app's method page
 ```
 
-**Design.** One LightGBM model per horizon predicts the *change* of `pulse_raw`
-(`objective=huber`), plus two quantile boosters (α = 0.1 / 0.9) for the band, so
-persistence is the starting point and the model only learns deviations. Inputs
-(162 columns, `forecast/features.py`): the 11 variables and their percentiles,
-Δ1/Δ3/Δ6 and 6-month volatility of every level, the four pillars and PULSE itself,
-cash-account flows (inflows, net 3m/6m, growth), the invoice calendar (AR/AP
-already due within 1/3/6 months, open overdue amounts), stress narratives
-(returned debits, overdrafts), intragroup inflow share, group mean PULSE and
-observation length. The per-feature contributions returned by LightGBM
-(`pred_contrib`) are folded into the 11 variables (`forecast/attribution.py`):
-component-derived features go to their variable, pillar-level features are split
-by weight inside the pillar, PULSE-level features across all variables by weight,
-and everything else is reported as `contexto`; the bias is `base`. The parts sum
-to `delta_raw` to 1e-14. Forecasts are expressed on the 0-100 PULSE scale through
-the frozen calibration.
+**Design.** A **single LightGBM model** (`objective=huber`) predicts the *change*
+of `pulse` between month *t* and *t+h*; the horizon `h` is an ordinary input
+column (`HORIZON_FEATURE`), so the training set is every (company-month, horizon)
+pair with an observed target stacked together (`features.stack_horizons`) and
+extending the horizon is a change in `config.HORIZONS`, not a new model. Persistence
+is the starting point and the model only learns deviations. The p10-p90 band is
+**conformal**: the 10th/90th percentile of the out-of-fold residual at each horizon
+(GroupKFold(5) on `group_id`, computed inside `fit`) is added to the central
+forecast, which keeps the 80 % coverage honest without extra quantile models; the
+offsets are stored in `model.json` and grow with the horizon (≈ ±8 points at +1,
+≈ −19/+18 at +12). Inputs (`forecast/features.py`): the 11 variables and their
+percentiles, Δ1/Δ3/Δ6 and 6-month volatility of every level, the four pillars and
+PULSE itself, cash-account flows (inflows, net 3m/6m, growth), the invoice calendar
+(AR/AP already due within 1/3/6 months, open overdue amounts), stress narratives
+(returned debits, overdrafts), intragroup inflow share, group mean PULSE,
+observation length and the horizon. The per-feature contributions returned by
+LightGBM (`pred_contrib`) are folded into the 11 variables
+(`forecast/attribution.py`): component-derived features go to their variable,
+pillar-level features are split by weight inside the pillar, PULSE-level features
+across all variables by weight, everything else is reported as `contexto`, and the
+bias plus the horizon input (the drift the model expects at that distance) as
+`base`. The parts sum to `delta` to 1e-14. The forecast is PULSE now plus `delta`,
+clipped to 0-100, and the band is clipped the same way.
 
 **Evaluation** (`data/pulse/forecast_evaluation.json`, GroupKFold(5) on
-`group_id`, MAE in points of `pulse_raw`). "Reversion" is a one-parameter
-mean-reversion baseline fitted out of fold; anything that does not beat it is
-just percentiles drifting back to the middle.
+`group_id`, one fit of the single model per fold, MAE in points of PULSE).
+"Reversion" is a one-parameter mean-reversion baseline fitted out of fold;
+anything that does not beat it is just percentiles drifting back to the middle.
+Over the 169,691 stacked (company-month, horizon) rows the model's MAE is 9.29
+against 11.11 for persistence (+16.4 %) and 10.59 for reversion (+12.3 %), with
+80.0 % of the outcomes inside the p10-p90 band.
 
 | horizon | rows | persist | reversion | ML | vs persist | vs reversion | direction on moves > 15 | recall declines | recall improvements | p10-p90 coverage |
 |---|---|---|---|---|---|---|---|---|---|---|
-| +1 | 20,932 | 5.72 | 5.88 | **5.32** | +7.0 % | +9.7 % | 0.84 | 0.13 | 0.00 | 0.77 |
-| +2 | 19,647 | 8.47 | 8.36 | **7.43** | +12.2 % | +11.1 % | 0.87 | 0.47 | 0.05 | 0.76 |
-| +3 | 18,362 | 10.52 | 9.97 | **8.86** | +15.8 % | +11.2 % | 0.87 | 0.61 | 0.18 | 0.76 |
-| +4 | 17,077 | 11.20 | 10.52 | **9.37** | +16.4 % | +11.0 % | 0.87 | 0.63 | 0.17 | 0.75 |
-| +5 | 15,795 | 11.83 | 10.99 | **9.90** | +16.4 % | +10.0 % | 0.87 | 0.64 | 0.16 | 0.74 |
-| +6 | 14,514 | 12.35 | 11.39 | **10.33** | +16.4 % | +9.4 % | 0.87 | 0.66 | 0.16 | 0.74 |
+| +1 | 20,932 | 5.72 | 5.89 | **5.45** | +4.6 % | +7.4 % | 0.85 | 0.45 | 0.03 | 0.80 |
+| +2 | 19,647 | 8.47 | 8.35 | **7.39** | +12.8 % | +11.5 % | 0.87 | 0.55 | 0.19 | 0.80 |
+| +3 | 18,362 | 10.52 | 9.99 | **8.70** | +17.3 % | +12.9 % | 0.89 | 0.63 | 0.31 | 0.80 |
+| +4 | 17,077 | 11.20 | 10.53 | **9.16** | +18.2 % | +13.0 % | 0.89 | 0.66 | 0.30 | 0.80 |
+| +5 | 15,795 | 11.83 | 11.02 | **9.66** | +18.3 % | +12.3 % | 0.89 | 0.67 | 0.29 | 0.80 |
+| +6 | 14,514 | 12.35 | 11.41 | **10.10** | +18.2 % | +11.5 % | 0.89 | 0.68 | 0.27 | 0.80 |
+| +7 | 13,240 | 12.70 | 11.66 | **10.45** | +17.7 % | +10.4 % | 0.88 | 0.67 | 0.28 | 0.80 |
+| +8 | 12,044 | 12.97 | 11.87 | **10.75** | +17.1 % | +9.4 % | 0.88 | 0.68 | 0.28 | 0.80 |
+| +9 | 10,980 | 13.27 | 12.06 | **11.01** | +17.0 % | +8.7 % | 0.87 | 0.68 | 0.26 | 0.80 |
+| +10 | 9,980 | 13.67 | 12.30 | **11.33** | +17.1 % | +7.9 % | 0.86 | 0.69 | 0.22 | 0.80 |
+| +11 | 9,018 | 14.00 | 12.46 | **11.55** | +17.5 % | +7.3 % | 0.86 | 0.70 | 0.22 | 0.80 |
+| +12 | 8,102 | 14.27 | 12.62 | **11.71** | +18.0 % | +7.2 % | 0.87 | 0.71 | 0.22 | 0.80 |
 
-The models see declines far better than recoveries (recall 0.66 vs 0.16 at six
-months): read the forecast as an early warning, not as a promise of improvement.
+The single model matches or beats the previous one-model-per-horizon setup at
+every horizon from +2 on (for example 10.10 vs 10.33 at +6) and doubles the recall
+of large improvements, because the horizons share what they learn; it gives up
+about 0.1 points at +1. The temporal backtest (fit on months up to 2025-08, test
+from 2025-09) tells the same story: MAE 5.42 vs 5.69 persistence at +1, 10.51 vs
+12.14 at +6, 12.72 vs 14.25 at +11 (+12 has no observable future after the cut).
+Declines are still seen far better than recoveries (recall 0.71 vs 0.22 at one
+year): read the forecast as an early warning, not as a promise of improvement.
 A preliminary experiment forecasting each pillar separately showed that *cobro*
 and *pago* pillar forecasts do not beat the reversion baseline, which is why only
 PULSE itself is modelled and the breakdown comes from attribution rather than
-from per-variable models. Horizon models are independent, so a company's
-trajectory across horizons is not forced to be monotone.
+from per-variable models. The `horizon` input ranks fourth by gain (4.6 %) after
+`pulse`, `pillar_cobro` and `pulse_d3`. Horizons are scored independently at
+prediction time, so a company's trajectory is not forced to be monotone.
 
 **API.** `GET /api/pulse/summary` and `GET /api/pulse/companies/{company_id}`
 serve the files written by `export_web.py` (`routes_pulse.py`); the contract is
 the JSON described in the frontend data layer (`frontend/src/lib/pulse`).
+
+## PULSE Advisor: product recommendations priced from PULSE (`pulse/recommend/`)
+
+Given a company's latest PULSE snapshot, the advisor decides **which financial
+products fit its situation, how much to offer and at what rate**, and explains
+every step in Spanish so the company understands why it is being offered what
+it is being offered. It is rule-based where the decision must be auditable
+(eligibility, sizing) and uses a small ML model where a probability is needed
+(the risk premium in the price).
+
+```bash
+uv run python -m ml_service.pulse.recommend.cli fit     # stress scorecard -> data/pulse/models/risk_model.json + risk_evaluation.json
+uv run python -m ml_service.pulse.recommend.cli build   # every company -> data/pulse/recommendations/{summary.json,catalogue.json,companies/<id>.json}
+#   (+ mirror of catalogue.json and companies/ in ../frontend/src/data/pulse/recommendations)
+uv run python -m ml_service.pulse.recommend.cli show COMP_1030   # human-readable narrative for one company
+make pulse-reco-all                                     # fit + build
+```
+
+Inputs (`recommend/inputs.py`, `inputs_raw.py`): the last month of
+`scored_panel.parquet` (PULSE, pillars, the 11 variables with raw values,
+`cash_end`, trailing outflows/collections/debt service), the +12 month forecast,
+the company's current facilities from `debt_products.csv` and
+`debt_schedule_config.csv` (line limit and drawn, loans outstanding, median
+rate) and its open invoices from the cleaned ERP data (open and *current*
+receivables, monthly billing and purchases).
+
+### Catalogue (`recommend/catalogue.py`)
+
+The products are the ones the portfolio already uses (`debt_products.csv`:
+loan 1,022, lineofcredit 536, confirming 229, factoring 24) plus a deposit for
+the companies with idle cash. Each carries a base margin and a loss given
+default that the pricing quotes.
+
+| key | product | when it fits (rule file) | sizing |
+|---|---|---|---|
+| `credit_line` | Línea de crédito | cash days < 30 or intramonth minimum < 0.25 months, no idle line, PULSE ≥ 30 (`rules_liquidity.py`) | 0.35-1.5 months of outflow by PULSE band, net of available line |
+| `credit_line_increase` | Ampliación de línea | existing line drawn ≥ 80 %, PULSE ≥ 30 | +15/30/50 % of the limit by PULSE band |
+| `factoring` | Anticipo de facturas | ERP receivables ≥ 20 k€ not > 90 d overdue, +90 d bucket ≤ 40 %, DSO > 45 favours it, PULSE ≥ 20 (`rules_receivables.py`) | 75-85 % of current receivables, cap 3 months of billing |
+| `confirming` | Confirming de proveedores | ERP purchases ≥ 15 k€/month, short supplier terms (< 20 d) or paying late, PULSE ≥ 30 (`rules_payables.py`) | 1.5 months of purchases |
+| `term_loan` | Préstamo a plazo | PULSE ≥ 60, maturities/cash < 1, balanced cash (`rules_debt.py`) | 3 months of collections × 70-100 %, 48 months |
+| `refinancing` | Reestructuración de vencimientos | debt outstanding and 6-month service ≥ 1× cash (≥ 3× severe), PULSE ≥ 15 (`rules_refinancing.py`) | loans outstanding (or 12 months of service), 60 months |
+| `treasury_deposit` | Depósito de excedentes | cash days ≥ 180, intramonth minimum ≥ 1 month, no maturity pressure, excess ≥ 50 k€ after a 90-day buffer (`rules_treasury.py`) | cash − 90 days of outflow; 3/6/12 months by cash days |
+
+Every rule returns an `Assessment`: a list of `Reason`s (`pro`, `contra` or
+`bloqueo`), each tied to the PULSE variable, the raw value and the threshold it
+was compared against, and a **fit** = 30 + Σ points, 0-100. A product with a
+blocker is never offered; eligible products with fit ≥ 40 are ranked and the top
+three are priced. Blocked and low-fit products are reported under `declined`
+with their reasons, so the company also sees *why not* factoring, for example.
+Thresholds live in `recommend/config.py`.
+
+### Price (`recommend/pricing.py`)
+
+```
+diferencial = margen del producto             (90-200 pb by product)
+            + prima de riesgo                 = PD12m × 25 % (stress -> default) × LGD, cap 900 pb
+            + prima por incertidumbre de datos = 75 pb × (1 − confidence)
+            + ajuste por tendencia            (+25 pb if the +12 m forecast drops ≥ 5 points, −15 pb if it rises ≥ 5)
+            [+ 25 pb si la línea actual está al ≥ 90 %]
+tipo        = tipo sin riesgo + diferencial        (floored at 0)
+```
+
+The spread is computed and clamped to the product's band (`min/max_spread_bps`
+in the catalogue) **before** the reference rate is added, so it never depends
+on the Euríbor: the static export is priced over `PULSE_EURIBOR_12M` (default
+2.10 %) and any API call can re-quote the same recommendation over another
+risk-free rate with `?euribor=0.03`. The deposit reads the same table as a yield
+(Euríbor − 60 pb, +15 pb when cash covers a year of outflows, capped at the
+reference). The payload lists every component with its basis points and a
+one-line justification, and says when the clamp applied. For `plazo` products it also compares with the median
+rate of the company's current loans and gives the monthly instalment.
+
+**PD12m** comes from `recommend/risk.py`: a standardised logistic regression on
+the four pillars, `confidence` and log(months observed), trained on the same
+stress label as `evaluate.py` (≥ 2 stress months in the next 6) with
+GroupKFold(5) on `group_id`. Any coefficient whose sign would mean "healthier is
+riskier" is zeroed and the model refitted (monotone guard), so improving a pillar
+can never raise the premium. Out-of-fold AUROC **0.871** (PULSE alone: 0.823),
+mean predicted 0.223 vs observed 0.224 (`data/pulse/risk_evaluation.json`).
+Standardised coefficients: liquidez −1.91, deuda −0.15, cobro −0.10, pago 0
+(no signal in this dataset), confidence −0.03, log months −0.36. Being linear in
+log-odds, `risk.contributions` splits each company's logit exactly by input.
+
+### Levers (`recommend/levers.py`) and narrative (`recommend/explain.py`)
+
+For each offer, the pillars below 60 are moved to 60 one at a time through the
+risk model, and the payload reports the new stress probability and the premium
+saved in basis points, together with the weakest variables of that pillar (so
+the company reads "si tu pilar de liquidez subiera de 23 a 60, la prima bajaría
+502 pb; las variables que más pesan: días de caja (20/100)…"). The same levers
+plus the products blocked only by the PULSE minimum ("se desbloquea con un
+PULSE de 30, hoy 11") form the company-level `improvement_plan`, which is the
+answer for companies that get no product today.
+
+### Results on the hackathon data (`data/pulse/recommendations/`)
+
+| top product | companies | rate q1 / median / q3 |
+|---|---|---|
+| credit_line | 365 | 4.86 / 5.65 / 7.77 % |
+| treasury_deposit | 152 | 1.50 / 1.65 / 1.65 % (yield) |
+| confirming | 89 | 3.59 / 4.06 / 5.54 % |
+| refinancing | 80 | 6.43 / 8.15 / 10.67 % |
+| factoring | 49 | 3.96 / 4.85 / 5.97 % |
+| term_loan | 31 | 4.54 / 4.82 / 5.12 % |
+| credit_line_increase | 4 | 3.79 / 4.57 / 6.15 % |
+| none | 515 | 379 of them get at least one "unlock", 458 a quantified lever |
+
+Most companies without an offer have PULSE < 30 (403) or no activity in the
+window; that is by design (no new credit for a company already in stress),
+which is why the improvement plan is part of the payload.
+
+### API (`api/routes_recommend.py`)
+
+| Method | Path | Returns |
+|---|---|---|
+| GET | `/api/pulse/recommendations/catalogue` | products (with their spread bands), pricing parameters, reference rate, risk-model evaluation |
+| GET | `/api/pulse/recommendations?product=&limit=&euribor=` | one row per company (`top_product`, `top_amount`, `top_annual_rate`, `top_spread_bps`, `top_fit`, `p_stress_6m`, `headline`) sorted by fit, plus `by_top_product` counts |
+| GET | `/api/pulse/recommendations/{company_id}?euribor=` | the full payload below |
+
+`euribor` (annual decimal, −1 % to 25 %) re-prices on the fly: the API loads
+`recommendations/snapshots.json` (the inputs of every recommendation, written
+by `build`) and `models/risk_model.json` once per process
+(`api/advisor_runtime.py`) and recomputes the recommendation over that rate.
+Spreads, amounts, reasons and levers are identical; only the reference line,
+the final rate, the headline and the price story change, and the payload's
+`reference_rate.source` says `request` instead of `default`. Without the
+parameter the static files are served.
+
+```jsonc
+{
+  "company_id": "COMP_1030", "month": "2026-08", "pulse": 39.2, "confidence": 0.68, "pillars": {...},
+  "reference_rate": {"label": "Euríbor 12 m", "value": 0.021, "source": "default"},
+  "summary": "PULSE 39 (2026-08), cobertura de datos 68%: 2 producto(s) encajan con tu situación.",
+  "risk": {"p_stress_6m": 0.31, "base_rate": 0.22, "contributions": [{"feature": "pillar_liquidez", "label": "Pilar liquidez", "value": 23.1, "logit": 1.9}, ...]},
+  "recommendations": [{
+    "rank": 1, "product": "credit_line", "label": "Línea de crédito", "family": "circulante", "what": "...", "fit": 75,
+    "amount": 140000, "tenor_months": 12, "monthly_instalment": null, "rate_kind": "cost", "annual_rate": 0.097, "spread_bps": 760,
+    "headline": "Línea de crédito de 140.000 € a 12 meses, a un tipo del 9.70% anual.",
+    "why": ["Tu caja a cierre de mes cubre solo 3 días de pagos operativos (umbral 30).", ...],
+    "reasons": [{"code": "caja_corta", "text": "...", "kind": "pro", "points": 25, "variable": "cash_days", "value": 3.1, "unit": "días"}, ...],
+    "sizing": {"formula": "0.60 meses de pagos operativos (233.000 €/mes, PULSE 39) menos ...", "inputs": {...}},
+    "pricing": {"components": [{"key": "referencia", "label": "Euríbor 12 m", "bps": 210, "detail": "..."}, ...],
+                "clamped": false, "reference_rate": 0.021, "spread_band_bps": [40, 990], "annual_pd": 0.52, "expected_loss_bps": 586, "story": ["..."]},
+    "levers": [{"pillar": "liquidez", "current": 23.1, "target": 60, "p_stress_now": 0.31, "p_stress_then": 0.04, "premium_saving_bps": 502, "variables": [...]}],
+    "lever_story": ["Si tu pilar de liquidez subiera de 23 a 60, ..."]
+  }],
+  "declined": [{"product": "factoring", "label": "...", "status": "no_elegible", "reasons": ["No vemos facturas de clientes suficientes ..."]}, ...],
+  "improvement_plan": {"unlocks": ["Préstamo a plazo: se desbloquea con un PULSE de 60 (hoy 39)."], "levers": [...], "story": [...]},
+  "inputs": {"cash_end": ..., "monthly_outflow": ..., "holdings": {...}, "invoices": {...}, "outlook": {...}, "variables": {...}},
+  "disclaimer": "Propuesta orientativa ..."
+}
+```
+
+The files are static, like the PULSE export: rerun `recommend.cli build` after
+`pulse.cli fit` / `forecast.cli predict`.

@@ -1,12 +1,7 @@
-"""PULSE arithmetic: component percentiles -> variable scores (with bank-proxy fallback) -> weighted 0-100 score + confidence."""
+"""PULSE arithmetic: component percentiles -> variable scores (with bank-proxy fallback) -> weighted 0-100 PULSE + confidence."""
 
 from __future__ import annotations
 
-import json
-from dataclasses import dataclass, field
-from pathlib import Path
-
-import numpy as np
 import polars as pl
 
 from ml_service.pulse.variables import (
@@ -16,8 +11,6 @@ from ml_service.pulse.variables import (
     Variable,
     coverage_column,
 )
-
-CALIBRATION_POINTS = 1001
 
 
 def _effective(v: Variable, columns: set[str]) -> tuple[pl.Expr, pl.Expr, pl.Expr]:
@@ -74,7 +67,7 @@ def _weight(v: Variable) -> pl.Expr:
 
 
 def weighted_score(scored: pl.DataFrame) -> pl.DataFrame:
-    """Add ``pulse_raw`` (effective weights renormalised), ``confidence`` (points backed by data / 100) and pillar scores.
+    """Add ``pulse`` (weighted mean of the known variables, weights renormalised), ``confidence`` (points backed by data / 100) and pillar scores.
 
     A proxy-backed variable carries only ``proxy_confidence`` x coverage of its
     weight, so it moves the score less and lowers ``confidence`` accordingly.
@@ -82,7 +75,7 @@ def weighted_score(scored: pl.DataFrame) -> pl.DataFrame:
     num = sum(pl.col(f"var_{v.key}").fill_null(0.0) * _weight(v) for v in VARIABLES)
     den = sum(_weight(v) for v in VARIABLES)
     out = scored.with_columns(
-        pl.when(den > 0).then(num / den).otherwise(None).alias("pulse_raw"),
+        pl.when(den > 0).then(num / den).otherwise(None).alias("pulse"),
         (den / 100.0).alias("confidence"),
         (
             sum(
@@ -106,7 +99,7 @@ def weighted_score(scored: pl.DataFrame) -> pl.DataFrame:
 
 
 def contributions(scored: pl.DataFrame) -> pl.DataFrame:
-    """Add ``contrib_<key>``: points of the raw score each variable is responsible for (sum = pulse_raw)."""
+    """Add ``contrib_<key>``: points of PULSE each variable is responsible for (sum = pulse)."""
     den = sum(_weight(v) for v in VARIABLES)
     return scored.with_columns(
         [
@@ -116,40 +109,3 @@ def contributions(scored: pl.DataFrame) -> pl.DataFrame:
             for v in VARIABLES
         ]
     )
-
-
-@dataclass
-class Calibration:
-    """Maps ``pulse_raw`` to its percentile in the training population, so PULSE spans 0-100.
-
-    A PULSE of 80 reads: "healthier than 80 % of the companies the model was fitted on".
-    """
-
-    grid: list[float] = field(default_factory=list)
-
-    def fit(self, raw: np.ndarray) -> Calibration:
-        self.grid = np.quantile(
-            raw[~np.isnan(raw)], np.linspace(0, 1, CALIBRATION_POINTS)
-        ).tolist()
-        return self
-
-    def apply(self, raw: np.ndarray) -> np.ndarray:
-        grid = np.asarray(self.grid)
-        lo = np.searchsorted(grid, raw, side="left") / len(grid)
-        hi = np.searchsorted(grid, raw, side="right") / len(grid)
-        return np.round((lo + hi) / 2 * 100, 2)
-
-    def save(self, path: Path) -> None:
-        path.write_text(json.dumps(self.grid))
-
-    @classmethod
-    def load(cls, path: Path) -> Calibration:
-        return cls(grid=json.loads(path.read_text()))
-
-
-def apply_calibration(scored: pl.DataFrame, calibration: Calibration) -> pl.DataFrame:
-    raw = scored["pulse_raw"].to_numpy().astype(float)
-    pulse = np.full(len(raw), np.nan)
-    mask = ~np.isnan(raw)
-    pulse[mask] = calibration.apply(raw[mask])
-    return scored.with_columns(pl.Series("pulse", pulse).fill_nan(None))

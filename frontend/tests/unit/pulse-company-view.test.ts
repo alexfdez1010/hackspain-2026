@@ -112,6 +112,6 @@ describe('forecast decomposition', () => {
 
   it('sums exactly the predicted change of the raw score', () => {
     const point = makeForecastPoint();
-    expect(sumContributions(point)).toBeCloseTo(point.deltaRaw ?? 0, 10);
+    expect(sumContributions(point)).toBeCloseTo(point.delta ?? 0, 10);
   });
 });

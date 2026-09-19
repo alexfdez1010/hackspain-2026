@@ -1,18 +1,25 @@
-"""Out-of-fold forecast metrics against persistence and a one-parameter mean-reversion baseline."""
+"""Out-of-fold forecast metrics against persistence and a one-parameter mean-reversion baseline.
+
+The single model is fitted once per GroupKFold fold on the stacked (row, horizon)
+matrix; the metrics are then reported per horizon on the out-of-fold predictions.
+"""
 
 from __future__ import annotations
 
 import numpy as np
 import polars as pl
-from sklearn.model_selection import GroupKFold
 
-from ml_service.pulse.forecast.config import BIG_MOVE, HORIZONS
-from ml_service.pulse.forecast.features import TARGET_PREFIX, feature_columns, to_matrix
-from ml_service.pulse.forecast.model import HorizonModel
+from ml_service.pulse.forecast.config import BIG_MOVE, HORIZON_FEATURE
+from ml_service.pulse.forecast.features import feature_columns, stack_horizons
+from ml_service.pulse.forecast.model import (
+    ForecastModel,
+    band_quantiles,
+    group_folds,
+    train_booster,
+)
 
 TEMPORAL_CUT = np.datetime64("2025-08-01")
 TEMPORAL_TEST_FROM = np.datetime64("2025-09-01")
-N_FOLDS = 5
 
 
 def _reversion_baseline(cur: np.ndarray, y: np.ndarray, splits) -> np.ndarray:
@@ -65,48 +72,84 @@ def _metrics(
     }
 
 
-def evaluate_horizon(
-    frame: pl.DataFrame, h: int, features: list[str], params: dict | None = None
-) -> dict:
-    """Group-wise OOF metrics for one horizon plus a temporal backtest (fit <= 2025-08, test >= 2025-09)."""
-    rows = frame.filter(pl.col(f"{TARGET_PREFIX}{h}").is_not_null())
-    X, y = (
-        to_matrix(rows, features),
-        rows[f"{TARGET_PREFIX}{h}"].to_numpy().astype(float),
-    )
-    cur, groups, months = (
-        rows["pulse_raw"].to_numpy().astype(float),
-        rows["group_id"].to_numpy(),
-        rows["month"].to_numpy(),
-    )
-    splits = list(GroupKFold(N_FOLDS).split(X, y, groups))
-    pred, lo, hi = np.zeros(len(y)), np.zeros(len(y)), np.zeros(len(y))
-    importance: dict[str, float] = {}
+def _oof_with_band(
+    X: np.ndarray, y: np.ndarray, hz: np.ndarray, splits: list, params: dict | None
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[int, float]]:
+    """OOF predictions; each fold's band comes from the residuals of the *other* folds."""
+    pred = np.zeros(len(y))
+    importance: dict[int, float] = {}
     for tr, te in splits:
-        model = HorizonModel.fit(X[tr], y[tr], h, features, params)
-        pred[te], lo[te], hi[te] = model.predict(X[te])
-        for f, g in model.feature_importance().items():
-            importance[f] = importance.get(f, 0.0) + g / N_FOLDS
-    result = _metrics(y, pred, lo, hi, _reversion_baseline(cur, y, splits))
-    train = months <= TEMPORAL_CUT - np.timedelta64(31 * h, "D")
+        booster = train_booster(X[tr], y[tr], params)
+        pred[te] = booster.predict(X[te])
+        gain = booster.feature_importance("gain")
+        total = gain.sum() or 1.0
+        for j, g in enumerate(gain):
+            importance[j] = importance.get(j, 0.0) + g / total / len(splits)
+    resid = y - pred
+    lo, hi = np.zeros(len(y)), np.zeros(len(y))
+    for tr, te in splits:
+        band = band_quantiles(hz[tr], resid[tr])
+        lo[te] = pred[te] + np.array([band.get(int(h), (0.0, 0.0))[0] for h in hz[te]])
+        hi[te] = pred[te] + np.array([band.get(int(h), (0.0, 0.0))[1] for h in hz[te]])
+    return pred, lo, hi, importance
+
+
+def _temporal_backtest(
+    X: np.ndarray,
+    y: np.ndarray,
+    hz: np.ndarray,
+    months: np.ndarray,
+    features: list[str],
+    params: dict | None,
+) -> dict[str, dict] | None:
+    """Fit on months up to 2025-08 (target observable before the cut) and test from 2025-09."""
+    train = months <= TEMPORAL_CUT - hz.astype("timedelta64[D]") * 31
     test = months >= TEMPORAL_TEST_FROM
-    if train.sum() > 500 and test.sum() > 100:
-        model = HorizonModel.fit(X[train], y[train], h, features, params)
-        p_t, _, _ = model.predict(X[test])
-        result["temporal_backtest"] = {
-            "rows": int(test.sum()),
-            "mae_persist": round(float(np.abs(y[test]).mean()), 3),
-            "mae_ml": round(float(np.abs(y[test] - p_t).mean()), 3),
+    if train.sum() <= 500 or test.sum() <= 100:
+        return None
+    model = ForecastModel.fit(X[train], y[train], features, params)
+    p_t, _, _ = model.predict(X[test])
+    out = {}
+    for h in np.unique(hz[test]):
+        m = hz[test] == h
+        out[str(int(h))] = {
+            "rows": int(m.sum()),
+            "mae_persist": round(float(np.abs(y[test][m]).mean()), 3),
+            "mae_ml": round(float(np.abs(y[test][m] - p_t[m]).mean()), 3),
         }
-    result["top_features"] = dict(sorted(importance.items(), key=lambda t: -t[1])[:10])
-    return result
+    return out
 
 
 def evaluate(frame: pl.DataFrame, params: dict | None = None) -> dict:
+    """Group-wise OOF metrics per horizon and overall, plus a temporal backtest per horizon."""
     features = feature_columns(frame)
-    return {
+    X, y, keys = stack_horizons(frame, features)
+    hz = keys[HORIZON_FEATURE].to_numpy().astype(int)
+    cur = keys["pulse"].to_numpy().astype(float)
+    splits = group_folds(keys["group_id"].to_numpy())
+    pred, lo, hi, importance = _oof_with_band(X, y, hz, splits, params)
+    rev = _reversion_baseline(cur, y, splits)
+    horizons = {}
+    for h in np.unique(hz):
+        m = hz == h
+        fold_m = [(tr[m[tr]], te[m[te]]) for tr, te in splits]
+        rev_h = _reversion_baseline(cur[m], y[m], _reindex(fold_m, m))
+        horizons[str(int(h))] = _metrics(y[m], pred[m], lo[m], hi[m], rev_h)
+    top = sorted(importance.items(), key=lambda t: -t[1])[:10]
+    result = {
         "n_features": len(features),
-        "horizons": {
-            str(h): evaluate_horizon(frame, h, features, params) for h in HORIZONS
-        },
+        "n_rows": len(y),
+        "overall": _metrics(y, pred, lo, hi, rev),
+        "horizons": horizons,
+        "top_features": {features[j]: round(float(g), 4) for j, g in top},
     }
+    temporal = _temporal_backtest(X, y, hz, keys["month"].to_numpy(), features, params)
+    if temporal:
+        result["temporal_backtest"] = temporal
+    return result
+
+
+def _reindex(fold_m: list, mask: np.ndarray) -> list:
+    """Translate global row indices restricted to ``mask`` into positions within ``mask``."""
+    pos = np.cumsum(mask) - 1
+    return [(pos[tr], pos[te]) for tr, te in fold_m]

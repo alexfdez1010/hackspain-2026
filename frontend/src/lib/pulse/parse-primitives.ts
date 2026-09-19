@@ -1,4 +1,4 @@
-import { asRecord, toNumberOrNull } from '@/lib/xray/parse-primitives';
+import { asRecord, toNumberOrNull } from '@/lib/parse-primitives';
 import type {
   PulseContributions,
   PulsePillars,
@@ -26,7 +26,7 @@ export function toPulsePillars(value: unknown): PulsePillars {
 /**
  * Reads the contribution points of a month or of a forecast horizon.
  *
- * Non-numeric entries are dropped so the sum stays comparable with `delta_raw`.
+ * Non-numeric entries are dropped so the sum stays comparable with `delta`.
  *
  * @param value - Candidate `contributions` object.
  * @returns A map from contribution key to points.

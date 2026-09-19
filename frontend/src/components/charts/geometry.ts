@@ -97,3 +97,27 @@ export function niceDomain(
     max: Math.min(rawMax + margin, options.max ?? Number.POSITIVE_INFINITY),
   };
 }
+
+/**
+ * Builds a closed band between an upper and a lower edge.
+ *
+ * Both edges must already be in viewBox coordinates and share the same x
+ * positions, which is what makes the shape a prediction interval and not an
+ * arbitrary polygon.
+ *
+ * @param upper - Upper edge, left to right.
+ * @param lower - Lower edge, left to right.
+ * @returns An SVG path definition, or an empty string when the band is
+ * narrower than two points.
+ */
+export function bandPath(
+  upper: readonly { x: number; y: number }[],
+  lower: readonly { x: number; y: number }[],
+): string {
+  if (upper.length < 2 || lower.length < 2) return '';
+  const back = [...lower]
+    .reverse()
+    .map((point) => `L${point.x} ${point.y}`)
+    .join(' ');
+  return `${linePath(upper)} ${back} Z`;
+}

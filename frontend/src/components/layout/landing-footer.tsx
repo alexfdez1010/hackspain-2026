@@ -1,19 +1,12 @@
 import Link from 'next/link';
 
 import { PulseFooterHeatmap } from '@/components/layout/pulse-footer-heatmap';
-import { DEMO_COMPANY_ID } from '@/lib/xray/demo';
+import { PRODUCT_SECTIONS } from '@/lib/landing/product-sections';
 
-const PLATFORM = [
-  { href: '/radar', label: 'Radar' },
-  { href: '/pulse', label: 'PULSE' },
-  { href: '/capital', label: 'Capital' },
-  { href: '/monitor', label: 'Monitor' },
-] as const;
-
-const DOCS = [
-  { href: '/metodo', label: 'Método' },
-  { href: `/empresa/${DEMO_COMPANY_ID}`, label: 'Radiografía' },
-] as const;
+const PLATFORM = PRODUCT_SECTIONS.filter(
+  (section) => section.label !== 'Método',
+);
+const DOCS = PRODUCT_SECTIONS.filter((section) => section.label === 'Método');
 
 /**
  * One labelled column of footer links, left-aligned.

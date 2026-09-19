@@ -1,7 +1,7 @@
 import { UNKNOWN_TEXT } from '@/lib/pulse/format';
 import type { PulsePillarMeta, PulsePillars } from '@/lib/pulse/types';
-import { formatNumber } from '@/lib/xray/format';
-import { scoreColor } from '@/lib/xray/score';
+import { formatNumber } from '@/lib/format';
+import { scoreColor } from '@/lib/score';
 
 interface PulsePillarListProps {
   /** Pillar metadata with the points each one owns. */

@@ -6,7 +6,7 @@
 
 ``fit``/``evaluate`` use the training panel already built by ``ml_service.pulse.cli build|fit``.
 ``predict`` without ``--raw-dir`` forecasts the training portfolio; with it, an unseen folder
-is cleaned, scored with the frozen PULSE engine and forecast with the frozen horizon models.
+is cleaned, scored with the frozen PULSE engine and forecast with the frozen model.
 """
 
 from __future__ import annotations
@@ -39,12 +39,14 @@ def _frame(raw_dir: Path, work_dir: Path, cache_name: str) -> pl.DataFrame:
 def fit(work_dir: Path) -> None:
     frame = _frame(RAW_DIR, work_dir, "")
     frame.write_parquet(work_dir / "forecast_frame.parquet")
-    engine = ForecastEngine.fit(
-        frame, PulseEngine.load(work_dir / "models").calibration
-    )
+    engine = ForecastEngine.fit(frame)
     engine.save(work_dir / FORECAST_MODELS)
+    band = ", ".join(
+        f"+{h}: [{lo:+.1f}, {hi:+.1f}]" for h, (lo, hi) in engine.model.band.items()
+    )
     print(
-        f"fitted {len(engine.models)} horizon models on {frame.shape[0]:,} company-months"
+        f"fitted one model for horizons +1..+{max(engine.model.band)} on "
+        f"{frame.shape[0]:,} company-months; p10-p90 band offsets {band}"
     )
 
 
@@ -52,9 +54,15 @@ def run_evaluate(work_dir: Path) -> None:
     frame = pl.read_parquet(work_dir / "forecast_frame.parquet")
     result = evaluate(frame)
     (work_dir / "forecast_evaluation.json").write_text(json.dumps(result, indent=1))
+    o = result["overall"]
+    print(
+        f"all  n={o['n']:6d} MAE persist {o['mae_persist']:5.2f} reversion {o['mae_reversion']:5.2f} "
+        f"ML {o['mae_ml']:5.2f} ({o['gain_vs_persist_pct']:+.1f}% / {o['gain_vs_reversion_pct']:+.1f}%) "
+        f"band {o['band_p10_p90_coverage']}"
+    )
     for h, r in result["horizons"].items():
         print(
-            f"+{h}m n={r['n']:5d} MAE persist {r['mae_persist']:5.2f} reversion {r['mae_reversion']:5.2f} "
+            f"+{h:>2}m n={r['n']:6d} MAE persist {r['mae_persist']:5.2f} reversion {r['mae_reversion']:5.2f} "
             f"ML {r['mae_ml']:5.2f} ({r['gain_vs_persist_pct']:+.1f}% / {r['gain_vs_reversion_pct']:+.1f}%) "
             f"dir {r['direction_accuracy_big_moves']} decl {r['recall_declines']} impr {r['recall_improvements']} "
             f"band {r['band_p10_p90_coverage']}"
@@ -66,9 +74,7 @@ def predict(raw_dir: Path | None, work_dir: Path, out: Path, all_months: bool) -
         frame = pl.read_parquet(work_dir / "forecast_frame.parquet")
     else:
         frame = _frame(raw_dir, work_dir, raw_dir.name)
-    engine = ForecastEngine.load(
-        work_dir / FORECAST_MODELS, PulseEngine.load(work_dir / "models").calibration
-    )
+    engine = ForecastEngine.load(work_dir / FORECAST_MODELS)
     forecast = engine.predict(frame, latest_only=not all_months)
     forecast.write_parquet(out.with_suffix(".parquet"))
     forecast.with_columns(

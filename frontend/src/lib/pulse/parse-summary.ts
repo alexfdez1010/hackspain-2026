@@ -5,7 +5,11 @@ import {
   toNumberOrNull,
   toText,
   type RawRecord,
-} from '@/lib/xray/parse-primitives';
+} from '@/lib/parse-primitives';
+import {
+  EMPTY_EVALUATION,
+  parsePulseEvaluation,
+} from '@/lib/pulse/parse-evaluation';
 import { toPulsePillars } from '@/lib/pulse/parse-primitives';
 import type {
   PulseCompanyRow,
@@ -26,6 +30,7 @@ const EMPTY_META: PulseMeta = {
   pillars: [],
   variables: [],
   contributionKeys: [],
+  evaluation: EMPTY_EVALUATION,
 };
 
 /**
@@ -70,7 +75,7 @@ function parseVariable(value: unknown): PulseVariableMeta | null {
  * Reads a forecast band, which the export sets to `null` when the model could
  * not project the company.
  *
- * @param value - Candidate `forecast_6m` object.
+ * @param value - Candidate `forecast_12m` object.
  * @returns The band, or `null`.
  */
 export function parseBand(value: unknown): PulseForecastBand | null {
@@ -101,7 +106,7 @@ function parseRow(value: unknown): PulseCompanyRow | null {
     pulsePrev: toNumberOrNull(record.pulse_prev),
     confidence: toNumberOrNull(record.confidence),
     pillars: toPulsePillars(record.pillars),
-    forecast6m: parseBand(record.forecast_6m),
+    forecast12m: parseBand(record.forecast_12m),
   };
 }
 
@@ -129,6 +134,7 @@ function parseMeta(record: RawRecord): PulseMeta {
     contributionKeys: toArray(record.contribution_keys).map((item) =>
       toText(item),
     ),
+    evaluation: parsePulseEvaluation(record.evaluation),
   };
 }
 

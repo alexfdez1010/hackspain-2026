@@ -55,6 +55,8 @@
     --default: #41465f;
     --default-foreground: #ffffff;
     --field-background: #232845;
+    --field-foreground: #ffffff;
+    --field-placeholder: #afafbb;
     --segment: #41465f;
     --segment-foreground: #ffffff;
     --border: #373c56;

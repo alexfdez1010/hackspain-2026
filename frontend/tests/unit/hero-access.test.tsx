@@ -4,20 +4,22 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import { HeroAccess } from '@/components/layout/hero-access';
-import { DEMO_COMPANY_ID } from '@/lib/xray/demo';
+import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
+import { companyRoutes } from '@/lib/routes';
+
+const demo = companyRoutes(PULSE_DEMO_COMPANY_ID);
 
 describe('HeroAccess', () => {
-  it('links the four working surfaces in a 2×2 grid, not a folder tab', () => {
+  it('links the company-scoped product surfaces in a grid, not a folder tab', () => {
     const html = renderToStaticMarkup(<HeroAccess />);
     expect(html).toContain('aria-label="Dashboard"');
     expect(html).toContain('grid-cols-2');
     expect(html).toContain('hero-access-link');
-    expect(html).toContain('href="/radar"');
-    expect(html).toContain('href="/pulse"');
-    expect(html).toContain('href="/capital"');
-    expect(html).toContain('href="/monitor"');
-    expect(html).not.toContain('href="/metodo"');
-    expect(html).not.toContain(`href="/empresa/${DEMO_COMPANY_ID}"`);
+    expect(html).toContain(`href="${demo.pulse}"`);
+    expect(html).toContain(`href="${demo.advisor}"`);
+    expect(html).toContain(`href="${demo.method}"`);
+    expect(html).not.toContain('href="/radar"');
+    expect(html).not.toContain('href="/capital"');
     expect(html).not.toContain('rounded-t-md');
   });
 

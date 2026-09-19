@@ -3,12 +3,11 @@ import Link from 'next/link';
 import { HERO_SECTIONS } from '@/lib/landing/product-sections';
 
 /**
- * Direct access to the four working surfaces from the landing hero.
+ * Direct access to the company-scoped product from the landing hero.
  *
- * Radar, PULSE, Capital and Monitor in a 2×2 grid. Not a folder tab. Método
- * lives in the footer Docs list; Radiografía opens from Radar and the nav.
+ * PULSE, Recomendaciones and Método in a 2-column grid. Not a folder tab.
  *
- * @returns A labelled 2×2 grid of large underlined dashboard links.
+ * @returns A labelled grid of large underlined product links.
  */
 export function HeroAccess() {
   return (

@@ -29,7 +29,6 @@ OUTPUT_COLUMNS = [
     "month",
     "months_observed",
     "pulse",
-    "pulse_raw",
     "confidence",
     "confidence_from_proxies",
 ]
@@ -56,7 +55,7 @@ def fit(work_dir: Path) -> PulseEngine:
     engine.save(work_dir / "models")
     scored = engine.score(panel)
     scored.write_parquet(work_dir / "scored_panel.parquet")
-    print(scored.select("pulse", "pulse_raw", "confidence").describe())
+    print(scored.select("pulse", "confidence").describe())
     return engine
 
 

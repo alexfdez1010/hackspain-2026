@@ -31,15 +31,16 @@ unresolved placeholders. Keep them when completing or updating this document.
 ## 1. Product foundation
 
 - Product name: Embat Pulse
-- One-sentence promise: cada mes, saber qué empresas de la cartera están
-  empeorando, si el cambio es estructural y cuánto circulante se les puede
-  ofrecer.
-- Primary audience: equipos de riesgo y producto de Embat; bancos socios que
-  aportan balance a la línea de circulante; aseguradoras de crédito que ajustan
-  prima y límite con la misma señal.
-- Key user needs: ordenar 1.286 empresas por movimiento y no por nivel;
-  distinguir un bache pasajero de una caída estructural; explicar el score ante
-  un comité; traducir el score en un límite y un precio defendibles.
+- One-sentence promise: cada mes, una empresa sabe cómo está su salud
+  financiera, hacia dónde va en seis meses y qué producto financiero encaja
+  con su situación, con cada cifra explicada.
+- Primary audience: la dirección financiera de la empresa cliente de Embat
+  (una sola empresa por pantalla, nunca la cartera); el equipo de producto de
+  Embat que presenta y defiende el score.
+- Key user needs: leer el PULSE del mes y su historia mes a mes; distinguir
+  observado de previsto y saber cuánto del score descansa en datos; entender
+  por qué se recomienda un producto, por cuánto y a qué precio; ver qué haría
+  falta para mejorar; comprobar cómo se construye el score.
 - Brand personality: financiero y sobrio. Muestra el número y su procedencia;
   no persuade, informa.
 - Words and patterns to avoid: «revolucionario», «IA», «potenciado por», iconos
@@ -56,7 +57,7 @@ unresolved placeholders. Keep them when completing or updating this document.
 - Reference products or visual inspirations: terminales de riesgo bancario y
   paneles de tesorería; tablas densas con tipografía tabular.
 - What makes this product recognisable: la escala de color del score aplicada de
-  forma idéntica en tabla, gráficos, mapa de calor y línea de crédito, y los
+  forma idéntica en cabecera, tablas y gráficos, y los
   gráficos SVG propios, sin librería ni cromos.
 - Density: compact en tablas y listas; balanced en cabeceras y textos.
 - Shape language: mixed —radios suaves de HeroUI en controles, rectángulos
@@ -109,13 +110,11 @@ llevan etiqueta de severidad además de color.
   destacadas) (`--font-sans`). Cuerpo, tablas y enlaces de navegación.
 - Identifiers (`COMP_0001`) and raw figures use DM Sans with `tabular-nums`.
   There is no dedicated mono face.
-- Wordmark: custom geometric SVG spelling `PULSE` in uppercase. Nav:
-  `PulseWordmark`, un fill `currentColor`, 24px. Hero: `PulseHeroMark` a
-  escala de columna, las mismas geometrías, `currentColor`. La U es el asta
-  izquierda y un cuenco corto (sin asta derecha) para leerse como U y no como
-  L; LSE se apartan lo justo para no solapar. Variante inversa: `tone="white"`
-  y `public/pulse-wordmark-white.svg` (`#ffffff`). El `h1` accesible es «Embat
-  Pulse»; el SVG del hero es presentacional.
+- Wordmark: en producto, `public/pulse-wordmark.png` como máscara CSS sobre
+  `foreground` (`PulseWordmark` en `ui/wordmark`, 14 px). En el hero de `/`,
+  `PulseHeroMark` SVG a escala de columna. El enlace de la nav se llama
+  «Embat Pulse, inicio»; el `h1` de la landing es «Embat Pulse» y el SVG es
+  presentacional.
 - Type scale: 12 / 14 / 16 / 18 / 24 / 30 / 36 px (`text-xs` … `text-4xl`).
   Toda cifra comparable usa `tabular-nums`.
 - Line-height rules: 1,5 en texto corrido; 1,25 en titulares y cifras.
@@ -139,13 +138,14 @@ llevan etiqueta de severidad además de color.
 ### Motion
 
 - Motion principles: la interfaz de producto no anima datos. Sólo transiciones
-  de estado de control (hover, foco, apertura de popover). La landing pagina
-  una banda por gesto con un tween `ease-in-out` cúbico; el snap nativo queda
-  como respaldo antes de hidratar. El lienzo (`background` / `foreground` /
-  `--separator`) cambia de esquema a la vez que la banda. Un pulso de 12 s
-  recorre la línea derecha del `SiteFrame` (`foreground` al 35 %); no usa
-  score ni `accent`. El subrayado de `HeroAccess` se oculta de izquierda a
-  derecha y se vuelve a dibujar (500 ms); no usa score ni `accent`.
+  de estado de control (hover, foco, apertura de popover). Nexo, solicitado
+  como mascota animada, es la excepción: respiración lenta, parpadeo y
+  expresiones según el estado del chat; nunca altera ni anima las cifras.
+  La landing pagina una banda por gesto con un tween `ease-in-out` cúbico; el
+  snap nativo queda como respaldo antes de hidratar. El lienzo cambia de
+  esquema a la vez que la banda. Un pulso de 12 s recorre la línea derecha del
+  `SiteFrame`. El subrayado de `HeroAccess` se oculta de izquierda a derecha y
+  se vuelve a dibujar (500 ms). Ninguno usa score ni `accent`.
 - Duration scale: 120 ms para hover y color; 200 ms para overlays; 500 ms para
   el recorte del subrayado del hero; 900 ms para el cambio de banda en
   marketing; 12 s para el pulso del gutter.
@@ -153,29 +153,57 @@ llevan etiqueta de severidad además de color.
   en producto; `ease-in-out` cúbico en el paging de la landing, el pulso y el
   subrayado del hero.
 - Reduced-motion behavior: se respeta `prefers-reduced-motion`; el paging de la
-  landing salta sin tween (ni de scroll ni de color), el pulso del gutter no
-  recorre y el subrayado del hero queda estático.
+  landing salta sin tween, el pulso del gutter no recorre, el subrayado del
+  hero queda estático y Nexo deja de moverse. Las expresiones de Nexo siguen
+  identificando el estado, acompañado siempre por texto accesible.
 
 ## 4. Component system
 
 Use HeroUI v3 components first. Document any wrapper or new primitive before
 adding it to the codebase.
 
-| Component/pattern | HeroUI primitive                       | Approved variants            | Usage guidance                                                                |
-| ----------------- | -------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------- |
-| Button            | `Button`                               | `secondary`, `tertiary`      | Sólo acciones de la propia vista (paginar, invertir orden).                   |
-| Link              | `Link` / `next/link`                   | por defecto                  | `next/link` para navegación interna; `Link` de HeroUI cuando lleva icono.     |
-| Card              | `Card`                                 | `secondary`                  | Únicamente la tarjeta de Embat Capital, que agrupa oferta y evolución.        |
-| Form field        | `SearchField`, `Select` + `ListBox`    | por defecto                  | Filtros del radar; cada control lleva `aria-label`, no etiqueta visible.      |
-| Feedback          | `Chip`                                 | `soft` con `color` semántico | Dirección, régimen, severidad y estado de la línea.                           |
-| Data              | `Table`                                | por defecto                  | Tabla de cartera, dentro de `Table.ScrollContainer`.                          |
-| Wordmark          | SVG propio (`PulseWordmark`)           | `currentColor`               | Marca en la nav; el enlace lleva `aria-label="Embat Pulse"`.                  |
-| Hero mark         | SVG propio (`PulseHeroMark`)           | tokens de score + accent     | Solo en `/`. El `h1` es «Embat Pulse»; el SVG es `aria-hidden`.               |
-| Site frame        | `SiteFrame`                            | `split`, `pulse`             | Gutters y eje; `pulse` solo en `/`, sobre la línea derecha existente.         |
-| Landing scroll    | `LandingScroll`                        | paging 900 ms                | Un gesto, una banda; tween propio, no snap nativo.                            |
-| Landing footer    | `LandingFooter`                        | cuadrante derecho            | Listas Platform/Docs a media altura; copyright y legal abajo.                 |
-| Footer heatmap    | Paper `Heatmap` (`PulseFooterHeatmap`) | rampa Embat                  | Columna izquierda, solo `lg+`; `aria-hidden`; `speed={0}` con reduced motion. |
-| Hero access       | `HeroAccess`                           | cuadrícula 2×2               | Radar, PULSE, Capital, Monitor (`HERO_SECTIONS`); subrayado animado.          |
+| Component/pattern | HeroUI primitive                       | Approved variants               | Usage guidance                                                                                    |
+| ----------------- | -------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Button            | `Button`                               | `secondary`, `tertiary`         | Sólo acciones de la propia vista (cambiar mes u horizonte).                                       |
+| Link              | `Link` / `next/link`                   | por defecto                     | `next/link` para navegación interna; `Link` de HeroUI cuando lleva icono.                         |
+| Card              | `Card`                                 | `secondary`                     | Una tarjeta por producto recomendado, que agrupa oferta, precio y motivos.                        |
+| Form field        | `ComboBox`, `Select` + `ListBox`       | por defecto                     | Selector de empresa en la nav; mes y horizonte en la empresa. Cada control lleva `aria-label`.    |
+| Feedback          | `Chip`                                 | `soft` con `color` semántico    | Familia de producto, tipo de razón y estado de un producto descartado.                            |
+| Data              | `Table` vía `DataTable`                | por defecto                     | Toda tabla usa `DataTable`: cabeceras ordenables en ambos sentidos, «sin datos» siempre al final. |
+| Asistente Nexo    | `Modal`, `Button`, `TextArea`          | `primary`, `secondary`, `ghost` | Diálogo lateral de 440 px; hoja inferior en móvil. Solo en rutas de producto.                     |
+| Wordmark          | PNG máscara (`ui/wordmark`)            | `foreground`                    | Nav de producto; el enlace lleva `aria-label="Embat Pulse, inicio"` y apunta a `/`.               |
+| Hero mark         | SVG propio (`PulseHeroMark`)           | tokens de score + accent        | Solo en `/`. El `h1` es «Embat Pulse»; el SVG es `aria-hidden`.                                   |
+| Site frame        | `SiteFrame`                            | `split`, `pulse`                | Gutters y eje; `pulse` solo en `/`, sobre la línea derecha existente.                             |
+| Landing scroll    | `LandingScroll`                        | paging 900 ms                   | Un gesto, una banda; tween propio, no snap nativo.                                                |
+| Landing footer    | `LandingFooter`                        | cuadrante derecho               | Platform (PULSE, Recomendaciones) y Docs (Método); copyright y legal abajo.                       |
+| Footer heatmap    | Paper `Heatmap` (`PulseFooterHeatmap`) | rampa Embat                     | Columna izquierda, solo `lg+`; `aria-hidden`; `speed={0}` con reduced motion.                     |
+| Hero access       | `HeroAccess`                           | cuadrícula 2 columnas           | PULSE, Recomendaciones, Método (`HERO_SECTIONS`); subrayado animado.                              |
+
+### Nexo
+
+- Personaje original de cerámica azul hielo, traje azul noche, camisa blanca y
+  corbata azul. La ilustración es una excepción al color exclusivamente semántico:
+  aporta identidad sin representar un score ni un estado financiero.
+- Ilustración transparente y expresiones SVG independientes; estados de reposo,
+  escucha, pensamiento, respuesta, saludo y error. Los componentes son
+  decorativos; el chat comunica sus estados mediante texto.
+- Acceso flotante en la esquina inferior derecha: sólo la mascota y un
+  bocadillo «¿Necesitas ayuda? Escríbeme», sin fondo ni chip. En móvil la
+  mascota se reduce a 64 px y el bocadillo desaparece para no tapar cifras. Panel con
+  cabecera (mascota, nombre, estado en texto y página consultada), conversación
+  y editor fijo. Radios de 24 px para el overlay, 12 px para sugerencias y 16 px
+  para el editor. Sombra sólo en el overlay y en el bocadillo.
+- Mensajes del usuario en burbuja `accent` alineada a la derecha; respuestas de
+  Nexo a ancho completo sin avatar. La bienvenida usa un lavado radial de
+  `accent` tras la mascota: es la única superficie decorativa del producto.
+- Las sugerencias se agrupan en dos columnas; el cuerpo puede desplazarse en
+  alturas pequeñas sin ocultar el cierre ni el editor. Áreas seguras en móvil.
+- Escape cierra, el foco queda dentro del diálogo y vuelve al acceso al cerrar.
+  Enter envía, Shift+Enter añade línea y Ctrl/Cmd+J abre o cierra.
+- Se indica «DEMO» cuando las respuestas son simuladas. Nunca se sustituye un
+  error del proveedor por una respuesta simulada. El historial se mantiene sólo
+  en memoria durante la navegación, sin localStorage ni persistencia en servidor.
+- Nexo no aparece en `/`: el layout de producto (`(app)`) es quien lo monta.
 
 Component rules:
 
@@ -189,8 +217,13 @@ Component rules:
 - Error states: una empresa desconocida devuelve 404 de Next.js; un backend
   caído degrada a lista vacía con su texto, nunca a excepción.
 - Destructive actions: no existen en este producto.
-- Responsive behavior: rejillas de una columna por debajo de `sm`; la tabla y el
-  mapa de calor scrollan en horizontal dentro de su contenedor.
+- Responsive behavior: rejillas de una columna por debajo de `sm`; las tablas
+  scrollan en horizontal dentro de su contenedor. El mapa de calor y el treemap
+  del método se dibujan por columnas desde `md` y por filas (un pilar por fila,
+  misma proporción de áreas) por debajo, sin scroll lateral. La navegación
+  ocupa dos filas en móvil: logotipo y buscador arriba, secciones abajo con
+  objetivos táctiles de 40 px; el buscador mantiene 16 px de fuente para que
+  iOS no haga zoom al enfocarlo.
 
 ## 5. Accessibility and content
 
@@ -206,53 +239,80 @@ Component rules:
   longitudes fijas.
 - Voice and tone: afirmativo y concreto. Se nombra la magnitud, la unidad y el
   horizonte.
-- Content examples: «77,4 % eventos avisados · 472 de 610 episodios»;
-  «Caída estructural: el nivel medio del score bajó 58 puntos».
+- Content examples: «82 de 100 puntos con datos»; «Línea de crédito de
+  25.000 € a 12 meses, a un tipo del 9,17 % anual»; «previsión +6 m 31,1 ·
+  banda p10-p90 15,6-48,4».
 
 ## 6. Layout and responsive behavior
 
 - Container widths: `max-w-7xl` en páginas de producto; `max-w-3xl` en texto
   corrido. La landing usa el `SiteFrame` a viewport completo, no `max-w-7xl`.
 - Breakpoints: los de Tailwind (`sm` 640, `lg` 1024).
-- Navigation behavior by breakpoint: en producto, barra superior fija que
-  envuelve en varias líneas en móvil. En `/` no hay `SiteNav`; el acceso es
-  `HeroAccess` (cuadrícula 2×2). En `lg` el hero es 50/50 y el pie ocupa el
-  cuadrante derecho (listas + legal); la columna izquierda del pie queda vacía.
-  Por debajo de `lg`, wordmark, accesos y pie se apilan dentro de los gutters.
-- Mobile-first exceptions: la tabla de cartera y el mapa de calor mantienen su
-  ancho mínimo y scrollan.
-- Table/data-density strategy: 40 filas por lote con un botón para ampliar; el
-  filtrado y el orden se resuelven en cliente sobre la proyección ligera que
-  envía el servidor.
+- Navigation behavior by breakpoint: en `/` no hay `SiteNav`; el acceso es
+  `HeroAccess`. En producto, barra superior fija con el wordmark (a `/`), el
+  buscador de empresa y tres destinos —PULSE, Recomendaciones, Método—; envuelve
+  en varias líneas en móvil, sin menú colapsable. En `lg` el hero es 50/50 y el
+  pie ocupa el cuadrante derecho; por debajo de `lg`, wordmark, accesos y pie
+  se apilan dentro de los gutters.
+- Mobile-first exceptions: las tablas mes a mes y de variables mantienen su
+  ancho mínimo y scrollan; los SVG escalan con `viewBox`.
+- Table/data-density strategy: una empresa tiene como máximo 24 meses, así que
+  las tablas se muestran completas; el mes y el horizonte se eligen en cliente
+  sobre datos ya calculados en el servidor.
 
 ## 7. Decision log
 
 Record meaningful deviations from HeroUI defaults or previously approved
 patterns.
 
-| Date       | Decision                                                                              | Reason                                                                                         | Owner        |
-| ---------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------ |
-| 2026-09-18 | Gráficos SVG propios en lugar de una librería de charting                             | Formas muy específicas (changepoint, waterfall, curva de evento) y bundle mínimo               | Equipo Pulse |
-| 2026-09-18 | Tema oscuro por `prefers-color-scheme` redefiniendo tokens primitivos                 | HeroUI expone su paleta oscura tras `.dark`; sin conmutador no hay estado que guardar          | Equipo Pulse |
-| 2026-09-18 | Escala de color del score como único helper (`scoreBand`)                             | Un mismo score debe tener el mismo color en tabla, gráfico, mapa de calor y oferta             | Equipo Pulse |
-| 2026-09-18 | Filtros de Monitor y Capital como enlaces con query string                            | Vistas compartibles durante la demo y funcionales sin JavaScript                               | Equipo Pulse |
-| 2026-09-19 | Observado y previsión en un solo gráfico, con banda p10-p90 y marca del último cierre | Comparar nivel y horizonte en la misma escala; la incertidumbre no puede quedar en otra figura | Equipo Pulse |
-| 2026-09-19 | Variable sin datos como «sin datos» y nunca como cero, junto a la confianza en %      | Un cero es una medición; la ausencia de evidencia cambia la decisión y debe verse              | Equipo Pulse |
-| 2026-09-19 | Pairing Aktiv Grotesk (display) + DM Sans (cuerpo); Geist fuera                       | Display neo-grotesk comercial junto a un cuerpo tabular; el wordmark `pulse` se alinea a Aktiv | Equipo Pulse |
-| 2026-09-19 | `/` landing con `SiteFrame`; radar en `/radar`                                        | Marketing y producto no comparten nav; las líneas del frame son columnas, no cromo             | Equipo Pulse |
-| 2026-09-19 | Tokens de producto tomados de embat.io (azul `#3878f6`, tinta `#050b2c`)              | Pulse debe integrarse con Embat; las bandas de score no se retintan                            | Equipo Pulse |
-| 2026-09-19 | Wordmark `PULSE` mayúsculas; U a media asta, LSE sin hueco                            | Firma geométrica legible a 24px; un fill `currentColor` en nav y hero                          | Equipo Pulse |
-| 2026-09-19 | Cuenco de la U corto, sin asta derecha                                                | El pie al ancho del counter se leía como L; un cuenco moderado marca la U                      | Equipo Pulse |
-| 2026-09-19 | Wordmark inverso blanco (`#ffffff`) junto al fill `currentColor`                      | Sobre campo oscuro hace falta un lockup fijo, no solo heredar el color de texto                | Equipo Pulse |
-| 2026-09-19 | Pie de landing: copy mínimo en la columna derecha; pulso sobre la línea del gutter    | Demo de empresa sin páginas legales inventadas; la señal recorre cromo ya estructural          | Equipo Pulse |
-| 2026-09-19 | Pie: Pulse + columnas Platform/Docs; sin Embat ni HackSpain                           | Escala de footer real; solo rutas que existen; la marca de marketing es Pulse                  | Equipo Pulse |
-| 2026-09-19 | Pie en el cuadrante derecho: listas + legal; izquierda reservada                      | No duplicar la marca; aire a eje y gutter; condiciones y privacidad como páginas mínimas       | Equipo Pulse |
-| 2026-09-19 | Heatmap Paper (`noise` 0.73) en la columna izquierda del pie                          | El shader de Tender iris es la marca del pie; silueta local (no CDN) sobre el canvas blanco    | Equipo Pulse |
-| 2026-09-19 | Rampa Heatmap en tinta / surface / accent / blanco, sin cian ni amarillo              | El pie es marca, no score; el amarillo de Paper se leía como banda frágil                      | Equipo Pulse |
-| 2026-09-19 | Landing oscuro / claro / oscuro por banda; producto sigue `prefers-color-scheme`      | El medio pide papel; hero y pie siguen tinta Embat; el sistema no debe pelear con el paging    | Equipo Pulse |
-| 2026-09-19 | Hero: lista Dashboard en lugar de pestaña; secciones compartidas con la nav           | Acceso directo a cada superficie; un solo catálogo de rutas                                    | Equipo Pulse |
-| 2026-09-19 | Hero: 2×2 Radar/PULSE/Capital/Monitor; subrayado que se contrae y vuelve              | Cuatro superficies de trabajo; Método en Docs; Radiografía desde Radar                         | Equipo Pulse |
-| 2026-09-19 | Subrayado del hero: wipe izquierda→derecha y redibujo, sin desplazar el texto         | La línea se esconde in situ; el enlace no se mueve                                             | Equipo Pulse |
+| Date       | Decision                                                                                                                                                                                       | Reason                                                                                                                         | Owner                                                    |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| 2026-09-18 | Gráficos SVG propios en lugar de una librería de charting                                                                                                                                      | Formas muy específicas (changepoint, waterfall, curva de evento) y bundle mínimo                                               | Equipo Pulse                                             |
+| 2026-09-18 | Tema oscuro por `prefers-color-scheme` redefiniendo tokens primitivos                                                                                                                          | HeroUI expone su paleta oscura tras `.dark`; sin conmutador no hay estado que guardar                                          | Equipo Pulse                                             |
+| 2026-09-18 | Escala de color del score como único helper (`scoreBand`)                                                                                                                                      | Un mismo score debe tener el mismo color en tabla, gráfico, mapa de calor y oferta                                             | Equipo Pulse                                             |
+| 2026-09-19 | Observado y previsión en un solo gráfico, con banda p10-p90 y marca del último cierre                                                                                                          | Comparar nivel y horizonte en la misma escala; la incertidumbre no puede quedar en otra figura                                 | Equipo Pulse                                             |
+| 2026-09-19 | Variable sin datos como «sin datos» y nunca como cero, junto a la confianza en %                                                                                                               | Un cero es una medición; la ausencia de evidencia cambia la decisión y debe verse                                              | Equipo Pulse                                             |
+| 2026-09-19 | Nexo como mascota con traje y chat global, con animación decorativa independiente                                                                                                              | Petición de producto; permite explicar datos y consultar IA sin rehacer las vistas existentes                                  | Equipo Pulse                                             |
+| 2026-09-19 | Acceso a Nexo reducido a mascota y bocadillo; estado del chat sólo en texto de cabecera                                                                                                        | Menos elementos compitiendo con los datos; el personaje ya identifica la función                                               | Equipo Pulse                                             |
+| 2026-09-19 | Aplicación de una sola empresa: sin radar ni cartera; X-Ray retirado del frontend                                                                                                              | El producto se lee desde la empresa; la comparación entre empresas no es una necesidad suya                                    | Equipo Pulse                                             |
+| 2026-09-19 | Empresa en contexto en la URL (`/empresa/[id]`, `?empresa=` en Método), nunca en storage                                                                                                       | Vistas compartibles y deterministas; la navegación no depende del estado del navegador                                         | Equipo Pulse                                             |
+| 2026-09-19 | Rutas en inglés (`/company/[id]`, `/recommendations`, `/method?company=`); selector HeroUI en la nav de producto                                                                               | Un solo idioma en los endpoints; la empresa se cambia desde cualquier página sin perder la sección                             | Equipo Pulse                                             |
+| 2026-09-19 | Empresas y grupos con nombre famoso por hash determinista del identificador; el identificador sigue visible                                                                                    | Una demo legible sin inventar datos: el nombre es un disfraz estable, no una atribución                                        | Equipo Pulse                                             |
+| 2026-09-19 | Mapa de calor de variables en la empresa: área = peso, color = banda del score, sin datos con trazo discontinuo                                                                                | Peso y estado se leen a la vez; «sin datos» nunca parece un score bajo                                                         | Equipo Pulse                                             |
+| 2026-09-19 | Treemaps a ancho completo con el panel de detalle debajo, sin columna del export                                                                                                               | Sin scroll horizontal en escritorio; el nombre técnico de la columna no ayuda al lector                                        | Equipo Pulse                                             |
+| 2026-09-19 | Oferta plegada en acordeón (por qué, importe, precio, palancas) bajo las cifras; entradilla sin score ni cobertura                                                                             | Las cifras se leen de un vistazo y la cabecera ya muestra PULSE y confianza; el argumento se abre a demanda                    | Equipo Pulse                                             |
+| 2026-09-19 | PULSE es la media ponderada de las variables con datos, sin calibración a percentil; las bandas 35/50/65 no cambian                                                                            | El usuario quiere leer el score directamente en la escala de las variables; los aportes suman el score                         | Equipo Pulse                                             |
+| 2026-09-19 | Botón info por variable en el mapa de calor y en el treemap del método: popover no modal que abre en hover y se fija al pulsar                                                                 | La misma explicación (qué mide, dirección, fuente) desde cualquier mapa, sin ir a la página Método; teclado y táctil incluidos | Equipo Pulse                                             |
+| 2026-09-19 | Palancas como bloques por pilar con barra de bandas hoy→objetivo y dos cifras (prima, tensión); descartados en rejilla con chip de estado y barra de encaje; sin frases que repitan la palanca | La escala de color del score ya dice de qué banda a cuál se pasa; el texto narrado duplicaba los mismos números                | Equipo Pulse                                             |
+| 2026-09-19 | Selector de empresa en la nav (`ComboBox`), no en la landing                                                                                                                                   | Elegir empresa no es comparar empresas: `/` es marketing y no un ranking                                                       | Equipo Pulse                                             |
+| 2026-09-19 | Nexo recibe una sola empresa (PULSE + Advisor) y no cubre la landing                                                                                                                           | El asistente no puede saber más que la pantalla; evita respuestas de cartera                                                   | Equipo Pulse                                             |
+| 2026-09-19 | Historial mes a mes en orden descendente y previsión en tabla aparte con «previsto» en cada fila                                                                                               | La decisión se toma sobre el último cierre; la distinción observado/previsto no puede depender del color                       | Equipo Pulse                                             |
+| 2026-09-19 | Guías 35/50/65 como componente SVG compartido (`ScoreGuides`)                                                                                                                                  | Una sola definición de la escala de bandas para trayectoria y small multiples                                                  | Equipo Pulse                                             |
+| 2026-09-19 | Cuatro small multiples de pilar en escala 0-100 común, con su peso al pie                                                                                                                      | Comparar qué pilar movió el score exige la misma escala y el peso a la vista                                                   | Equipo Pulse                                             |
+| 2026-09-19 | Barras de aporte desde cero, coloreadas por el score de la variable, en vez de barras divergentes                                                                                              | Los aportes mensuales son todos positivos; divergir desperdiciaba la mitad del ancho                                           | Equipo Pulse                                             |
+| 2026-09-19 | Selector de mes (por defecto el último cierre) como único estado de cliente de la página de empresa                                                                                            | Permite auditar cualquier mes sin duplicar tablas ni romper el renderizado en servidor                                         | Equipo Pulse                                             |
+| 2026-09-19 | `Card` `secondary` para cada producto recomendado                                                                                                                                              | La oferta es el único objeto que agrupa cifras, argumento, precio y contrafactual y necesita contenedor visible                | Equipo Pulse                                             |
+| 2026-09-19 | Precio como barra SVG apilada proporcional a                                                                                                                                                   | pb                                                                                                                             | con la leyenda en HTML; los descuentos se dibujan huecos | Texto dentro del SVG no se lee a 390 px; un descuento apunta en sentidos opuestos en coste y en rendimiento | Equipo Pulse |
+| 2026-09-19 | Encaje en barra neutra 0-100 con el umbral 40 marcado, nunca con la paleta del score                                                                                                           | Encaje y PULSE conviven en la misma página y no deben confundirse                                                              | Equipo Pulse                                             |
+| 2026-09-19 | Palancas ordenadas por ahorro de prima y la mayor señalada en peso tipográfico, no en color                                                                                                    | El color sólo codifica score; el ahorro es una prioridad de lectura                                                            | Equipo Pulse                                             |
+| 2026-09-19 | Sin ERP el bloque de facturas dice «sin datos» y «Sin ERP conectado», nunca cuatro ceros                                                                                                       | Un cero del libro es una medición; la ausencia de ERP cambia qué productos son posibles                                        | Equipo Pulse                                             |
+| 2026-09-19 | Sin oferta no hay sección vacía: el resumen abre y «Plan de mejora» ocupa su lugar antes de los descartados                                                                                    | La página responde primero «qué hacer ahora» y después «qué no»                                                                | Equipo Pulse                                             |
+| 2026-09-19 | Reparto de los 100 puntos como treemap SVG: columna por pilar ∝ peso, celda por variable ∝ su parte                                                                                            | El área es el peso: la figura y la tabla de pesos dicen lo mismo y cada celda tiene sitio para su etiqueta                     | Equipo Pulse                                             |
+| 2026-09-19 | Treemap interactivo con `role="group"` y celdas `role="button"` con `tabIndex`; detalle en `aria-live`                                                                                         | Un gráfico explorable con ratón y teclado no puede exponerse como una sola imagen                                              | Equipo Pulse                                             |
+| 2026-09-19 | Celda seleccionada en `foreground` sobre texto `background`, no en `accent`                                                                                                                    | Blanco sobre `accent` no alcanza 4,5:1; la inversión garantiza AA en claro y oscuro                                            | Equipo Pulse                                             |
+| 2026-09-19 | Barra de confianza: relleno con datos, rayado a 45° para proxy bancario, vacío sin datos                                                                                                       | Hace visible la regla de 0,5 × cobertura y que una variable sin datos no entra como cero                                       | Equipo Pulse                                             |
+| 2026-09-19 | Barras de AUROC por variable con guía en 0,5 («sin señal») y escala 0-1 completa                                                                                                               | La distancia a 0,5 es la lectura honesta; la escala completa impide exagerar diferencias                                       | Equipo Pulse                                             |
+| 2026-09-19 | Escala de bandas y barras de AUROC en HTML con anchos en %, treemap en SVG                                                                                                                     | Tipografía real donde manda el texto; SVG donde manda la geometría                                                             | Equipo Pulse                                             |
+
+| 2026-09-19 | Todas las tablas sobre `DataTable`: columnas declaradas como datos, orden por cualquier cabecera y filas sin valor siempre al final | Una sola implementación de tabla; el lector elige el criterio y una ausencia de dato nunca se cuela como extremo | Equipo Pulse |
+
+| 2026-09-19 | Método centrado en el cálculo del PULSE del mes, en palabras llanas; AUROC, tabla de precisión, pila de precio y catálogo retirados; previsión, precio y límites en tres frases | La página debe entenderse sin saber estadística; el detalle de validación vive en el backend y en su README | Equipo Pulse |
+
+| 2026-09-19 | Pairing Aktiv Grotesk (display) + DM Sans (cuerpo); Geist fuera | Display neo-grotesk comercial junto a un cuerpo tabular | Equipo Pulse |
+| 2026-09-19 | `/` es landing con `SiteFrame`; el producto vive en `/company` y `/method` | Marketing y producto no comparten nav; las líneas del frame son columnas, no cromo | Equipo Pulse |
+| 2026-09-19 | Tokens de producto tomados de embat.io (azul `#3878f6`, tinta `#050b2c`) | Pulse debe integrarse con Embat; las bandas de score no se retintan | Equipo Pulse |
+| 2026-09-19 | Pie de landing: Platform/Docs + legal; heatmap Paper a la izquierda | Solo rutas que existen; la marca de marketing es Pulse | Equipo Pulse |
+| 2026-09-19 | Hero: accesos PULSE / Recomendaciones / Método con subrayado wipe izquierda→derecha | Las tres superficies de la app de empresa; la línea se esconde in situ | Equipo Pulse |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce

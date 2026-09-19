@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# X-Ray API: self-contained image (engine + precomputed artefacts).
+# PULSE API: self-contained image (engine + precomputed artefacts).
 
 FROM python:3.12-slim AS builder
 
@@ -35,11 +35,11 @@ ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000 \
-    XRAY_DATA_DIR=/app/data
+    PULSE_DATA_DIR=/app/data
 
 COPY --from=builder /app/.venv /app/.venv
 COPY src ./src
-# .dockerignore keeps only data/models and the precomputed web artefacts.
+# .dockerignore keeps only data/pulse/{web,recommendations,models}.
 COPY data ./data
 
 EXPOSE 8000

@@ -5,7 +5,6 @@ import polars as pl
 
 from ml_service.pulse.normalize import Normalizer
 from ml_service.pulse.score import (
-    Calibration,
     contributions,
     variable_scores,
     weighted_score,
@@ -65,19 +64,12 @@ def test_unknown_variables_leave_the_denominator():
     known_weight = sum(v.weight for v in VARIABLES if v.pillar != "cobro")
     assert np.allclose(scored["confidence"].to_numpy(), known_weight / 100)
     assert scored["pillar_cobro"].is_null().all()
-    assert scored["pulse_raw"].is_between(0, 100).all()
+    assert scored["pulse"].is_between(0, 100).all()
     contrib = contributions(scored)
     total = sum(
         contrib[f"contrib_{v.key}"].fill_null(0.0).to_numpy() for v in VARIABLES
     )
-    assert np.allclose(total, scored["pulse_raw"].to_numpy())
-
-
-def test_calibration_spreads_scores_over_0_100():
-    raw = np.linspace(30, 70, 1000)
-    cal = Calibration().fit(raw)
-    out = cal.apply(np.array([30.0, 50.0, 70.0]))
-    assert out[0] < 0.1 and abs(out[1] - 50) < 0.1 and out[2] > 99.9
+    assert np.allclose(total, scored["pulse"].to_numpy())
 
 
 def test_bank_proxies_back_a_variable_at_reduced_confidence():
@@ -110,7 +102,7 @@ def test_bank_proxies_back_a_variable_at_reduced_confidence():
     total = sum(
         contrib[f"contrib_{v.key}"].fill_null(0.0).to_numpy() for v in VARIABLES
     )
-    assert np.allclose(total, scored["pulse_raw"].to_numpy())
+    assert np.allclose(total, scored["pulse"].to_numpy())
 
 
 def test_proxy_below_minimum_coverage_stays_unknown():

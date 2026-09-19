@@ -1,4 +1,4 @@
-import { formatNumber, formatPercent } from '@/lib/xray/format';
+import { formatNumber, formatPercent } from '@/lib/format';
 
 /** Rendered when a variable has no evidence in the month. */
 export const UNKNOWN_TEXT = 'sin datos';

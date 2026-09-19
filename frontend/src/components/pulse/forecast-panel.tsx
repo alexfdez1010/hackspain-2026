@@ -3,15 +3,15 @@
 import { useMemo, useState } from 'react';
 
 import { ImpactBars } from '@/components/charts/impact-bars';
-import { FacetSelect, type FacetOption } from '@/components/radar/facet-select';
-import { ScoreBadge } from '@/components/xray/score-badge';
+import { FacetSelect, type FacetOption } from '@/components/ui/facet-select';
+import { ScoreBadge } from '@/components/ui/score-badge';
 import {
   buildContributionItems,
   sumContributions,
 } from '@/lib/pulse/company-view';
 import { formatBand, formatHorizon } from '@/lib/pulse/format';
 import type { PulseForecastPoint, PulseVariableMeta } from '@/lib/pulse/types';
-import { formatMonth, formatNumber, formatSigned } from '@/lib/xray/format';
+import { formatMonth, formatNumber, formatSigned } from '@/lib/format';
 
 interface PulseForecastPanelProps {
   /** Forecast horizons, ascending. */
@@ -42,7 +42,7 @@ export function PulseForecastPanel({
     label: formatHorizon(point.horizon),
   }));
   const [horizon, setHorizon] = useState(
-    String(forecast[forecast.length - 1]?.horizon ?? 6),
+    String(forecast[forecast.length - 1]?.horizon ?? 12),
   );
   const point =
     forecast.find((item) => String(item.horizon) === horizon) ??
@@ -102,10 +102,9 @@ export function PulseForecastPanel({
       />
 
       <p className="max-w-3xl text-sm text-muted">
-        Cada barra son puntos de <code>pulse_raw</code>; las{' '}
-        {formatNumber(items.length)} suman{' '}
+        Cada barra son puntos de PULSE; las {formatNumber(items.length)} suman{' '}
         {formatSigned(sumContributions(point), 2)}, que es exactamente el cambio
-        previsto <code>delta_raw</code> de {formatSigned(point.deltaRaw, 2)}.
+        previsto de {formatSigned(point.delta, 2)}.
       </p>
     </div>
   );

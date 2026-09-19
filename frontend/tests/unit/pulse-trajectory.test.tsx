@@ -40,6 +40,17 @@ describe('PulseTrajectoryChart', () => {
     expect(markup).not.toContain('NaN');
   });
 
+  it('prints the last close and the farthest horizon next to their point', () => {
+    const { points, boundaryIndex } = buildTrajectory(SERIES, FORECAST);
+    const markup = renderToStaticMarkup(
+      <PulseTrajectoryChart points={points} boundaryIndex={boundaryIndex} />,
+    );
+    expect(markup).toContain('>32,8</text>');
+    expect(markup).toContain('>31,1</text>');
+    expect(markup).toContain('>jul</text>');
+    expect(markup).toContain('>feb</text>');
+  });
+
   it('explains what is missing when there is no history', () => {
     const { points, boundaryIndex } = buildTrajectory([], FORECAST);
     expect(

@@ -3,14 +3,16 @@
 Features derived from a variable's components go to that variable. Pillar-level
 features are split across the pillar's variables by weight; PULSE-level features
 across all variables by weight. Everything else (flows, calendar, events, group)
-is reported as ``contexto``; the model bias as ``base``. The parts sum exactly to
-the predicted change.
+is reported as ``contexto``; the model bias and the horizon input (the drift the
+model expects at that distance) as ``base``. The parts sum exactly to the
+predicted change.
 """
 
 from __future__ import annotations
 
 import numpy as np
 
+from ml_service.pulse.forecast.config import HORIZON_FEATURE
 from ml_service.pulse.variables import PILLARS, VARIABLES
 
 CONTEXT = "contexto"
@@ -26,11 +28,13 @@ _PILLAR_SHARES = {
     for p in PILLARS
 }
 _ALL_SHARES = {v.key: v.weight / 100.0 for v in VARIABLES}
-_PULSE_FEATURES = ("pulse", "pulse_raw")
+_PULSE_FEATURES = ("pulse",)
 
 
 def shares_of_feature(name: str) -> dict[str, float]:
-    """How a feature's contribution is distributed over variable keys (or CONTEXT)."""
+    """How a feature's contribution is distributed over variable keys (or CONTEXT / BASE)."""
+    if name == HORIZON_FEATURE:
+        return {BASE: 1.0}
     if name.startswith("var_"):
         key = name[4:].split("__")[0]
         return {key: 1.0} if key in _ALL_SHARES else {CONTEXT: 1.0}

@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import numpy as np
 import polars as pl
 
 from ml_service.pulse.clean.pipeline import CleanData
-from ml_service.pulse.forecast.config import HORIZONS
+from ml_service.pulse.forecast.config import HORIZON_FEATURE, HORIZONS
 from ml_service.pulse.forecast.features_calendar import (
     calendar_columns,
     calendar_features,
@@ -20,7 +21,13 @@ from ml_service.pulse.variables import PILLARS, VARIABLES
 
 KEY = ["company_id", "month"]
 TARGET_PREFIX = "y_"
-EXCLUDED_PREFIXES = (TARGET_PREFIX, "contrib_", "top_client_id", "group_id")
+EXCLUDED_PREFIXES = (
+    TARGET_PREFIX,
+    "contrib_",
+    "top_client_id",
+    "group_id",
+    HORIZON_FEATURE,
+)
 NUMERIC = (pl.Float64, pl.Float32, pl.Int64, pl.Int32, pl.UInt32, pl.Int8, pl.Boolean)
 DYNAMIC_LEVELS = [
     c.name
@@ -28,7 +35,7 @@ DYNAMIC_LEVELS = [
     for c in v.components
     if not c.name.endswith(("_d3", "_d6"))
 ]
-DYNAMIC_LEVELS += [f"pillar_{p}" for p in PILLARS] + ["pulse_raw"]
+DYNAMIC_LEVELS += [f"pillar_{p}" for p in PILLARS] + ["pulse"]
 
 
 def _dynamics(df: pl.DataFrame) -> pl.DataFrame:
@@ -51,18 +58,18 @@ def _dynamics(df: pl.DataFrame) -> pl.DataFrame:
 
 def _group_context(df: pl.DataFrame) -> pl.DataFrame:
     grp = df.group_by(["group_id", "month"]).agg(
-        pl.col("pulse_raw").mean().alias("group_pulse"), pl.len().alias("group_n")
+        pl.col("pulse").mean().alias("group_pulse"), pl.len().alias("group_n")
     )
     return df.join(grp, on=["group_id", "month"], how="left")
 
 
 def add_targets(df: pl.DataFrame) -> pl.DataFrame:
-    """``y_<h>`` = change of ``pulse_raw`` between month t and t+h (null when unobservable)."""
+    """``y_<h>`` = change of ``pulse`` between month t and t+h (null when unobservable)."""
     return df.with_columns(
         [
-            (
-                pl.col("pulse_raw").shift(-h).over("company_id") - pl.col("pulse_raw")
-            ).alias(f"{TARGET_PREFIX}{h}")
+            (pl.col("pulse").shift(-h).over("company_id") - pl.col("pulse")).alias(
+                f"{TARGET_PREFIX}{h}"
+            )
             for h in HORIZONS
         ]
     )
@@ -91,14 +98,41 @@ def forecast_frame(scored: pl.DataFrame, clean: CleanData) -> pl.DataFrame:
 
 
 def feature_columns(df: pl.DataFrame) -> list[str]:
-    """Deterministic list of model inputs: every numeric column that is not a key, target or output."""
+    """Deterministic list of model inputs: every numeric column that is not a key, target or
+    output, followed by the horizon column the single model reads."""
     return [
         c
         for c in df.columns
         if c not in KEY
         and not c.startswith(EXCLUDED_PREFIXES)
         and df[c].dtype in NUMERIC
-    ]
+    ] + [HORIZON_FEATURE]
+
+
+def with_horizon(df: pl.DataFrame, h: int) -> pl.DataFrame:
+    """The frame with the horizon column set to ``h`` on every row."""
+    return df.with_columns(pl.lit(float(h)).alias(HORIZON_FEATURE))
+
+
+def stack_horizons(
+    frame: pl.DataFrame, features: list[str]
+) -> tuple[np.ndarray, np.ndarray, pl.DataFrame]:
+    """Training set of the single model: one row per (company-month, horizon) with an observed target.
+
+    Returns ``(X, y, keys)`` where ``keys`` carries ``company_id``, ``month``,
+    ``group_id`` (when present), ``pulse`` and ``horizon`` aligned with the matrix rows.
+    """
+    key_cols = [c for c in KEY + ["group_id", "pulse"] if c in frame.columns]
+    parts, targets, keys = [], [], []
+    for h in HORIZONS:
+        rows = frame.filter(pl.col(f"{TARGET_PREFIX}{h}").is_not_null())
+        if rows.is_empty():
+            continue
+        rows = with_horizon(rows, h)
+        parts.append(to_matrix(rows, features))
+        targets.append(rows[f"{TARGET_PREFIX}{h}"].to_numpy().astype(float))
+        keys.append(rows.select(key_cols + [HORIZON_FEATURE]))
+    return np.vstack(parts), np.concatenate(targets), pl.concat(keys)
 
 
 def to_matrix(df: pl.DataFrame, features: list[str]):

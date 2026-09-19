@@ -15,22 +15,24 @@ export const DEFAULT_PULSE_SORT: PulseSort = { key: 'pulse', direction: 'asc' };
 /**
  * Change of the score against the previous month.
  *
- * @param row - Portfolio row.
+ * @param row - Anything carrying both months, a row or a full company.
  * @returns The change in points, or `null` when either month is unknown.
  */
-export function monthlyChange(row: PulseCompanyRow): number | null {
+export function monthlyChange(
+  row: Pick<PulseCompanyRow, 'pulse' | 'pulsePrev'>,
+): number | null {
   if (row.pulse === null || row.pulsePrev === null) return null;
   return row.pulse - row.pulsePrev;
 }
 
 /**
- * Change the six-month forecast implies against today's score.
+ * Change the one-year forecast implies against today's score.
  *
  * @param row - Portfolio row.
  * @returns The change in points, or `null` when there is no forecast.
  */
 export function forecastDelta(row: PulseCompanyRow): number | null {
-  const predicted = row.forecast6m?.pulsePred ?? null;
+  const predicted = row.forecast12m?.pulsePred ?? null;
   if (row.pulse === null || predicted === null) return null;
   return predicted - row.pulse;
 }

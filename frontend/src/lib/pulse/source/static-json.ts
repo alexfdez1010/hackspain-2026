@@ -8,7 +8,7 @@ import type { PulseCompany, PulseSummary } from '@/lib/pulse/types';
 /**
  * Data source backed by the JSON files bundled in `src/data/pulse`.
  *
- * It is the fallback used whenever `XRAY_API_URL` is not configured, which
+ * It is the fallback used whenever `PULSE_API_URL` is not configured, which
  * keeps the demo working with no backend running.
  */
 export class StaticPulseSource implements PulseDataSource {

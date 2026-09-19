@@ -60,7 +60,7 @@ describe('parsePulseSummary', () => {
           pulse_prev: 17.88,
           confidence: 0.82,
           pillars: { liquidez: 34.33 },
-          forecast_6m: {
+          forecast_12m: {
             pulse_pred: 31.07,
             pulse_p10: 15.58,
             pulse_p90: 48.35,
@@ -72,7 +72,7 @@ describe('parsePulseSummary', () => {
     expect(summary.meta.horizons).toEqual([1, 6]);
     expect(summary.meta.pillars).toHaveLength(1);
     expect(summary.companies).toHaveLength(1);
-    expect(summary.companies[0].forecast6m?.pulsePred).toBe(31.07);
+    expect(summary.companies[0].forecast12m?.pulsePred).toBe(31.07);
     expect(summary.companies[0].pillars.liquidez).toBe(34.33);
   });
 
@@ -84,9 +84,9 @@ describe('parsePulseSummary', () => {
 
   it('keeps a missing forecast as null', () => {
     const summary = parsePulseSummary({
-      companies: [{ company_id: 'COMP_0001', forecast_6m: null }],
+      companies: [{ company_id: 'COMP_0001', forecast_12m: null }],
     });
-    expect(summary.companies[0].forecast6m).toBeNull();
+    expect(summary.companies[0].forecast12m).toBeNull();
   });
 });
 
@@ -142,20 +142,20 @@ describe('parsePulseCompany', () => {
 });
 
 describe('createPulseDataSource', () => {
-  it('falls back to the bundled JSON files without XRAY_API_URL', () => {
+  it('falls back to the bundled JSON files without PULSE_API_URL', () => {
     expect(createPulseDataSource({})).toBeInstanceOf(StaticPulseSource);
-    expect(createPulseDataSource({ XRAY_API_URL: '  ' })).toBeInstanceOf(
+    expect(createPulseDataSource({ PULSE_API_URL: '  ' })).toBeInstanceOf(
       StaticPulseSource,
     );
   });
 
-  it('uses the PULSE endpoints when XRAY_API_URL is set', async () => {
+  it('uses the PULSE endpoints when PULSE_API_URL is set', async () => {
     const { impl, calls } = stubFetch({
       '/api/pulse/summary': { companies: [{ company_id: 'COMP_0001' }] },
       '/api/pulse/companies/COMP_0001': { company_id: 'COMP_0001' },
     });
     const source = createPulseDataSource(
-      { XRAY_API_URL: 'http://localhost:8000/' },
+      { PULSE_API_URL: 'http://localhost:8000/' },
       impl,
     );
     expect(source).toBeInstanceOf(ApiPulseSource);
@@ -169,7 +169,7 @@ describe('createPulseDataSource', () => {
 
   it('degrades to an empty portfolio when the service is down', async () => {
     const source = createPulseDataSource(
-      { XRAY_API_URL: 'http://localhost:8000' },
+      { PULSE_API_URL: 'http://localhost:8000' },
       stubFetch({}).impl,
     );
     expect((await source.getSummary()).companies).toEqual([]);
@@ -190,13 +190,18 @@ describe('StaticPulseSource', () => {
     expect(
       meta.pillars.reduce((total, pillar) => total + pillar.weight, 0),
     ).toBe(100);
+    expect(meta.evaluation.score.auroc).toBeGreaterThan(0.5);
+    expect(meta.evaluation.forecast.map((item) => item.horizon)).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+    ]);
+    expect(meta.evaluation.risk.auroc).toBeGreaterThan(0.5);
   });
 
   it('reads the demo companies of the navigation', async () => {
     const company = await source.getCompany(PULSE_DEMO_COMPANY_ID);
     expect(company?.series.length).toBeGreaterThan(0);
     expect(company?.forecast.map((point) => point.horizon)).toEqual([
-      1, 2, 3, 4, 5, 6,
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
     ]);
     const withLines = await source.getCompany(
       PULSE_DEMO_CREDIT_LINE_COMPANY_ID,

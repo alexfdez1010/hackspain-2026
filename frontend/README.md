@@ -10,20 +10,25 @@ A **production-grade Next.js template** engineered with enterprise-level best pr
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.x-38bdf8)](https://tailwindcss.com/)
 [![HeroUI](https://img.shields.io/badge/HeroUI-v3-7c3aed)](https://heroui.com/)
 
-## 🩻 Embat Pulse (HackSpain 2026, reto Embat X-Ray)
+## 🩻 Embat Pulse (HackSpain 2026, reto Embat)
 
-Producto que se monta sobre el score X-Ray: siete superficies navegables,
-sin base de datos y sin backend obligatorio.
+Producto de una sola empresa: cada pantalla muestra el PULSE de la empresa
+abierta y nunca una vista global de la cartera. Sin base de datos y sin backend
+obligatorio.
 
-| Ruta            | Qué muestra                                                                                          |
-| --------------- | ---------------------------------------------------------------------------------------------------- |
-| `/`             | Radar de cartera: tabla filtrable de 1.286 pymes, distribución de scores, movers y mapa de calor.    |
-| `/empresa/[id]` | Radiografía: 24 meses de score con changepoint y tendencia, pilares, SHAP, KPIs, alertas y línea.    |
-| `/pulse`        | Cartera PULSE: score 0-100, variación mensual, confianza, previsión +6 m y reparto de los pesos.     |
-| `/pulse/[id]`   | Empresa PULSE: trayectoria con previsión +1..+6 m y banda p10-p90, pilares, 11 variables y desglose. |
-| `/capital`      | Embat Capital: límite y precio por empresa, totales y evolución de 12 meses.                         |
-| `/monitor`      | Feed de alertas con facetas y panel de anticipación (lead time, detección, AUROC).                   |
-| `/metodo`       | Cómo se construye el score, variables por pilar y cifras de evaluación.                              |
+| Ruta                            | Qué muestra                                                                                                                                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                             | Redirige a la empresa de demo. No hay portada: la empresa se cambia desde el selector de la cabecera, que mantiene la sección abierta.                                                      |
+| `/company/[id]`                 | PULSE de la empresa: score del mes, trayectoria con previsión +1..+12 m y banda p10-p90, mapa de calor de las 11 variables, mes a mes, evolución de pilares, explorador mensual y desglose. |
+| `/company/[id]/recommendations` | Advisor: productos financieros que encajan, importe, tipo y por qué; precio desglosado, palancas, descartados, plan de mejora, riesgo y datos usados.                                       |
+| `/method?company=[id]`          | Método: cómo se calcula el PULSE del mes en palabras llanas (escala, 100 puntos, cuatro pasos, confianza y un mes real sumado a mano); previsión, precio y límites en tres frases.          |
+
+Las empresas y los grupos del export son anónimos (`COMP_0001`, `GROUP_0147`).
+La interfaz los muestra con el nombre de una empresa o grupo famoso elegido por
+un hash determinista del identificador (`src/lib/company/names.ts`, catálogos
+en `src/lib/company/catalogues.ts`): el mismo identificador da siempre el mismo
+nombre, dos identificadores pueden compartirlo y el identificador real sigue
+visible en las rutas, en el selector y en la entradilla de cada página.
 
 ### Arrancar la demo
 
@@ -31,62 +36,81 @@ sin base de datos y sin backend obligatorio.
 bun run dev
 ```
 
+### Nexo, asistente de Pulse
+
+Mascota con traje, expresiones animadas y chat global accesible desde el botón
+flotante o `Ctrl/Cmd+J`. Funciona sin clave con respuestas simuladas, streaming,
+contexto de la página, cancelación, reintento y enlaces a los datos originales.
+La conversación permanece en memoria al navegar y se elimina al recargar.
+
+Para conectar Vercel AI Gateway, define `AI_GATEWAY_API_KEY` en `.env` (o
+`.env.local`) y reinicia Next.js; el servidor la lee al arrancar y el SDK la
+toma del entorno. El modelo está fijado como `ASSISTANT_MODEL =
+'google/gemini-3.8-flash'` en `src/lib/assistant/config.ts`, con razonamiento
+en nivel bajo y 10.000 tokens de salida para que la respuesta llegue completa.
+No se configura desde el navegador. `ASSISTANT_MODE=mock` fuerza la demo;
+`ASSISTANT_MODE=gateway` exige una clave y devuelve un error claro si falta.
+Nunca se envía la clave al cliente.
+
+El frontend es propietario de `POST /api/assistant`; no añade endpoints a FastAPI.
+Acepta `{ messages: UIMessage[], pathname: string }` y devuelve SSE con el protocolo
+UI Message Stream de AI SDK 7. Sólo acepta texto y roles `user`/`assistant`, hasta
+20 mensajes, 2.000 caracteres por pregunta y 64 KiB por petición. El transporte
+del navegador limita el historial a los últimos 20 mensajes. La respuesta incluye
+metadata `{ mode: 'mock' | 'gateway', sources: { label, href }[] }`.
+Errores antes del stream: JSON `{ error: string }`, códigos 400/403/413/415/503;
+errores del modelo durante el stream: evento SDK `error` con mensaje seguro.
+El contexto se obtiene de los adaptadores de datos existentes, nunca del HTML
+enviado por el cliente. Ejemplo de invocación y contrato completo en
+[la documentación de Nexo](docs/nexo.md).
+
+Referencias: [Vercel AI Gateway](https://vercel.com/docs/ai-gateway/getting-started),
+[AI SDK Chatbot](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot),
+[Gemini 3.8 Flash](https://vercel.com/ai-gateway/models/gemini-3.8-flash).
+
 ### Fuente de datos
 
-La capa de datos (`src/lib/xray/data.ts`) expone la interfaz `XrayDataSource`
-con dos implementaciones seleccionadas por entorno en un único factory
-(`createDataSource`):
+Dos capas con el mismo patrón —una interfaz, una implementación estática y otra
+contra la API— seleccionadas por entorno en un factory:
 
-- **`StaticJsonSource`** (por defecto): lee `src/data/xray/summary.json` y
-  `src/data/xray/companies/<id>.json`.
-- **`ApiSource`**: se activa cuando `XRAY_API_URL` está definida y consume el
-  servicio FastAPI de [`../backend`](../backend).
+- **PULSE** (`src/lib/pulse/data.ts`, interfaz `PulseDataSource`):
+  `StaticPulseSource` lee `src/data/pulse/summary.json` y
+  `src/data/pulse/companies/<id>.json` (1.285 ficheros que reescribe
+  `uv run python -m ml_service.pulse.export_web`); `ApiPulseSource` se activa
+  con `PULSE_API_URL`.
+- **Advisor** (`src/lib/advisor/data.ts`, interfaz `AdvisorDataSource`):
+  `StaticAdvisorSource` lee `src/data/pulse/recommendations/catalogue.json` y
+  `src/data/pulse/recommendations/companies/<id>.json` (espejo que escribe
+  `uv run python -m ml_service.pulse.recommend.cli build`); `ApiAdvisorSource`
+  se activa con la misma variable.
 
-| Variable       | Obligatoria | Descripción                                                                                             |
-| -------------- | ----------- | ------------------------------------------------------------------------------------------------------- |
-| `XRAY_API_URL` | No          | URL raíz del servicio X-Ray, p. ej. `http://localhost:8000`. Sin ella se leen los JSON del repositorio. |
+| Variable        | Obligatoria | Descripción                                                                                                                              |
+| --------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `PULSE_API_URL` | No          | URL raíz del servicio FastAPI, p. ej. `http://localhost:8000`. Sin ella se leen los JSON del repositorio. `XRAY_API_URL` sigue valiendo. |
 
-Contrato consumido por `ApiSource` (el servicio es el dueño del endpoint; este
-listado es el espejo en el consumidor):
+Contrato consumido (el servicio es el dueño de cada endpoint; este listado es el
+espejo en el consumidor):
 
-| Método y ruta             | Respuesta esperada                                                                                                                             |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /api/meta`           | `generated_for`, `pillar_labels`, `feature_labels`, `feature_pillars`, `n_companies`, `n_groups`, opcionalmente `anticipation` y `evaluation`. |
-| `GET /api/companies`      | Lista de empresas (sin series). Filtros `direction`, `regime`, `min_score`, `max_score`, `q`, `sort`, `limit`, `offset`.                       |
-| `GET /api/companies/{id}` | `{ company (con series), alerts, offer }`.                                                                                                     |
-| `GET /api/movers`         | `{ improvers, decliners }` de empresas. Parámetros `window`, `limit`.                                                                          |
-| `GET /api/alerts`         | Lista de alertas. Filtros `type`, `severity`, `limit`.                                                                                         |
-| `GET /api/alerts/counts`  | `{ tipo: n }` o `{ counts: { tipo: n } }`.                                                                                                     |
-| `GET /api/offers`         | Lista de líneas. Filtros `status`, `limit`. Cada elemento puede traer `offer` y `avg_monthly_inflow`.                                          |
-| `GET /api/offers/{id}`    | `{ company, offer, history }` con el histórico de 12 meses del límite.                                                                         |
-| `GET /health`             | Cualquier cuerpo JSON con estado 2xx.                                                                                                          |
+| Método y ruta                              | Respuesta esperada                                                                                                                                                                                                                                                       |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /api/pulse/summary`                   | `score_name`, `score_expansion`, `horizons`, `last_month`, `pillars[{key,label,weight}]`, `variables[{key,number,label,pillar,weight,raw,unit}]`, `contribution_keys`, `evaluation{score,forecast{horizons},risk}`, `companies[...]` (solo se usan los identificadores). |
+| `GET /api/pulse/companies/{id}`            | Empresa con `series[]` (por mes: `pulse`, `confidence`, `pillars`, `variables`, `contributions`, `cash_end`) y `forecast[]` (`horizon`, `target_month`, `pulse_pred`, `pulse_p10`, `pulse_p90`, `delta_raw`, `contributions`).                                           |
+| `GET /api/pulse/recommendations/catalogue` | `reference_rate`, `pricing_parameters`, `products[]`, `risk_model`.                                                                                                                                                                                                      |
+| `GET /api/pulse/recommendations/{id}`      | `summary`, `risk`, `recommendations[]` (con `reasons`, `sizing`, `pricing`, `levers`), `declined[]`, `improvement_plan`, `inputs`, `disclaimer`. Admite `?euribor=`.                                                                                                     |
 
 Las respuestas se parsean con parsers tolerantes: claves desconocidas se
-ignoran, las ausentes se derivan localmente con las mismas reglas puras que usa
-la fuente estática, y un fallo de red degrada la página a su estado vacío.
+ignoran, las ausentes quedan a `null` y un fallo de red degrada la página a su
+estado vacío. Una variable sin evidencia llega con `known: false` y se muestra
+como «sin datos», nunca como un cero. Los pesos suman 100 puntos y las
+contribuciones de cada horizonte suman exactamente `delta`; ambas
+invariantes se comprueban en `tests/unit/pulse-source.test.ts` y
+`tests/unit/pulse-company-view.test.ts`. En el Advisor, los componentes del
+precio suman el diferencial (`tests/unit/advisor-source.test.ts`).
 
-#### PULSE
-
-PULSE tiene su propia capa (`src/lib/pulse/data.ts`, interfaz `PulseDataSource`)
-con el mismo patrón y la misma variable de entorno: `StaticPulseSource` lee
-`src/data/pulse/summary.json` y `src/data/pulse/companies/<id>.json` (1.285
-ficheros que reescribe `uv run python -m ml_service.pulse.export_web`);
-`ApiPulseSource` se activa con `XRAY_API_URL`.
-
-| Método y ruta                   | Respuesta esperada                                                                                                                                                                                                              |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /api/pulse/summary`        | `score_name`, `score_expansion`, `horizons`, `last_month`, `pillars[{key,label,weight}]`, `variables[{key,number,label,pillar,weight,raw,unit}]`, `contribution_keys`, `companies[...]`.                                        |
-| `GET /api/pulse/companies/{id}` | Empresa con `series[]` (por mes: `pulse`, `pulse_raw`, `confidence`, `pillars`, `variables`, `contributions`) y `forecast[]` (`horizon`, `target_month`, `pulse_pred`, `pulse_p10`, `pulse_p90`, `delta_raw`, `contributions`). |
-
-Empresas de ejemplo: `/pulse/COMP_0001` (8 meses observados, 82 % de confianza,
-dos variables de líneas sin datos) y `/pulse/COMP_0051` (24 meses y utilización
-de líneas conocida). Ambas están fijadas en `src/lib/pulse/demo.ts`.
-
-Los pesos suman 100 puntos y las contribuciones de cada horizonte suman
-exactamente `delta_raw`; ambas invariantes se comprueban en
-`tests/unit/pulse-source.test.ts` y `tests/unit/pulse-company-view.test.ts`.
-Una variable sin evidencia llega con `known: false` y se muestra como «sin
-datos», nunca como un cero.
+Empresas de ejemplo: `/company/COMP_0001` («Atresmedia Labs»: 8 meses observados,
+82 % de confianza, dos variables de líneas sin datos, tres productos
+recomendados) y `/company/COMP_0051` («Atlassian Global»: 24 meses y
+utilización de líneas conocida). Ambas están fijadas en `src/lib/pulse/demo.ts`.
 
 ## 🎯 Philosophy
 
@@ -231,6 +255,49 @@ it with the official source, run:
 ```bash
 bunx skills add heroui-inc/heroui --skill heroui-react --yes
 ```
+
+### Tablas con orden por columna
+
+Toda tabla de datos se construye con `DataTable`
+(`src/components/ui/data-table.tsx`), un envoltorio de HeroUI `Table` que
+ordena por cualquier columna al pulsar su cabecera, en ambos sentidos. Las
+columnas se declaran como datos: id, cabecera, celda y, si la columna se puede
+ordenar, un `sortBy` que devuelve el valor a comparar (`number | string | null`).
+Una fila sin valor (`null`) queda siempre al final, en cualquier sentido, para
+que «sin datos» nunca parezca la mejor ni la peor cifra. `defaultSort` fija el
+orden con el que abre la tabla y la cabecera lo muestra.
+
+```tsx
+const COLUMNS: readonly DataTableColumn<Row>[] = [
+  {
+    id: 'label',
+    header: 'Variable',
+    isRowHeader: true,
+    sortBy: (r) => r.label,
+    cell: (r) => r.label,
+  },
+  {
+    id: 'weight',
+    header: 'Peso',
+    cellClassName: 'tabular-nums',
+    sortBy: (r) => r.weight,
+    cell: (r) => `${r.weight} pts`,
+  },
+];
+
+<DataTable
+  aria-label="Variables del score"
+  columns={COLUMNS}
+  rows={rows}
+  rowId={(r) => r.key}
+  defaultSort={{ column: 'weight', direction: 'descending' }}
+/>;
+```
+
+La ordenación es pura (`sortRows` en `src/lib/table/sort.ts`, con colación
+española) y ocurre en el cliente sobre filas ya calculadas en el servidor; el
+componente no accede a la fuente de datos. Las cuatro tablas del producto (mes a
+mes, previsión, variables y ejemplo del método) la usan.
 
 ## 📜 Available Scripts
 

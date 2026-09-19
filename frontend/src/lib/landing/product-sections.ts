@@ -1,52 +1,31 @@
-import { DEMO_COMPANY_ID } from '@/lib/xray/demo';
+import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
+import { companyRoutes } from '@/lib/routes';
+
+const demoRoutes = companyRoutes(PULSE_DEMO_COMPANY_ID);
 
 /**
- * Product surfaces, in the order the demo walks through them.
+ * Product surfaces of the company-scoped app, in reading order.
  *
- * Shared by the product nav so the endpoints cannot drift. The landing hero
- * uses `HERO_SECTIONS`, a working subset of these same records.
+ * Shared by the landing hero and footer so the endpoints cannot drift.
  */
 export const PRODUCT_SECTIONS = [
-  { href: '/radar', label: 'Radar', match: '/radar' },
+  { href: demoRoutes.pulse, label: 'PULSE', match: demoRoutes.pulse },
   {
-    href: `/empresa/${DEMO_COMPANY_ID}`,
-    label: 'Radiografía',
-    match: '/empresa',
+    href: demoRoutes.advisor,
+    label: 'Recomendaciones',
+    match: demoRoutes.advisor,
   },
-  { href: '/pulse', label: 'PULSE', match: '/pulse' },
-  { href: '/capital', label: 'Capital', match: '/capital' },
-  { href: '/monitor', label: 'Monitor', match: '/monitor' },
-  { href: '/metodo', label: 'Método', match: '/metodo' },
+  { href: demoRoutes.method, label: 'Método', match: '/method' },
 ] as const;
 
-type ProductSection = (typeof PRODUCT_SECTIONS)[number];
-
-const HERO_HREFS = ['/radar', '/pulse', '/capital', '/monitor'] as const;
-
 /**
- * Resolves a product section by its href.
- *
- * @param href - A href that already exists on `PRODUCT_SECTIONS`.
- * @returns The matching section record.
- * @throws If the catalogue no longer contains that href.
- */
-function sectionByHref(href: (typeof HERO_HREFS)[number]): ProductSection {
-  const section = PRODUCT_SECTIONS.find((item) => item.href === href);
-  if (!section) {
-    throw new Error(`Missing product section: ${href}`);
-  }
-  return section;
-}
-
-/**
- * Four working surfaces shown in the landing hero (Radar, PULSE, Capital,
- * Monitor). Método stays in the footer Docs list; Radiografía opens from Radar
- * and the product nav.
+ * Working surfaces shown in the landing hero. Same catalogue as the product
+ * nav of the demo company.
  *
  * @example
  * ```ts
  * HERO_SECTIONS.map((section) => section.href)
- * // ['/radar', '/pulse', '/capital', '/monitor']
+ * // ['/company/COMP_0001', '/company/COMP_0001/recommendations', '/method?company=COMP_0001']
  * ```
  */
-export const HERO_SECTIONS = HERO_HREFS.map(sectionByHref);
+export const HERO_SECTIONS = PRODUCT_SECTIONS;
