@@ -42,9 +42,13 @@ const COMPANY: PulseCompany = {
 };
 
 describe('PULSE views render on the server', () => {
-  it('opens the company with the score, the ruler and the three qualifiers', () => {
+  it('opens the company with the score, the ruler and the four qualifiers', () => {
     const markup = renderToStaticMarkup(
-      <PulseCompanyHeader company={COMPANY} cashEnd={36_982.49} />,
+      <PulseCompanyHeader
+        company={COMPANY}
+        clientHealth={{ score: 71.25, customers: 3 }}
+        cashEnd={36_982.49}
+      />,
     );
     expect(markup).toContain('32,8');
     expect(markup).toContain('PULSE del cierre de ago 2026');
@@ -53,6 +57,9 @@ describe('PULSE views render on the server', () => {
     expect(markup).toContain('Desde 17,9 puntos en jul 2026');
     expect(markup).toContain('82 de 100 puntos de peso con datos');
     expect(markup).not.toContain('Tensión a 6 meses');
+    expect(markup).toContain('Salud de los clientes');
+    expect(markup).toContain('71,3');
+    expect(markup).toContain('Sólido · 3 clientes por facturación');
     expect(markup).toContain('Días de caja');
     expect(markup).not.toContain('NaN');
   });

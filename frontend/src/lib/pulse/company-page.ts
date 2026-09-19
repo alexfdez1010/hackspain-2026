@@ -2,6 +2,7 @@ import { getAdvisorDataSource } from '@/lib/advisor/data';
 import type { AdvisorCompany } from '@/lib/advisor/types';
 import { companyName } from '@/lib/company/names';
 import { getPulseDataSource } from '@/lib/pulse/data';
+import type { PulseCompanyDetails } from '@/lib/pulse/details/types';
 import type { PulseCompany, PulseMeta } from '@/lib/pulse/types';
 
 /** Everything the three company pages read, loaded once per request. */
@@ -10,6 +11,8 @@ export interface CompanyPageData {
   meta: PulseMeta;
   /** Recommendations of the company, or `null` when the advisor has none. */
   advisor: AdvisorCompany | null;
+  /** Detail behind the variables, or `null` when not asked for or not published. */
+  details: PulseCompanyDetails | null;
 }
 
 /**
@@ -21,20 +24,23 @@ export interface CompanyPageData {
  *
  * @param id - Company identifier from the route.
  * @param withAdvisor - Whether the page needs the advisor figures.
+ * @param withDetails - Whether the page needs the detail of the variables.
  * @returns The page data, or `null` when the company is unknown.
  */
 export async function loadCompanyPage(
   id: string,
   withAdvisor = false,
+  withDetails = false,
 ): Promise<CompanyPageData | null> {
   const source = getPulseDataSource();
-  const [company, summary, advisor] = await Promise.all([
+  const [company, summary, advisor, details] = await Promise.all([
     source.getCompany(id),
     source.getSummary(),
     withAdvisor ? getAdvisorDataSource().getCompany(id) : null,
+    withDetails ? source.getCompanyDetails(id) : null,
   ]);
   if (!company) return null;
-  return { company, meta: summary.meta, advisor };
+  return { company, meta: summary.meta, advisor, details };
 }
 
 /**

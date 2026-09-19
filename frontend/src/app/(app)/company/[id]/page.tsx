@@ -10,6 +10,7 @@ import { PulseSignalAlert } from '@/components/pulse/signal-alert';
 import { Panel } from '@/components/ui/panel';
 import { companyName } from '@/lib/company/names';
 import { companyRoutes } from '@/lib/routes';
+import { clientHealth } from '@/lib/pulse/client-health';
 import { companyPageTitle, loadCompanyPage } from '@/lib/pulse/company-page';
 import { buildTrajectory } from '@/lib/pulse/company-view';
 import { formatMonth, formatNumber } from '@/lib/format';
@@ -61,9 +62,9 @@ function buildLead(
  */
 export default async function CompanyPulsePage({ params }: CompanyPageProps) {
   const { id } = await params;
-  const data = await loadCompanyPage(id, true);
+  const data = await loadCompanyPage(id, true, true);
   if (!data) notFound();
-  const { company, advisor } = data;
+  const { company, advisor, details } = data;
   const { points, boundaryIndex } = buildTrajectory(
     company.series,
     company.forecast,
@@ -80,6 +81,7 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
     >
       <PulseCompanyHeader
         company={company}
+        clientHealth={clientHealth(details)}
         cashEnd={advisor?.inputs.cashEnd ?? lastPoint?.cashEnd ?? null}
       />
       <PulseSignalAlert

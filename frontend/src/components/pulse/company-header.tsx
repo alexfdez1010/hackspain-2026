@@ -10,7 +10,7 @@ import { formatMonth, formatNumber } from '@/lib/format';
 
 /**
  * Opens the company view: the score of the last close, where it sits on the
- * 0-100 scale and the three figures that qualify it.
+ * 0-100 scale and the four figures that qualify it.
  *
  * The ruler answers what the number alone cannot, which is distance: how far
  * the company is from the next band and how far it moved since last month.
@@ -18,8 +18,8 @@ import { formatMonth, formatNumber } from '@/lib/format';
  * backed by 82 points of data is a decision, the same 33 backed by 40 is a
  * request for information.
  *
- * @param props - The company and its cash.
- * @returns The headline score, the ruler and the three qualifiers.
+ * @param props - The company, its customers' health and its cash.
+ * @returns The headline score, the ruler and the four qualifiers.
  */
 export function PulseCompanyHeader(props: PulseHeaderInput) {
   const { company } = props;
@@ -43,7 +43,7 @@ export function PulseCompanyHeader(props: PulseHeaderInput) {
         </div>
         <BandRuler value={company.pulse} previous={company.pulsePrev} />
       </div>
-      <StatGrid items={buildHeaderStats(props)} columns={3} />
+      <StatGrid items={buildHeaderStats(props)} columns={4} />
     </div>
   );
 }
