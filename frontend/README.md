@@ -256,6 +256,50 @@ it with the official source, run:
 bunx skills add heroui-inc/heroui --skill heroui-react --yes
 ```
 
+### Tablas con orden por columna
+
+Toda tabla de datos se construye con `DataTable`
+(`src/components/ui/data-table.tsx`), un envoltorio de HeroUI `Table` que
+ordena por cualquier columna al pulsar su cabecera, en ambos sentidos. Las
+columnas se declaran como datos: id, cabecera, celda y, si la columna se puede
+ordenar, un `sortBy` que devuelve el valor a comparar (`number | string | null`).
+Una fila sin valor (`null`) queda siempre al final, en cualquier sentido, para
+que «sin datos» nunca parezca la mejor ni la peor cifra. `defaultSort` fija el
+orden con el que abre la tabla y la cabecera lo muestra.
+
+```tsx
+const COLUMNS: readonly DataTableColumn<Row>[] = [
+  {
+    id: 'label',
+    header: 'Variable',
+    isRowHeader: true,
+    sortBy: (r) => r.label,
+    cell: (r) => r.label,
+  },
+  {
+    id: 'weight',
+    header: 'Peso',
+    cellClassName: 'tabular-nums',
+    sortBy: (r) => r.weight,
+    cell: (r) => `${r.weight} pts`,
+  },
+];
+
+<DataTable
+  aria-label="Variables del score"
+  columns={COLUMNS}
+  rows={rows}
+  rowId={(r) => r.key}
+  defaultSort={{ column: 'weight', direction: 'descending' }}
+/>;
+```
+
+La ordenación es pura (`sortRows` en `src/lib/table/sort.ts`, con colación
+española) y ocurre en el cliente sobre filas ya calculadas en el servidor; el
+componente no accede a la fuente de datos. Las seis tablas del producto (mes a
+mes, previsión, variables, ejemplo, precisión de la previsión y catálogo) la
+usan.
+
 ## 📜 Available Scripts
 
 ### Development

@@ -1,7 +1,7 @@
 'use client';
 
-import { Table } from '@heroui/react';
-
+import type { DataTableColumn } from '@/components/ui/data-table';
+import { DataTable } from '@/components/ui/data-table';
 import { ScoreBadge } from '@/components/ui/score-badge';
 import type { MethodExampleRow } from '@/lib/method/example';
 import { formatNumber } from '@/lib/format';
@@ -11,53 +11,65 @@ interface MethodExampleTableProps {
   rows: readonly MethodExampleRow[];
 }
 
+const COLUMNS: readonly DataTableColumn<MethodExampleRow>[] = [
+  {
+    id: 'label',
+    header: 'Variable',
+    isRowHeader: true,
+    sortBy: (row) => row.number,
+    cell: (row) => (
+      <>
+        <span className="mr-1.5 font-mono text-xs text-muted">
+          {formatNumber(row.number)}
+        </span>
+        {row.label}
+      </>
+    ),
+  },
+  {
+    id: 'pillar',
+    header: 'Pilar',
+    cellClassName: 'text-muted',
+    sortBy: (row) => row.pillarLabel,
+    cell: (row) => row.pillarLabel,
+  },
+  {
+    id: 'weight',
+    header: 'Peso',
+    cellClassName: 'tabular-nums',
+    sortBy: (row) => row.weight,
+    cell: (row) => `${formatNumber(row.weight)} pts`,
+  },
+  {
+    id: 'score',
+    header: 'Score 0-100',
+    sortBy: (row) => row.score,
+    cell: (row) => <ScoreBadge score={row.score} />,
+  },
+  {
+    id: 'contribution',
+    header: 'Aporte a PULSE',
+    cellClassName: 'tabular-nums',
+    sortBy: (row) => row.contribution,
+    cell: (row) => formatNumber(row.contribution, 2),
+  },
+];
+
 /**
  * Lists the variables that built the score of one month, with the points each
- * one added.
+ * one added, sortable by any column.
  *
  * @param props - The rows of the worked example.
  * @returns The table of contributions.
  */
 export function MethodExampleTable({ rows }: MethodExampleTableProps) {
   return (
-    <Table>
-      <Table.ScrollContainer>
-        <Table.Content aria-label="Aporte de cada variable al score del mes">
-          <Table.Header>
-            <Table.Column id="label" isRowHeader>
-              Variable
-            </Table.Column>
-            <Table.Column id="pillar">Pilar</Table.Column>
-            <Table.Column id="weight">Peso</Table.Column>
-            <Table.Column id="score">Score 0-100</Table.Column>
-            <Table.Column id="contribution">Aporte a PULSE</Table.Column>
-          </Table.Header>
-          <Table.Body items={rows}>
-            {(row) => (
-              <Table.Row id={row.key}>
-                <Table.Cell>
-                  <span className="mr-1.5 font-mono text-xs text-muted">
-                    {formatNumber(row.number)}
-                  </span>
-                  {row.label}
-                </Table.Cell>
-                <Table.Cell className="text-muted">
-                  {row.pillarLabel}
-                </Table.Cell>
-                <Table.Cell className="tabular-nums">
-                  {formatNumber(row.weight)} pts
-                </Table.Cell>
-                <Table.Cell>
-                  <ScoreBadge score={row.score} />
-                </Table.Cell>
-                <Table.Cell className="tabular-nums">
-                  {formatNumber(row.contribution, 2)}
-                </Table.Cell>
-              </Table.Row>
-            )}
-          </Table.Body>
-        </Table.Content>
-      </Table.ScrollContainer>
-    </Table>
+    <DataTable
+      aria-label="Aporte de cada variable al score del mes"
+      columns={COLUMNS}
+      rows={rows}
+      rowId={(row) => row.key}
+      defaultSort={{ column: 'contribution', direction: 'descending' }}
+    />
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import { Table } from '@heroui/react';
-
+import type { DataTableColumn } from '@/components/ui/data-table';
+import { DataTable } from '@/components/ui/data-table';
 import type { AdvisorProduct } from '@/lib/advisor/types';
 import { formatNumber, formatPercent } from '@/lib/format';
 
@@ -14,6 +14,62 @@ const FAMILY: Record<string, string> = {
   tesoreria: 'Tesorería',
 };
 
+/**
+ * Names the family of a product in Spanish.
+ *
+ * @param family - Family key of the catalogue.
+ * @returns The label, or the key when it is not a known family.
+ */
+function familyLabel(family: string): string {
+  return FAMILY[family] ?? family;
+}
+
+const COLUMNS: readonly DataTableColumn<AdvisorProduct>[] = [
+  {
+    id: 'label',
+    header: 'Producto',
+    isRowHeader: true,
+    sortBy: (row) => row.label,
+    cell: (row) => row.label,
+  },
+  {
+    id: 'family',
+    header: 'Familia',
+    cellClassName: 'text-muted',
+    sortBy: (row) => familyLabel(row.family),
+    cell: (row) => familyLabel(row.family),
+  },
+  {
+    id: 'margin',
+    header: 'Margen',
+    cellClassName: 'tabular-nums',
+    sortBy: (row) => row.baseSpreadBps,
+    cell: (row) => `${formatNumber(row.baseSpreadBps)} pb`,
+  },
+  {
+    id: 'lgd',
+    header: 'LGD',
+    cellClassName: 'tabular-nums',
+    sortBy: (row) => row.lgd,
+    cell: (row) => formatPercent(row.lgd, 0),
+  },
+  {
+    id: 'band',
+    header: 'Banda del diferencial',
+    cellClassName: 'tabular-nums',
+    sortBy: (row) => row.minSpreadBps,
+    cell: (row) =>
+      `${formatNumber(row.minSpreadBps)} a ${formatNumber(row.maxSpreadBps)} pb`,
+  },
+  {
+    id: 'tenor',
+    header: 'Plazo',
+    cellClassName: 'tabular-nums',
+    sortBy: (row) => row.tenorMonths,
+    cell: (row) => `${formatNumber(row.tenorMonths)} meses`,
+  },
+];
+
 interface MethodProductTableProps {
   products: readonly AdvisorProduct[];
   /** Rendered when the catalogue is empty. */
@@ -23,7 +79,7 @@ interface MethodProductTableProps {
 /**
  * Publishes the catalogue with the three constants that price each product:
  * its margin, the loss given default of the risk premium and the band the
- * spread is clamped to.
+ * spread is clamped to. Every column sorts; the band sorts by its lower bound.
  *
  * @param props - The products and the empty text.
  * @returns The table of the catalogue.
@@ -35,46 +91,12 @@ export function MethodProductTable({
   if (products.length === 0) {
     return <p className="text-sm text-muted">{emptyText}</p>;
   }
-  const rows = products.map((product) => ({ ...product, id: product.key }));
   return (
-    <Table>
-      <Table.ScrollContainer>
-        <Table.Content aria-label="Catálogo de productos y sus constantes de precio">
-          <Table.Header>
-            <Table.Column id="label" isRowHeader>
-              Producto
-            </Table.Column>
-            <Table.Column id="family">Familia</Table.Column>
-            <Table.Column id="margin">Margen</Table.Column>
-            <Table.Column id="lgd">LGD</Table.Column>
-            <Table.Column id="band">Banda del diferencial</Table.Column>
-            <Table.Column id="tenor">Plazo</Table.Column>
-          </Table.Header>
-          <Table.Body items={rows}>
-            {(row) => (
-              <Table.Row id={row.id}>
-                <Table.Cell>{row.label}</Table.Cell>
-                <Table.Cell className="text-muted">
-                  {FAMILY[row.family] ?? row.family}
-                </Table.Cell>
-                <Table.Cell className="tabular-nums">
-                  {formatNumber(row.baseSpreadBps)} pb
-                </Table.Cell>
-                <Table.Cell className="tabular-nums">
-                  {formatPercent(row.lgd, 0)}
-                </Table.Cell>
-                <Table.Cell className="tabular-nums">
-                  {formatNumber(row.minSpreadBps)} a{' '}
-                  {formatNumber(row.maxSpreadBps)} pb
-                </Table.Cell>
-                <Table.Cell className="tabular-nums">
-                  {formatNumber(row.tenorMonths)} meses
-                </Table.Cell>
-              </Table.Row>
-            )}
-          </Table.Body>
-        </Table.Content>
-      </Table.ScrollContainer>
-    </Table>
+    <DataTable
+      aria-label="Catálogo de productos y sus constantes de precio"
+      columns={COLUMNS}
+      rows={products}
+      rowId={(row) => row.key}
+    />
   );
 }

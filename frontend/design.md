@@ -138,7 +138,7 @@ adding it to the codebase.
 | Card              | `Card`                           | `secondary`                     | Una tarjeta por producto recomendado, que agrupa oferta, precio y motivos.                         |
 | Form field        | `ComboBox`, `Select` + `ListBox` | por defecto                     | Selector de empresa en la portada; mes y horizonte en la empresa. Cada control lleva `aria-label`. |
 | Feedback          | `Chip`                           | `soft` con `color` semántico    | Familia de producto, tipo de razón y estado de un producto descartado.                             |
-| Data              | `Table`                          | por defecto                     | Mes a mes, variables y evaluación, dentro de `Table.ScrollContainer`.                              |
+| Data              | `Table` vía `DataTable`          | por defecto                     | Toda tabla usa `DataTable`: cabeceras ordenables en ambos sentidos, «sin datos» siempre al final.  |
 | Asistente Nexo    | `Modal`, `Button`, `TextArea`    | `primary`, `secondary`, `ghost` | Diálogo lateral de 440 px; hoja inferior en móvil.                                                 |
 
 ### Nexo
@@ -255,6 +255,8 @@ patterns.
 | 2026-09-19 | Barra de confianza: relleno con datos, rayado a 45° para proxy bancario, vacío sin datos                                                                                                       | Hace visible la regla de 0,5 × cobertura y que una variable sin datos no entra como cero                                       | Equipo Pulse                                             |
 | 2026-09-19 | Barras de AUROC por variable con guía en 0,5 («sin señal») y escala 0-1 completa                                                                                                               | La distancia a 0,5 es la lectura honesta; la escala completa impide exagerar diferencias                                       | Equipo Pulse                                             |
 | 2026-09-19 | Escala de bandas y barras de AUROC en HTML con anchos en %, treemap en SVG                                                                                                                     | Tipografía real donde manda el texto; SVG donde manda la geometría                                                             | Equipo Pulse                                             |
+
+| 2026-09-19 | Todas las tablas sobre `DataTable`: columnas declaradas como datos, orden por cualquier cabecera y filas sin valor siempre al final | Una sola implementación de tabla; el lector elige el criterio y una ausencia de dato nunca se cuela como extremo | Equipo Pulse |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce
