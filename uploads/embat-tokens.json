@@ -1,0 +1,203 @@
+{
+  "name": "Embat",
+  "version": 2,
+  "color": {
+    "themes": [
+      { "id": "light", "name": "Claro" },
+      { "id": "dark", "name": "Oscuro" }
+    ],
+    "tokens": [
+      { "name": "brand-blue", "value": "#3878f6", "usage": "Azul Embat. Relleno del boton primario ('Solicitar demo'), radios y filas seleccionadas del producto, serie de saldo en graficos." },
+      { "name": "brand-sky", "value": "#8ed1fc", "usage": "Celeste de marca. Acento sobre fondo oscuro, serie de prevision y anillo de foco. Nunca como texto pequeno sobre blanco." },
+      { "name": "brand-navy", "value": "#050b2c", "usage": "Navy Embat. Tinta de la marca y base de todas las secciones oscuras." },
+
+      { "name": "navy-950", "value": "#05081c", "usage": "Fondo mas profundo del hero, donde muere el degradado." },
+      { "name": "navy-850", "value": "#0a1033", "usage": "Navy iluminado: el cuerpo del hero, donde el halo azul levanta el fondo." },
+      { "name": "navy-800", "value": "#111a46", "usage": "Superficie elevada sobre navy: panel del dashboard, tarjetas en tema oscuro." },
+      { "name": "navy-700", "value": "#1b2759", "usage": "Segundo nivel elevado y fondo del panel TellMe sobre oscuro." },
+      { "name": "navy-600", "value": "#27356e", "usage": "Bordes y separadores dentro de superficies oscuras." },
+
+      { "name": "blue-50", "value": "#eff4ff", "usage": "Fila seleccionada en tablas y fondo de avisos azules." },
+      { "name": "blue-100", "value": "#e2ebff", "usage": "Fondo de la etiqueta 'Previsiones' y de los chips azules." },
+      { "name": "blue-200", "value": "#c2d5fd", "usage": "Bordes suaves del azul y estados desactivados." },
+      { "name": "blue-300", "value": "#86aef9", "usage": "Azul legible sobre navy: enlaces y texto interactivo en tema oscuro." },
+      { "name": "blue-400", "value": "#5e93f7", "usage": "Hover del primario sobre fondo oscuro." },
+      { "name": "blue-500", "value": "{brand-blue}", "usage": "Alias del azul de marca dentro de la rampa." },
+      { "name": "blue-600", "value": "#1f5fe0", "usage": "Hover del primario en claro y azul minimo para texto normal sobre blanco (5.5:1)." },
+      { "name": "blue-700", "value": "#1747ad", "usage": "Estado pulsado del boton primario." },
+      { "name": "blue-800", "value": "#0f3580", "usage": "Azul profundo de ilustracion y del halo del hero." },
+
+      { "name": "sky-100", "value": "#e8f5fe", "usage": "Fondo de avisos informativos en claro." },
+      { "name": "sky-300", "value": "{brand-sky}", "usage": "Alias del celeste de marca dentro de la rampa." },
+      { "name": "sky-500", "value": "#2aa3f2", "usage": "Celeste utilizable sobre fondo claro solo en piezas grandes (3:1)." },
+
+      { "name": "tellme-indigo", "value": "#5b6cf5", "usage": "Arranque del degradado de TellMe (izquierda del boton 'Descubre TellMe')." },
+      { "name": "tellme-violet", "value": "#a77bf3", "usage": "Violeta de TellMe: la entrada 'TellMe IA' del menu, el icono del agente y su texto sobre oscuro." },
+      { "name": "tellme-magenta", "value": "#c05be0", "usage": "Final del degradado de TellMe." },
+      { "name": "tellme-tint", "value": "#f0e8fd", "usage": "Fondo de la etiqueta 'TellMe' dentro de tablas y celdas en tema claro." },
+
+      { "name": "white", "value": "#ffffff", "usage": "Fondo de pagina en claro, relleno del CTA de la barra sobre navy y texto sobre azul." },
+      { "name": "grey-50", "value": "#f7f8fa", "usage": "Marco de las capturas de producto y fondo de seccion alterna." },
+      { "name": "grey-100", "value": "#eff1f5", "usage": "Relleno de campos, cabeceras de tabla y filas alternas." },
+      { "name": "grey-200", "value": "#e4e7ee", "usage": "Borde por defecto y hairline entre filas (1px)." },
+      { "name": "grey-300", "value": "#cfd4e0", "usage": "Borde de controles y del CTA con contorno (3:1 sobre blanco)." },
+      { "name": "grey-400", "value": "#9aa1b4", "usage": "Texto terciario e iconos decorativos. Nunca texto continuo." },
+      { "name": "grey-500", "value": "#6e7488", "usage": "Texto secundario y parrafos de apoyo sobre blanco (5.3:1)." },
+      { "name": "grey-600", "value": "#545a6e", "usage": "Etiquetas de formulario y texto de apoyo con mas peso." },
+      { "name": "grey-900", "value": "#0d1130", "usage": "Titulares en tema claro: casi negro con matiz azul. No es negro puro." },
+
+      { "name": "surface-page", "value": { "light": "{white}", "dark": "{brand-navy}" }, "usage": "Fondo de pagina. La web alterna secciones blancas con secciones navy a sangre completa." },
+      { "name": "surface-deep", "value": { "light": "{grey-50}", "dark": "{navy-950}" }, "usage": "Marco gris que envuelve las capturas de producto en claro; el navy mas profundo en oscuro." },
+      { "name": "surface-raised", "value": { "light": "{white}", "dark": "{navy-800}" }, "usage": "Tarjetas, menus desplegables y paneles de producto." },
+      { "name": "surface-inverse", "value": { "light": "{brand-navy}", "dark": "{white}" }, "usage": "Bloque invertido dentro de una seccion clara." },
+      { "name": "surface-brand", "value": "{brand-blue}", "usage": "Relleno del boton primario." },
+      { "name": "surface-brand-subtle", "value": { "light": "{blue-50}", "dark": "{navy-800}" }, "usage": "Fila seleccionada, chip azul y bloque informativo." },
+      { "name": "surface-tellme", "value": { "light": "{tellme-tint}", "dark": "{navy-700}" }, "usage": "Superficie de todo lo que pertenece al agente: etiquetas, panel flotante, celdas enriquecidas." },
+
+      { "name": "border-subtle", "value": { "light": "{grey-200}", "dark": "#ffffff1f" }, "usage": "Borde y separador por defecto, 1px. Es el recurso principal de division: la web casi no usa sombra." },
+      { "name": "border-strong", "value": { "light": "{grey-300}", "dark": "#ffffff52" }, "usage": "Contorno del CTA secundario y de los controles de formulario." },
+
+      { "name": "text-primary", "value": { "light": "{grey-900}", "dark": "{white}" }, "usage": "Titulares y texto principal. 17.5:1 sobre surface-page en claro." },
+      { "name": "text-secondary", "value": { "light": "{grey-500}", "dark": "#c3cada" }, "usage": "Bajadas y parrafos de apoyo. 5.3:1 en claro, 11:1 en oscuro." },
+      { "name": "text-muted", "value": { "light": "{grey-400}", "dark": "#8e9ab9" }, "usage": "Metadatos y pies. Solo a 14px o mas." },
+      { "name": "text-on-brand", "value": "{white}", "usage": "Texto sobre surface-brand. Blanco sobre brand-blue da 4.05:1: usalo a 16px con peso 500 o mas; por debajo, pasa el fondo a blue-600." },
+      { "name": "text-on-inverse", "value": { "light": "{white}", "dark": "{brand-navy}" }, "usage": "Texto sobre surface-inverse." },
+      { "name": "text-link", "value": { "light": "{grey-900}", "dark": "{white}" }, "usage": "Los enlaces de seccion van en tinta, no en azul: texto mas flecha ('Gestion de Tesoreria ->'). El azul se reserva para los botones." },
+      { "name": "text-link-accent", "value": { "light": "{blue-600}", "dark": "{blue-300}" }, "usage": "Enlace azul dentro de texto corrido, cuando hay que distinguirlo del parrafo." },
+      { "name": "text-tellme", "value": { "light": "#7a4ddb", "dark": "{tellme-violet}" }, "usage": "Texto e iconos del agente: la entrada 'TellMe IA' del menu y la etiqueta TellMe en tablas." },
+
+      { "name": "interactive-primary", "value": "{brand-blue}", "usage": "Accion principal. Sobre navy el azul mantiene su valor: el boton del hero es exactamente este." },
+      { "name": "interactive-primary-hover", "value": { "light": "{blue-600}", "dark": "{blue-400}" }, "usage": "Hover de la accion principal." },
+      { "name": "interactive-primary-active", "value": { "light": "{blue-700}", "dark": "{blue-300}" }, "usage": "Estado pulsado." },
+      { "name": "interactive-disabled", "value": { "light": "{grey-200}", "dark": "{navy-600}" }, "usage": "Control deshabilitado; el texto pasa a text-muted." },
+      { "name": "focus-ring", "value": "{brand-sky}", "usage": "Anillo de foco de 2px con 2px de separacion. Visible sobre blanco, sobre navy y sobre el azul." },
+
+      { "name": "feedback-success", "value": { "light": "#12a150", "dark": "#3dd68c" }, "usage": "Conciliado, pago ejecutado, conexion bancaria activa." },
+      { "name": "feedback-warning", "value": { "light": "#b06f00", "dark": "#f7b955" }, "usage": "Pendiente de firma o de aprobacion. El tono claro esta oscurecido para poder llevar texto." },
+      { "name": "feedback-danger", "value": { "light": "#c62a2f", "dark": "#ff8a8e" }, "usage": "Error de conciliacion, pago rechazado, limite superado." },
+      { "name": "feedback-info", "value": { "light": "{blue-600}", "dark": "{blue-300}" }, "usage": "Avisos neutros del sistema." },
+
+      { "name": "data-in", "value": "#4fc08d", "usage": "Entradas de caja: barras verdes del grafico de flujo." },
+      { "name": "data-out", "value": "#e28a5f", "usage": "Salidas de caja: barras naranjas del grafico de flujo." },
+      { "name": "data-balance", "value": "{brand-blue}", "usage": "Linea de saldo consolidado." },
+      { "name": "data-forecast", "value": "{brand-sky}", "usage": "Tramo previsto de la linea de saldo, dibujado discontinuo." },
+      { "name": "data-grid", "value": { "light": "{grey-200}", "dark": "#ffffff29" }, "usage": "Ejes, rejilla y linea de cero." }
+    ]
+  },
+  "type": {
+    "families": {
+      "sans": "\"Aeonik\", \"General Sans\", \"Inter\", system-ui, \"Helvetica Neue\", Arial, sans-serif"
+    },
+    "groups": [
+      {
+        "name": "Display",
+        "family": "sans",
+        "styles": [
+          { "name": "display-xl", "fontSize": "72px", "lineHeight": 1.03, "fontWeight": 600, "letterSpacing": "-0.025em", "usage": "Titular del hero de portada. Dos lineas, con el salto elegido a mano.", "sample": "La inteligencia que impulsa tu tesoreria" },
+          { "name": "display-lg", "fontSize": "60px", "lineHeight": 1.06, "fontWeight": 600, "letterSpacing": "-0.02em", "usage": "Hero de paginas interiores, centrado y a dos o tres lineas." },
+          { "name": "display-md", "fontSize": "52px", "lineHeight": 1.1, "fontWeight": 600, "letterSpacing": "-0.02em", "usage": "Titular de apertura de seccion, centrado.", "sample": "Una plataforma para la gestion de todo el ciclo de tu tesoreria" }
+        ]
+      },
+      {
+        "name": "Titulares",
+        "family": "sans",
+        "styles": [
+          { "name": "h1", "fontSize": "40px", "lineHeight": 1.15, "fontWeight": 600, "letterSpacing": "-0.015em", "usage": "Titulo de pagina fuera del hero." },
+          { "name": "h2", "fontSize": "34px", "lineHeight": 1.2, "fontWeight": 600, "letterSpacing": "-0.01em", "usage": "Titulo del bloque 50/50 de producto.", "sample": "Tu posicion de caja completa, actualizada en tiempo real" },
+          { "name": "h3", "fontSize": "24px", "lineHeight": 1.3, "fontWeight": 600, "usage": "Titulo de tarjeta, de panel de producto o de columna del footer." },
+          { "name": "h4", "fontSize": "20px", "lineHeight": 1.35, "fontWeight": 600, "usage": "Subtitulo dentro de una tarjeta o de un panel." }
+        ]
+      },
+      {
+        "name": "Texto",
+        "family": "sans",
+        "styles": [
+          { "name": "lead", "fontSize": "20px", "lineHeight": 1.55, "fontWeight": 400, "usage": "Bajada del hero y entradilla de seccion. En oscuro va en blanco; en claro, en text-secondary." },
+          { "name": "body", "fontSize": "17px", "lineHeight": 1.6, "fontWeight": 400, "usage": "Texto corrido por defecto." },
+          { "name": "body-sm", "fontSize": "15px", "lineHeight": 1.55, "fontWeight": 400, "usage": "Descripciones de menu, notas y tablas densas." },
+          { "name": "caption", "fontSize": "13px", "lineHeight": 1.45, "fontWeight": 400, "usage": "Pies, fechas y la linea de prueba social bajo el CTA ('+500 equipos financieros confian en nosotros')." },
+          { "name": "quote", "fontSize": "20px", "lineHeight": 1.5, "fontWeight": 400, "usage": "Testimonios. Comillas tipograficas, sin cursiva." }
+        ]
+      },
+      {
+        "name": "Interfaz",
+        "family": "sans",
+        "styles": [
+          { "name": "nav", "fontSize": "16px", "lineHeight": 1, "fontWeight": 500, "usage": "Entradas de la barra de navegacion, con chevron de 16px." },
+          { "name": "button", "fontSize": "16px", "lineHeight": 1, "fontWeight": 500, "usage": "Texto de boton. Peso medio, nunca bold ni mayusculas." },
+          { "name": "button-sm", "fontSize": "14px", "lineHeight": 1, "fontWeight": 500, "usage": "Boton compacto dentro de paneles de producto." },
+          { "name": "label", "fontSize": "14px", "lineHeight": 1.2, "fontWeight": 500, "usage": "Etiquetas de formulario, pestanas y cabeceras de tabla." },
+          { "name": "overline", "fontSize": "13px", "lineHeight": 1.2, "fontWeight": 600, "letterSpacing": "0.06em", "usage": "Encabezado de categoria en MAYUSCULAS dentro del megamenu y de las tablas. Aplica text-transform: uppercase.", "sample": "CUENTA DE PAGO" }
+        ]
+      },
+      {
+        "name": "Cifras",
+        "family": "sans",
+        "styles": [
+          { "name": "metric-xl", "fontSize": "44px", "lineHeight": 1.05, "fontWeight": 600, "letterSpacing": "-0.02em", "usage": "Cifra protagonista de un panel ('20', '230'). Misma familia que el resto: aqui no hay monoespaciada.", "sample": "230" },
+          { "name": "metric", "fontSize": "32px", "lineHeight": 1.1, "fontWeight": 600, "letterSpacing": "-0.01em", "usage": "KPI secundario dentro de una tarjeta." },
+          { "name": "amount", "fontSize": "15px", "lineHeight": 1.5, "fontWeight": 400, "usage": "Importes en tabla, alineados a la derecha con font-variant-numeric: tabular-nums." }
+        ]
+      }
+    ]
+  },
+  "spacing": {
+    "note": "Escala de 4px. Las secciones respiran mucho: el ritmo vertical de la web va de 96 a 128px.",
+    "tokens": [
+      { "name": "space-1", "value": "4px", "usage": "Separacion entre icono y etiqueta." },
+      { "name": "space-2", "value": "8px", "usage": "Hueco entre chip y texto; separacion del anillo de foco." },
+      { "name": "space-3", "value": "12px", "usage": "Padding vertical de control compacto." },
+      { "name": "space-4", "value": "16px", "usage": "Padding de celda de tabla y hueco base." },
+      { "name": "space-5", "value": "20px", "usage": "Separacion entre titulo y parrafo dentro de un bloque." },
+      { "name": "space-6", "value": "24px", "usage": "Padding interior de panel y gutter de rejilla estrecha." },
+      { "name": "space-8", "value": "32px", "usage": "Padding de tarjeta, gutter principal y margen lateral de pagina." },
+      { "name": "space-10", "value": "40px", "usage": "Separacion entre grupos dentro de una columna." },
+      { "name": "space-12", "value": "48px", "usage": "Espacio entre el titular de seccion y su contenido." },
+      { "name": "space-16", "value": "64px", "usage": "Separacion entre las dos mitades del bloque 50/50; ritmo de seccion en movil." },
+      { "name": "space-20", "value": "80px", "usage": "Padding vertical de seccion en tablet." },
+      { "name": "space-24", "value": "96px", "usage": "Padding vertical de seccion en escritorio." },
+      { "name": "space-32", "value": "128px", "usage": "Aire del hero y de los bloques oscuros a sangre." }
+    ]
+  },
+  "radius": {
+    "note": "Radios contenidos: 8px en botones y 12-16px en paneles. La marca es blanda, no redonda.",
+    "tokens": [
+      { "name": "radius-xs", "value": "4px", "usage": "Barras de grafico, casillas y marcadores." },
+      { "name": "radius-sm", "value": "6px", "usage": "Chips, contadores y controles pequenos del producto." },
+      { "name": "radius-md", "value": "8px", "usage": "Botones, inputs y selectores. Es el radio mas visible de la marca." },
+      { "name": "radius-lg", "value": "12px", "usage": "Tarjetas, menus desplegables y paneles internos." },
+      { "name": "radius-xl", "value": "16px", "usage": "Marco de las capturas de producto y panel del dashboard." },
+      { "name": "radius-2xl", "value": "24px", "usage": "Bloques de medios grandes y contenedores con esquinas." },
+      { "name": "radius-pill", "value": "999px", "usage": "Etiquetas de estado y selector de idioma." }
+    ]
+  },
+  "shadow": {
+    "note": "La web casi no usa sombra: separa con borde y con fondo. Reserva estas para lo que flota de verdad.",
+    "tokens": [
+      { "name": "shadow-xs", "value": { "light": "0 1px 2px 0 #0d113014", "dark": "0 1px 2px 0 #00000052" }, "usage": "Elevacion minima de un control." },
+      { "name": "shadow-sm", "value": { "light": "0 2px 8px 0 #0d113014", "dark": "0 2px 8px 0 #00000052" }, "usage": "Menu desplegable y tarjeta al hover." },
+      { "name": "shadow-lg", "value": { "light": "0 24px 60px -16px #0d113029", "dark": "0 24px 60px -16px #00000080" }, "usage": "Panel del dashboard flotando sobre el hero, y modales." },
+      { "name": "shadow-tellme", "value": "0 16px 40px -12px #5b6cf566", "usage": "Halo del panel flotante de TellMe. Solo para el agente." }
+    ]
+  },
+  "gradient": {
+    "note": "Tres degradados, y solo tres. El violeta pertenece a TellMe: fuera del agente, nada de azul-violeta.",
+    "tokens": [
+      { "name": "gradient-tellme", "value": "linear-gradient(97deg, #5b6cf5 0%, #c05be0 100%)", "usage": "Boton y acentos del agente ('Descubre TellMe'). No se usa en ningun otro CTA." },
+      { "name": "gradient-hero", "value": "radial-gradient(120% 95% at 72% 8%, #16266b 0%, #0a1033 48%, #05081c 100%)", "usage": "Fondo del hero de portada: halo azul arriba a la derecha que cae a navy casi negro." },
+      { "name": "gradient-beam", "value": "linear-gradient(196deg, #ffffff00 38%, #93b4ff2e 50%, #ffffff00 62%)", "usage": "Haz de luz diagonal que cruza las secciones oscuras de TellMe. Uno por seccion, muy tenue." }
+    ]
+  },
+  "layout": {
+    "note": "Contenido centrado y ancho, con margenes generosos; el texto largo se estrecha.",
+    "tokens": [
+      { "name": "container-max", "value": "1240px", "usage": "Ancho maximo del contenido de seccion." },
+      { "name": "container-wide", "value": "1440px", "usage": "Ancho de la barra de navegacion y de las capturas que se salen de la reticula." },
+      { "name": "container-prose", "value": "720px", "usage": "Ancho maximo de texto corrido y de las bajadas centradas." },
+      { "name": "gutter", "value": "32px", "usage": "Hueco entre columnas." },
+      { "name": "page-inset", "value": "32px", "usage": "Margen lateral de la pagina." },
+      { "name": "nav-height", "value": "80px", "usage": "Altura de la barra de navegacion." },
+      { "name": "focus-offset", "value": "2px", "usage": "Separacion entre el elemento y su anillo de foco." }
+    ]
+  }
+}
