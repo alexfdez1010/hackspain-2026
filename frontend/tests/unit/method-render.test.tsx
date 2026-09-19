@@ -159,10 +159,10 @@ describe('the method page renders on the server with the real export', () => {
         emptyText="sin validación"
       />,
     );
-    expect(markup).toContain('+6 m');
-    expect(markup).toContain('10,34');
-    expect(markup).toContain('12,35');
-    expect(markup).toContain('16,3 %');
+    expect(markup).toContain('+12 m');
+    expect(markup).toContain('11,71');
+    expect(markup).toContain('14,27');
+    expect(markup).toContain('18,0 %');
   });
 
   it('stacks the price and publishes the catalogue', () => {

@@ -16,12 +16,12 @@ Producto de una sola empresa: cada pantalla muestra el PULSE de la empresa
 abierta y nunca una vista global de la cartera. Sin base de datos y sin backend
 obligatorio.
 
-| Ruta                            | Qué muestra                                                                                                                                                                                |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/`                             | Redirige a la empresa de demo. No hay portada: la empresa se cambia desde el selector de la cabecera, que mantiene la sección abierta.                                                     |
+| Ruta                            | Qué muestra                                                                                                                                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                             | Redirige a la empresa de demo. No hay portada: la empresa se cambia desde el selector de la cabecera, que mantiene la sección abierta.                                                      |
 | `/company/[id]`                 | PULSE de la empresa: score del mes, trayectoria con previsión +1..+12 m y banda p10-p90, mapa de calor de las 11 variables, mes a mes, evolución de pilares, explorador mensual y desglose. |
-| `/company/[id]/recommendations` | Advisor: productos financieros que encajan, importe, tipo y por qué; precio desglosado, palancas, descartados, plan de mejora, riesgo y datos usados.                                      |
-| `/method?company=[id]`          | Método: anatomía de los 100 puntos, variables y pesos, pipeline, confianza, ejemplo real, evaluación del score y de la previsión, y cómo se pone precio a un producto.                     |
+| `/company/[id]/recommendations` | Advisor: productos financieros que encajan, importe, tipo y por qué; precio desglosado, palancas, descartados, plan de mejora, riesgo y datos usados.                                       |
+| `/method?company=[id]`          | Método: anatomía de los 100 puntos, variables y pesos, pipeline, confianza, ejemplo real, evaluación del score y de la previsión, y cómo se pone precio a un producto.                      |
 
 Las empresas y los grupos del export son anónimos (`COMP_0001`, `GROUP_0147`).
 La interfaz los muestra con el nombre de una empresa o grupo famoso elegido por

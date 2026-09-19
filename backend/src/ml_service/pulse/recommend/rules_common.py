@@ -113,27 +113,27 @@ def already_holds(s: CompanySnapshot, dataset_type: str, label: str) -> Reason |
 def trend_reason(
     s: CompanySnapshot, when_declining: float, when_improving: float
 ) -> Reason | None:
-    """Points for the six-month outlook (positive ``when_declining`` favours defensive products)."""
+    """Points for the one-year outlook (positive ``when_declining`` favours defensive products)."""
     delta = s.forecast_delta
     if delta is None:
         return None
     if delta <= cfg.TREND_DECLINE_POINTS:
         return Reason(
             "tendencia_bajista",
-            f"Prevemos que tu PULSE baje {abs(delta):.0f} puntos en seis meses.",
+            f"Prevemos que tu PULSE baje {abs(delta):.0f} puntos en un año.",
             "pro" if when_declining > 0 else "contra",
             when_declining,
             value=delta,
-            unit="puntos PULSE a +6 m",
+            unit="puntos PULSE a +12 m",
         )
     if delta >= cfg.TREND_IMPROVE_POINTS:
         return Reason(
             "tendencia_alcista",
-            f"Prevemos que tu PULSE suba {delta:.0f} puntos en seis meses.",
+            f"Prevemos que tu PULSE suba {delta:.0f} puntos en un año.",
             "pro" if when_improving > 0 else "contra",
             when_improving,
             value=delta,
-            unit="puntos PULSE a +6 m",
+            unit="puntos PULSE a +12 m",
         )
     return None
 

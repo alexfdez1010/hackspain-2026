@@ -22,7 +22,7 @@ REFERENCE_RATE_LABEL = "Euríbor 12 m"
 MAX_RISK_PREMIUM_BPS = 900
 MAX_DATA_UNCERTAINTY_BPS = 75
 """Premium charged when ``confidence`` is 0; scales linearly with (1 - confidence)."""
-TREND_DECLINE_POINTS = -5.0  # forecast +6 m vs today, PULSE points
+TREND_DECLINE_POINTS = -5.0  # forecast +12 m vs today, PULSE points
 TREND_IMPROVE_POINTS = 5.0
 TREND_DECLINE_BPS = 25
 TREND_IMPROVE_BPS = -15

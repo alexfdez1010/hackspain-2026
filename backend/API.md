@@ -89,7 +89,7 @@ Definición del score (pilares, variables, pesos, horizontes de forecast) y una 
   "generated_for": "HackSpain 2026 · Embat PULSE",
   "score_name": "PULSE",
   "score_expansion": "Payment, Underwriting, Liquidity & Solvency Estimate",
-  "horizons": [1, 2, 3, 4, 5, 6],                 // meses de forecast disponibles
+  "horizons": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],   // meses de forecast disponibles
   "last_month": "2026-08",
   "pillars": [
     {"key": "liquidez", "label": "Liquidez", "weight": 26},
@@ -112,7 +112,7 @@ Definición del score (pilares, variables, pesos, horizontes de forecast) y una 
       "pulse_prev": 17.88,
       "confidence": 0.82,                         // parte del score respaldada por datos, 0-1
       "pillars": {"liquidez": 34.3, "deuda": 34.0, "pago": 51.1, "cobro": 54.6},
-      "forecast_6m": {"pulse_pred": 31.07, "pulse_p10": 15.58, "pulse_p90": 48.35}
+      "forecast_12m": {"pulse_pred": 31.07, "pulse_p10": 15.58, "pulse_p90": 48.35}   // previsión a un año (último horizonte)
     }
   ]
 }
@@ -156,7 +156,7 @@ Historia mensual del PULSE de una empresa, con el desglose por variable y contri
       "delta": -0.17,               // cambio previsto de PULSE; las contribuciones suman delta
       "contributions": {"cash_days": 0.37, "...": 0, "contexto": -0.41, "base": -0.64}
     }
-    // ... horizontes 2 a 6
+    // ... horizontes 2 a 12
   ]
 }
 ```

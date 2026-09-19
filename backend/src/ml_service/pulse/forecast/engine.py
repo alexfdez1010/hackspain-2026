@@ -1,4 +1,4 @@
-"""ForecastEngine: fit one HorizonModel per horizon and emit the forecast table."""
+"""ForecastEngine: fit the single horizon-aware model and emit the forecast table."""
 
 from __future__ import annotations
 
@@ -10,8 +10,13 @@ import polars as pl
 
 from ml_service.pulse.forecast.attribution import BASE, CONTEXT, aggregate
 from ml_service.pulse.forecast.config import HORIZONS
-from ml_service.pulse.forecast.features import TARGET_PREFIX, feature_columns, to_matrix
-from ml_service.pulse.forecast.model import HorizonModel
+from ml_service.pulse.forecast.features import (
+    feature_columns,
+    stack_horizons,
+    to_matrix,
+    with_horizon,
+)
+from ml_service.pulse.forecast.model import ForecastModel
 from ml_service.pulse.variables import VARIABLES
 
 KEY = ["company_id", "month"]
@@ -19,22 +24,23 @@ KEY = ["company_id", "month"]
 
 @dataclass
 class ForecastEngine:
-    """Frozen horizon models; forecasts are PULSE now plus the predicted change, clipped to 0-100."""
+    """One frozen model; forecasts are PULSE now plus the predicted change, clipped to 0-100."""
 
-    models: dict[int, HorizonModel]
+    model: ForecastModel
 
     @classmethod
-    def fit(cls, frame: pl.DataFrame, params: dict | None = None) -> ForecastEngine:
+    def fit(
+        cls, frame: pl.DataFrame, params: dict | None = None, **kwargs
+    ) -> ForecastEngine:
+        """Train on every (company-month, horizon) pair with an observed target.
+
+        The p10-p90 band is calibrated out of fold by ``group_id`` when the frame
+        carries it; ``kwargs`` (for example ``rounds``) reach ``ForecastModel.fit``.
+        """
         features = feature_columns(frame)
-        models = {}
-        for h in HORIZONS:
-            rows = frame.filter(pl.col(f"{TARGET_PREFIX}{h}").is_not_null())
-            X, y = (
-                to_matrix(rows, features),
-                rows[f"{TARGET_PREFIX}{h}"].to_numpy().astype(float),
-            )
-            models[h] = HorizonModel.fit(X, y, h, features, params)
-        return cls(models)
+        X, y, keys = stack_horizons(frame, features)
+        groups = keys["group_id"].to_numpy() if "group_id" in keys.columns else None
+        return cls(ForecastModel.fit(X, y, features, params, groups, **kwargs))
 
     def predict(self, frame: pl.DataFrame, latest_only: bool = True) -> pl.DataFrame:
         """One row per (company, month, horizon) with the forecast, its band and the decomposition."""
@@ -47,11 +53,10 @@ class ForecastEngine:
         return pl.concat(parts).sort(KEY + ["horizon"])
 
     def _predict_horizon(self, rows: pl.DataFrame, h: int) -> pl.DataFrame:
-        model = self.models[h]
-        X = to_matrix(rows, model.features)
-        delta, lo, hi = model.predict(X)
+        X = to_matrix(with_horizon(rows, h), self.model.features)
+        delta, lo, hi = self.model.predict(X)
         now = rows["pulse"].to_numpy().astype(float)
-        parts = aggregate(model.contributions(X), model.features)
+        parts = aggregate(self.model.contributions(X), self.model.features)
         clip = lambda a: np.clip(a, 0, 100)
         out = rows.select(KEY, pulse_now=pl.col("pulse")).with_columns(
             pl.lit(h).alias("horizon"),
@@ -68,9 +73,8 @@ class ForecastEngine:
         return out.with_columns(contrib_cols)
 
     def save(self, models_dir: Path) -> None:
-        for model in self.models.values():
-            model.save(models_dir)
+        self.model.save(models_dir)
 
     @classmethod
     def load(cls, models_dir: Path) -> ForecastEngine:
-        return cls({h: HorizonModel.load(models_dir, h) for h in HORIZONS})
+        return cls(ForecastModel.load(models_dir))

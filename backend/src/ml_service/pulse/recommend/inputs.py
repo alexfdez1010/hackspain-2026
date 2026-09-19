@@ -28,12 +28,12 @@ def _num(x) -> float | None:
 
 
 def _outlooks(forecast: pl.DataFrame) -> dict[str, Outlook]:
-    h6 = forecast.filter(pl.col("horizon") == forecast["horizon"].max())
+    last = forecast.filter(pl.col("horizon") == forecast["horizon"].max())
     return {
         r["company_id"]: Outlook(
             _num(r["pulse_pred"]), _num(r["pulse_p10"]), _num(r["pulse_p90"])
         )
-        for r in h6.to_dicts()
+        for r in last.to_dicts()
     }
 
 

@@ -192,7 +192,7 @@ describe('StaticPulseSource', () => {
     ).toBe(100);
     expect(meta.evaluation.score.auroc).toBeGreaterThan(0.5);
     expect(meta.evaluation.forecast.map((item) => item.horizon)).toEqual([
-      1, 2, 3, 4, 5, 6,
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
     ]);
     expect(meta.evaluation.risk.auroc).toBeGreaterThan(0.5);
   });
@@ -201,7 +201,7 @@ describe('StaticPulseSource', () => {
     const company = await source.getCompany(PULSE_DEMO_COMPANY_ID);
     expect(company?.series.length).toBeGreaterThan(0);
     expect(company?.forecast.map((point) => point.horizon)).toEqual([
-      1, 2, 3, 4, 5, 6,
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
     ]);
     const withLines = await source.getCompany(
       PULSE_DEMO_CREDIT_LINE_COMPANY_ID,

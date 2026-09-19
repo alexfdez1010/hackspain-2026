@@ -12,7 +12,6 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
-
 from balances_outliers import column_summary, flag_outliers, iqr_bounds, load_balances
 
 OUTPUT_DIR = Path(__file__).resolve().parent / "output"
@@ -21,7 +20,10 @@ COLORS = {"cash": "#4C72B0", "credit_line": "#DD8452"}
 
 def plot_missingness(df: pd.DataFrame) -> None:
     """Bar chart of % missing values per numeric column."""
-    pct = df[["balance", "available", "granted", "liquidity", "countable"]].isna().mean() * 100
+    pct = (
+        df[["balance", "available", "granted", "liquidity", "countable"]].isna().mean()
+        * 100
+    )
     fig, ax = plt.subplots(figsize=(7, 4))
     pct.sort_values().plot.barh(ax=ax, color="#55A868")
     ax.set_xlabel("% missing")
@@ -117,10 +119,19 @@ def plot_liquidity_vs_granted(df: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(7, 6))
     ax.scatter(sub["granted"].abs(), sub["liquidity"], s=10, alpha=0.4, color="#8172B2")
     limit = sub["granted"].abs().max()
-    ax.plot([0, limit], [0, limit], color="black", linewidth=1, linestyle="--", label="liquidity = limit")
+    ax.plot(
+        [0, limit],
+        [0, limit],
+        color="black",
+        linewidth=1,
+        linestyle="--",
+        label="liquidity = limit",
+    )
     ax.set_xlabel("|granted| (credit limit)")
     ax.set_ylabel("liquidity (headroom)")
-    ax.set_title("Credit line headroom vs limit\n(points above the line are inconsistent)")
+    ax.set_title(
+        "Credit line headroom vs limit\n(points above the line are inconsistent)"
+    )
     ax.legend()
     fig.tight_layout()
     fig.savefig(OUTPUT_DIR / "06_liquidity_vs_granted.png", dpi=150)

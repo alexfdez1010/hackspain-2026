@@ -29,6 +29,6 @@ def summary(request: Request) -> dict:
 
 @router.get("/companies/{company_id}")
 def company(company_id: str, request: Request) -> dict:
-    """Monthly PULSE series with variables and contributions, plus the +1..+6 month forecast."""
+    """Monthly PULSE series with variables and contributions, plus the +1..+12 month forecast."""
     safe = Path(company_id).name
     return _read(_web_dir(request) / "companies" / f"{safe}.json")

@@ -1,7 +1,7 @@
 # backend (ml-service)
 
 Python service of HackSpain 2026. It implements PULSE, the transparent
-0-100 financial-health score for SMEs, its 6-month forecast and the PULSE
+0-100 financial-health score for SMEs, its one-year forecast and the PULSE
 Advisor (priced product recommendations), and serves them over HTTP to the web
 app in [`../frontend`](../frontend).
 
@@ -34,7 +34,7 @@ make pre-commit        # Unit tests + format + lint
 
 make pulse-all         # build (clean + panel) -> fit -> evaluate
 make pulse-score RAW=/path/to/hidden_test   # Score an unseen dataset folder
-make pulse-forecast-fit && make pulse-forecast   # +1..+6 month forecasts
+make pulse-forecast-fit && make pulse-forecast   # +1..+12 month forecasts
 make pulse-reco-all    # fit the risk model + build the Advisor export
 make api-dev           # uvicorn --reload on :8000
 ```
@@ -195,54 +195,78 @@ the cobro variables came from invoices (0.771), bank proxies (0.841) or nothing
 
 ## Forecast layer (`pulse/forecast/`)
 
-Monthly PULSE forecasts for +1..+6 months, each with a p10-p90 band and an
-exact decomposition of the predicted change into the 11 variables.
+Monthly PULSE forecasts for +1..+12 months (one year), each with a p10-p90 band
+and an exact decomposition of the predicted change into the 11 variables.
 
 ```bash
-uv run python -m ml_service.pulse.forecast.cli fit        # 6 horizon models -> data/pulse/models/forecast/
+uv run python -m ml_service.pulse.forecast.cli fit        # one model -> data/pulse/models/forecast/{model.txt,model.json}
 uv run python -m ml_service.pulse.forecast.cli evaluate   # OOF vs persistence/reversion -> forecast_evaluation.json
 uv run python -m ml_service.pulse.forecast.cli predict [--raw-dir DIR] [--all-months]   # -> data/pulse/forecast.{parquet,csv}
 uv run python -m ml_service.pulse.export_web              # -> data/pulse/web/ (+ mirror in ../frontend/src/data/pulse)
 # summary.json also carries an `evaluation` block (score, forecast and risk figures) read by the web app's method page
 ```
 
-**Design.** One LightGBM model per horizon predicts the *change* of `pulse`
-(`objective=huber`), plus two quantile boosters (α = 0.1 / 0.9) for the band, so
-persistence is the starting point and the model only learns deviations. Inputs
-(162 columns, `forecast/features.py`): the 11 variables and their percentiles,
-Δ1/Δ3/Δ6 and 6-month volatility of every level, the four pillars and PULSE itself,
-cash-account flows (inflows, net 3m/6m, growth), the invoice calendar (AR/AP
-already due within 1/3/6 months, open overdue amounts), stress narratives
-(returned debits, overdrafts), intragroup inflow share, group mean PULSE and
-observation length. The per-feature contributions returned by LightGBM
-(`pred_contrib`) are folded into the 11 variables (`forecast/attribution.py`):
-component-derived features go to their variable, pillar-level features are split
-by weight inside the pillar, PULSE-level features across all variables by weight,
-and everything else is reported as `contexto`; the bias is `base`. The parts sum
-to `delta` to 1e-14. The forecast is PULSE now plus `delta`, clipped to 0-100, and
-the band is built the same way from the two quantile boosters.
+**Design.** A **single LightGBM model** (`objective=huber`) predicts the *change*
+of `pulse` between month *t* and *t+h*; the horizon `h` is an ordinary input
+column (`HORIZON_FEATURE`), so the training set is every (company-month, horizon)
+pair with an observed target stacked together (`features.stack_horizons`) and
+extending the horizon is a change in `config.HORIZONS`, not a new model. Persistence
+is the starting point and the model only learns deviations. The p10-p90 band is
+**conformal**: the 10th/90th percentile of the out-of-fold residual at each horizon
+(GroupKFold(5) on `group_id`, computed inside `fit`) is added to the central
+forecast, which keeps the 80 % coverage honest without extra quantile models; the
+offsets are stored in `model.json` and grow with the horizon (≈ ±8 points at +1,
+≈ −19/+18 at +12). Inputs (`forecast/features.py`): the 11 variables and their
+percentiles, Δ1/Δ3/Δ6 and 6-month volatility of every level, the four pillars and
+PULSE itself, cash-account flows (inflows, net 3m/6m, growth), the invoice calendar
+(AR/AP already due within 1/3/6 months, open overdue amounts), stress narratives
+(returned debits, overdrafts), intragroup inflow share, group mean PULSE,
+observation length and the horizon. The per-feature contributions returned by
+LightGBM (`pred_contrib`) are folded into the 11 variables
+(`forecast/attribution.py`): component-derived features go to their variable,
+pillar-level features are split by weight inside the pillar, PULSE-level features
+across all variables by weight, everything else is reported as `contexto`, and the
+bias plus the horizon input (the drift the model expects at that distance) as
+`base`. The parts sum to `delta` to 1e-14. The forecast is PULSE now plus `delta`,
+clipped to 0-100, and the band is clipped the same way.
 
 **Evaluation** (`data/pulse/forecast_evaluation.json`, GroupKFold(5) on
-`group_id`, MAE in points of PULSE). "Reversion" is a one-parameter
-mean-reversion baseline fitted out of fold; anything that does not beat it is
-just percentiles drifting back to the middle.
+`group_id`, one fit of the single model per fold, MAE in points of PULSE).
+"Reversion" is a one-parameter mean-reversion baseline fitted out of fold;
+anything that does not beat it is just percentiles drifting back to the middle.
+Over the 169,691 stacked (company-month, horizon) rows the model's MAE is 9.29
+against 11.11 for persistence (+16.4 %) and 10.59 for reversion (+12.3 %), with
+80.0 % of the outcomes inside the p10-p90 band.
 
 | horizon | rows | persist | reversion | ML | vs persist | vs reversion | direction on moves > 15 | recall declines | recall improvements | p10-p90 coverage |
 |---|---|---|---|---|---|---|---|---|---|---|
-| +1 | 20,932 | 5.72 | 5.88 | **5.32** | +7.0 % | +9.7 % | 0.84 | 0.13 | 0.00 | 0.77 |
-| +2 | 19,647 | 8.47 | 8.36 | **7.43** | +12.2 % | +11.1 % | 0.87 | 0.47 | 0.05 | 0.76 |
-| +3 | 18,362 | 10.52 | 9.97 | **8.86** | +15.8 % | +11.2 % | 0.87 | 0.61 | 0.18 | 0.76 |
-| +4 | 17,077 | 11.20 | 10.52 | **9.37** | +16.4 % | +11.0 % | 0.87 | 0.63 | 0.17 | 0.75 |
-| +5 | 15,795 | 11.83 | 10.99 | **9.90** | +16.4 % | +10.0 % | 0.87 | 0.64 | 0.16 | 0.74 |
-| +6 | 14,514 | 12.35 | 11.39 | **10.33** | +16.4 % | +9.4 % | 0.87 | 0.66 | 0.16 | 0.74 |
+| +1 | 20,932 | 5.72 | 5.89 | **5.45** | +4.6 % | +7.4 % | 0.85 | 0.45 | 0.03 | 0.80 |
+| +2 | 19,647 | 8.47 | 8.35 | **7.39** | +12.8 % | +11.5 % | 0.87 | 0.55 | 0.19 | 0.80 |
+| +3 | 18,362 | 10.52 | 9.99 | **8.70** | +17.3 % | +12.9 % | 0.89 | 0.63 | 0.31 | 0.80 |
+| +4 | 17,077 | 11.20 | 10.53 | **9.16** | +18.2 % | +13.0 % | 0.89 | 0.66 | 0.30 | 0.80 |
+| +5 | 15,795 | 11.83 | 11.02 | **9.66** | +18.3 % | +12.3 % | 0.89 | 0.67 | 0.29 | 0.80 |
+| +6 | 14,514 | 12.35 | 11.41 | **10.10** | +18.2 % | +11.5 % | 0.89 | 0.68 | 0.27 | 0.80 |
+| +7 | 13,240 | 12.70 | 11.66 | **10.45** | +17.7 % | +10.4 % | 0.88 | 0.67 | 0.28 | 0.80 |
+| +8 | 12,044 | 12.97 | 11.87 | **10.75** | +17.1 % | +9.4 % | 0.88 | 0.68 | 0.28 | 0.80 |
+| +9 | 10,980 | 13.27 | 12.06 | **11.01** | +17.0 % | +8.7 % | 0.87 | 0.68 | 0.26 | 0.80 |
+| +10 | 9,980 | 13.67 | 12.30 | **11.33** | +17.1 % | +7.9 % | 0.86 | 0.69 | 0.22 | 0.80 |
+| +11 | 9,018 | 14.00 | 12.46 | **11.55** | +17.5 % | +7.3 % | 0.86 | 0.70 | 0.22 | 0.80 |
+| +12 | 8,102 | 14.27 | 12.62 | **11.71** | +18.0 % | +7.2 % | 0.87 | 0.71 | 0.22 | 0.80 |
 
-The models see declines far better than recoveries (recall 0.66 vs 0.16 at six
-months): read the forecast as an early warning, not as a promise of improvement.
+The single model matches or beats the previous one-model-per-horizon setup at
+every horizon from +2 on (for example 10.10 vs 10.33 at +6) and doubles the recall
+of large improvements, because the horizons share what they learn; it gives up
+about 0.1 points at +1. The temporal backtest (fit on months up to 2025-08, test
+from 2025-09) tells the same story: MAE 5.42 vs 5.69 persistence at +1, 10.51 vs
+12.14 at +6, 12.72 vs 14.25 at +11 (+12 has no observable future after the cut).
+Declines are still seen far better than recoveries (recall 0.71 vs 0.22 at one
+year): read the forecast as an early warning, not as a promise of improvement.
 A preliminary experiment forecasting each pillar separately showed that *cobro*
 and *pago* pillar forecasts do not beat the reversion baseline, which is why only
 PULSE itself is modelled and the breakdown comes from attribution rather than
-from per-variable models. Horizon models are independent, so a company's
-trajectory across horizons is not forced to be monotone.
+from per-variable models. The `horizon` input ranks fourth by gain (4.6 %) after
+`pulse`, `pillar_cobro` and `pulse_d3`. Horizons are scored independently at
+prediction time, so a company's trajectory is not forced to be monotone.
 
 **API.** `GET /api/pulse/summary` and `GET /api/pulse/companies/{company_id}`
 serve the files written by `export_web.py` (`routes_pulse.py`); the contract is
@@ -267,7 +291,7 @@ make pulse-reco-all                                     # fit + build
 
 Inputs (`recommend/inputs.py`, `inputs_raw.py`): the last month of
 `scored_panel.parquet` (PULSE, pillars, the 11 variables with raw values,
-`cash_end`, trailing outflows/collections/debt service), the +6 month forecast,
+`cash_end`, trailing outflows/collections/debt service), the +12 month forecast,
 the company's current facilities from `debt_products.csv` and
 `debt_schedule_config.csv` (line limit and drawn, loans outstanding, median
 rate) and its open invoices from the cleaned ERP data (open and *current*
@@ -304,7 +328,7 @@ Thresholds live in `recommend/config.py`.
 diferencial = margen del producto             (90-200 pb by product)
             + prima de riesgo                 = PD12m × 25 % (stress -> default) × LGD, cap 900 pb
             + prima por incertidumbre de datos = 75 pb × (1 − confidence)
-            + ajuste por tendencia            (+25 pb if the +6 m forecast drops ≥ 5 points, −15 pb if it rises ≥ 5)
+            + ajuste por tendencia            (+25 pb if the +12 m forecast drops ≥ 5 points, −15 pb if it rises ≥ 5)
             [+ 25 pb si la línea actual está al ≥ 90 %]
 tipo        = tipo sin riesgo + diferencial        (floored at 0)
 ```

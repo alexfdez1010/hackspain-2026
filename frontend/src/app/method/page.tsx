@@ -143,11 +143,11 @@ export default async function MethodPage({ searchParams }: MethodPageProps) {
       >
         <div className="flex flex-col gap-5">
           <p className="max-w-3xl text-sm text-muted">
-            Un único modelo predice el cambio del PULSE a cualquier horizonte
-            de +1 a +{formatNumber(lastHorizon)} meses: el horizonte es una
-            entrada más, así que ampliar la previsión no exige entrenar modelos
-            nuevos. El punto de partida es que el score se quede donde está, y
-            la banda p10-p90 se calibra con los errores fuera de muestra de cada
+            Un único modelo predice el cambio del PULSE a cualquier horizonte de
+            +1 a +{formatNumber(lastHorizon)} meses: el horizonte es una entrada
+            más, así que ampliar la previsión no exige entrenar modelos nuevos.
+            El punto de partida es que el score se quede donde está, y la banda
+            p10-p90 se calibra con los errores fuera de muestra de cada
             horizonte. Las contribuciones del modelo se reparten entre las{' '}
             {formatNumber(meta.variables.length)} variables más «contexto» y
             «base», de forma que las partes suman exactamente el cambio

@@ -7,7 +7,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "raw" / "xray" / "balances.csv"
+DATA_PATH = (
+    Path(__file__).resolve().parent.parent / "data" / "raw" / "xray" / "balances.csv"
+)
 NUMERIC_COLS = ["balance", "available", "granted", "liquidity", "countable"]
 
 
@@ -36,7 +38,9 @@ def iqr_bounds(series: pd.Series, k: float = 1.5) -> tuple[float, float]:
     return q1 - k * iqr, q3 + k * iqr
 
 
-def flag_outliers(df: pd.DataFrame, column: str, group_col: str | None = None) -> pd.Series:
+def flag_outliers(
+    df: pd.DataFrame, column: str, group_col: str | None = None
+) -> pd.Series:
     """Flag IQR outliers in ``column``, optionally fencing per ``group_col``.
 
     Args:
@@ -66,7 +70,11 @@ def column_summary(df: pd.DataFrame) -> pd.DataFrame:
     for col in NUMERIC_COLS:
         s = df[col].dropna()
         missing = df[col].isna().sum()
-        row = {"column": col, "n_present": len(s), "pct_missing": 100 * missing / len(df)}
+        row = {
+            "column": col,
+            "n_present": len(s),
+            "pct_missing": 100 * missing / len(df),
+        }
         if s.empty:
             rows.append(
                 row

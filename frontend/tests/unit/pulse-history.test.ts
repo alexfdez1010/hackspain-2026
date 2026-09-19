@@ -176,6 +176,6 @@ describe('the bundled export feeds the month-by-month view', () => {
     expect(pillars[0].points).toHaveLength(24);
     expect(
       buildForecastRows(company?.forecast ?? [], company?.pulse ?? null),
-    ).toHaveLength(6);
+    ).toHaveLength(12);
   });
 });

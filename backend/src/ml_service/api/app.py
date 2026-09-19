@@ -13,7 +13,7 @@ from ml_service.api.settings import Settings, build_settings
 TITLE = "HackSpain 2026 · Embat PULSE API"
 DESCRIPTION = (
     "Transparent monthly financial-health score (0-100) for SMEs: PULSE "
-    "history and forecast per company, plus priced product recommendations."
+    "history and one-year forecast per company, plus priced product recommendations."
 )
 VERSION = "2.0.0"
 

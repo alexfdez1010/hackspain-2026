@@ -66,14 +66,14 @@ def _trend(s: CompanySnapshot) -> Component | None:
             "tendencia",
             "Ajuste por tendencia",
             cfg.TREND_DECLINE_BPS,
-            f"Prevemos una caída de {abs(delta):.0f} puntos de PULSE a seis meses.",
+            f"Prevemos una caída de {abs(delta):.0f} puntos de PULSE a un año.",
         )
     if delta >= cfg.TREND_IMPROVE_POINTS:
         return Component(
             "tendencia",
             "Ajuste por tendencia",
             cfg.TREND_IMPROVE_BPS,
-            f"Prevemos una mejora de {delta:.0f} puntos de PULSE a seis meses.",
+            f"Prevemos una mejora de {delta:.0f} puntos de PULSE a un año.",
         )
     return None
 

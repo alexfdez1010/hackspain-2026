@@ -14,7 +14,7 @@ from pathlib import Path
 import polars as pl
 
 from ml_service.pulse.forecast.attribution import BASE, CONTEXT
-from ml_service.pulse.forecast.config import HORIZONS
+from ml_service.pulse.forecast.config import HORIZONS, MAX_HORIZON
 from ml_service.pulse.variables import PILLARS, VARIABLES
 
 GENERATED_FOR = "HackSpain 2026 · Embat PULSE"
@@ -209,7 +209,9 @@ def write_all(work_dir: Path, mirror_dir: Path | None = None) -> Path:
         (web / "companies" / f"{cid}.json").write_text(
             json.dumps(payload, ensure_ascii=False)
         )
-        h6 = next((f for f in payload["forecast"] if f["horizon"] == 6), None)
+        last = next(
+            (f for f in payload["forecast"] if f["horizon"] == MAX_HORIZON), None
+        )
         summary_rows.append(
             {
                 "company_id": cid,
@@ -219,10 +221,10 @@ def write_all(work_dir: Path, mirror_dir: Path | None = None) -> Path:
                 "pulse_prev": payload["pulse_prev"],
                 "confidence": payload["confidence"],
                 "pillars": payload["pillars"],
-                "forecast_6m": {
-                    k: h6[k] for k in ("pulse_pred", "pulse_p10", "pulse_p90")
+                "forecast_12m": {
+                    k: last[k] for k in ("pulse_pred", "pulse_p10", "pulse_p90")
                 }
-                if h6
+                if last
                 else None,
             }
         )
