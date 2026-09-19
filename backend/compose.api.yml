@@ -3,17 +3,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: hackspain-xray-api:latest
-    container_name: xray-api
+    image: hackspain-pulse-api:latest
+    container_name: pulse-api
     ports:
       - "${PORT:-8000}:8000"
     environment:
       PORT: "8000"
-      XRAY_DATA_DIR: /app/data
-      XRAY_CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
-      # XRAY_API_KEY: change-me   # guards POST /api/score and /api/score/path
+      PULSE_DATA_DIR: /app/data
+      PULSE_CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
     # Uncomment to serve artefacts regenerated on the host instead of the baked
-    # ones (the image already ships data/models and data/output/web).
+    # ones (the image already ships data/pulse/{web,recommendations,models}).
     # volumes:
     #   - ./data:/app/data
     healthcheck:

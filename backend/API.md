@@ -36,8 +36,8 @@ Siempre JSON con la forma `{"detail": "<mensaje>"}`:
 
 | Variable | Por defecto | Uso |
 |---|---|---|
-| `XRAY_DATA_DIR` | `backend/data` | Raíz de artefactos (`pulse/web`, `pulse/recommendations`) |
-| `XRAY_CORS_ORIGINS` | `http://localhost:3000,http://127.0.0.1:3000` | Orígenes permitidos, separados por comas |
+| `PULSE_DATA_DIR` | `backend/data` | Raíz de artefactos (`pulse/web`, `pulse/recommendations`) |
+| `PULSE_CORS_ORIGINS` | `http://localhost:3000,http://127.0.0.1:3000` | Orígenes permitidos, separados por comas |
 | `PORT` | `8000` | Puerto del contenedor / `python -m ml_service.api` |
 
 ### Valores enumerados
@@ -63,10 +63,10 @@ Comprueba que el servicio está vivo y qué ha cargado. Es el health check de Fl
 
 ```jsonc
 {
-  "status": "ok",                       // "degraded" si no hay empresas cargadas
-  "n_companies": 1286,
-  "models_loaded": true,                // true si existe data/models con los boosters
-  "generated_at": "2026-09-18T18:27:05+00:00"   // fecha del export web, o null
+  "status": "ok",                       // "degraded" si no existe el export PULSE
+  "n_companies": 1286,                  // empresas en pulse/web/summary.json
+  "last_month": "2026-08",              // último mes puntuado, o null
+  "recommendations_loaded": true        // true si existe el export del Advisor
 }
 ```
 
@@ -74,7 +74,7 @@ Comprueba que el servicio está vivo y qué ha cargado. Es el health check de Fl
 
 ## PULSE (score 0-100 transparente, 11 variables)
 
-Estos endpoints sirven ficheros estáticos escritos por `ml_service.pulse.export_web` en `<XRAY_DATA_DIR>/pulse/web/`. Si no se ha ejecutado el export devuelven `404`.
+Estos endpoints sirven ficheros estáticos escritos por `ml_service.pulse.export_web` en `<PULSE_DATA_DIR>/pulse/web/`. Si no se ha ejecutado el export devuelven `404`.
 
 ### `GET /api/pulse/summary`
 
@@ -168,7 +168,7 @@ Historia mensual del PULSE de una empresa, con el desglose por variable y contri
 
 ## PULSE Advisor (recomendación de productos financieros)
 
-Sirve los ficheros de `<XRAY_DATA_DIR>/pulse/recommendations/` escritos por `ml_service.pulse.recommend.cli build`. Los tres endpoints aceptan `?euribor=` para re-cotizar en caliente sobre otro tipo sin riesgo.
+Sirve los ficheros de `<PULSE_DATA_DIR>/pulse/recommendations/` escritos por `ml_service.pulse.recommend.cli build`. Los tres endpoints aceptan `?euribor=` para re-cotizar en caliente sobre otro tipo sin riesgo.
 
 | Parámetro común | Tipo | Descripción |
 |---|---|---|

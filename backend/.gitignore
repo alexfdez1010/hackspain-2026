@@ -5,6 +5,5 @@
 __pycache__
 .ruff_cache
 .vscode
-# datasets and derived artefacts (large, local); trained models are versioned
+# datasets and derived artefacts (large, local): raw CSVs, parquet caches, PULSE models and exports
 data/*
-!data/models/

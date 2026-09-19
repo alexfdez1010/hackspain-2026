@@ -30,10 +30,9 @@ def _client(tmp_path: Path) -> TestClient:
     settings = Settings(
         data_dir=tmp_path,
         cors_origins=("http://localhost:3000",),
-        api_key=None,
         port=8000,
     )
-    client = TestClient(create_app(settings=settings, store=object(), routers=()))
+    client = TestClient(create_app(settings=settings, routers=()))
     client.app.include_router(routes_recommend.router)
     return client
 

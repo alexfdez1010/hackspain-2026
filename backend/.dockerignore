@@ -18,11 +18,6 @@ AGENTS.md
 # Datasets: everything is excluded, then the artefacts the API needs are
 # re-included so the container is self-contained (no data/raw, no parquet cache).
 data/**
-!data/models/**
-!data/output/web/**
-!data/output/scored_panel.parquet
-!data/output/evaluation.json
-!data/output/anticipation.json
-!data/output/submission.csv
 !data/pulse/web/**
+!data/pulse/recommendations/**
 !data/pulse/models/**

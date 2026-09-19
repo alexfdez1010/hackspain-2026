@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/pulse", tags=["pulse"])
 
 def _web_dir(request: Request) -> Path:
     """Folder written by ``ml_service.pulse.export_web`` (``<data_dir>/pulse/web``)."""
-    return request.app.state.settings.data_dir / "pulse" / "web"
+    return request.app.state.settings.web_dir
 
 
 def _read(path: Path) -> dict:

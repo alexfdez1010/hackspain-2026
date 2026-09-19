@@ -27,7 +27,7 @@ EuriborParam = Annotated[
 
 def _dir(request: Request) -> Path:
     """Folder written by ``ml_service.pulse.recommend.cli build``."""
-    return request.app.state.settings.data_dir / "pulse" / "recommendations"
+    return request.app.state.settings.recommendations_dir
 
 
 def _read(path: Path) -> dict:

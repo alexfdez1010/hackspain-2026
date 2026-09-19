@@ -39,7 +39,7 @@ Then open <http://localhost:3000/pulse> for the portfolio or
 history, the 11 variables with their contributions, and the +1..+6 month
 forecast with bands. The API image ships the precomputed artefacts
 (`backend/data/pulse/web`); the web container reads them through
-`XRAY_API_URL=http://api:8000`. See `backend/README.md` (section PULSE) for how
+`PULSE_API_URL=http://api:8000`. See `backend/README.md` (section PULSE) for how
 the artefacts are produced.
 
 ## Layout

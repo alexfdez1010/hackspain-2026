@@ -1,4 +1,4 @@
-# Full local stack: FastAPI (X-Ray + PULSE artefacts baked in) and the Next.js app.
+# Full local stack: FastAPI (PULSE artefacts baked in) and the Next.js app.
 #   docker compose up --build
 #   open http://localhost:3000/pulse/COMP_0001
 services:
@@ -11,8 +11,8 @@ services:
       - "${API_PORT:-8000}:8000"
     environment:
       PORT: "8000"
-      XRAY_DATA_DIR: /app/data
-      XRAY_CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+      PULSE_DATA_DIR: /app/data
+      PULSE_CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 15s
@@ -29,7 +29,7 @@ services:
       - "${WEB_PORT:-3000}:3000"
     environment:
       # Server-side fetches go to the API container; the browser never calls it directly.
-      XRAY_API_URL: http://api:8000
+      PULSE_API_URL: http://api:8000
     depends_on:
       api:
         condition: service_healthy

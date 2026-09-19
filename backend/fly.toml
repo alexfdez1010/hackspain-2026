@@ -1,6 +1,5 @@
 # Fly.io deployment example:
 #   fly launch --no-deploy --copy-config
-#   fly secrets set XRAY_API_KEY=...        # optional, guards POST endpoints
 #   fly deploy
 app = "hackspain-xray-api"
 primary_region = "mad"
@@ -10,8 +9,8 @@ primary_region = "mad"
 
 [env]
   PORT = "8080"
-  XRAY_DATA_DIR = "/app/data"
-  XRAY_CORS_ORIGINS = "https://hackspain-xray.vercel.app,http://localhost:3000"
+  PULSE_DATA_DIR = "/app/data"
+  PULSE_CORS_ORIGINS = "https://hackspain-xray.vercel.app,http://localhost:3000"
 
 [http_service]
   internal_port = 8080
