@@ -174,3 +174,23 @@ test('answers 404 for an unknown company', async ({ page }) => {
   const response = await page.goto('/company/COMP_9999');
   expect(response?.status()).toBe(404);
 });
+
+test('answers an unknown URL with a 404 that leads back to the product', async ({
+  page,
+}) => {
+  // The browser logs the 404 of the document itself; only script errors count.
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  const response = await page.goto('/company/COMP_9999/nothing-here');
+  expect(response?.status()).toBe(404);
+  await expect(page).toHaveTitle('Página no encontrada · Embat Pulse');
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Esta página no existe' }),
+  ).toBeVisible();
+  await page
+    .getByRole('navigation', { name: 'Dashboard' })
+    .getByRole('link', { name: 'PULSE', exact: true })
+    .click();
+  await expect(page).toHaveURL('/company/COMP_0001');
+  expect(errors).toEqual([]);
+});

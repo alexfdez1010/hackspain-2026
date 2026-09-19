@@ -75,13 +75,10 @@ export function MobileNav({
         <MenuIcon />
       </Drawer.Trigger>
       <Drawer.Backdrop className="bg-black/15 backdrop-blur-[2px]">
-        <Drawer.Content
-          placement="right"
-          className="w-[min(360px,88vw)] max-w-none bg-surface"
-        >
+        <Drawer.Content placement="right">
           <Drawer.Dialog
             aria-label="Menú de secciones"
-            className="flex h-full flex-col gap-0 p-0"
+            className="flex h-full w-[min(360px,88vw)] max-w-none flex-col gap-0 bg-surface p-0"
           >
             <div className="flex h-14 items-center px-4">
               <p className="text-[13px] leading-none font-medium tracking-[0.12em] text-ink-secondary uppercase">
