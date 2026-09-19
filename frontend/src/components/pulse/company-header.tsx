@@ -54,9 +54,7 @@ export function PulseCompanyHeader({ company }: PulseCompanyHeaderProps) {
       key: 'group',
       label: 'Grupo',
       value: company.groupId ? groupName(company.groupId) : '—',
-      hint: company.groupId
-        ? `${company.groupId} · unidad de validación cruzada`
-        : 'Unidad de validación cruzada del modelo',
+      hint: 'Unidad de validación cruzada del modelo',
     },
   ];
 

@@ -192,21 +192,21 @@ describe('the method page renders on the server with the real export', () => {
     expect(markup).toContain('Previsión a 6 meses');
     expect(markup).toContain('De la puntuación al producto');
     expect(markup).toContain('Qué no hace PULSE');
-    expect(markup).toContain('Ver un PULSE: Domino’s');
+    expect(markup).toContain('Ver un PULSE: Atresmedia Labs');
     expect(markup).not.toContain('NaN');
   });
 
   it('keeps the company of the query in context and works its month', async () => {
     const markup = await renderPage('COMP_0051');
-    expect(markup).toContain('Volver a Schneider Electric');
+    expect(markup).toContain('Volver a Atlassian Global');
     expect(markup).toContain('href="/company/COMP_0051"');
-    expect(markup).toContain('Ver el PULSE completo de Schneider Electric');
+    expect(markup).toContain('Ver el PULSE completo de Atlassian Global');
   });
 
   it('falls back to the demo company when the query names an unknown one', async () => {
     const markup = await renderPage('COMP_9999');
     expect(markup).toContain('href="/company/COMP_9999"');
-    expect(markup).toContain('Ver el PULSE completo de Domino’s');
+    expect(markup).toContain('Ver el PULSE completo de Atresmedia Labs');
     expect(markup).toContain('href="/company/COMP_0001"');
   });
 });

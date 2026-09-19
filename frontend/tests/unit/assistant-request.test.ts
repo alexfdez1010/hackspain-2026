@@ -137,9 +137,9 @@ describe('assistant request boundary', () => {
     });
   });
   it('labels company and section context without interpreting arbitrary URLs', () => {
-    expect(getPageLabel('/company/COMP_0001')).toBe('PULSE · Domino’s');
+    expect(getPageLabel('/company/COMP_0001')).toBe('PULSE · Atresmedia Labs');
     expect(getPageLabel('/company/COMP_0001/recommendations')).toBe(
-      'Recomendaciones · Domino’s',
+      'Recomendaciones · Atresmedia Labs',
     );
     expect(getPageLabel('/method')).toBe('Método');
     expect(getPageLabel('/unknown')).toBe('Embat Pulse');

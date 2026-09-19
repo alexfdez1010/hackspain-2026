@@ -11,7 +11,11 @@ import {
   isActive,
   resolveNavCompany,
 } from '@/components/layout/site-nav';
-import { buildCompanyOptions } from '@/lib/company/options';
+import {
+  buildCompanyOptions,
+  filterCompanyOptions,
+  VISIBLE_LIMIT,
+} from '@/lib/company/options';
 
 describe('companyRoutes', () => {
   it('scopes every destination to the company', () => {
@@ -84,13 +88,51 @@ describe('buildCompanyOptions', () => {
       'COMP_0051',
       'COMP_0001',
     ]);
+    expect(options.map((option) => option.name)).toEqual([
+      'Atlassian Global',
+      'Atresmedia Labs',
+      'Ørsted Global',
+    ]);
     expect(options.map((option) => option.id)).toEqual([
+      'COMP_0051',
       'COMP_0001',
       'COMP_9999',
-      'COMP_0051',
     ]);
-    expect(options[0].name).toBe('Domino’s');
-    expect(options[1].name).toBe('Domino’s');
-    expect(options[2].name).toBe('Schneider Electric');
+  });
+});
+
+describe('filterCompanyOptions', () => {
+  const options = buildCompanyOptions(
+    Array.from(
+      { length: 200 },
+      (_, index) => `COMP_${String(index + 1).padStart(4, '0')}`,
+    ),
+  );
+
+  it('matches names without accents or case and identifiers too', () => {
+    const named = [
+      { id: 'A', name: 'Nestlé Iberia' },
+      { id: 'B', name: 'Telefónica' },
+    ];
+    expect(filterCompanyOptions(named, 'NESTLE', 'B')).toEqual([
+      named[1],
+      named[0],
+    ]);
+    expect(filterCompanyOptions(named, 'telefo', 'A')).toEqual([
+      named[0],
+      named[1],
+    ]);
+    expect(
+      filterCompanyOptions(options, 'comp_0051', 'COMP_0001').map((o) => o.id),
+    ).toEqual(['COMP_0001', 'COMP_0051']);
+  });
+
+  it('caps the list and keeps the company in context in it', () => {
+    const list = filterCompanyOptions(options, '', 'COMP_0200');
+    expect(list.length).toBeLessThanOrEqual(VISIBLE_LIMIT + 1);
+    expect(list.some((option) => option.id === 'COMP_0200')).toBe(true);
+    expect(filterCompanyOptions(options, 'zzz', 'COMP_0001')).toEqual([
+      options.find((option) => option.id === 'COMP_0001'),
+    ]);
   });
 });

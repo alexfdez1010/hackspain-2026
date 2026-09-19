@@ -50,7 +50,8 @@ describe('PULSE views render on the server', () => {
     expect(markup).toContain('32,8');
     expect(markup).toContain('+14,9');
     expect(markup).toContain('82 de 100 puntos con datos');
-    expect(markup).toContain('GROUP_0147');
+    expect(markup).toContain('Grupo Ebro');
+    expect(markup).not.toContain('GROUP_0147');
   });
 
   it('publishes the weights of the pillars and of the variables', () => {

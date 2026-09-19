@@ -71,7 +71,7 @@ describe('the company PULSE page', () => {
     const metadata = await generateMetadata({
       params: Promise.resolve({ id: 'COMP_0001' }),
     });
-    expect(metadata.title).toBe('Domino’s — PULSE · Embat Pulse');
+    expect(metadata.title).toBe('Atresmedia Labs — PULSE · Embat Pulse');
     await expect(render('COMP_9999')).rejects.toThrow();
   });
 });

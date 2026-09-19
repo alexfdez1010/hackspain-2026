@@ -14,9 +14,9 @@ test('lands on the demo company without browser errors', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto('/');
   await expect(page).toHaveURL('/company/COMP_0001');
-  await expect(page).toHaveTitle(/Domino’s — PULSE/);
+  await expect(page).toHaveTitle(/Atresmedia Labs — PULSE/);
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Domino’s' }),
+    page.getByRole('heading', { level: 1, name: 'Atresmedia Labs' }),
   ).toBeVisible();
   await expect(
     page.getByRole('group', {
@@ -34,15 +34,15 @@ test('switches company from the navigation and stays on the section', async ({
 }) => {
   await page.goto('/company/COMP_0001/recommendations');
   const nav = page.getByRole('navigation', { name: 'Secciones' });
-  await nav.getByRole('button', { name: /Domino’s/ }).click();
-  await page.getByRole('option', { name: /COMP_0051/ }).click();
+  const search = nav.getByRole('combobox', { name: 'Empresa' });
+  await expect(search).toHaveValue('Atresmedia Labs');
+  await search.fill('atlassian glo');
+  await page.getByRole('option', { name: 'Atlassian Global' }).click();
   await expect(page).toHaveURL('/company/COMP_0051/recommendations');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Schneider Electric' }),
+    page.getByRole('heading', { level: 1, name: 'Atlassian Global' }),
   ).toBeVisible();
-  await expect(
-    nav.getByRole('button', { name: /Schneider Electric/ }),
-  ).toBeVisible();
+  await expect(search).toHaveValue('Atlassian Global');
 });
 
 test('keeps the company in the navigation across its pages', async ({
@@ -53,7 +53,9 @@ test('keeps the company in the navigation across its pages', async ({
   const nav = page.getByRole('navigation', { name: 'Secciones' });
   await nav.getByRole('link', { name: 'Recomendaciones', exact: true }).click();
   await expect(page).toHaveURL('/company/COMP_0001/recommendations');
-  await expect(nav.getByRole('button', { name: /Domino’s/ })).toBeVisible();
+  await expect(nav.getByRole('combobox', { name: 'Empresa' })).toHaveValue(
+    'Atresmedia Labs',
+  );
   await nav.getByRole('link', { name: 'Método', exact: true }).click();
   await expect(page).toHaveURL('/method?company=COMP_0001');
   await expect(

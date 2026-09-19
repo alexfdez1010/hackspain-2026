@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { CompanySelect } from '@/components/layout/company-select';
+import { CompanySearch } from '@/components/layout/company-search';
 import type { CompanyOption } from '@/lib/company/options';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 import {
@@ -23,7 +23,7 @@ interface NavSection {
 }
 
 interface SiteNavProps {
-  /** Every company of the export, as the selector lists them. */
+  /** Every company of the export, as the search lists them. */
   companies: readonly CompanyOption[];
 }
 
@@ -83,11 +83,11 @@ export function resolveNavCompany(
  * Renders the top navigation shared by every page.
  *
  * Every destination is scoped to one company: there is no portfolio view, so
- * the company in context is chosen right here, and switching it keeps the
+ * the company in context is searched right here, and switching it keeps the
  * reader on the section they were reading.
  *
- * @param props - The companies the selector offers.
- * @returns The product name, the company selector and the section links.
+ * @param props - The companies the search offers.
+ * @returns The product name, the company search and the section links.
  */
 export function SiteNav({ companies }: SiteNavProps) {
   const pathname = usePathname();
@@ -109,7 +109,8 @@ export function SiteNav({ companies }: SiteNavProps) {
         <Link href="/" className="text-base font-semibold tracking-tight">
           Embat Pulse
         </Link>
-        <CompanySelect
+        <CompanySearch
+          key={companyId}
           companies={companies}
           selectedId={companyId}
           onSelect={switchCompany}

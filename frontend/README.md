@@ -107,9 +107,9 @@ invariantes se comprueban en `tests/unit/pulse-source.test.ts` y
 `tests/unit/pulse-company-view.test.ts`. En el Advisor, los componentes del
 precio suman el diferencial (`tests/unit/advisor-source.test.ts`).
 
-Empresas de ejemplo: `/company/COMP_0001` («Domino’s»: 8 meses observados,
+Empresas de ejemplo: `/company/COMP_0001` («Atresmedia Labs»: 8 meses observados,
 82 % de confianza, dos variables de líneas sin datos, tres productos
-recomendados) y `/company/COMP_0051` («Schneider Electric»: 24 meses y
+recomendados) y `/company/COMP_0051` («Atlassian Global»: 24 meses y
 utilización de líneas conocida). Ambas están fijadas en `src/lib/pulse/demo.ts`.
 
 ## 🎯 Philosophy

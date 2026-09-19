@@ -31,9 +31,9 @@ test('streams a demo, preserves the conversation through navigation, and starts 
     .click();
   await expect(page).toHaveURL('/company/COMP_0001/recommendations');
   await openAssistant(page);
-  await expect(page.getByRole('log')).toContainText('Domino’s · PULSE');
+  await expect(page.getByRole('log')).toContainText('Atresmedia Labs · PULSE');
   await expect(page.getByRole('dialog')).toContainText(
-    'Viendo: Recomendaciones · Domino’s',
+    'Viendo: Recomendaciones · Atresmedia Labs',
   );
   await page.getByRole('button', { name: 'Nueva conversación' }).click();
   await expect(

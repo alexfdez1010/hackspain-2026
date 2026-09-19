@@ -109,8 +109,8 @@ describe('trusted assistant context', () => {
       pulseSource(company()),
       advisorSource(recommendation()),
     );
-    expect(context.page).toBe('Recomendaciones · Domino’s');
-    expect(context.company?.name).toBe('Domino’s');
+    expect(context.page).toBe('Recomendaciones · Atresmedia Labs');
+    expect(context.company?.name).toBe('Atresmedia Labs');
     expect(context.company?.change).toBe(5);
     expect(context.company?.unknownVariables).toEqual(['loc_util']);
     expect(context.advisor?.offers[0].label).toBe('Línea de crédito');

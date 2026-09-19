@@ -43,7 +43,7 @@ describe('honest demo answers', () => {
       companyId: 'COMP_0001',
       company: {
         id: 'COMP_0001',
-        name: 'Domino’s',
+        name: 'Atresmedia Labs',
         month: '2026-08',
         monthsObserved: 1,
         pulse: null,
@@ -64,7 +64,7 @@ describe('honest demo answers', () => {
       companyId: 'COMP_0007',
       company: {
         id: 'COMP_0007',
-        name: 'Pixar',
+        name: 'Mercedes-Benz Labs',
         month: '2026-08',
         monthsObserved: 12,
         pulse: 45,
