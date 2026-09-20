@@ -1,17 +1,23 @@
 import type { ChartBox } from '@/components/charts/geometry';
+import { TrajectoryTooltipSignal } from '@/components/charts/trajectory-tooltip-signal';
 import type { PlacedTrajectoryPoint } from '@/lib/pulse/trajectory-layout';
+import type { PulseSignal } from '@/lib/pulse/types';
 import { formatBand } from '@/lib/pulse/format';
 import { formatMonth, formatNumber } from '@/lib/format';
 import { scoreBand } from '@/lib/score';
 
 /** Width of the tooltip card, used to keep it inside the chart. */
 const CARD_WIDTH = 176;
+/** Width of the card when it also explains a signal. */
+const SIGNAL_CARD_WIDTH = 288;
 /** Gap between the point and the card. */
 const GAP = 14;
 
 interface TrajectoryTooltipProps {
   point: PlacedTrajectoryPoint;
   box: ChartBox;
+  /** Signal that opened on the hovered month, when the month carries one. */
+  signal?: PulseSignal;
 }
 
 /**
@@ -20,16 +26,23 @@ interface TrajectoryTooltipProps {
  * Rendered as HTML over the SVG, in the inverted foreground/background pair
  * so the card reads on any chart colour, in light and dark themes alike. It
  * stays inside the chart horizontally and flips under the point near the top.
+ * A month flagged with a signal widens the card and adds the signal block,
+ * so the triangle is explained where the pointer already is.
  *
- * @param props - The hovered point and the chart box.
+ * @param props - The hovered point, the chart box and the month's signal.
  * @returns The positioned card, or nothing for a month without score.
  */
-export function TrajectoryTooltip({ point, box }: TrajectoryTooltipProps) {
+export function TrajectoryTooltip({
+  point,
+  box,
+  signal,
+}: TrajectoryTooltipProps) {
   if (point.y === null || point.value === null) return null;
   const band = scoreBand(point.value);
+  const width = signal ? SIGNAL_CARD_WIDTH : CARD_WIDTH;
   const left = Math.min(
-    Math.max(point.x - CARD_WIDTH / 2, 0),
-    Math.max(box.width - CARD_WIDTH, 0),
+    Math.max(point.x - width / 2, 0),
+    Math.max(box.width - width, 0),
   );
   const above = point.y > box.padTop + 72;
   const forecast = point.kind === 'forecast';
@@ -38,7 +51,7 @@ export function TrajectoryTooltip({ point, box }: TrajectoryTooltipProps) {
       role="status"
       className="pointer-events-none absolute z-10 flex flex-col gap-0.5 rounded-lg bg-foreground px-3 py-2 text-background shadow-lg"
       style={{
-        width: CARD_WIDTH,
+        width,
         left,
         top: above ? undefined : point.y + GAP,
         bottom: above ? box.height - point.y + GAP : undefined,
@@ -66,6 +79,7 @@ export function TrajectoryTooltip({ point, box }: TrajectoryTooltipProps) {
           Banda p10-p90: {formatBand(point.p10, point.p90)}
         </span>
       )}
+      {signal && <TrajectoryTooltipSignal signal={signal} />}
     </div>
   );
 }

@@ -7,6 +7,12 @@ interface PageShellProps {
   lead: string;
   /** Optional figures rendered next to the title. */
   aside?: ReactNode;
+  /**
+   * Optional tag rendered under the title, on its own line, such as the
+   * group pill of a company. It belongs to the name, so it never sits on the
+   * far side of the row as `aside` does.
+   */
+  badge?: ReactNode;
   children: ReactNode;
 }
 
@@ -17,12 +23,20 @@ interface PageShellProps {
  * phone.
  *
  * The title is the brand `h1`: 40/1.15/600 with −0.015em of tracking, stepped
- * down to 30 px where the line would otherwise break mid-name.
+ * down to 30 px where the line would otherwise break mid-name. The badge, when
+ * there is one, hangs under the title as the prototype places the group pill:
+ * on its own line, before the lead.
  *
- * @param props - Title, lead sentence, optional aside and the page sections.
+ * @param props - Title, lead sentence, optional badge, aside and the sections.
  * @returns The page main element.
  */
-export function PageShell({ title, lead, aside, children }: PageShellProps) {
+export function PageShell({
+  title,
+  lead,
+  aside,
+  badge,
+  children,
+}: PageShellProps) {
   return (
     <main className="mx-auto flex max-w-[1240px] flex-col gap-12 px-4 pb-24 pt-6 sm:px-8">
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
@@ -30,6 +44,7 @@ export function PageShell({ title, lead, aside, children }: PageShellProps) {
           <h1 className="text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] sm:text-[40px]">
             {title}
           </h1>
+          {badge && <div className="-mt-0.5 flex">{badge}</div>}
           <p className="text-[15px] leading-[1.55] text-ink-secondary">
             {lead}
           </p>

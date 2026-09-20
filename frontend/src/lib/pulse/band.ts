@@ -45,9 +45,6 @@ export const NO_DATA_COLOR = 'var(--border-subtle, #d2d2db)';
 /** Share of the band colour a plain wash keeps, in percent. */
 const SURFACE_TINT = 8;
 
-/** Share of the band colour the border of a washed card keeps, in percent. */
-const BORDER_TINT = 30;
-
 /**
  * Washes the raised surface with the colour of the band a score falls in.
  *
@@ -69,8 +66,9 @@ export function bandTint(
 
 /**
  * Surface of a card that carries a score: a wash of its band behind the
- * figure and a border of the same hue, both mixed with the neutral tokens so
- * they read in light and dark mode without a token per band.
+ * figure, mixed with the neutral tokens so it reads in light and dark mode
+ * without a token per band. The wash carries no border of its own: the tint
+ * already groups the card, and a hairline of the same hue only repeated it.
  *
  * The mix is the one the signal alert uses, so every tinted surface of the
  * product says «severity» the same way. Without a score the card keeps its
@@ -83,9 +81,5 @@ export function bandSurfaceStyle(
   score: number | null,
 ): CSSProperties | undefined {
   if (score === null || !Number.isFinite(score)) return undefined;
-  const tone = scoreBand(score).color;
-  return {
-    borderColor: `color-mix(in oklab, ${tone} ${BORDER_TINT}%, var(--border-subtle))`,
-    background: bandTint(score, SURFACE_TINT),
-  };
+  return { background: bandTint(score, SURFACE_TINT) };
 }

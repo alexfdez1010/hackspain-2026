@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@heroui/react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { PulseBandShowcase } from '@/components/layout/pulse-band-showcase';
@@ -26,10 +26,13 @@ const ROWS = Math.ceil(LANDING_FEATURES.length / 2);
  * the four pages of the landing with 1px rules between the rows. Copy uses
  * the same `px-4 sm:px-8` as the product chrome; the 2×2 stays flush. One
  * dither field sits behind the cells so the sparkle continues under the
- * rules, one sparkle per cell in the colour of one score level. Hover,
- * focus or press on a cell selects it: title, lead and the trajectory of
- * that cell's band. The same `selectedId` drives the level strip, so a
- * chip and a cell cannot disagree.
+ * rules, one sparkle per cell in the colour of one score level.
+ *
+ * Every cell is a `next/link` to its page of the demo company. Hover or
+ * focus previews it on the left: title, lead and the trajectory of that
+ * cell's band. The same `selectedId` drives the level strip, so a chip
+ * and a cell cannot disagree. The previewed cell is marked with
+ * `data-selected`, never with a pressed state: a link is not a toggle.
  *
  * @returns The middle landing section.
  */
@@ -98,20 +101,19 @@ export function LandingShowcase() {
           style={{ gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))` }}
         >
           {LANDING_FEATURES.map((feature) => {
-            const pressed = feature.key === selectedId;
+            const selected = feature.key === selectedId;
             return (
               <div
                 key={feature.key}
                 data-feature={feature.key}
                 className="feature-cell relative min-h-0 min-w-0 overflow-hidden"
               >
-                <Button
-                  variant="tertiary"
-                  aria-pressed={pressed}
-                  onHoverStart={() => setSelectedId(feature.key)}
+                <Link
+                  href={feature.href}
+                  data-selected={selected}
+                  onMouseEnter={() => setSelectedId(feature.key)}
                   onFocus={() => setSelectedId(feature.key)}
-                  onPress={() => setSelectedId(feature.key)}
-                  className="relative z-[1] h-full min-w-0 w-full flex-col items-start justify-center rounded-none bg-transparent px-4 py-4 text-left whitespace-normal text-foreground shadow-none [--button-bg-hover:transparent] [--button-bg-pressed:transparent] hover:bg-transparent sm:px-6 sm:py-6"
+                  className="relative z-[1] flex h-full min-w-0 w-full flex-col items-start justify-center px-4 py-4 text-left text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus sm:px-6 sm:py-6"
                 >
                   <span className="font-display text-lg tracking-tight sm:text-xl">
                     {feature.label}
@@ -119,7 +121,7 @@ export function LandingShowcase() {
                   <span className="feature-lead mt-1.5 text-xs font-normal text-muted sm:text-sm">
                     {feature.lead}
                   </span>
-                </Button>
+                </Link>
               </div>
             );
           })}

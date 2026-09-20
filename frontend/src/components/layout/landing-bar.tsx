@@ -1,14 +1,11 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { PulseWordmark } from '@/components/ui/wordmark';
-
-/** Tagline of the prototype header, beside the mark. */
-export const LANDING_TAGLINE = 'La inteligencia que impulsa tu tesorería';
+import { PRODUCT_TAGLINE } from '@/lib/brand';
 
 /**
  * The bar over the hero: the same mark and height as the product nav, with
- * the tagline of the prototype instead of the company search.
+ * the claim of the product instead of the company search.
  *
  * It sits inside the hero band so it takes the band's ink and never covers
  * the light band or the footer. The hairline is full width. The mark sits
@@ -24,13 +21,12 @@ export function LandingBar() {
         <Link
           href="/"
           aria-label="Embat Pulse, inicio"
-          className="flex h-11 shrink-0 items-center gap-2 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="flex h-11 shrink-0 items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
-          <Image src="/icon.svg" alt="" width={40} height={40} unoptimized />
-          <PulseWordmark className="h-3.5" />
+          <PulseWordmark className="h-6" />
         </Link>
         <p className="hidden border-l border-separator pl-4 text-[15px] leading-none text-muted sm:block">
-          {LANDING_TAGLINE}
+          {PRODUCT_TAGLINE}
         </p>
       </div>
     </header>

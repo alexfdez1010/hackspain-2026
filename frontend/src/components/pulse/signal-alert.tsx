@@ -38,9 +38,8 @@ export function PulseSignalAlert({ company, href }: PulseSignalAlertProps) {
     <aside
       role="status"
       aria-label={`Señal: ${signal.headline}`}
-      className="flex flex-col gap-3 rounded-xl border p-6 sm:flex-row sm:items-start sm:gap-8"
+      className="flex flex-col gap-3 rounded-xl p-6 sm:flex-row sm:items-start sm:gap-8"
       style={{
-        borderColor: `color-mix(in oklab, ${tone} 28%, var(--border-subtle))`,
         background: `color-mix(in oklab, ${tone} 6%, var(--surface-raised))`,
       }}
     >

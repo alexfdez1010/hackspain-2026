@@ -19,6 +19,10 @@ export const FALLBACK_PLAN_KEY = 'cash_min';
  * The two variables read from the credit lines (`loc_util`, `loc_accel`) have
  * no plan of their own: while they carry no data there is nothing to order, so
  * they fall back to the plan of the intramonth minimum.
+ *
+ * `maturities` asks for the amortisation table instead of renegotiating it: the
+ * export reads no maturity for most months, so the first move is to let the
+ * model see the debt calendar, and only then is there a tranche to spread.
  */
 export const PLANS: Readonly<Record<string, PulsePlan>> = {
   cash_min: {
@@ -35,21 +39,21 @@ export const PLANS: Readonly<Record<string, PulsePlan>> = {
     title: 'Sube los días de caja sin pedir circulante',
     steps: [
       'Barre la caja de las filiales a la cuenta principal antes de cada cierre.',
-      'Adelanta el cobro de las facturas con vencimiento a más de 60 días.',
+      'Valora el anticipo de las facturas con vencimiento a más de 60 días.',
       'Retén los pagos no críticos hasta después del cobro del cliente principal.',
     ],
     cost: '0 €',
     horizon: 'Dos cierres',
   },
   maturities: {
-    title: 'Reparte los vencimientos de los próximos seis meses',
+    title: 'Conecta tu calendario de deuda',
     steps: [
-      'Agrupa los vencimientos en tramos mensuales en vez de concentrarlos.',
-      'Negocia con la entidad una carencia de capital de tres meses.',
-      'Sustituye el vencimiento más grande por una línea revolving.',
+      'Sube el cuadro de amortización de tus préstamos al módulo de deuda.',
+      'Comprueba si hay vencimientos en los próximos seis meses que el modelo no esté viendo.',
+      'Si se concentran en un mismo mes, valora con la entidad repartirlos en tramos.',
     ],
-    cost: 'Comisión de novación',
-    horizon: 'Un trimestre',
+    cost: '0 €',
+    horizon: 'Próximo cierre',
   },
   top_client: {
     title: 'Reduce la dependencia del cliente principal',
@@ -65,7 +69,7 @@ export const PLANS: Readonly<Record<string, PulsePlan>> = {
     title: 'Gana plazo con tus proveedores',
     steps: [
       'Renegocia a 45 días los tres proveedores con más volumen.',
-      'Ofrece confirming a cambio de plazo.',
+      'Valora ofrecer confirming a cambio de plazo.',
       'Agrupa pedidos para tener poder de negociación.',
     ],
     cost: '0 €',
@@ -86,7 +90,7 @@ export const PLANS: Readonly<Record<string, PulsePlan>> = {
     steps: [
       'Revisa los diez clientes con más exposición y su propio PULSE.',
       'Fija límite de crédito por cliente y bloquea al superarlo.',
-      'Contrata seguro de crédito para la cola de riesgo.',
+      'Valora un seguro de crédito para la cola de riesgo.',
     ],
     cost: 'Prima del seguro',
     horizon: 'Un trimestre',

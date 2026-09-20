@@ -49,6 +49,42 @@ export function clientHealthHint(health: ClientHealth | null): string {
 }
 
 /**
+ * What every figure of the strip means, in the words a finance team uses.
+ *
+ * They are the tooltips of the prototype: the labels stay short because the
+ * definition lives one hover away, so the strip never turns into a glossary.
+ */
+const TIPS = {
+  change:
+    'Cuántos puntos ha subido o bajado el PULSE respecto al cierre anterior.',
+  confidence: 'Porcentaje del peso del modelo que tiene dato este mes.',
+  clients:
+    'Score de 0 a 100 de la salud financiera de tus clientes. Bajo significa que quien te debe dinero está peor que la media.',
+  cash: 'Días que aguantas pagando lo de siempre sin que entre un euro nuevo.',
+} as const;
+
+/**
+ * Explains the confidence figure with the two numbers that make it actionable:
+ * the share of weight with data and the points of weight missing.
+ *
+ * The second sentence only appears when there is a figure to name, because
+ * «faltan — puntos» would read as a bug rather than as an unknown coverage.
+ *
+ * @param confidence - Ratio between 0 and 1; `null` when unknown.
+ * @returns The tooltip of the confidence cell.
+ */
+export function confidenceTip(confidence: number | null): string {
+  if (confidence === null || !Number.isFinite(confidence)) {
+    return TIPS.confidence;
+  }
+  const missing = 100 - confidence * 100;
+  return (
+    `${TIPS.confidence} Al ${formatConfidence(confidence)} faltan ` +
+    `${formatNumber(missing)} puntos de peso: el PULSE se calcula solo con lo que hay.`
+  );
+}
+
+/**
  * Builds the four figures that qualify the headline score.
  *
  * Each one answers a question the score alone cannot: where it came from, how
@@ -56,6 +92,10 @@ export function clientHealthHint(health: ClientHealth | null): string {
  * how long the cash lasts if nothing changes. The six-month stress
  * probability stays out on purpose: the price of the offers already charges
  * for it and the actions block names it when it changes what to do.
+ *
+ * Each one also carries its definition as a tooltip, so «Salud de tus
+ * clientes» or «Días de caja» can be read by someone who has never seen the
+ * model without spending a line of the strip on explaining it.
  *
  * @param input - The company, its customers' health and its cash.
  * @returns The four figures, in reading order.
@@ -80,21 +120,24 @@ export function buildHeaderStats({
         company.pulsePrev === null || !previousMonth
           ? 'Sin mes anterior observado'
           : `Desde ${formatNumber(company.pulsePrev, 1)} puntos en ${formatMonth(previousMonth)}`,
+      tip: TIPS.change,
     },
     {
       key: 'confidence',
       label: 'Confianza del dato',
       value: formatConfidence(company.confidence),
       hint: formatWeightPoints(company.confidence),
+      tip: confidenceTip(company.confidence),
     },
     {
       key: 'clients',
-      label: 'Salud de los clientes',
+      label: 'Salud de tus clientes',
       value:
         clientHealth?.score === null || clientHealth === null
           ? '—'
           : formatNumber(clientHealth.score, 1),
       hint: clientHealthHint(clientHealth),
+      tip: TIPS.clients,
     },
     {
       key: 'cash',
@@ -103,7 +146,8 @@ export function buildHeaderStats({
       hint:
         cashEnd === null
           ? 'Sin caja exportada'
-          : `${formatEuro(cashEnd)} al cierre`,
+          : `${formatEuro(cashEnd)} en caja`,
+      tip: TIPS.cash,
     },
   ];
 }

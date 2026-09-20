@@ -31,6 +31,24 @@ export function formatNumber(value: number | null, digits = 0): string {
 }
 
 /**
+ * Formats a count with a thousands separator even at four digits.
+ *
+ * `es-ES` leaves «1285» ungrouped because Spanish only groups from five
+ * digits; a count of companies reads as a year that way, so the portfolio
+ * size is always grouped, as the legal pages write it («1.285»).
+ *
+ * @param value - Count to format; `null` renders as an em dash.
+ * @returns A localized string such as `1.285`.
+ */
+export function formatCount(value: number | null): string {
+  if (value === null || !Number.isFinite(value)) return '—';
+  return value.toLocaleString(LOCALE, {
+    maximumFractionDigits: 0,
+    useGrouping: 'always',
+  });
+}
+
+/**
  * Formats an amount in euros, using compact notation above 10.000 €.
  *
  * The number is formatted on its own and the euro sign appended by hand

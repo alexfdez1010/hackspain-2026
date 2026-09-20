@@ -183,7 +183,13 @@ export function PulseTrajectoryChart({
           onLeave={() => setActiveIndex(-1)}
         />
       </svg>
-      {active && <TrajectoryTooltip point={active} box={box} />}
+      {active && (
+        <TrajectoryTooltip
+          point={active}
+          box={box}
+          signal={markers.get(active.index)}
+        />
+      )}
     </div>
   );
 }

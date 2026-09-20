@@ -17,20 +17,21 @@ export interface PulsePlanView {
   points: number;
   /** Why this variable and not another one, in the figures of the month. */
   why: string;
-  /** Score today, points at stake, cost and horizon. */
+  /** Value today, score, points at stake, cost and horizon. */
   figures: PulsePlanFigure[];
 }
 
 /**
  * Builds the plan of one variable for one month.
  *
- * The «por qué» is written from the month itself — score, weight, measured
- * value — so the recommendation is never a generic piece of advice: it names
- * the figure that puts the variable at the top of the list.
+ * The «por qué» is written from the month itself — the measured value first,
+ * then the score and the weight it carries — so the recommendation is never a
+ * generic piece of advice: it opens with the figure the treasury recognises
+ * and only then explains what the model does with it.
  *
  * @param cell - The variable of the month, as the mosaic lays it out.
  * @param knownWeight - Points of weight backed by data this month.
- * @returns The plan, the points at stake, the reason and the figures.
+ * @returns The plan, the points at stake, the reason and the five figures.
  */
 export function buildPulsePlanView(
   cell: PulseMosaicCell,
@@ -41,10 +42,13 @@ export function buildPulsePlanView(
   const points = measured
     ? (cell.weight * (100 - (cell.score as number))) / knownWeight
     : 0;
+  const rawValue = measured
+    ? formatRawValue(cell.rawValue, cell.unit)
+    : UNKNOWN_TEXT;
   const why = measured
-    ? `${cell.label} está en ${formatNumber(cell.score)} sobre 100 y pesa ` +
-      `${formatNumber(cell.weight)} de ${formatNumber(knownWeight)} puntos con dato. ` +
-      `Su valor medido hoy es ${formatRawValue(cell.rawValue, cell.unit)}.`
+    ? `${cell.label}: hoy son ${rawValue}. Eso puntúa ${formatNumber(cell.score)} ` +
+      `sobre 100 y la variable pesa ${formatNumber(cell.weight)} de ` +
+      `${formatNumber(knownWeight)} puntos con dato.`
     : `${cell.label} no tiene dato este mes, así que sus ${formatNumber(cell.weight)} ` +
       'puntos de peso se reparten entre las demás variables. Conectar su fuente no sube ' +
       'el PULSE por sí solo: mete esos puntos en el cálculo y con ellos su propio recorrido.';
@@ -53,6 +57,7 @@ export function buildPulsePlanView(
     points,
     why,
     figures: [
+      { key: 'value', label: 'Valor real de hoy', value: rawValue },
       {
         key: 'score',
         label: 'Score de hoy, sobre 100',

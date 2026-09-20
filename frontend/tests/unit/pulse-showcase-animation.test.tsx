@@ -13,7 +13,7 @@ describe('PulseShowcaseAnimation', () => {
       <PulseShowcaseAnimation svg={showcase.svg} />,
     );
     expect(html).toContain('data-showcase="pulse-animation"');
-    expect(html).toContain('[&_svg]:h-full');
+    expect(html).toContain('[&amp;_svg]:h-full');
     expect(html).toContain('id="pulse-observed"');
     expect(html).toContain('id="pulse-band"');
     expect(html).toContain('id="pulse-area"');

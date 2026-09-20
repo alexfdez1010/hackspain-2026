@@ -15,6 +15,13 @@ export interface PulseGap {
   weight: number;
   /** Points of PULSE the score would gain if the variable reached 100. */
   points: number;
+  /**
+   * Raw figure behind the score, in `unit`, copied from the cell so the table
+   * can print the real reading of the month instead of only its score.
+   */
+  rawValue: number | null;
+  /** Unit of `rawValue`, as the export declares it. */
+  unit: string;
 }
 
 /**
@@ -44,6 +51,10 @@ export function knownWeight(cells: readonly PulseMosaicCell[]): number {
  * table and where they are, instead of pointing at the lowest score, which may
  * weigh nothing.
  *
+ * Every entry carries the raw reading of the cell as well, because the table
+ * shows the figure a finance director recognises — 8,2 días, 8.700 € — and
+ * keeps the score as the hover note behind it.
+ *
  * @param cells - The variables of the month, as the mosaic lays them out.
  * @returns One entry per measured variable, the largest gap first.
  */
@@ -63,6 +74,8 @@ export function buildPulseGaps(cells: readonly PulseMosaicCell[]): PulseGap[] {
           score,
           weight: cell.weight,
           points: (cell.weight * (100 - score)) / weight,
+          rawValue: cell.rawValue,
+          unit: cell.unit,
         },
       ];
     })

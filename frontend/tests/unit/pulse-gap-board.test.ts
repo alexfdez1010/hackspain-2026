@@ -65,6 +65,16 @@ describe('buildPulseGapBoard', () => {
     expect(board.steps[0].band.key).toBe('neutral');
   });
 
+  it('hands every step the figure behind its score', () => {
+    const board = buildPulseGapBoard(MOSAIC);
+    expect(board.steps.map((step) => step.rawValue)).toEqual([12, 12, 12]);
+    expect(board.steps.map((step) => step.unit)).toEqual([
+      'días',
+      'días',
+      'días',
+    ]);
+  });
+
   it('draws every bar against the largest gap', () => {
     const board = buildPulseGapBoard(MOSAIC);
     expect(board.steps[0].share).toBe(1);

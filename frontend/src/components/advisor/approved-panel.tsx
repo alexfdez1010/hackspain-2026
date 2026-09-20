@@ -1,5 +1,4 @@
 import { OfferRow } from '@/components/advisor/offer-row';
-import { OutOfScopeList } from '@/components/advisor/out-of-scope';
 import { Panel } from '@/components/ui/panel';
 import type { AdvisorCompany } from '@/lib/advisor/types';
 import { weakestPillar } from '@/lib/advisor/view';
@@ -34,12 +33,14 @@ function weakestSentence(
 }
 
 /**
- * What the company can sign today and what it cannot: one line per approved
- * product with its amount, its price and its fit, and under them the
- * products the rules left out, folded.
+ * What the company can sign today: one line per approved product with its
+ * amount, its price, its fit and the button that asks for it.
  *
- * The heading frames the catalogue as an option and not as a result, because
- * the panel above it already offers the measure that costs nothing.
+ * The heading frames the catalogue as an option and not as a result — the
+ * measure that costs nothing lives on the Acción page — and the sentence next
+ * to it names, once, the pillar the price is charging for. What the rules
+ * left out is a different reading, so it has a panel of its own; this one
+ * closes with the only line of social proof the product shows.
  *
  * @param props - The company, the pillar labels and the variable labels.
  * @returns The panel that answers «¿qué puedo contratar?».
@@ -49,7 +50,7 @@ export function ApprovedPanel({
   pillarLabels,
   variableLabels,
 }: ApprovedPanelProps) {
-  const { recommendations, declined, improvementPlan } = company;
+  const { recommendations, improvementPlan } = company;
   const aside = weakestSentence(company, pillarLabels);
   return (
     <Panel>
@@ -64,16 +65,18 @@ export function ApprovedPanel({
         )}
       </div>
       {recommendations.length > 0 ? (
-        recommendations.map((offer) => (
-          <OfferRow
-            key={offer.product}
-            offer={offer}
-            referenceLabel={company.referenceRate.label}
-            variableLabels={variableLabels}
-          />
-        ))
+        <div>
+          {recommendations.map((offer) => (
+            <OfferRow
+              key={offer.product}
+              offer={offer}
+              referenceLabel={company.referenceRate.label}
+              variableLabels={variableLabels}
+            />
+          ))}
+        </div>
       ) : (
-        <div className="border-hairline flex flex-col gap-3 border-t pt-5">
+        <div className="flex flex-col gap-3 pt-5">
           <p className="max-w-[720px] text-[15px] leading-[1.55]">
             {`Hoy ningún producto supera el encaje mínimo de ${OFFER_THRESHOLD} con el PULSE de ${formatMonth(company.month)}`}
           </p>
@@ -89,17 +92,8 @@ export function ApprovedPanel({
           </ul>
         </div>
       )}
-      <div className="border-hairline mt-6 border-t pt-6">
-        <h3 className="mb-1 text-[20px] leading-[1.35] font-semibold">
-          Fuera de alcance hoy
-        </h3>
-        <p className="text-ink-secondary mb-2 text-[15px] leading-[1.55]">
-          Abre cualquiera para ver la regla que lo deja fuera.
-        </p>
-        <OutOfScopeList declined={declined} />
-      </div>
-      <p className="text-ink-secondary mt-6 max-w-[720px] text-[13px] leading-[1.45]">
-        {company.disclaimer}
+      <p className="text-ink-secondary mt-5 text-[13px] leading-[1.45]">
+        +500 equipos financieros confían en nosotros
       </p>
     </Panel>
   );

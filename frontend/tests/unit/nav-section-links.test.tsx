@@ -19,17 +19,21 @@ describe('NavSectionLinks', () => {
     expect(markup).toContain('href="/method?company=COMP_0001"');
   });
 
-  it('grows the targets to 48 px in the phone menu', () => {
+  it('draws the wide row as tabs on a rule and grows the phone targets to 48 px', () => {
     const row = renderToStaticMarkup(
       <NavSectionLinks sections={SECTIONS} current="pulse" layout="row" />,
     );
     const column = renderToStaticMarkup(
       <NavSectionLinks sections={SECTIONS} current="pulse" layout="column" />,
     );
-    expect(row).toContain('min-h-10');
-    expect(row).toContain('px-2 ');
-    expect(row).toContain('xl:px-3');
+    expect(row).toContain('border-b-2');
+    expect(row).toMatch(
+      /<a[^>]*aria-current="page"[^>]*border-accent text-ink/,
+    );
+    expect(row.split('border-transparent').length - 1).toBe(6);
+    expect(row).not.toContain('bg-brand-subtle');
     expect(column).toContain('min-h-12');
     expect(column).toContain('flex-col');
+    expect(column).toContain('bg-brand-subtle');
   });
 });

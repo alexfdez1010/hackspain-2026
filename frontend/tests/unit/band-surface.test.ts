@@ -5,7 +5,7 @@ import { bandSurfaceStyle } from '@/lib/pulse/band';
 describe('bandSurfaceStyle', () => {
   it('washes the card with the colour of the band of the score', () => {
     expect(bandSurfaceStyle(20)?.background).toContain('var(--score-critical)');
-    expect(bandSurfaceStyle(40)?.borderColor).toContain('var(--score-fragile)');
+    expect(bandSurfaceStyle(40)?.background).toContain('var(--score-fragile)');
     expect(bandSurfaceStyle(60)?.background).toContain('var(--score-neutral)');
     expect(bandSurfaceStyle(90)?.background).toContain('var(--score-solid)');
   });
@@ -13,7 +13,10 @@ describe('bandSurfaceStyle', () => {
   it('mixes with the neutral tokens so both themes keep their surface', () => {
     const style = bandSurfaceStyle(20);
     expect(style?.background).toContain('var(--surface-raised)');
-    expect(style?.borderColor).toContain('var(--border-subtle)');
+  });
+
+  it('draws no border of its own: the wash already groups the card', () => {
+    expect(bandSurfaceStyle(20)?.borderColor).toBeUndefined();
   });
 
   it('leaves the surface plain without a score', () => {

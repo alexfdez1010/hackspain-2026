@@ -29,6 +29,7 @@ function buildColumns(
     {
       id: 'month',
       header: 'Mes previsto',
+      headerTip: 'Mes aún sin cerrar: el valor es una previsión.',
       isRowHeader: true,
       cellClassName: 'whitespace-nowrap',
       sortBy: (row) => row.targetMonth,
@@ -37,6 +38,7 @@ function buildColumns(
     {
       id: 'horizon',
       header: 'Horizonte',
+      headerTip: 'Meses hacia delante desde el último cierre.',
       cellClassName: 'tabular-nums',
       sortBy: (row) => row.horizon,
       cell: (row) => formatHorizon(row.horizon),
@@ -44,12 +46,15 @@ function buildColumns(
     {
       id: 'pulse',
       header: 'PULSE previsto',
+      headerTip: 'Valor central de la previsión.',
       sortBy: (row) => row.pulsePred,
       cell: (row) => <ScoreBadge score={row.pulsePred} />,
     },
     {
       id: 'band',
       header: 'Banda p10-p90',
+      headerTip:
+        'Intervalo de la previsión: nueve de cada diez escenarios caen dentro.',
       cellClassName: 'tabular-nums',
       sortBy: (row) => row.pulseP10,
       cell: (row) => formatBand(row.pulseP10, row.pulseP90),
@@ -71,6 +76,9 @@ function buildColumns(
  * Nothing in these rows is a measurement: the month column says «previsto» on
  * every line, the band is printed next to the point prediction, and the change
  * is always taken against the last observed score, which the caption names.
+ *
+ * Each header carries its definition in its `title`, so «Horizonte» or «Banda
+ * p10-p90» can be read without leaving the table for the method page.
  *
  * @param props - The forecast rows and the month they are predicted from.
  * @returns The forecast table, or an empty state.

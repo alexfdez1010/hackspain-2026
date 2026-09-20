@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#131A2A; --raised:#1A2336; --sunken:#0F1522;
+  --ink:#E9ECF4; --ink-2:#AEB6C8; --ink-3:#7F889D;
+  --rule:rgba(233,236,244,.15); --rule-soft:rgba(233,236,244,.07);
+  --lift:rgba(255,255,255,.06); --focus:#8FD8FF;
+  --s0:#8A2F53; --s1:#C2553C; --s2:#D9A03F; --s3:#7FAE71; --s4:#49C8BE;
+}
+:root[data-theme="light"]{
+  --ground:#E9EBF0; --raised:#F7F8FB; --sunken:#DFE2E9;
+  --ink:#171C28; --ink-2:#4B5366; --ink-3:#666F80;
+  --rule:rgba(23,28,40,.16); --rule-soft:rgba(23,28,40,.08);
+  --lift:rgba(255,255,255,.9); --focus:#1B6FA8;
+  --s0:#8A2F53; --s1:#B84A31; --s2:#B9822A; --s3:#4F8C52; --s4:#1E8F8A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.5; font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased; text-wrap:pretty;
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--rule)}
+a:hover{color:var(--ink);border-bottom-color:var(--ink-3)}
+input,textarea{font:inherit}
+input::placeholder,textarea::placeholder{color:var(--ink-3)}
+svg{display:block;overflow:visible}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+[data-p]{position:relative}
+[data-p]::before{content:"";position:absolute;inset:0 0 auto;height:1px;background:var(--lift);border-radius:10px 10px 0 0;pointer-events:none}
+[data-r="step"]:hover{color:var(--ink)}
+[data-r="step"][aria-current="true"]{color:var(--ink);border-left-color:var(--ink)}
+[data-r="step"][aria-current="true"] b{font-weight:600}
+[data-r="step"][data-due="true"]{color:var(--s2)}
+/* Estado de reposo = estado final, siempre. El estado oculto no se declara
+   aquí: lo pone el JS desde dentro de un frame y lo quita en el siguiente,
+   así que un documento sin frames no puede quedarse invisible. */
+[data-fieldhit="1"]{cursor:pointer}
+[data-r="anchor"]{backdrop-filter:blur(6px)}
+@media (max-width:960px){
+  [data-r="shell"]{grid-template-columns:minmax(0,1fr)!important}
+  [data-r="rail"]{position:static!important;height:auto!important;border-right:0!important;border-bottom:1px solid var(--rule)!important;padding:18px 0 12px!important}
+  [data-r="steps"]{display:flex!important;overflow-x:auto!important;padding:10px 0!important}
+  [data-r="step"]{grid-template-columns:auto auto!important;white-space:nowrap!important;padding:8px 16px!important;border-left:0!important;border-bottom:2px solid transparent!important}
+  [data-r="step"][aria-current="true"]{border-bottom-color:var(--ink)!important}
+  [data-r="step"] em{display:none!important}
+  [data-r="stage"]{padding:22px 18px 70px!important}
+  [data-r="cols"]{grid-template-columns:minmax(0,1fr)!important}
+  [data-r="head"]{font-size:24px!important}
+  [data-r="thesis"]{font-size:18px!important}
+  [data-r="pacer"]{left:0!important}
+  [data-r="anchor"]{position:static!important;backdrop-filter:none!important}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div data-r="shell" style="display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh;background:var(--ground)">
+
+  <nav data-r="rail" aria-label="Guion del pitch" style="border-right:1px solid var(--rule);padding:26px 0 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:var(--ground);z-index:5">
+    <div style="padding:0 22px 20px;border-bottom:1px solid var(--rule-soft)">
+      <b style="display:block;font-size:17px;font-weight:600;letter-spacing:-.025em">Embat X&#8209;Ray</b>
+      <span style="display:block;font-size:11.5px;color:var(--ink-3);margin-top:3px">Salud financiera continua</span>
+    </div>
+
+    <ul data-r="steps" style="list-style:none;margin:0;padding:12px 0;flex:1;overflow-y:auto;display:block">
+      <li><button data-r="step" aria-current="{{ cur0 }}" data-due="{{ due0 }}" onClick="{{ go0 }}" style="width:100%;text-align:left;display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:baseline;padding:9px 20px;border-left:2px solid transparent;color:var(--ink-2)"><i style="font-style:normal;font-size:11.5px;color:var(--ink-3)">1</i><b style="font-weight:500;font-size:14px">Fragmentación</b><em style="font-style:normal;font-size:11.5px;color:var(--ink-3)">0:00</em></button></li>
+      <li><button data-r="step" aria-current="{{ cur1 }}" data-due="{{ due1 }}" onClick="{{ go1 }}" style="width:100%;text-align:left;display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:baseline;padding:9px 20px;border-left:2px solid transparent;color:var(--ink-2)"><i style="font-style:normal;font-size:11.5px;color:var(--ink-3)">2</i><b style="font-weight:500;font-size:14px">Cartera</b><em style="font-style:normal;font-size:11.5px;color:var(--ink-3)">0:40</em></button></li>
+      <li><button data-r="step" aria-current="{{ cur2 }}" data-due="{{ due2 }}" onClick="{{ go2 }}" style="width:100%;text-align:left;display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:baseline;padding:9px 20px;border-left:2px solid transparent;color:var(--ink-2)"><i style="font-style:normal;font-size:11.5px;color:var(--ink-3)">3</i><b style="font-weight:500;font-size:14px">Las dos caras</b><em style="font-style:normal;font-size:11.5px;color:var(--ink-3)">1:05</em></button></li>
+      <li><button data-r="step" aria-current="{{ cur3 }}" data-due="{{ due3 }}" onClick="{{ go3 }}" style="width:100%;text-align:left;display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:baseline;padding:9px 20px;border-left:2px solid transparent;color:var(--ink-2)"><i style="font-style:normal;font-size:11.5px;color:var(--ink-3)">4</i><b style="font-weight:500;font-size:14px">Ficha</b><em style="font-style:normal;font-size:11.5px;color:var(--ink-3)">1:35</em></button></li>
+      <li><button data-r="step" aria-current="{{ cur4 }}" data-due="{{ due4 }}" onClick="{{ go4 }}" style="width:100%;text-align:left;display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:baseline;padding:9px 20px;border-left:2px solid transparent;color:var(--ink-2)"><i style="font-style:normal;font-size:11.5px;color:var(--ink-3)">5</i><b style="font-weight:500;font-size:14px">Antelación</b><em style="font-style:normal;font-size:11.5px;color:var(--ink-3)">2:35</em></button></li>
+      <li><button data-r="step" aria-current="{{ cur5 }}" data-due="{{ due5 }}" onClick="{{ go5 }}" style="width:100%;text-align:left;display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:baseline;padding:9px 20px;border-left:2px solid transparent;color:var(--ink-2)"><i style="font-style:normal;font-size:11.5px;color:var(--ink-3)">6</i><b style="font-weight:500;font-size:14px">Monitor</b><em style="font-style:normal;font-size:11.5px;color:var(--ink-3)">3:10</em></button></li>
+      <li><button data-r="step" aria-current="{{ cur6 }}" data-due="{{ due6 }}" onClick="{{ go6 }}" style="width:100%;text-align:left;display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:baseline;padding:9px 20px;border-left:2px solid transparent;color:var(--ink-2)"><i style="font-style:normal;font-size:11.5px;color:var(--ink-3)">7</i><b style="font-weight:500;font-size:14px">Producto</b><em style="font-style:normal;font-size:11.5px;color:var(--ink-3)">3:35</em></button></li>
+      <li><button data-r="step" aria-current="{{ cur7 }}" data-due="{{ due7 }}" onClick="{{ go7 }}" style="width:100%;text-align:left;display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:baseline;padding:9px 20px;border-left:2px solid transparent;color:var(--ink-2)"><i style="font-style:normal;font-size:11.5px;color:var(--ink-3)">8</i><b style="font-weight:500;font-size:14px">Preguntar</b><em style="font-style:normal;font-size:11.5px;color:var(--ink-3)">4:20</em></button></li>
+    </ul>
+
+    <div style="padding:14px 22px 0;border-top:1px solid var(--rule-soft);display:grid;gap:11px">
+      <sc-if value="{{ showRehearsal }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <b style="font-size:24px;font-weight:600;letter-spacing:-.02em">{{ clock }}</b>
+          <span style="font-size:11.5px;color:var(--ink-3)">{{ clockhint }}</span>
+        </div>
+      </sc-if>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <sc-if value="{{ showRehearsal }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ onRun }}" style="font-size:12px;color:var(--ink-2);border:1px solid var(--rule);border-radius:999px;padding:3px 11px" style-hover="color:var(--ink);border-color:var(--ink-3)">{{ runLabel }}</button>
+        </sc-if>
+        <sc-if value="{{ showRehearsal }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ onReset }}" style="font-size:12px;color:var(--ink-2);border:1px solid var(--rule);border-radius:999px;padding:3px 11px" style-hover="color:var(--ink);border-color:var(--ink-3)">Reiniciar</button>
+        </sc-if>
+        <button onClick="{{ onTheme }}" style="font-size:12px;color:var(--ink-2);border:1px solid var(--rule);border-radius:999px;padding:3px 11px" style-hover="color:var(--ink);border-color:var(--ink-3)">{{ themeLabel }}</button>
+      </div>
+      <div style="display:grid;gap:3px">
+        <span style="font-size:11.5px;color:var(--ink-3)">← → cambian de pantalla</span>
+        <sc-if value="{{ showRehearsal }}" hint-placeholder-val="{{ true }}">
+          <span style="font-size:11.5px;color:var(--ink-3)">Espacio arranca el cronómetro</span>
+        </sc-if>
+      </div>
+      <a href="Sistema.dc.html" style="font-size:11.5px;color:var(--ink-3);border:0;justify-self:start" style-hover="color:var(--ink-2)">Sistema de diseño</a>
+    </div>
+  </nav>
+
+  <main data-r="stage" tabindex="-1" style="min-width:0;padding:34px 40px 90px;max-width:1180px">
+
+    <sc-if value="{{ isFrag }}" hint-placeholder-val="{{ true }}">
+      <section data-screen-label="01 Fragmentación">
+        <h1 data-r="head" style="margin:0 0 4px;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1">Fragmentación</h1>
+        <p data-r="thesis" style="font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:20px;line-height:1.45;color:var(--ink-2);max-width:56ch;margin:0 0 30px"><b style="font-weight:400;color:var(--ink)">Nadie ve la empresa entera. Ni siquiera la empresa.</b> Cuatro bancos, cuatro trozos, y cada uno mide un Pulse que no existe.</p>
+
+        <div style="display:grid;gap:14px">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:16px">
+              <h3 style="margin:0;font-size:13.5px;font-weight:600;color:var(--ink)">Velasco Industrial, septiembre de 2026</h3>
+              <span style="font-size:12px;color:var(--ink-3)">Cada línea fina es el Pulse que calcularía un banco con solo sus cuentas</span>
+            </div>
+            <div data-r="cols" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:26px;align-items:start">
+              <div style="min-width:172px">
+                <div style="display:flex;align-items:baseline;gap:8px">
+                  <b style="font-size:52px;font-weight:600;letter-spacing:-.045em;line-height:.9">{{ fg.gap }}</b>
+                  <span style="font-size:14px;color:var(--ink-2)">puntos</span>
+                </div>
+                <p style="margin:10px 0 0;font-size:13px;line-height:1.55;color:var(--ink-2);max-width:26ch">de Pulse que no existen en ningún banco. La media ponderada de los cuatro dice <em style="font-style:normal;color:var(--ink)">{{ fg.weighted }}</em>. El consolidado es <em style="font-style:normal;color:{{ fg.consColor }}">{{ fg.consolidated }}</em>.</p>
+                <div style="margin-top:16px;border-top:1px solid var(--rule-soft);padding-top:14px">
+                  <b style="display:block;font-size:22px;font-weight:600;letter-spacing:-.03em;line-height:1.1">{{ fg.crossedLine }}</b>
+                  <span style="display:block;font-size:12.5px;color:var(--ink-3);margin-top:4px;max-width:26ch">de los cuatro cruza el umbral de vigilancia. Por separado, esta empresa está sana para todos ellos.</span>
+                </div>
+              </div>
+              {{ fragChart }}
+            </div>
+            <p style="margin:16px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:74ch">La reserva se agota en la póliza de un banco mientras el vencimiento fuerte está en otro y el barrido de caja pasa por un tercero. Ninguna de las tres señales es alarmante sola. Juntas son la firma de la tensión, y solo aparecen al sumar las cuatro cuentas.</p>
+          </div>
+
+          <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Qué ve cada uno</h3>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 54px 64px;gap:12px;font-size:12px;color:var(--ink-3);padding:0 0 8px;border-bottom:1px solid var(--rule-soft)">
+                <span>Banco y lo que tiene delante</span><span style="text-align:right">Pulse</span><span style="text-align:right">Volumen</span>
+              </div>
+              <sc-for list="{{ bankRows }}" as="b" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 54px 64px;gap:12px;font-size:13.5px;padding:11px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline">
+                  <span><b style="font-weight:500">{{ b.n }}</b><small style="display:block;color:var(--ink-3);font-size:12px;margin-top:3px;line-height:1.45">{{ b.sees }}</small></span>
+                  <span style="text-align:right;color:{{ b.color }}">{{ b.pulse }}</span>
+                  <span style="text-align:right">{{ b.share }}</span>
+                </div>
+              </sc-for>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 54px 64px;gap:12px;font-size:13.5px;padding:11px 0;align-items:baseline">
+                <span><b style="font-weight:600">Consolidado</b><small style="display:block;color:var(--ink-3);font-size:12px;margin-top:3px;line-height:1.45">Las cuatro cuentas, el saldo diario reconstruido y las facturas de los dos lados</small></span>
+                <span style="text-align:right;font-weight:600;color:{{ fg.consColor }}">{{ fg.consolidated }}</span>
+                <span style="text-align:right">100%</span>
+              </div>
+            </div>
+
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Y hacia delante se abre más</h3>
+              <div style="display:grid;gap:14px">
+                <div>
+                  <div style="display:flex;align-items:baseline;gap:9px">
+                    <b style="font-size:26px;font-weight:600;letter-spacing:-.03em;line-height:1;color:{{ fg.fcConsColor }}">{{ fg.fcCons }}</b>
+                    <span style="font-size:13px;color:var(--ink-2)">Pulse previsto a seis meses, consolidado</span>
+                  </div>
+                </div>
+                <div style="border-top:1px solid var(--rule-soft);padding-top:14px">
+                  <div style="display:flex;align-items:baseline;gap:9px">
+                    <b style="font-size:26px;font-weight:600;letter-spacing:-.03em;line-height:1;color:var(--ink-3)">{{ fg.fcBanks }}</b>
+                    <span style="font-size:13px;color:var(--ink-2)">es lo que preverían los bancos con su trozo</span>
+                  </div>
+                </div>
+              </div>
+              <p style="margin:14px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">El error no se queda quieto: el modelo amplifica lo que le das. Alimentado con una sola cuenta, proyecta una empresa estable durante los seis meses en los que se rompe. Nadie va a pedir explicaciones porque nadie está mirando nada raro.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isCartera }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="02 Cartera" ref="{{ screenRef }}">
+        <h1 data-r="head" style="margin:0 0 4px;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1">Cartera</h1>
+        <p data-r="thesis" style="font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:20px;line-height:1.45;color:var(--ink-2);max-width:56ch;margin:0 0 30px">Todo el sistema de crédito mide un <b style="font-weight:400;color:var(--ink)">stock con un año de retraso</b>. Esto mide el pulso, todos los días, sobre la posición consolidada que ningún banco ve entera.</p>
+
+        <div style="display:grid;gap:14px">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:12px;min-height:19px">
+              <h3 style="margin:0;font-size:13.5px;font-weight:600;color:var(--ink)">Las 1.286 empresas, septiembre de 2026</h3>
+              <sc-if value="{{ fieldIdle }}" hint-placeholder-val="{{ true }}">
+                <span style="font-size:12px;color:var(--ink-3)">Posición: Pulse. Altura: días de caja. Encendidas: más de 6 puntos en tres meses.</span>
+              </sc-if>
+              <sc-if value="{{ fieldHover }}" hint-placeholder-val="{{ false }}">
+                <span style="display:inline-flex;align-items:baseline;gap:12px;font-size:12.5px;color:var(--ink-2);flex-wrap:wrap">
+                  <b style="font-weight:600;color:var(--ink)">{{ hov.name }}</b>
+                  <em style="font-style:normal;color:{{ hov.color }}">{{ hov.score }}</em>
+                  <em style="font-style:normal">{{ hov.d3 }} en tres meses</em>
+                  <em style="font-style:normal">{{ hov.cash }} de caja</em>
+                  <em style="font-style:normal;color:var(--ink-3)">abrir ficha</em>
+                </span>
+              </sc-if>
+            </div>
+            <div data-fieldhit="{{ fieldHit }}" onMouseMove="{{ onFieldMove }}" onMouseLeave="{{ onFieldLeave }}" onClick="{{ onFieldClick }}">{{ fieldChart }}</div>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">El trazo corto sobre cada línea encendida indica la dirección del movimiento. La misma imagen el mes que viene es el informe de cartera: no hay que pedirlo, ni esperar al cierre anual.</p>
+          </div>
+
+          <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr))">
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <b style="display:block;font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.1">{{ nUp }}</b>
+              <span style="display:block;font-size:12.5px;color:var(--ink-3);margin-top:4px;max-width:24ch">empresas mejoran más de 3 puntos este trimestre</span>
+            </div>
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <b style="display:block;font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.1">{{ nDown }}</b>
+              <span style="display:block;font-size:12.5px;color:var(--ink-3);margin-top:4px;max-width:24ch">empeoran más de 3 puntos</span>
+            </div>
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <b style="display:block;font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.1">{{ nAlerts }}</b>
+              <span style="display:block;font-size:12.5px;color:var(--ink-3);margin-top:4px;max-width:24ch">alertas abiertas, todas con una acción asociada</span>
+            </div>
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <b style="display:block;font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.1">{{ nStruct }}</b>
+              <span style="display:block;font-size:12.5px;color:var(--ink-3);margin-top:4px;max-width:24ch">clasificadas como deterioro estructural, no como bache</span>
+            </div>
+          </div>
+
+          <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Reparto por banda</h3>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 80px 56px 90px;gap:12px;font-size:12px;color:var(--ink-3);padding:0 0 8px;border-bottom:1px solid var(--rule-soft)">
+                <span>Banda</span><span style="text-align:right">Empresas</span><span style="text-align:right">Peso</span><span style="text-align:right">Caja media</span>
+              </div>
+              <sc-for list="{{ bandRows }}" as="r" hint-placeholder-count="5">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 80px 56px 90px;gap:12px;font-size:13.5px;padding:9px 0;border-bottom:1px solid var(--rule-soft)">
+                  <span style="display:inline-flex;align-items:center;gap:7px;color:var(--ink-2)"><i style="width:8px;height:8px;border-radius:2px;display:inline-block;background:{{ r.color }}"></i>{{ r.name }}<em style="font-style:normal;font-size:11.5px;color:var(--ink-3)">{{ r.range }}</em></span>
+                  <span style="text-align:right">{{ r.count }}</span>
+                  <span style="text-align:right">{{ r.pct }}</span>
+                  <span style="text-align:right">{{ r.cash }}</span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Lo que más se ha movido a la baja</h3>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 46px 52px 62px;gap:10px;font-size:12px;color:var(--ink-3);padding:0 0 8px;border-bottom:1px solid var(--rule-soft)">
+                <span>Empresa</span><span style="text-align:right">Pulse</span><span style="text-align:right">3 m</span><span style="text-align:right">Previsto</span>
+              </div>
+              <sc-for list="{{ moverRows }}" as="r" hint-placeholder-count="6">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 46px 52px 62px;gap:10px;font-size:13.5px;padding:9px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline">
+                  <span><button onClick="{{ r.open }}" style="text-align:left" style-hover="color:var(--focus)">{{ r.name }}</button><small style="display:block;color:var(--ink-3);font-size:12px">{{ r.sector }}</small></span>
+                  <span style="text-align:right;color:{{ r.color }}">{{ r.score }}</span>
+                  <span style="text-align:right">{{ r.d3 }}</span>
+                  <span style="text-align:right;color:{{ r.fcColor }}">{{ r.fc }}</span>
+                </div>
+              </sc-for>
+              <p style="margin:10px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Ordenado por variación, no por nivel. Una empresa en 40 que lleva dos años en 40 no necesita a nadie; una que estaba en 70 hace un trimestre, sí.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isCaras }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="03 Las dos caras" ref="{{ screenRef }}">
+        <h1 data-r="head" style="margin:0 0 4px;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1">Las dos caras</h1>
+        <p data-r="thesis" style="font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:20px;line-height:1.45;color:var(--ink-2);max-width:56ch;margin:0 0 30px">La misma medida tiene que <b style="font-weight:400;color:var(--ink)">detectar la recuperación con la misma sensibilidad</b> con la que detecta el deterioro. Si solo sabe encontrar enfermos, sirve para excluir y no para tratar.</p>
+
+        <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr))">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+              <h3 style="margin:0;font-size:13.5px;font-weight:600;color:var(--ink)">Velasco Industrial</h3>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)"><i style="width:8px;height:8px;border-radius:2px;display:inline-block;background:{{ vel.color }}"></i>{{ vel.band }}</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:10px;margin:8px 0 12px;flex-wrap:wrap">
+              <b style="font-size:38px;font-weight:600;letter-spacing:-.04em;line-height:1;color:{{ vel.color }}">{{ vel.score }}</b>
+              <span style="font-size:14px;color:var(--ink-2)">hace seis meses {{ vel.prev }} · {{ vel.delta }} desde entonces</span>
+            </div>
+            {{ velChart }}
+            <p style="margin:14px 0 0;font-size:13.5px;line-height:1.6;color:var(--ink-2)">Cae de 82 a 68 sin que las ventas se muevan. Primero estira el pago a proveedores, después tira de la póliza, después se le alarga el cobro, y solo al final se nota en la caja. Ese orden es la firma de la tensión de tesorería, y es lo que el modelo busca.</p>
+            <p style="margin:10px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3)">Primera señal detectable: abril de 2026, cinco meses antes de cruzar 70.</p>
+            <button onClick="{{ vel.open }}" style="margin-top:14px;border:1px solid var(--rule);border-radius:999px;padding:5px 14px;font-size:12.5px" style-hover="border-color:var(--ink-3)">Abrir la ficha</button>
+          </div>
+
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+              <h3 style="margin:0;font-size:13.5px;font-weight:600;color:var(--ink)">Northbrook Distribución</h3>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)"><i style="width:8px;height:8px;border-radius:2px;display:inline-block;background:{{ nor.color }}"></i>{{ nor.band }}</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:10px;margin:8px 0 12px;flex-wrap:wrap">
+              <b style="font-size:38px;font-weight:600;letter-spacing:-.04em;line-height:1;color:{{ nor.color }}">{{ nor.score }}</b>
+              <span style="font-size:14px;color:var(--ink-2)">hace seis meses {{ nor.prev }} · {{ nor.delta }} desde entonces</span>
+            </div>
+            {{ norChart }}
+            <p style="margin:14px 0 0;font-size:13.5px;line-height:1.6;color:var(--ink-2)">Sube de 45 a 65 haciendo exactamente lo contrario, y en el mismo orden invertido: baja utilización de líneas, paga antes, y acorta el DSO porque ya tiene músculo para exigir cobro.</p>
+            <p style="margin:10px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3)">Primera señal detectable: octubre de 2025, con el score todavía en 47.</p>
+            <button onClick="{{ nor.open }}" style="margin-top:14px;border:1px solid var(--rule);border-radius:999px;padding:5px 14px;font-size:12.5px" style-hover="border-color:var(--ink-3)">Abrir la ficha</button>
+          </div>
+        </div>
+
+        <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px;margin-top:14px">
+          <h3 style="margin:0 0 10px;font-size:13.5px;font-weight:600;color:var(--ink)">Por qué esta pantalla abre el pitch</h3>
+          <p style="margin:0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Son las dos empresas del propio enunciado de Embat. Enseñar que la medida funciona en las dos direcciones, sobre su ejemplo y con la señal fechada meses antes, es la forma más corta de demostrar que el problema está entendido.</p>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isFicha }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="04 Ficha" ref="{{ screenRef }}">
+        <h1 data-r="head" style="margin:0 0 4px;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1">Ficha</h1>
+        <p data-r="thesis" style="font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:20px;line-height:1.45;color:var(--ink-2);max-width:56ch;margin:0 0 30px">Una empresa <b style="font-weight:400;color:var(--ink)">no muere de solvencia, muere de liquidez</b>. El patrimonio es una integral de la historia; la caja es un flujo con una frontera dura en cero.</p>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+          <sc-for list="{{ pickers }}" as="p" hint-placeholder-count="3">
+            <button onClick="{{ p.pick }}" style="font-size:11.5px;padding:3px 10px;border-radius:999px;border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.fg }}">{{ p.label }}</button>
+          </sc-for>
+        </div>
+
+        <div data-r="anchor" style="position:sticky;top:0;z-index:4;background:var(--ground);border-bottom:1px solid var(--rule-soft);padding:10px 0 12px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap">
+          <div style="display:flex;align-items:baseline;gap:14px;min-width:0">
+            <b style="font-size:36px;font-weight:600;letter-spacing:-.04em;line-height:.9;color:{{ f.color }}">{{ f.score }}</b>
+            <span style="min-width:0">
+              <b style="display:block;font-size:14px;font-weight:600;letter-spacing:-.01em">{{ f.name }}</b>
+              <span style="display:block;font-size:11.5px;color:var(--ink-3)">{{ f.meta }} · {{ f.bandline }}</span>
+            </span>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap">
+            <span><b style="display:block;font-size:17px;font-weight:600;letter-spacing:-.02em;line-height:1.2;color:{{ f.fcColor }}">{{ f.fcLine }}</b><span style="display:block;font-size:11.5px;color:var(--ink-3)">{{ f.fcNote }}</span></span>
+            <span><b style="display:block;font-size:17px;font-weight:600;letter-spacing:-.02em;line-height:1.2">{{ f.cashLine }}</b><span style="display:block;font-size:11.5px;color:var(--ink-3)">{{ f.cashNote }}</span></span>
+            <span><b style="display:block;font-size:17px;font-weight:600;letter-spacing:-.02em;line-height:1.2">{{ f.windowLine }}</b><span style="display:block;font-size:11.5px;color:var(--ink-3)">{{ f.windowNote }}</span></span>
+          </div>
+        </div>
+
+        <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:12px">
+            <h3 style="margin:0;font-size:13.5px;font-weight:600;color:var(--ink)">Veinticuatro meses de Pulse, y seis previstos</h3>
+            <span style="font-size:12px;color:var(--ink-3)">{{ f.signalNote }} · {{ f.fcBand }}</span>
+          </div>
+          {{ fichaChart }}
+        </div>
+
+        <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);margin-top:14px">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Por qué se mueve</h3>
+            <p style="margin:0 0 18px;font-size:14.5px;line-height:1.6;max-width:66ch">{{ f.explanation }}</p>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px">
+              <span style="font-size:12.5px;color:var(--ink-2)">{{ f.attribTitle }}</span>
+              <span style="font-size:12px;color:var(--ink-3)">{{ f.attribSum }}</span>
+            </div>
+            {{ wfChart }}
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Las barras suman la variación dibujada arriba, y el porcentaje de cada una es el que cita el párrafo. La frase se genera con plantilla sobre estos números, nunca con texto libre: lo que se muestra es siempre lo que se ha calculado.</p>
+          </div>
+
+          <div style="display:grid;gap:14px">
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <h3 style="margin:0 0 6px;font-size:13.5px;font-weight:600;color:var(--ink)">Los seis pilares</h3>
+              <sc-for list="{{ pillarRows }}" as="p" hint-placeholder-count="6">
+                <div style="padding:10px 0;border-bottom:1px solid var(--rule-soft)">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+                    <b style="font-weight:500;font-size:13.5px">{{ p.n }}</b>
+                    <span style="font-size:13px;color:var(--ink-2)">{{ p.readout }}</span>
+                  </div>
+                  <div style="height:6px;border-radius:3px;background:var(--sunken);overflow:hidden;margin-top:6px">
+                    <i style="display:block;height:100%;width:{{ p.w }};background:{{ p.color }}"></i>
+                  </div>
+                  <small style="display:block;font-size:11.5px;color:var(--ink-3);margin-top:5px">{{ p.d }}</small>
+                </div>
+              </sc-for>
+            </div>
+
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <h3 style="margin:0 0 8px;font-size:13.5px;font-weight:600;color:var(--ink)">{{ f.regimeTitle }}</h3>
+              <p style="margin:0;font-size:13px;color:var(--ink-2)">{{ f.regimeText }}</p>
+              <ul style="list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px">
+                <sc-for list="{{ tests }}" as="t" hint-placeholder-count="4">
+                  <li style="display:grid;grid-template-columns:14px 1fr;gap:9px;font-size:13px;color:var(--ink-2);align-items:baseline">
+                    <i style="font-style:normal;font-weight:600;color:{{ t.color }}">{{ t.mark }}</i><span>{{ t.t }}</span>
+                  </li>
+                </sc-for>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:14px;margin-top:14px">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <div style="border:1px solid var(--rule);border-radius:10px;padding:16px;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center">
+              <b style="font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1">{{ f.daysLeft }}</b>
+              <p style="margin:0;font-size:13px;color:var(--ink-2);max-width:52ch">{{ f.holdLead }} <em style="font-style:normal;color:var(--ink)">Ninguna alerta sale hacia un tercero antes de que la empresa la haya visto sobre sí misma.</em> Durante esta ventana, las acciones de abajo están abiertas.</p>
+            </div>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">{{ f.disclosureRule }}</p>
+            <p style="margin:8px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">No es cortesía. Un aviso que llega antes al acreedor que al deudor no predice el impago: lo provoca. El acreedor solo puede cortar; la empresa tiene veinte palancas.</p>
+            <div style="margin-top:14px;border-top:1px solid var(--rule-soft);padding-top:14px">
+              <sc-if value="{{ repClosed }}" hint-placeholder-val="{{ true }}">
+                <div>
+                  <button onClick="{{ onRepOpen }}" style="border:1px solid var(--rule);border-radius:999px;padding:5px 14px;font-size:12.5px" style-hover="border-color:var(--ink-3)">Aportar contexto</button>
+                  <p style="margin:8px 0 0;font-size:12.5px;color:var(--ink-3);max-width:60ch">Derecho de réplica. Lo que el dato no ve —una obra en curso, un cliente que renegoció, una compra de existencias— se adjunta al score y viaja con él.</p>
+                </div>
+              </sc-if>
+              <sc-if value="{{ repOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="display:grid;gap:10px">
+                  <label for="xr-rep" style="font-size:12.5px;color:var(--ink-2)">Contexto que el dato no ve. Se adjunta al score; no lo modifica.</label>
+                  <textarea id="xr-rep" value="{{ repText }}" onInput="{{ onRepText }}" rows="3" placeholder="El DPO sube porque negociamos 60 días con Aldabe a cambio de un 3% de descuento. Contrato firmado el 4 de septiembre." style="color:var(--ink);background:var(--sunken);border:1px solid var(--rule);border-radius:8px;padding:11px 14px;width:100%;resize:vertical;line-height:1.5;font-size:13.5px"></textarea>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <button onClick="{{ onRepSend }}" style="border:1px solid var(--rule);border-radius:999px;padding:5px 14px;font-size:12.5px" style-hover="border-color:var(--ink-3)">Adjuntar al score</button>
+                    <button onClick="{{ onRepCancel }}" style="border:1px solid transparent;border-radius:999px;padding:5px 14px;font-size:12.5px;color:var(--ink-3)" style-hover="color:var(--ink-2)">Descartar</button>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ repSent }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;font-size:13px;color:var(--ink-2)">Contexto adjuntado. Viaja con el score y aparece junto a la explicación cuando la señal llegue a un tercero. <button onClick="{{ onRepOpen }}" style="color:var(--ink-3);border-bottom:1px solid var(--rule)" style-hover="color:var(--ink)">Editar</button></p>
+              </sc-if>
+            </div>
+          </div>
+
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px;min-height:19px">
+              <h3 style="margin:0;font-size:13.5px;font-weight:600;color:var(--ink)">Qué hacer esta semana</h3>
+              <sc-if value="{{ hasDone }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size:12.5px;color:var(--ink-2)">{{ doneLine }} <button onClick="{{ onUndo }}" style="color:var(--ink-3);border-bottom:1px solid var(--rule);margin-left:4px" style-hover="color:var(--ink)">Deshacer</button></span>
+              </sc-if>
+            </div>
+            <sc-for list="{{ actions }}" as="a" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:13px 0;border-bottom:1px solid var(--rule-soft)">
+                <div><p style="margin:0;font-size:13.5px">{{ a.t }}</p><small style="display:block;color:var(--ink-3);font-size:12px;margin-top:3px">{{ a.s }}</small></div>
+                <div style="display:flex;align-items:center;gap:14px">
+                  <span style="font-size:{{ a.gainSize }};font-weight:{{ a.gainWeight }};white-space:nowrap;letter-spacing:-.02em;color:{{ a.gainColor }}">{{ a.gain }}</span>
+                  <sc-if value="{{ a.lever }}" hint-placeholder-val="{{ true }}">
+                    <button onClick="{{ a.toggle }}" style="border:1px solid {{ a.btnBorder }};background:{{ a.btnBg }};color:{{ a.btnFg }};border-radius:999px;padding:5px 14px;font-size:12.5px;white-space:nowrap">{{ a.btnLabel }}</button>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Regla de producto: ninguna alerta se muestra sin al menos una acción concreta, cuantificada en días de caja y ejecutable esta semana. «Riesgo medio-alto» no es una salida válida del sistema. Y cuando no hay palanca financiera se dice: nada financiero, es comercial.</p>
+          </div>
+
+          <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <h3 style="margin:0 0 10px;font-size:13.5px;font-weight:600;color:var(--ink)">El camino de vuelta</h3>
+              <p style="margin:0 0 12px;font-size:13.5px;color:var(--ink-2);max-width:60ch">{{ f.rehabText }}</p>
+              {{ rehabChart }}
+              <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">El peso de cada incidencia decae con vida media declarada: 18 meses para las operativas, 36 para los impagos reales. Un mal 2026 no puede seguir encareciendo el capital en 2038, porque entonces el modelo deja de predecir el futuro y empieza a fabricarlo.</p>
+            </div>
+
+            <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+              <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Lo que se detectó, y cuándo</h3>
+              <ul style="list-style:none;margin:0 0 0 5px;padding:0;border-left:1px solid var(--rule)">
+                <sc-for list="{{ events }}" as="e" hint-placeholder-count="5">
+                  <li style="padding:0 0 16px 18px;position:relative;font-size:13px;color:var(--ink-2)" style-before="content:'';position:absolute;left:-4px;top:7px;width:7px;height:7px;border-radius:2px;background:var(--ink-3)">
+                    <b style="display:block;color:var(--ink);font-weight:500">{{ e.t }}</b>
+                    <span style="font-size:11.5px;color:var(--ink-3)">{{ e.month }}</span>
+                    <div style="margin-top:3px">{{ e.s }}</div>
+                  </li>
+                </sc-for>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isAntelacion }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="05 Antelación" ref="{{ screenRef }}">
+        <h1 data-r="head" style="margin:0 0 4px;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1">Antelación</h1>
+        <p data-r="thesis" style="font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:20px;line-height:1.45;color:var(--ink-2);max-width:56ch;margin:0 0 30px">Detectar algo el mes que pasa no vale nada. La pregunta no es si acierta, es <b style="font-weight:400;color:var(--ink)">cuántos meses antes que la revisión anual</b>, y quién paga el coste de equivocarse.</p>
+
+        <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <b style="display:block;font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.1">+2,6 meses</b>
+            <span style="display:block;font-size:12.5px;color:var(--ink-3);margin-top:4px;max-width:26ch">de ventaja mediana sobre la revisión anual del banco</span>
+          </div>
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <b style="display:block;font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.1">71%</b>
+            <span style="display:block;font-size:12.5px;color:var(--ink-3);margin-top:4px;max-width:26ch">de los deterioros con dos meses o más de ventaja sobre ese baseline</span>
+          </div>
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <b style="display:block;font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.1">0,8</b>
+            <span style="display:block;font-size:12.5px;color:var(--ink-3);margin-top:4px;max-width:26ch">falsas alarmas por empresa y año en el punto conservador</span>
+          </div>
+        </div>
+
+        <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);margin-top:14px">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Ventaja sobre la revisión anual</h3>
+            {{ histChart }}
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Evento de deterioro: el Pulse real cae 15 puntos o más y se mantiene bajo el umbral tres meses. La alerta se calcula usando solo datos hasta el mes t. La misma curva existe para las mejoras, y es la que dispara la ampliación de límite.</p>
+            <p style="margin:10px 0 0;font-size:13px;line-height:1.55;color:var(--ink-2);max-width:70ch">No damos la antelación absoluta a propósito. El dataset es sintético, así que el absoluto mide al generador, no al modelo. Lo único comparable es el diferencial contra el baseline que existe hoy: la revisión anual del banco.</p>
+          </div>
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Cobertura frente a falsas alarmas</h3>
+            {{ tradeoffChart }}
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Dos puntos de operación sobre la misma curva. Elegir dónde se sienta cada destinatario es la decisión de diseño más importante del sistema, y es una decisión de producto, no de modelo.</p>
+          </div>
+        </div>
+
+        <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px;margin-top:14px">
+          <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Por qué dos umbrales y no uno</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+            <thead>
+              <tr>
+                <th style="text-align:left;font-weight:500;color:var(--ink-3);font-size:12px;padding:0 14px 8px 0;border-bottom:1px solid var(--rule-soft)">Destinatario</th>
+                <th style="text-align:left;font-weight:500;color:var(--ink-3);font-size:12px;padding:0 14px 8px 0;border-bottom:1px solid var(--rule-soft)">Punto de operación</th>
+                <th style="text-align:left;font-weight:500;color:var(--ink-3);font-size:12px;padding:0 0 8px;border-bottom:1px solid var(--rule-soft)">Qué cuesta la falsa alarma</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:10px 14px 10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top">La propia empresa</td>
+                <td style="padding:10px 14px 10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top">Sensible: 94% de cobertura, 1,9 avisos al año</td>
+                <td style="padding:10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top;color:var(--ink-2)">Media hora de un director financiero revisando sus cobros. Casi cero, y probablemente útil aunque la alarma sea falsa.</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 14px 10px 0;vertical-align:top">El financiador</td>
+                <td style="padding:10px 14px 10px 0;vertical-align:top">Específico: 74% de cobertura, 0,8 avisos al año</td>
+                <td style="padding:10px 0;vertical-align:top;color:var(--ink-2)">Un recorte de línea a una empresa sana. Puede ser catastrófico, y puede cumplirse a sí mismo.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Si la antelación tiene un coste inevitable en falsas alarmas, la pregunta no es cuántas se aceptan, sino sobre quién recaen. Hacia el financiador la señal va además suavizada, con histéresis y un tope de cuatro puntos de movimiento por periodo: si mil sistemas de decisión reaccionan a la vez a la misma señal, la retirada simultánea produce la crisis que cada uno intentaba evitar por separado.</p>
+        </div>
+
+        <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);margin-top:14px">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">De dónde sale el dato</h3>
+            <p style="margin:0 0 12px;font-size:13.5px;line-height:1.6;color:var(--ink-2);max-width:60ch">El fichero de saldos es una foto del cierre, no un histórico. Usarlo como serie es fuga temporal, así que el saldo diario se reconstruye hacia atrás desde el saldo final y las transacciones:</p>
+            <pre style="margin:0;font-size:12.5px;line-height:1.6;color:var(--ink);background:var(--sunken);border:1px solid var(--rule-soft);border-radius:8px;padding:12px 14px;overflow-x:auto;white-space:pre-wrap;font-family:'Archivo',sans-serif;font-variant-numeric:tabular-nums">saldo(cuenta, t) = saldo_final − Σ transacciones(t+1 … T)</pre>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Sin esto no hay días de caja, no hay mínimo intramensual y no hay pilar de liquidez. Es el primer trabajo del proyecto y todo lo demás depende de él.</p>
+            <div style="margin-top:14px;border-top:1px solid var(--rule-soft);padding-top:14px;display:grid;gap:9px">
+              <div style="display:grid;grid-template-columns:14px 1fr;gap:10px;font-size:13px;color:var(--ink-2)"><i style="font-style:normal;color:var(--ink-3)">·</i><span>Validación con <em style="font-style:normal;color:var(--ink)">GroupKFold por group_id</em>: un grupo empresarial nunca se parte entre train y test, porque los flujos intragrupo filtrarían la respuesta.</span></div>
+              <div style="display:grid;grid-template-columns:14px 1fr;gap:10px;font-size:13px;color:var(--ink-2)"><i style="font-style:normal;color:var(--ink-3)">·</i><span>Corte temporal además del corte por grupo: se entrena con meses anteriores al de evaluación, nunca con posteriores.</span></div>
+            </div>
+          </div>
+
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+              <h3 style="margin:0;font-size:13.5px;font-weight:600;color:var(--ink)">Las cuatro variables que cargan el Pulse</h3>
+              <span style="font-size:12px;color:var(--ink-3)">de unas 150</span>
+            </div>
+            <sc-for list="{{ keyVars }}" as="v" hint-placeholder-count="4">
+              <div style="padding:11px 0;border-bottom:1px solid var(--rule-soft)">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap">
+                  <b style="font-weight:500;font-size:13.5px">{{ v.n }}</b>
+                  <span style="font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid var(--rule);color:var(--ink-2);white-space:nowrap">{{ v.src }}</span>
+                </div>
+                <small style="display:block;font-size:12.5px;color:var(--ink-3);margin-top:4px;line-height:1.5">{{ v.why }}</small>
+              </div>
+            </sc-for>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Dos vienen de la agregación, así que nadie más las ve. Dos son de contraparte, así que nadie las puede falsear: se miden en las facturas del otro lado. Esas son las dos únicas fuentes de ventaja; el resto de las 150 es relleno necesario.</p>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isMonitor }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="06 Monitor" ref="{{ screenRef }}">
+        <h1 data-r="head" style="margin:0 0 4px;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1">Monitor</h1>
+        <p data-r="thesis" style="font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:20px;line-height:1.45;color:var(--ink-2);max-width:56ch;margin:0 0 30px">El prestamista decide una vez al año y está <b style="font-weight:400;color:var(--ink)">ciego los otros once meses</b>. El hueco no está en la originación: está en la monitorización entre decisiones.</p>
+
+        <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+            <h3 style="margin:0;font-size:13.5px;font-weight:600;color:var(--ink)">{{ monitorTitle }}</h3>
+            <span style="font-size:12.5px;color:var(--ink-3)">Ordenadas por severidad, no por tamaño</span>
+          </div>
+          <p style="margin:0 0 14px;font-size:12.5px;color:var(--ink-3);max-width:74ch">Esta es la vista del financiador, y por eso no es la vista de cartera. La señal que ve aquí va suavizada y con tope de movimiento, y no aparece hasta que la empresa ha visto la suya.</p>
+          <div style="overflow-x:auto">
+            <div style="min-width:880px">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 60px 100px 74px 116px 168px;gap:12px;font-size:12px;color:var(--ink-3);padding:0 0 8px;border-bottom:1px solid var(--rule-soft)">
+                <span>Empresa y motivo</span><span style="text-align:right">Pulse</span><span style="text-align:right">Al financiador</span><span style="text-align:right">Caja</span><span>Disclosure</span><span>Acción propuesta</span>
+              </div>
+              <sc-for list="{{ monitorRows }}" as="r" hint-placeholder-count="12">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 60px 100px 74px 116px 168px;gap:12px;font-size:13.5px;padding:10px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline">
+                  <span><button onClick="{{ r.open }}" style="text-align:left;font-weight:500" style-hover="color:var(--focus)">{{ r.name }}</button><small style="display:block;color:var(--ink-3);font-size:12px;margin-top:2px">{{ r.reason }}</small></span>
+                  <span style="text-align:right"><span style="color:{{ r.color }}">{{ r.score }}</span><small style="display:block;color:var(--ink-3);font-size:11.5px">{{ r.fc }}</small></span>
+                  <span style="text-align:right"><span style="color:{{ r.lenderColor }}">{{ r.lender }}</span><small style="display:block;color:var(--ink-3);font-size:11.5px">{{ r.lenderNote }}</small></span>
+                  <span style="text-align:right">{{ r.cash }}</span>
+                  <span style="font-size:12.5px;color:var(--ink-2)">{{ r.disclosure }}</span>
+                  <span style="font-size:13px;color:var(--ink-2)">{{ r.action }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Cada fila lleva su motivo en una línea y su acción. Un director financiero tolera unas pocas alertas al mes antes de desactivarlas todas, así que el coste de una alerta no es el pixel: es la credibilidad de las siguientes.</p>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isProducto }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="07 Producto" ref="{{ screenRef }}">
+        <h1 data-r="head" style="margin:0 0 4px;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1">Producto</h1>
+        <p data-r="thesis" style="font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:20px;line-height:1.45;color:var(--ink-2);max-width:56ch;margin:0 0 30px">Un aviso que nadie ejecuta vale cero. <b style="font-weight:400;color:var(--ink)">Embat no solo ve el dinero: lo mueve.</b> El SaaS de tesorería tiene un techo de ticket por cliente; la originación no lo tiene.</p>
+
+        <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Límite de circulante preaprobado</h3>
+            <div style="display:flex;align-items:baseline;gap:14px;margin:10px 0 4px;flex-wrap:wrap">
+              <b style="font-size:44px;font-weight:600;letter-spacing:-.04em;line-height:1">1,4 M€</b>
+              <span style="font-size:14px;color:var(--ink-2)">a 5,9% · revisado cada mes con el Pulse</span>
+            </div>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Embat no pone balance: origina y cobra comisión, con capital de bancos, fondos de direct lending y aseguradoras de crédito. El coste de adquisición es cero porque el cliente ya entra en la plataforma varias veces al mes.</p>
+            <div style="margin-top:16px;border-top:1px solid var(--rule-soft);padding-top:14px">
+              <p style="margin:0;font-size:14px;line-height:1.6;color:var(--ink-2);max-width:60ch">El Pulse decide a quién y a qué precio. Lo que hace que la operación exista es otra cosa: Embat ya está dentro del canal de pago, así que la financiación se repaga del flujo antes que nadie. El Pulse no la hace posible; la hace barata.</p>
+            </div>
+            <button style="margin-top:16px;border:1px solid var(--rule);border-radius:999px;padding:6px 16px;font-size:12.5px" style-hover="border-color:var(--ink-3)">Solicitar disposición</button>
+          </div>
+
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Riesgo de contrapartes</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+              <thead>
+                <tr>
+                  <th style="text-align:left;font-weight:500;color:var(--ink-3);font-size:12px;padding:0 12px 8px 0;border-bottom:1px solid var(--rule-soft)">Cliente</th>
+                  <th style="text-align:left;font-weight:500;color:var(--ink-3);font-size:12px;padding:0 12px 8px 0;border-bottom:1px solid var(--rule-soft)">Peso</th>
+                  <th style="text-align:left;font-weight:500;color:var(--ink-3);font-size:12px;padding:0 0 8px;border-bottom:1px solid var(--rule-soft)">Señal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:10px 12px 10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top"><b style="font-weight:500">Aldabe Europa</b><small style="display:block;color:var(--ink-3);font-size:12px;margin-top:3px">Pedir garantía o acortar plazo</small></td>
+                  <td style="padding:10px 12px 10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top;white-space:nowrap">22%</td>
+                  <td style="padding:10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top;color:var(--ink-2)">paga 18 días más tarde, y lo mismo a otros 3 proveedores de la red</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 12px 10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top"><b style="font-weight:500">Miramar Ibérica</b><small style="display:block;color:var(--ink-3);font-size:12px;margin-top:3px">Nada que hacer</small></td>
+                  <td style="padding:10px 12px 10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top;white-space:nowrap">9%</td>
+                  <td style="padding:10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top;color:var(--ink-2)">estable, sin señales</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 12px 10px 0;vertical-align:top"><b style="font-weight:500">Cerezal Logística</b><small style="display:block;color:var(--ink-3);font-size:12px;margin-top:3px">Ampliar crédito comercial</small></td>
+                  <td style="padding:10px 12px 10px 0;vertical-align:top;white-space:nowrap">7%</td>
+                  <td style="padding:10px 0;vertical-align:top;color:var(--ink-2)">mejora: adelanta pagos desde marzo</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Embat ve las facturas de los dos lados. Con 400 clientes ve decenas de miles de contrapartes que no son clientes suyos, y el comportamiento de pago de una empresa hacia ocho proveedores es la misma variable medida ocho veces. Un proveedor solo no distingue «me paga tarde a mí» de «paga tarde a todos». La red sí, y esa distinción separa un conflicto comercial de una crisis de caja.</p>
+          </div>
+        </div>
+
+        <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);margin-top:14px">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Supuestos y aritmética</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+              <tbody>
+                <tr><td style="padding:9px 0;border-bottom:1px solid var(--rule-soft)">Clientes actuales de Embat</td><td style="padding:9px 0;border-bottom:1px solid var(--rule-soft);text-align:right;white-space:nowrap">400</td></tr>
+                <tr><td style="padding:9px 0;border-bottom:1px solid var(--rule-soft)">Necesidad media de circulante</td><td style="padding:9px 0;border-bottom:1px solid var(--rule-soft);text-align:right;white-space:nowrap">1,5 M€</td></tr>
+                <tr><td style="padding:9px 0;border-bottom:1px solid var(--rule-soft)">Penetración en el año 1</td><td style="padding:9px 0;border-bottom:1px solid var(--rule-soft);text-align:right;white-space:nowrap">15%</td></tr>
+                <tr><td style="padding:9px 0;border-bottom:1px solid var(--rule-soft)">Volumen originado en el año 1</td><td style="padding:9px 0;border-bottom:1px solid var(--rule-soft);text-align:right;white-space:nowrap">90 M€</td></tr>
+                <tr><td style="padding:9px 0;border-bottom:1px solid var(--rule-soft)">Comisión de originación</td><td style="padding:9px 0;border-bottom:1px solid var(--rule-soft);text-align:right;white-space:nowrap">1,0%</td></tr>
+                <tr><td style="padding:9px 0;font-weight:500">Ingreso incremental año 1</td><td style="padding:9px 0;text-align:right;white-space:nowrap;font-weight:600">~0,9 M€</td></tr>
+              </tbody>
+            </table>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Son supuestos nuestros y están marcados como tales. Un cliente que factura 30 M€ y necesita 2 M€ de circulante deja 20.000 € en una sola operación, comparable a su contrato anual de software y sin riesgo de balance.</p>
+          </div>
+
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">En qué cambiamos de opinión</h3>
+            <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:var(--ink-2)">El viernes el plan era vender las alertas a los financiadores en crudo y en tiempo real. Es el producto más fácil de vender y el que más paga.</p>
+            <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:var(--ink-2)">Lo descartamos al ver el orden de las señales en Velasco. Un aviso que llega antes al acreedor que al deudor no predice el impago: lo provoca. Habríamos fabricado exactamente lo que decíamos predecir, y el modelo habría acertado por la peor razón posible.</p>
+            <p style="margin:0;font-size:14px;line-height:1.6;color:var(--ink-2)">Así que quien puede arreglar el problema recibe la señal completa y primero. Quien solo puede cortar recibe menos, más tarde y suavizada. El Pulse de una empresa es de la empresa, y Embat cobra por originar, no por rechazar.</p>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Hay un conflicto real entre servir al prestamista y al prestatario. No tiene solución perfecta; tiene una estructura de incentivos que decide a quién sirve y no puede traicionarlo.</p>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isAsk }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="08 Preguntar" ref="{{ screenRef }}">
+        <h1 data-r="head" style="margin:0 0 4px;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1">Preguntar</h1>
+        <p data-r="thesis" style="font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:20px;line-height:1.45;color:var(--ink-2);max-width:56ch;margin:0 0 30px">En veinte años el crédito no se pide: se recalcula solo y lo consultan agentes. Entonces el score <b style="font-weight:400;color:var(--ink)">deja de ser una pantalla y es un protocolo</b>.</p>
+
+        <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+          <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Pregunte por cualquiera de las 1.286 empresas</h3>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:10px">
+            <input type="text" value="{{ q }}" onInput="{{ onQ }}" onKeyDown="{{ onQKey }}" placeholder="¿Por qué ha bajado Velasco?" aria-label="Pregunta sobre cualquier empresa de la cartera" style="color:var(--ink);background:var(--sunken);border:1px solid var(--rule);border-radius:8px;padding:11px 14px;width:100%">
+            <button onClick="{{ onAsk }}" style="border:1px solid var(--rule);border-radius:8px;padding:0 18px" style-hover="border-color:var(--ink-3)">Responder</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">
+            <sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+              <button onClick="{{ c.ask }}" style="font-size:11.5px;padding:3px 10px;border-radius:999px;border:1px solid var(--rule);color:var(--ink-2)" style-hover="color:var(--ink);border-color:var(--ink-3)">{{ c.q }}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ hasAnswer }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:16px;font-size:14.5px;line-height:1.6;max-width:66ch">
+              <p style="margin:0">{{ answerText }}</p>
+              <span style="display:block;margin-top:10px;font-size:11.5px;color:var(--ink-3)">{{ answerSrc }}</span>
+            </div>
+          </sc-if>
+        </div>
+
+        <div data-r="cols" style="display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin-top:14px">
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">El mismo Pulse, legible por una máquina</h3>
+            <pre style="margin:0;font-size:11.5px;line-height:1.65;color:var(--ink-2);background:var(--sunken);border:1px solid var(--rule-soft);border-radius:8px;padding:14px 16px;overflow-x:auto;white-space:pre;font-family:'Archivo',sans-serif;font-variant-numeric:tabular-nums">{
+  "schema": "embat.xray.score/1.0",
+  "company": "C0001",
+  "as_of": "2026-09-30",
+  "pulse": 68,
+  "band": "vigilancia",
+  "trajectory_3m": -4,
+  "pulse_forecast_6m": {
+    "value": 62, "lo": 53, "hi": 71,
+    "band": "vigilancia",
+    "model": "xray-fc-damped@0.9.4",
+    "damping": 0.82
+  },
+  "p_structural_6m": 0.71,
+  "pillars": {
+    "liquidez": 54, "deuda": 22, "cobros": 71,
+    "pagos": 31, "actividad": 76, "grupo": 64
+  },
+  "attribution_6m": {
+    "total": -14,
+    "deuda": -8.5, "pagos": -3.4, "liquidez": -1.4,
+    "grupo": -0.4, "cobros": -0.3, "actividad": 0
+  },
+  "first_signal": "2026-04",
+  "regime": "structural",
+  "disclosure": {
+    "subject_seen": true,
+    "window_opened": "2026-09-23",
+    "window_days": 30,
+    "third_party_release": "2026-10-23",
+    "subject_statement": true
+  },
+  "decay": { "operational_months": 18, "default_months": 36 },
+  "model": "xray-lgbm-3head@0.9.4",
+  "signature": "ed25519:9f3c…a71e"
+}</pre>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">Versionado, firmado, con el Pulse observado y el previsto, la atribución y la ventana de disclosure dentro. Quien defina el formato en el que dos máquinas se dicen «puedo fiarme de ti» captura la capa entera.</p>
+          </div>
+
+          <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px">
+            <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Lo que queda cuando el dato deje de ser el foso</h3>
+            <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:var(--ink-2)">La factura electrónica obligatoria y el open finance van a poner este rastro al alcance de cualquiera antes de diez años. Tener los datos dejará de ser una ventaja.</p>
+            <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:var(--ink-2)">Lo que no se copia es el historial calibrado. Cada predicción se guarda con su fecha y con el resultado que vino después, desde el primer día. También el grafo de contrapartes, que crece más rápido que la lista de clientes.</p>
+            <p style="margin:18px 0 0;font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:18px;line-height:1.45;color:var(--ink);max-width:44ch">Hoy medimos el dinero porque es lo que se puede medir. Lo que en realidad queremos saber es si una empresa merece existir dentro de diez años, y el dinero solo es su sombra.</p>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:70ch">La arquitectura de pilares admite sensores nuevos sin rehacerse.</p>
+          </div>
+        </div>
+
+        <div data-p style="background:var(--raised);border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px;margin-top:14px">
+          <h3 style="margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink)">Cómo leer esta demo</h3>
+          <p style="margin:0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:74ch">Todo sale de un único contrato de datos: index.json para la cartera y company/{id}.json para la ficha, con series, pilares, atribución, eventos, régimen, acciones, camino de vuelta, explicación y firma. El pipeline de Python precomputa los 1.286 × 24 Pulse y el front los lee estáticos. Sin base de datos, sin arranque en frío y sin nada que se pueda caer a las once de la mañana del domingo.</p>
+        </div>
+      </section>
+    </sc-if>
+
+  </main>
+</div>
+
+<sc-if value="{{ showRehearsal }}" hint-placeholder-val="{{ true }}">
+  <div data-r="pacer" style="position:fixed;top:0;left:236px;right:0;height:2px;z-index:9">
+    <i style="display:block;height:100%;width:{{ pacerW }};background:var(--ink-3);transition:width .5s linear"></i>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;startScreen&quot;: {
+    &quot;editor&quot;: &quot;enum&quot;,
+    &quot;options&quot;: [&quot;Fragmentación&quot;, &quot;Cartera&quot;, &quot;Las dos caras&quot;, &quot;Ficha&quot;, &quot;Antelación&quot;, &quot;Monitor&quot;, &quot;Producto&quot;, &quot;Preguntar&quot;],
+    &quot;default&quot;: &quot;Fragmentación&quot;,
+    &quot;tsType&quot;: &quot;string&quot;,
+    &quot;section&quot;: &quot;Demo&quot;,
+    &quot;label&quot;: &quot;Pantalla inicial&quot;
+  },
+  &quot;showRehearsal&quot;: {
+    &quot;editor&quot;: &quot;boolean&quot;,
+    &quot;default&quot;: true,
+    &quot;tsType&quot;: &quot;boolean&quot;,
+    &quot;section&quot;: &quot;Demo&quot;,
+    &quot;label&quot;: &quot;Cronómetro de ensayo&quot;
+  },
+  &quot;defaultTheme&quot;: {
+    &quot;editor&quot;: &quot;enum&quot;,
+    &quot;options&quot;: [&quot;sistema&quot;, &quot;oscuro&quot;, &quot;claro&quot;],
+    &quot;default&quot;: &quot;sistema&quot;,
+    &quot;tsType&quot;: &quot;string&quot;,
+    &quot;section&quot;: &quot;Demo&quot;,
+    &quot;label&quot;: &quot;Tema de sala&quot;
+  }
+}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.SCREENS = [
+      { n:"Fragmentación", at:0 }, { n:"Cartera", at:40 }, { n:"Las dos caras", at:65 },
+      { n:"Ficha", at:95 }, { n:"Antelación", at:155 }, { n:"Monitor", at:190 },
+      { n:"Producto", at:215 }, { n:"Preguntar", at:260 }
+    ];
+    const names = this.SCREENS.map(s => s.n);
+    this.state = {
+      screen: Math.max(0, names.indexOf(this.props.startScreen || "Fragmentación")),
+      fichaId:"C0001", t:0, running:false, dark:true, q:"", answer:null, done:{},
+      rep:"", repMode:"closed", ready:false, rev:0, hoverId:null
+    };
+
+    /* Mide el ancho con una lectura síncrona de layout, sin depender del bucle
+       de frames. Sin ancho medido no se dibuja: un ancho inventado deforma el
+       viewBox, porque los SVG van con preserveAspectRatio="none". */
+    this.Measured = (p) => {
+      const nodeRef = React.useRef(null);
+      const seen = React.useRef(0);
+      const [w, setW] = React.useState(0);
+      const measure = (node) => {
+        let n = node;
+        while (n){
+          const cw = n.clientWidth || n.offsetWidth || 0;
+          if (cw > 0) return Math.max(240, Math.round(cw - (n === node ? 0 : 42)));
+          n = n.parentElement;
+        }
+        return 0;
+      };
+      React.useLayoutEffect(() => {
+        const node = nodeRef.current;
+        if (!node) return;
+        /* Histéresis de 2 px: sin ella el observer se realimenta en bucle. */
+        const read = () => {
+          const next = measure(node);
+          if (next <= 0 || Math.abs(next - seen.current) <= 2) return;
+          seen.current = next;
+          setW(next);
+        };
+        read();
+        /* Un único reintento fuera del commit: si la actualización del montaje
+           se pierde, el observer no puede recuperarla porque la geometría ya
+           no cambia. El temporizador sí corre en documentos ocultos. */
+        const t = setTimeout(read, 0);
+        let ro = null;
+        if (typeof ResizeObserver !== "undefined"){
+          ro = new ResizeObserver(read);
+          ro.observe(node);
+        }
+        return () => { clearTimeout(t); if (ro) ro.disconnect(); };
+      }, []);
+      return React.createElement("div", { ref:nodeRef, style:{ width:"100%", height:p.h + "px" } }, w > 0 ? p.draw(w) : null);
+    };
+  }
+
+  componentDidMount(){
+    const pref = this.props.defaultTheme || "sistema";
+    const root = document.documentElement;
+    let dark;
+    if (pref === "oscuro"){ root.setAttribute("data-theme", "dark"); dark = true; }
+    else if (pref === "claro"){ root.setAttribute("data-theme", "light"); dark = false; }
+    else { root.removeAttribute("data-theme"); dark = !matchMedia("(prefers-color-scheme: light)").matches; }
+
+    import("./xray-model.js").then(M => {
+      this.M = M;
+      this.universe = M.buildUniverse();
+      this.byId = Object.fromEntries(this.universe.map(c => [c.id, c]));
+      this.applySpectrum(dark);
+      this.setState({ ready:true, dark:dark });
+    }).catch(e => console.error("No se pudo cargar xray-model.js", e));
+
+    this.mq = matchMedia("(prefers-color-scheme: light)");
+    this.mqHandler = () => { if (!document.documentElement.getAttribute("data-theme")) this.setTheme(!this.mq.matches); };
+    this.mq.addEventListener("change", this.mqHandler);
+    this.keyHandler = (e) => {
+      const tag = e.target && e.target.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.key === "ArrowRight" || e.key === "PageDown") this.go(this.state.screen + 1);
+      if (e.key === "ArrowLeft" || e.key === "PageUp") this.go(this.state.screen - 1);
+      if (e.key === " "){ e.preventDefault(); this.state.running ? this.stop() : this.start(); }
+    };
+    document.addEventListener("keydown", this.keyHandler);
+  }
+  componentWillUnmount(){
+    clearInterval(this.timer);
+    document.removeEventListener("keydown", this.keyHandler);
+    if (this.mq) this.mq.removeEventListener("change", this.mqHandler);
+  }
+
+  applySpectrum(dark){
+    this.spectrum = this.M.makeSpectrum(dark);
+    this.g = this.M.charts(React, this.spectrum);
+  }
+  setTheme(dark){ if (this.M) this.applySpectrum(dark); this.setState(s => ({ dark:dark, rev:s.rev + 1 })); }
+  toggleTheme(){
+    const root = document.documentElement;
+    const now = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    const next = now === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    this.setTheme(next === "dark");
+  }
+
+  go(i, companyId){
+    const next = companyId ? 3 : Math.max(0, Math.min(this.SCREENS.length - 1, i));
+    if (!companyId && next === this.state.screen) return;
+    if (companyId) this.setState({ screen:3, fichaId:companyId, repMode:"closed", rep:"", hoverId:null });
+    else this.setState({ screen:next, hoverId:null });
+    window.scrollTo(0, 0);
+    if (next !== 0) this.armEnter();
+  }
+  /* La entrada se aplica sobre el nodo desde dentro de un frame y se retira en el
+     siguiente. Si no hay frames, nada se oculta nunca: el reposo es el final. */
+  armEnter(){
+    requestAnimationFrame(() => {
+      const el = this.screenEl;
+      if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const shift = !el.querySelector('[data-r="anchor"]');
+      el.style.transition = "none";
+      el.style.opacity = "0";
+      if (shift) el.style.transform = "translateY(6px)";
+      requestAnimationFrame(() => {
+        if (!el.isConnected) return;
+        el.style.transition = "opacity .4s ease, transform .4s ease";
+        el.style.opacity = "1";
+        el.style.transform = "none";
+        setTimeout(() => {
+          if (el.isConnected && el.style.opacity === "1"){ el.style.transition = ""; el.style.opacity = ""; el.style.transform = ""; }
+        }, 480);
+      });
+    });
+  }
+  start(){
+    if (this.state.running) return;
+    this.setState({ running:true });
+    this.timer = setInterval(() => {
+      const t = this.state.t + 1;
+      this.setState({ t:t });
+      if (t >= 330) this.stop();
+    }, 1000);
+  }
+  stop(){ clearInterval(this.timer); this.setState({ running:false }); }
+
+  chart(h, draw){ return React.createElement(this.Measured, { h:h, draw:draw }); }
+
+  answerFor(q){
+    const M = this.M, t = (q || "").toLowerCase().trim();
+    if (!t) return null;
+    const hit = this.universe.find(c => t.includes(c.name.toLowerCase().split(" ")[0]));
+    const c = hit || this.byId.C0001, d = M.detail(c);
+    if (/(qu[eé] hago|acci[oó]n|qu[eé] hacer|c[oó]mo)/.test(t)){
+      const a = d.actions[0];
+      return { text:"La acción con más retorno para " + c.name + " es: " + a.t.toLowerCase() + ". " + a.s + " Devuelve " + a.g + " días de caja. Hay " + (d.actions.length - 1) + " acciones más abiertas en su ficha.", src:"company/" + c.id + ".json → actions[0]" };
+    }
+    if (/(cu[aá]ndo|antelaci[oó]n|primera se[nñ]al)/.test(t)){
+      return { text:"La primera señal detectable en " + c.name + " es de " + d.signal.label + ", " + (23 - d.signal.month) + " meses antes del cierre. Se disparó en el pilar de Deuda, por utilización creciente de líneas, cuando el Pulse todavía no se había movido.", src:"company/" + c.id + ".json → signal" };
+    }
+    if (/(bache|estructural|r[eé]gimen|transitorio)/.test(t)){
+      return { text:c.name + (c.structural ? " está clasificada como deterioro estructural: cumple los cuatro tests, persiste tres meses bajo su media móvil, afecta a dos pilares y no lo explica su estacionalidad." : " está clasificada como bache transitorio: solo cumple uno de los cuatro tests, así que se vigila pero no se escala a los financiadores."), src:"company/" + c.id + ".json → regime" };
+    }
+    if (/(previsto|previsi[oó]n|prev[eé]|futuro|proyecci[oó]n|va a pasar|seis meses)/.test(t)){
+      const fc = M.forecast(c);
+      return { text:c.name + " está en " + Math.round(c.score) + " de Pulse y el previsto a " + fc.months + " meses es " + fc.at + ", con banda de ±" + fc.spread + " puntos. " + (fc.bandChange ? "Eso la saca de banda " + M.bandName(c.score).toLowerCase() + " y la mete en " + fc.band.toLowerCase() + "." : "Se mantiene en banda " + fc.band.toLowerCase() + ".") + " La proyección amortigua el momento reciente mes a mes en vez de extrapolarlo en línea recta, que es lo que hace que el número a seis meses sea defendible.", src:"company/" + c.id + ".json → pulse_forecast_6m" };
+    }
+    if (/(banco|bancos|fragment|consolidad|por separado)/.test(t)){
+      const fd = M.bankViews(c);
+      const lo = Math.min.apply(null, fd.views.map(v => v.pulse)), hi = Math.max.apply(null, fd.views.map(v => v.pulse));
+      return { text:"Los cuatro bancos de " + c.name + " calculan entre " + lo + " y " + hi + " de Pulse con solo sus cuentas, y la media ponderada por volumen es " + fd.weighted + ". El consolidado es " + fd.consolidated + ": " + M.fmtDelta(fd.gap) + " puntos de diferencia. " + (fd.crossed === 0 ? "Ninguno de los cuatro cruza el umbral de vigilancia por separado." : fd.crossed + " de los cuatro cruzan el umbral por separado."), src:"company/" + c.id + ".json → bank_views" };
+    }
+    if (/(l[ií]mite|financiaci[oó]n|cr[eé]dito|cu[aá]nto)/.test(t)){
+      const lim = Math.round(c.score * 22) / 1000;
+      return { text:"Con el Pulse de cierre de " + Math.round(c.score) + ", el límite de circulante preaprobado para " + c.name + " es de " + String(lim).replace(".", ",") + " M€. Se recalcula cada mes y el movimiento está topado por periodo, para que el límite no se mueva más rápido de lo que la empresa puede reaccionar.", src:"company/" + c.id + ".json → facility" };
+    }
+    return { text:d.explanation, src:"company/" + c.id + ".json → explanation" };
+  }
+
+  renderVals(){
+    const st = this.state, screen = st.screen;
+    const show = this.props.showRehearsal !== false;
+    const vals = {
+      showRehearsal: show,
+      isFrag: screen === 0, isCartera: screen === 1, isCaras: screen === 2, isFicha: screen === 3,
+      isAntelacion: screen === 4, isMonitor: screen === 5, isProducto: screen === 6, isAsk: screen === 7,
+      themeLabel: st.dark ? "Sala clara" : "Sala oscura",
+      onTheme: () => this.toggleTheme(),
+      runLabel: st.running ? "Pausar" : "Ensayar",
+      onRun: () => st.running ? this.stop() : this.start(),
+      onReset: () => { this.stop(); this.setState({ t:0 }); },
+      screenRef: (el) => { if (el) this.screenEl = el; },
+      clock: Math.floor(st.t / 60) + ":" + String(st.t % 60).padStart(2, "0"),
+      pacerW: Math.min(100, st.t / 300 * 100) + "%"
+    };
+    const should = this.SCREENS.reduce((acc, s, i) => st.t >= s.at ? i : acc, 0);
+    vals.clockhint = st.t === 0 && !st.running ? "5 minutos"
+      : st.t > 300 ? "pasado"
+      : should === screen ? "en hora"
+      : should > screen ? "vais tarde: " + this.SCREENS[should].n : "vais rápido";
+    this.SCREENS.forEach((s, i) => {
+      vals["go" + i] = () => this.go(i);
+      vals["cur" + i] = i === screen ? "true" : "false";
+      vals["due" + i] = st.running && st.t >= s.at && (i === this.SCREENS.length - 1 || st.t < this.SCREENS[i + 1].at) && i !== screen ? "true" : "false";
+    });
+    if (!st.ready || !this.M) return vals;
+
+    const M = this.M, sp = this.spectrum, g = this.g, rev = st.rev;
+
+    if (vals.isFrag){
+      const c = this.byId.C0001;
+      const fd = M.bankViews(c), fcCons = M.forecast(c);
+      const bankMom = fd.views.reduce((a, v) => a + (v.series[23] - v.series[20]) * v.share, 0) / 100;
+      const fcBank = M.forecast({ score:fd.weighted, d3:bankMom });
+      vals.fg = {
+        gap:"+" + fd.gap, weighted:String(fd.weighted), consolidated:String(fd.consolidated),
+        consColor:sp(fd.consolidated),
+        crossedLine:fd.crossed === 0 ? "Ninguno" : String(fd.crossed),
+        fcCons:String(fcCons.at), fcConsColor:sp(fcCons.at), fcBanks:String(fcBank.at)
+      };
+      vals.bankRows = fd.views.map(v => ({
+        n:v.n, sees:v.sees, pulse:String(v.pulse), color:sp(v.pulse), share:v.share + "%"
+      }));
+      vals.fragChart = this.chart(248, w => g.frag(fd, c.series, w, 248));
+    }
+
+    if (vals.isCartera){
+      const U = this.universe;
+      vals.nUp = String(U.filter(c => c.d3 > 3).length);
+      vals.nDown = String(U.filter(c => c.d3 < -3).length);
+      vals.nAlerts = String(U.filter(c => c.d3 < -6 || c.cashDays < 18).length);
+      vals.nStruct = String(U.filter(c => c.structural).length);
+      const hovC = st.hoverId ? this.byId[st.hoverId] : null;
+      vals.fieldChart = this.chart(240, w => g.field(U, w, 240, st.hoverId));
+      vals.fieldIdle = !hovC;
+      vals.fieldHover = !!hovC;
+      vals.fieldHit = hovC ? "1" : "0";
+      vals.hov = hovC ? {
+        name:hovC.name, score:String(Math.round(hovC.score)), color:sp(hovC.score),
+        d3:M.fmtDelta(hovC.d3), cash:hovC.cashDays + " días"
+      } : { name:"", score:"", color:"var(--ink)", d3:"", cash:"" };
+      vals.onFieldMove = (e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        const hit = g.nearestMover(U, e.clientX - r.left, r.width);
+        const id = hit ? hit.id : null;
+        if (id !== this.state.hoverId) this.setState({ hoverId:id });
+      };
+      vals.onFieldLeave = () => { if (this.state.hoverId) this.setState({ hoverId:null }); };
+      vals.onFieldClick = () => { if (this.state.hoverId) this.go(2, this.state.hoverId); };
+      vals.bandRows = M.BANDS.map(b => {
+        const inB = U.filter(c => c.score >= b.lo && c.score < b.hi);
+        const md = inB.length ? Math.round(inB.reduce((a, c) => a + c.cashDays, 0) / inB.length) : 0;
+        return {
+          name:b.n, color:sp((b.lo + Math.min(100, b.hi)) / 2),
+          range:b.hi > 100 ? "85 +" : b.lo === 0 ? "< 30" : b.lo + "–" + b.hi,
+          count:String(inB.length), pct:Math.round(inB.length / U.length * 100) + "%", cash:md + " días"
+        };
+      });
+      vals.moverRows = U.slice().sort((a, b) => a.d3 - b.d3).slice(0, 6).map(c => {
+        const fc = M.forecast(c);
+        return {
+          name:c.name, sector:c.sector, score:String(Math.round(c.score)),
+          color:sp(c.score), d3:M.fmtDelta(c.d3),
+          fc:String(fc.at), fcColor:sp(fc.at), open:() => this.go(2, c.id)
+        };
+      });
+    }
+
+    if (vals.isCaras){
+      const mk = (id, gid) => {
+        const c = this.byId[id], d = M.FIXED[id];
+        return {
+          score:String(Math.round(c.score)), color:sp(c.score), band:M.bandName(c.score),
+          prev:String(Math.round(c.series[17])), delta:M.fmtDelta(c.score - c.series[17]),
+          open:() => this.go(2, id),
+          chart:this.chart(132, w => g.trace(c.series, w, 132, { axis:true, fill:true, mark:d.signal.month, markLabel:"primera señal", id:gid, rev:rev }))
+        };
+      };
+      const v = mk("C0001", "vel"), n = mk("C0002", "nor");
+      vals.vel = v; vals.nor = n; vals.velChart = v.chart; vals.norChart = n.chart;
+    }
+
+    if (vals.isFicha){
+      const c = this.byId[st.fichaId], d = M.detail(c), dis = d.disclosure, fc = M.forecast(c);
+      const doneIdx = d.actions.map((a, i) => i).filter(i => st.done[st.fichaId + ":" + i]);
+      const gained = doneIdx.reduce((sum, i) => sum + d.actions[i].g, 0);
+      vals.hasDone = doneIdx.length > 0;
+      vals.doneLine = doneIdx.length + (doneIdx.length === 1 ? " acción en curso · " : " acciones en curso · ") + "+" + gained + " días de caja";
+      vals.onUndo = () => {
+        const done = Object.assign({}, this.state.done);
+        doneIdx.forEach(i => { delete done[st.fichaId + ":" + i]; });
+        this.setState({ done:done });
+      };
+      vals.f = {
+        name:c.name, meta:c.sector + " · grupo " + c.group + " · " + c.id,
+        score:String(Math.round(c.score)), color:sp(c.score),
+        bandline:M.bandName(c.score) + " · " + M.fmtDelta(c.d6) + " en seis meses",
+        explanation:d.explanation,
+        attribTitle:"Atribución de la variación a " + d.attrib.horizon + ", en puntos de Pulse",
+        attribSum:d.attrib.from + " → " + d.attrib.to + " · total " + M.fmtDelta(d.attrib.total),
+        regimeTitle:c.structural ? "Deterioro estructural" : "Bache transitorio",
+        regimeText:c.structural ? "Cumple 4 de los 4 tests. No es estacionalidad." : "Cumple 1 de los 4 tests. Se sigue vigilando, no se escala.",
+        rehabText:"Manteniendo la utilización de líneas por debajo del 55% y el DPO por debajo de 50 días, " + c.name + " vuelve a banda estable en 8 meses y a holgada en 13.",
+        signalNote:"Primera señal detectable: " + d.signal.label,
+        fcLine:String(fc.at), fcColor:sp(fc.at),
+        fcNote:"Pulse previsto a " + fc.months + " meses · ±" + fc.spread,
+        fcBand:fc.bandChange ? "Cambia de banda: " + M.bandName(c.score).toLowerCase() + " a " + fc.band.toLowerCase() : "Se mantiene en banda " + fc.band.toLowerCase(),
+        cashLine:gained > 0 ? c.cashDays + " → " + (c.cashDays + gained) + " días" : c.cashDays + " días",
+        cashNote:gained > 0 ? "de caja con lo que está en curso" : "de caja hoy",
+        windowLine:dis.daysLeft > 0 ? dis.daysLeft + " días" : "Sin ventana",
+        windowNote:dis.daysLeft > 0 ? "hasta que la señal salga" : "no se escala a terceros",
+        daysLeft:dis.daysLeft > 0 ? String(dis.daysLeft) : "—",
+        holdLead:dis.daysLeft > 0
+          ? "días hasta que esta señal, si sigue igual, llegue a los financiadores el " + dis.release + "."
+          : "no hay ventana abierta hacia terceros con esta señal.",
+        disclosureRule:dis.rule
+      };
+      vals.pickers = [{ label:"Velasco Industrial", id:"C0001" }, { label:"Northbrook Distribución", id:"C0002" }].map(p => {
+        const on = st.fichaId === p.id;
+        return { label:p.label, border:on ? "transparent" : "var(--rule)", bg:on ? "var(--sunken)" : "transparent", fg:on ? "var(--ink)" : "var(--ink-2)", pick:() => this.setState({ fichaId:p.id, repMode:"closed", rep:"" }) };
+      });
+      const rnd = ["C0001","C0002"].indexOf(st.fichaId) === -1;
+      vals.pickers.push({
+        label:"Una cualquiera de las 1.286",
+        border:rnd ? "transparent" : "var(--rule)", bg:rnd ? "var(--sunken)" : "transparent", fg:rnd ? "var(--ink)" : "var(--ink-2)",
+        pick:() => { const pool = this.universe.filter(x => !x.pinned); this.setState({ fichaId:pool[Math.floor(Math.random() * pool.length)].id, repMode:"closed", rep:"" }); }
+      });
+      vals.fichaChart = this.chart(164, w => g.trace(c.series, w, 164, { axis:true, fill:true, mark:d.signal.month, markLabel:"primera señal", id:"ficha" + c.id, rev:rev, fc:fc }));
+      vals.wfChart = this.chart(178, w => g.waterfall(d.attrib, w, 178));
+      vals.rehabChart = this.chart(152, w => g.rehab(c.score, w, 152));
+      vals.pillarRows = M.PILLARS.map(p => {
+        const v = d.pillars[p.k], dv = v - d.prev[p.k];
+        return { n:p.n, d:p.d, readout:v + " · " + M.fmtDelta(dv), w:v + "%", color:sp(v) };
+      });
+      vals.tests = [
+        ["Persiste 3 meses bajo la media móvil de 12", c.structural],
+        ["Afecta a dos pilares o más", c.structural],
+        ["No lo explica su propia estacionalidad", c.structural],
+        ["CUSUM dispara cambio de régimen", c.structural]
+      ].map(x => ({ t:x[0], mark:x[1] ? "•" : "○", color:x[1] ? sp(22) : "var(--ink-3)" }));
+      vals.actions = d.actions.map((a, i) => {
+        const key = st.fichaId + ":" + i, on = !!st.done[key];
+        return {
+          t:a.t, s:a.s, lever:a.g > 0,
+          gain:a.g > 0 ? (on ? "+" + a.g + " días · en curso" : "+" + a.g + " días") : "Nada financiero. Es comercial.",
+          gainColor:a.g > 0 ? sp(60 + a.g) : "var(--ink-3)",
+          gainSize:a.g > 0 ? "17px" : "12.5px",
+          gainWeight:a.g > 0 ? "600" : "400",
+          btnLabel:on ? "En curso" : "Ejecutar",
+          btnBorder:on ? "transparent" : "var(--rule)",
+          btnBg:on ? "var(--sunken)" : "transparent",
+          btnFg:on ? "var(--ink-3)" : "var(--ink)",
+          toggle:() => { const done = Object.assign({}, this.state.done); done[key] = !done[key]; this.setState({ done:done }); }
+        };
+      });
+      vals.events = d.events.map(e => ({ t:e.t, s:e.s, month:M.MONTHS[e.m].long }));
+      vals.repClosed = st.repMode === "closed";
+      vals.repOpen = st.repMode === "open";
+      vals.repSent = st.repMode === "sent";
+      vals.repText = st.rep;
+      vals.onRepOpen = () => this.setState({ repMode:"open" });
+      vals.onRepText = (e) => this.setState({ rep:e.target.value });
+      vals.onRepSend = () => this.setState({ repMode:"sent" });
+      vals.onRepCancel = () => this.setState({ repMode:"closed", rep:"" });
+    }
+
+    if (vals.isAntelacion){
+      vals.histChart = this.chart(176, w => g.histogram([{k:"0 m",v:11},{k:"1",v:18},{k:"2",v:23},{k:"3",v:21},{k:"4",v:15},{k:"5+",v:12}], w, 176));
+      vals.tradeoffChart = this.chart(214, w => g.tradeoff(w, 214));
+      vals.keyVars = [
+        { n:"Δ utilización de líneas", src:"agregación", why:"La más predictiva: es la reserva agotándose. Solo aparece sumando las pólizas de todos los bancos." },
+        { n:"Δ y aceleración del DPO", src:"contraparte", why:"La más temprana: pagar tarde es gratis e invisible. La aceleración, no el nivel, es la que avisa." },
+        { n:"Plazo que conceden los proveedores", src:"contraparte", why:"La única que no se puede maquillar, porque la decide otro y se lee en sus facturas." },
+        { n:"Mínimo intramensual de caja de grupo", src:"agregación", why:"El día real en que se rompe. Exige el saldo diario reconstruido y las cuentas consolidadas." }
+      ];
+    }
+
+    if (vals.isMonitor){
+      const reasons = [
+        "Utilización de líneas del 41% al 78% en dos meses",
+        "DPO alargado 19 días sin cambio en compras",
+        "Cliente que pesa el 22% de la facturación paga 18 días más tarde",
+        "Mínimo intramensual de caja por debajo de tres semanas de outflow",
+        "Vencimiento de deuda en 60 días sin cobertura visible",
+        "Dos proveedores dejan de facturarle tras tres meses seguidos"
+      ];
+      const acts = ["Adelantar 3 facturas","Disponer la línea barata","Renegociar el vencimiento","Barrido a cuenta principal","Conversación comercial","Sustituir confirming"];
+      const list = this.universe.filter(c => c.d3 < -5 || c.cashDays < 20)
+        .sort((a, b) => (a.d3 - a.cashDays / 8) - (b.d3 - b.cashDays / 8)).slice(0, 12);
+      vals.monitorTitle = list.length + " empresas se han movido este mes";
+      vals.monitorRows = list.map((c, i) => {
+        const ls = M.lenderScore(c), fc = M.forecast(c);
+        return {
+          name:c.name, reason:reasons[i % reasons.length],
+          score:String(Math.round(c.score)), color:sp(c.score),
+          fc:"prev. " + fc.at,
+          lender:String(ls), lenderColor:sp(ls),
+          lenderNote:"tope " + M.fmtDelta(ls - Math.round(c.score - c.d3)),
+          cash:c.cashDays + " días",
+          disclosure:c.structural ? "Ventana: " + (1 + (c.seed % 29)) + " días" : "No se escala",
+          action:acts[i % acts.length], open:() => this.go(2, c.id)
+        };
+      });
+    }
+
+    if (vals.isAsk){
+      const ask = (q) => this.setState({ q:q, answer:this.answerFor(q) });
+      vals.q = st.q;
+      vals.onQ = (e) => this.setState({ q:e.target.value });
+      vals.onQKey = (e) => { if (e.key === "Enter") ask(e.target.value); };
+      vals.onAsk = () => ask(this.state.q);
+      vals.hasAnswer = !!st.answer;
+      vals.answerText = st.answer ? st.answer.text : "";
+      vals.answerSrc = st.answer ? "Respondido desde " + st.answer.src + ". Sin texto generado: solo se muestran números calculados." : "";
+      vals.chips = ["¿Por qué ha bajado Velasco?","¿Qué Pulse prevé el modelo?","¿Qué ve cada banco por separado?","¿Cuándo se detectó?","¿Qué hago esta semana?","¿Es un bache o una caída?","¿Cuánto crédito tiene Northbrook?"]
+        .map(q => ({ q:q, ask:() => ask(q) }));
+    }
+
+    return vals;
+  }
+}
+</script>
+</body>
+</html>

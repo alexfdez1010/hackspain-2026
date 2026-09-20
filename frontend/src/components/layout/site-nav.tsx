@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -8,6 +7,7 @@ import { CompanySearch } from '@/components/layout/company-search';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { NavSectionLinks } from '@/components/layout/nav-section-links';
 import { PulseWordmark } from '@/components/ui/wordmark';
+import { PRODUCT_TAGLINE } from '@/lib/brand';
 import type { CompanyOption } from '@/lib/company/options';
 import { companySections } from '@/lib/company/sections';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
@@ -67,25 +67,19 @@ export function resolveNavCompany(
  * the company in context is searched right here, and switching it keeps the
  * reader on the section they were reading.
  *
- * The bar follows the prototype: the mark on the left, the search and the
- * sections on the right, and a hairline underneath. Nothing floats on a
- * shadow.
+ * From `lg` the bar is the two rows of the prototype: the mark, a hairline
+ * and the claim on the left with the company search on the right, and under
+ * them the seven sections as tabs on one hairline, the current one marked by
+ * a 2 px rule in brand blue. Nothing is sticky and nothing floats on a
+ * shadow: the page scrolls under the header as the prototype does.
  *
- * The sections read as tabs — 8 px of radius, the current one in link blue on
- * `brand-subtle` — but they stay `next/link` anchors with `aria-current`, so
- * every section keeps its own URL and can be opened in a new tab.
- *
- * Seven tabs, a search and a mark do not fit one row below `lg`, so there the
- * bar keeps only the mark and one menu button; the search and the sections
- * move into the drawer of {@link MobileNav}. Between `lg` and `xl` the search
- * is 176 px wide and the tabs lose two pixels of padding each side, which is
- * what the seventh tab costs. The prototype's tagline is left
- * out: with the search beside the tabs it no longer fits the 1240 px row, and
- * the landing already carries it. The current tab is the section
- * {@link sectionFromPath} names, so a variable page keeps PULSE current.
+ * Below `lg` the bar keeps only the mark and one menu button; the search and
+ * the sections move into the drawer of {@link MobileNav}. The current tab is
+ * the section {@link sectionFromPath} names, so a variable page keeps PULSE
+ * current.
  *
  * @param props - The companies the search offers.
- * @returns The mark, the company search and the section links, or the menu.
+ * @returns The mark, the company search and the section tabs, or the menu.
  */
 export function SiteNav({ companies }: SiteNavProps) {
   const pathname = usePathname();
@@ -99,21 +93,25 @@ export function SiteNav({ companies }: SiteNavProps) {
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-hairline bg-page/85 backdrop-blur">
+    <header className="bg-page">
       <nav
         aria-label="Secciones"
-        className="mx-auto flex max-w-[1240px] items-center justify-between gap-x-4 px-4 py-2 sm:px-8 lg:gap-x-6 lg:py-4"
+        className="mx-auto max-w-[1240px] px-4 sm:px-8"
       >
-        <Link
-          href="/"
-          aria-label="Embat Pulse, inicio"
-          className="flex h-11 shrink-0 items-center gap-2 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-        >
-          <Image src="/icon.svg" alt="" width={40} height={40} unoptimized />
-          <PulseWordmark className="h-3.5" />
-        </Link>
-        <div className="hidden min-w-0 items-center gap-x-6 lg:flex">
-          <div className="w-40 shrink-0 xl:w-64">
+        <div className="flex items-center justify-between gap-x-4 border-b border-hairline py-2 lg:min-h-[92px] lg:border-b-0 lg:py-4 lg:pb-6">
+          <div className="flex min-w-0 items-center gap-4">
+            <Link
+              href="/"
+              aria-label="Embat Pulse, inicio"
+              className="flex h-11 shrink-0 items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            >
+              <PulseWordmark className="h-6" />
+            </Link>
+            <p className="hidden border-l border-hairline pl-4 text-[15px] leading-none text-ink-secondary lg:block">
+              {PRODUCT_TAGLINE}
+            </p>
+          </div>
+          <div className="hidden w-64 shrink-0 lg:block">
             <CompanySearch
               key={companyId}
               companies={companies}
@@ -121,17 +119,19 @@ export function SiteNav({ companies }: SiteNavProps) {
               onSelect={switchCompany}
             />
           </div>
-          <NavSectionLinks sections={sections} current={current} layout="row" />
+          <div className="lg:hidden">
+            <MobileNav
+              companies={companies}
+              companyId={companyId}
+              sections={sections}
+              current={current}
+              pathname={pathname}
+              onSelectCompany={switchCompany}
+            />
+          </div>
         </div>
-        <div className="lg:hidden">
-          <MobileNav
-            companies={companies}
-            companyId={companyId}
-            sections={sections}
-            current={current}
-            pathname={pathname}
-            onSelectCompany={switchCompany}
-          />
+        <div className="hidden border-b border-hairline lg:block">
+          <NavSectionLinks sections={sections} current={current} layout="row" />
         </div>
       </nav>
     </header>

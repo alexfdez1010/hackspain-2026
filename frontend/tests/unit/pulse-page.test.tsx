@@ -37,9 +37,33 @@ describe('the company summary page', () => {
     expect(markup).toContain('PULSE del cierre de ago 2026');
     expect(markup).toContain('82 de 100 puntos de peso con datos');
     expect(markup).toContain('Días de caja');
-    expect(markup).toContain('Salud de los clientes');
+    expect(markup).toContain('Salud de tus clientes');
     expect(markup).toContain('3 clientes por facturación');
     expect(markup).not.toContain('Tensión a 6 meses');
+  });
+
+  it('puts an info button on the score and on every qualifier', async () => {
+    const markup = await render(CompanyPulsePage, 'COMP_0001');
+    for (const label of [
+      'PULSE',
+      'Variación vs mes anterior',
+      'Confianza del dato',
+      'Salud de tus clientes',
+      'Días de caja',
+    ]) {
+      expect(markup).toContain(`aria-label="Qué significa ${label}"`);
+    }
+    expect(markup).not.toContain('title="PULSE');
+  });
+
+  it('offers the points on the table above the strip, linking to Acción', async () => {
+    const markup = await render(CompanyPulsePage, 'COMP_0001');
+    expect(markup).toContain('puntos de PULSE en juego');
+    expect(markup).toContain('Pasar a la acción');
+    expect(markup).toContain('href="/company/COMP_0001/action"');
+    expect(markup.indexOf('puntos de PULSE en juego')).toBeLessThan(
+      markup.indexOf('Variación vs mes anterior'),
+    );
   });
 
   it('keeps only the trajectory and the actions, in that order', async () => {
@@ -81,6 +105,10 @@ describe('the company diagnosis page', () => {
     expect(markup).toContain('Tramo +90 días');
     expect(markup).toContain('Utilización de líneas');
     expect(markup).toContain('Evolución por pilar');
+    expect(markup).toContain('Valor de hoy');
+    expect(markup).toContain('>Peso</small>');
+    expect(markup).not.toContain('Peso en el modelo');
+    expect(markup).not.toContain('Pulsa cualquier celda');
     expect(markup).toMatch(/href="\/company\/COMP_0001\/variable\/\w+"/);
     expect(markup).not.toContain('NaN');
   });
@@ -112,6 +140,18 @@ describe('the company detail page', () => {
     expect(markup).toContain('8 cierres observados y 6 meses previstos');
     expect(markup).toContain('Meses previstos, aún sin cerrar');
     expect(markup).toContain('primer mes');
+    expect(markup).toContain('aria-label="Qué significa PULSE"');
+    expect(markup).toContain('aria-label="Qué significa PULSE previsto"');
+  });
+
+  it('closes with the arithmetic of one variable of the last close', async () => {
+    const markup = await render(CompanyDetailPage, 'COMP_0001');
+    expect(markup).toContain('Cuántos puntos vale cada variable');
+    expect(markup).toContain('con la cartera de 1.285 pymes');
+    expect(markup).toContain('que en la cartera puntúa');
+    expect(markup).toContain('puntos de PULSE');
+    expect(markup).toContain('los que pondría con un score de 100');
+    expect(markup).not.toContain('NaN');
   });
 
   it('opens the month and the forecast decompositions', async () => {
@@ -120,6 +160,8 @@ describe('the company detail page', () => {
     expect(markup).toContain('De dónde sale el cambio previsto');
     expect(markup).toContain('Base del modelo');
     expect(markup).toContain('2 de 11');
+    expect(markup).not.toContain('barras suman');
+    expect(markup).not.toContain('Suman ');
     expect(markup).not.toContain('NaN');
   });
 
