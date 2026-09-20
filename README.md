@@ -128,12 +128,6 @@ Simplicity and the reader's experience decided every trade-off:
   meaningful.
 - **One company per screen.** The reader is a treasury team looking at its own
   company. Portfolio views, dashboards and rankings were removed on purpose.
-- **Text that earns its place.** Every word must add information: no slogans,
-  no decorative icons, no cards that only wrap a number. Panels separate with a
-  hairline, never a shadow.
-- **Works without keys and without network.** Demo answers for Nexo, anonymous
-  companies shown under deterministic stand-in names, a generated export
-  checked into the repo.
 - **Fast by construction.** Streaming skeletons on every product route, local
   data at request time, mobile layouts checked in the end-to-end tests.
 - **Tested at every layer.** Unit and integration tests in both apps, Playwright
