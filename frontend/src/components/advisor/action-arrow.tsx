@@ -1,6 +1,10 @@
 import Link from 'next/link';
 
-import type { ActionLink } from '@/lib/actions/links';
+/** An internal link: where it goes and what it leads to, never where it is. */
+export interface ActionLink {
+  href: string;
+  label: string;
+}
 
 interface ActionArrowProps {
   link: ActionLink;

@@ -20,7 +20,7 @@ running.
 | Route                           | What it shows                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/`                             | Landing: hero with the product access, the pages of the product with the PULSE trajectory played by score level, and a heatmap footer. The company is changed from the header picker, which keeps the open section.                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `/company/[id]`                 | Summary: the close's score on the band rule, its change, confidence, customer health (the payment health of its customers weighted by invoicing, out of 100) and cash days; the signal alert; the trajectory with the +1..+6 m forecast and its p10–p90 band; "What to do now" (up to three actions written by the model).                                                                                                                                                                                                                                                                                                   |
+| `/company/[id]`                 | Summary: the close's score on the band rule, its change, confidence, customer health (the payment health of its customers weighted by invoicing, out of 100) and cash days; the signal alert; the trajectory with the +1..+6 m forecast and its p10–p90 band.                                                                                                                                                                                                                                                                                                                                                                |
 | `/company/[id]/diagnosis`       | Diagnosis: mosaic of the 11 variables by pillar (width = pillar weight, height = variable weight, each cell washed with its band colour); the chosen variable opens its detail inside its own cell and its column widens, and the evolution of the four pillars.                                                                                                                                                                                                                                                                                                                                                             |
 | `/company/[id]/action`          | Action: the three variables where the company has the most PULSE points to gain, ranked by `weight · (100 − score) / known weight`, each with the plan that would collect them.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `/company/[id]/action/[key]`    | The plan of one variable, laid straight on the page: the real value, score, points at stake, cost and horizon, why that variable holds the points, and the three moves.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -76,8 +76,7 @@ from the browser. `ASSISTANT_MODE=mock` forces the demo; `ASSISTANT_MODE=gateway
 requires a key and returns a clear error when it is missing. The key is never
 sent to the client.
 
-The frontend owns `POST /api/assistant` and `GET /api/actions/[id]`; these are
-its only route handlers. The assistant route accepts
+The frontend owns `POST /api/assistant`, its only route handler. It accepts
 `{ messages: UIMessage[], pathname: string }` and answers SSE with the AI SDK 7
 UI Message Stream protocol, tool parts (`tool-*`) included. It accepts text and,
 in previous assistant answers, finished tool parts of the eight known tools;
@@ -93,26 +92,6 @@ example and full contract in [the Nexo documentation](docs/nexo.md).
 References: [Vercel AI Gateway](https://vercel.com/docs/ai-gateway/getting-started),
 [AI SDK Chatbot](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot),
 [Gemini 3.8 Flash](https://vercel.com/ai-gateway/models/gemini-3.8-flash).
-
-### What to do now (actions)
-
-Every company page opens with the navy "Qué hacer ahora" block: at most three
-actions, from the highest impact down, written by the same Gateway model as Nexo
-(`ASSISTANT_MODEL`) with typed output (`Output.object`) and a 30 s deadline. The
-first action is the page headline; the other two sit below a rule, and each one
-links to the page where it is carried out or checked.
-
-The model only receives that company's figures — score, pillars, weak and
-missing variables, open signal, forecast, six-month stress, cash, offers with
-their lever and the declined ones; never the portfolio. The destinations it
-writes are validated against the known routes: anything else falls back to the
-recommendations page. Actions arrive through `GET /api/actions/[id]` and the
-browser stores the model's answer in `localStorage` per company and close, so
-coming back to the company — today or tomorrow — does not pay tokens again; the
-server also adds a one-hour memo per company. With `ASSISTANT_MODE=mock`, if the
-model fails or returns nothing usable, the block writes the deterministic
-actions from the same figures and is marked with the `DEMO` tag. Contract and
-response example in [the actions documentation](docs/actions.md).
 
 ### 🗄️ Data source
 
@@ -253,7 +232,7 @@ cp .env.example .env
 ```
 
 Everything works without editing it; add `AI_GATEWAY_API_KEY` only to run Nexo
-and the actions against a real model.
+against a real model.
 
 ### 3. Run the development server
 
@@ -409,7 +388,7 @@ frontend/
 │   ├── integration/      # Integration tests
 │   ├── e2e/              # End-to-end tests
 │   └── setup.ts          # Test configuration
-├── docs/                 # Nexo and actions contracts
+├── docs/                 # Nexo contract
 ├── public/               # Static assets
 ├── Dockerfile            # Production image (standalone Next.js)
 ├── eslint.config.mjs     # ESLint configuration

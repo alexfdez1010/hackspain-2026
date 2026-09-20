@@ -1,4 +1,4 @@
-import { ActionArrow } from '@/components/actions/action-arrow';
+import { ActionArrow } from '@/components/advisor/action-arrow';
 import { InfoTip } from '@/components/ui/info-tip';
 import {
   buildLeverHeadline,

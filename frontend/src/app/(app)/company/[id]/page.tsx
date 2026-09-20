@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { CompanyActionsSection } from '@/components/actions/company-actions-panel';
 import { PulseTrajectoryChart } from '@/components/charts/pulse-trajectory';
 import { PageShell, Section } from '@/components/layout/page-shell';
 import { PulseActionLead } from '@/components/pulse/action-lead';
@@ -55,9 +54,8 @@ function buildLead(
 /**
  * Summary of one company: the score of the last close on the band scale, the
  * points still on the table with the way out to «Acción», the alert when the
- * score really moved, the trajectory with its forecast and what to do now.
- * Where the score is decided and the month-level detail live on their own
- * pages.
+ * score really moved and the trajectory with its forecast. Where the score
+ * is decided and the month-level detail live on their own pages.
  *
  * The group hangs under the company name as a badge, not beside the lead: it
  * qualifies the name, so the prototype reads it as part of the title block.
@@ -114,12 +112,6 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
           </p>
         </Panel>
       </Section>
-
-      <CompanyActionsSection
-        companyId={company.companyId}
-        month={company.month}
-        current="pulse"
-      />
     </PageShell>
   );
 }
