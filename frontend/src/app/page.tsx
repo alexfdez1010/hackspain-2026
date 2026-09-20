@@ -8,9 +8,6 @@ import { LandingShowcase } from '@/components/layout/landing-showcase';
 import { PulseHeroDither } from '@/components/layout/pulse-hero-dither';
 import { SiteFrame } from '@/components/layout/site-frame';
 import { PULSE_HERO_DITHER_IMAGE } from '@/lib/landing/pulse-hero-dither';
-import { getPulseDataSource } from '@/lib/pulse/data';
-import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
-import { scoreBand } from '@/lib/score';
 
 /**
  * Marketing landing: three viewport-tall bands inside the site frame.
@@ -19,15 +16,13 @@ import { scoreBand } from '@/lib/score';
  * access: PULSE is the `h1` and the monthly line sits under the links. The
  * webp is `preload`ed here so the fetch starts with the document; Paper still
  * owns the canvas. The middle band lists the product pages and plays the
- * PULSE trajectory by score level, opening on the band of the demo company's
- * last close. The footer is heatmap and lists.
+ * PULSE trajectory of the selected cell, opening on PULSE. The footer is
+ * heatmap and lists.
  *
  * @returns The framed landing page.
  */
-export default async function LandingPage() {
+export default function LandingPage() {
   preload(PULSE_HERO_DITHER_IMAGE, { as: 'image', type: 'image/webp' });
-  const company = await getPulseDataSource().getCompany(PULSE_DEMO_COMPANY_ID);
-  const initialBand = scoreBand(company?.pulse ?? null).key;
 
   return (
     <SiteFrame split pulse>
@@ -40,7 +35,7 @@ export default async function LandingPage() {
               <PulseHeroDither />
             </div>
           </div>
-          <div className="col-start-2 flex h-full items-center px-6 py-10 sm:px-10 lg:col-start-3">
+          <div className="col-start-2 flex h-full items-center px-[var(--landing-inset)] py-10 lg:col-start-3">
             <div className="flex w-full flex-col gap-10 sm:gap-12">
               <HeroAccess />
               <p className="max-w-xl text-[17px] leading-[1.6] text-ink-secondary">
@@ -50,7 +45,7 @@ export default async function LandingPage() {
           </div>
           <div className="col-start-3 row-span-2 lg:col-start-4 lg:row-span-1" />
         </section>
-        <LandingShowcase initialBand={initialBand} />
+        <LandingShowcase />
         <LandingFooter />
       </LandingScroll>
     </SiteFrame>

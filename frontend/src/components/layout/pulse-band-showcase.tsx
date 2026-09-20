@@ -1,15 +1,16 @@
 'use client';
 
 import { Button } from '@heroui/react';
-import { useState } from 'react';
 
 import { PulseShowcaseAnimation } from '@/components/layout/pulse-showcase-animation';
 import { bandShowcaseFor } from '@/lib/landing/band-showcase-svg';
 import { SCORE_BANDS, type ScoreBandKey } from '@/lib/score';
 
 interface PulseBandShowcaseProps {
-  /** Band drawn before the reader hovers any level. */
-  initialBand: ScoreBandKey;
+  /** Band whose trajectory is drawn. */
+  band: ScoreBandKey;
+  /** Called when the reader hovers, focuses or presses a level. */
+  onBandChange: (band: ScoreBandKey) => void;
 }
 
 /**
@@ -24,22 +25,24 @@ export function bandRange(label: string): string {
 
 /**
  * The landing chart: the four score levels in their colour, and the
- * trajectory of whichever level the reader hovers, focuses or taps.
+ * trajectory of the selected band.
  *
- * Each level swaps the chart for a trajectory that closes inside that band,
- * drawn in the band's colour, so the palette of the product is read as
- * severity before the product is opened. The strip is a group of toggle
- * buttons: hover previews, press keeps.
+ * The strip is controlled by the parent so a cell and a level cannot
+ * disagree. Hover, focus or press preview; the parent keeps the choice.
+ * The column fills its cell: the levels stay at the top and the SVG grows
+ * into the remaining height.
  *
- * @param props - The band shown first.
+ * @param props - The band shown and the callback that selects another.
  * @returns The level strip and the animated chart.
  */
-export function PulseBandShowcase({ initialBand }: PulseBandShowcaseProps) {
-  const [band, setBand] = useState<ScoreBandKey>(initialBand);
+export function PulseBandShowcase({
+  band,
+  onBandChange,
+}: PulseBandShowcaseProps) {
   const showcase = bandShowcaseFor(band);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex h-full min-h-0 flex-col gap-5">
       <div
         role="group"
         aria-label="Niveles del score"
@@ -54,9 +57,9 @@ export function PulseBandShowcase({ initialBand }: PulseBandShowcaseProps) {
               size="sm"
               aria-pressed={pressed}
               data-band={level.key}
-              onHoverStart={() => setBand(level.key)}
-              onFocus={() => setBand(level.key)}
-              onPress={() => setBand(level.key)}
+              onHoverStart={() => onBandChange(level.key)}
+              onFocus={() => onBandChange(level.key)}
+              onPress={() => onBandChange(level.key)}
               className={`showcase-level h-auto min-w-0 gap-2 rounded-lg bg-transparent px-2.5 py-1.5 text-[13px] font-medium shadow-none [--button-bg-hover:transparent] [--button-bg-pressed:transparent] hover:bg-transparent ${
                 pressed ? 'text-foreground' : 'text-muted'
               }`}

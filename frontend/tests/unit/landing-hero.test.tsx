@@ -92,5 +92,28 @@ describe('the landing hero', () => {
     expect(page).toContain('PULSE_HERO_DITHER_IMAGE');
     expect(page).toContain("as: 'image'");
     expect(page).toContain("type: 'image/webp'");
+    expect(page).toContain('px-[var(--landing-inset)]');
+    expect(page).not.toContain('px-6 py-10 sm:px-10');
+  });
+
+  it('puts the mark on the product 1240 px row, not flush with the frame', () => {
+    const html = renderToStaticMarkup(<LandingPage />);
+    expect(html).toContain('max-w-[1240px]');
+    expect(html).toContain('px-4 py-2 sm:px-8');
+
+    const bar = readFileSync(
+      resolve(process.cwd(), 'src/components/layout/landing-bar.tsx'),
+      'utf8',
+    );
+    expect(bar).toContain('max-w-[1240px]');
+    expect(bar).toContain('px-4 py-2 sm:px-8');
+    expect(bar).not.toContain('lg:col-span-2');
+
+    const css = readFileSync(
+      resolve(process.cwd(), 'src/app/globals.css'),
+      'utf8',
+    );
+    expect(css).toContain('--landing-inset: 1.5rem');
+    expect(css).toContain('--landing-inset: 2.5rem');
   });
 });

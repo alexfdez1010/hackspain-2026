@@ -3,8 +3,8 @@ import { PULSE_HERO_DITHER_IMAGE } from '@/lib/landing/pulse-hero-dither';
 /**
  * Paper ImageDithering uniforms for the landing footer’s right pane.
  *
- * Same webp as the 2×2, but a rotated crop (`scale` 2.4, origin off-centre)
- * so the grain is a fragment, not the four sparkles with inverted ink.
+ * Same webp as the 2×2, but a rotated crop (`scale` 1.8, origin off-centre)
+ * so a fragment of the sparkles reads without filling the lists.
  * Dark-band colours and `screen` live in CSS; `speed` stays 0 at the canvas.
  * Not the Heatmap silhouette.
  */
@@ -15,7 +15,7 @@ export const FOOTER_DITHER = {
   fit: 'cover',
   originX: 0.68,
   originY: 0.32,
-  scale: 2.4,
+  scale: 1.8,
   type: '4x4',
   size: 3.5,
   colorSteps: 2,

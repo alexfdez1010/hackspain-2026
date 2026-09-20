@@ -11,7 +11,9 @@ export const LANDING_TAGLINE = 'La inteligencia que impulsa tu tesorería';
  * the tagline of the prototype instead of the company search.
  *
  * It sits inside the hero band so it takes the band's ink and never covers
- * the light band or the footer. The hairline under it is the product's.
+ * the light band or the footer. The hairline is full width. The mark sits
+ * on the same 1240 px row as the product nav and page shell, so landing and
+ * the app share one left edge.
  *
  * @returns The landing header.
  */

@@ -49,8 +49,8 @@ function FooterLinkGroup({
  * Full-viewport footer: Heatmap in the left pane, dithered lists on the right.
  *
  * The left inner column is desktop-only. No product mark as a heading here.
- * The bottom line is the same signature as the product footer, over a
- * hairline, plus the copyright.
+ * The bottom line is the copyright and the same signature as the product
+ * footer, with no hairline and no description of the model.
  *
  * @returns The framed footer band.
  */
@@ -64,7 +64,7 @@ export function LandingFooter() {
       <div className="footer-heatmap relative col-start-2 hidden h-full min-h-0 overflow-hidden lg:block">
         <PulseFooterHeatmap />
       </div>
-      <div className="relative col-start-2 flex h-full flex-col px-6 py-10 sm:px-10 lg:col-start-3">
+      <div className="relative col-start-2 flex h-full flex-col px-[var(--landing-inset)] py-10 lg:col-start-3">
         <div className="footer-dither pointer-events-none absolute inset-0 overflow-hidden">
           <PulseFooterDither />
         </div>
@@ -77,8 +77,8 @@ export function LandingFooter() {
             <FooterLinkGroup title="Documentación" links={DOCS} />
           </div>
         </nav>
-        <p className="relative z-[1] mt-auto flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-separator pt-6 text-[13px] leading-[1.45] text-muted">
-          <span>© 2026 Pulse · 11 variables en 4 pilares</span>
+        <p className="relative z-[1] mt-auto flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 pt-6 text-[13px] leading-[1.45] text-muted">
+          <span>© 2026 Pulse</span>
           <span>By humans for humans.</span>
         </p>
       </div>

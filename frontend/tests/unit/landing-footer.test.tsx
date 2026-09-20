@@ -53,12 +53,17 @@ describe('LandingFooter', () => {
     expect(html).not.toContain('Condiciones de uso');
     expect(html).not.toContain('Política de privacidad');
     expect(html).toContain('© 2026 Pulse');
+    expect(html).not.toContain('11 variables');
+    expect(html).not.toContain('4 pilares');
+    expect(html).not.toContain('border-t');
     expect(html).toContain('By humans for humans.');
     expect(html).not.toContain('<h2');
     expect(html).not.toContain('Embat');
     expect(html).not.toContain('HackSpain');
     expect(html).not.toContain('justify-end');
     expect(html).not.toContain('href="/radar"');
+    expect(html).toContain('px-[var(--landing-inset)]');
+    expect(html).not.toContain('sm:px-10');
   });
 
   it('puts the Heatmap in the desktop-only left pane', () => {

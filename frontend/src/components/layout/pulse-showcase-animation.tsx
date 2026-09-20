@@ -40,7 +40,7 @@ export function PulseShowcaseAnimation({ svg }: PulseShowcaseAnimationProps) {
     <div
       ref={root}
       data-showcase="pulse-animation"
-      className="pulse-showcase-anim w-full [&_svg]:block [&_svg]:h-auto [&_svg]:w-full"
+      className="pulse-showcase-anim min-h-0 flex-1 [&_svg]:block [&_svg]:h-full [&_svg]:w-full"
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );

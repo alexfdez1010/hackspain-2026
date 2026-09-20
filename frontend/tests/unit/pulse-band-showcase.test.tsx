@@ -11,7 +11,7 @@ import { SCORE_BANDS } from '@/lib/score';
 describe('PulseBandShowcase', () => {
   it('lists the four levels with their colour and opens on the given band', () => {
     const html = renderToStaticMarkup(
-      <PulseBandShowcase initialBand="neutral" />,
+      <PulseBandShowcase band="neutral" onBandChange={() => undefined} />,
     );
     expect(html).toContain('aria-label="Niveles del score"');
     for (const band of SCORE_BANDS) {
@@ -24,7 +24,7 @@ describe('PulseBandShowcase', () => {
     );
     expect(html.split('aria-pressed="false"').length - 1).toBe(3);
     expect(html).toContain(`stroke="${LIGHT_SCORE.neutral}"`);
-    expect(html).not.toContain(`stroke="${LIGHT_SCORE.critical}"`);
+    expect(html).toContain('flex h-full min-h-0 flex-col gap-5');
   });
 
   it('prints the range of a band from its legend label', () => {

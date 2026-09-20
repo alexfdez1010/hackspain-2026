@@ -8,8 +8,8 @@ import { FEATURE_DITHER } from '@/lib/landing/landing-feature-dither';
 import { LANDING_FEATURES } from '@/lib/landing/landing-features';
 
 vi.mock('@/components/layout/pulse-band-showcase', () => ({
-  PulseBandShowcase: ({ initialBand }: { initialBand: string }) => (
-    <div data-band-showcase={initialBand} />
+  PulseBandShowcase: ({ band }: { band: string }) => (
+    <div data-band-showcase={band} />
   ),
 }));
 
@@ -26,16 +26,14 @@ vi.mock('@paper-design/shaders-react', () => ({
 
 describe('LandingShowcase', () => {
   it('renders every product page with a pressed PULSE cell and the band chart', () => {
-    const html = renderToStaticMarkup(
-      <LandingShowcase initialBand="fragile" />,
-    );
+    const html = renderToStaticMarkup(<LandingShowcase />);
 
     for (const feature of LANDING_FEATURES) {
       expect(html).toContain(feature.label);
       expect(html).toContain(feature.lead);
       expect(html).toContain(`data-feature="${feature.key}"`);
     }
-    expect(html).toContain('data-band-showcase="fragile"');
+    expect(html).toContain('data-band-showcase="critical"');
     expect(html).toContain('aria-pressed="true"');
     expect(html.split('aria-pressed="false"').length - 1).toBe(
       LANDING_FEATURES.length - 1,
@@ -53,7 +51,7 @@ describe('LandingShowcase', () => {
   });
 
   it('draws the rules as overlays so the dither field stays continuous', () => {
-    const html = renderToStaticMarkup(<LandingShowcase initialBand="solid" />);
+    const html = renderToStaticMarkup(<LandingShowcase />);
     const rows = Math.ceil(LANDING_FEATURES.length / 2);
 
     expect(html).not.toContain('gap-px bg-separator');
@@ -64,12 +62,15 @@ describe('LandingShowcase', () => {
     expect(html.split('h-px w-full bg-separator').length - 1).toBe(rows - 1);
     expect(html).toContain('feature-cell');
     expect(html).toContain('feature-dither');
+    expect(html).toContain('px-4 py-2 sm:px-8');
+    expect(html).toContain('justify-between');
+    expect(html).not.toContain('px-[var(--landing-inset)]');
+    expect(html).not.toContain('justify-center px-');
+    expect(html).not.toContain('sm:px-10');
   });
 
   it('keeps hover and selected as type, not an accent fill', () => {
-    const html = renderToStaticMarkup(
-      <LandingShowcase initialBand="critical" />,
-    );
+    const html = renderToStaticMarkup(<LandingShowcase />);
     expect(html).toContain('feature-lead');
     expect(html).toContain('[--button-bg-hover:transparent]');
     expect(html).toContain('[--button-bg-pressed:transparent]');
@@ -100,6 +101,19 @@ describe('LandingShowcase', () => {
       css.indexOf('.feature-cell {'),
     );
     expect(inkBlock).toContain('mix-blend-mode: screen');
+  });
+
+  it('wires hover, focus and press so the chart follows the selected cell', () => {
+    const source = readFileSync(
+      resolve(process.cwd(), 'src/components/layout/landing-showcase.tsx'),
+      'utf8',
+    );
+    expect(source).toContain('onHoverStart={() => setSelectedId(feature.key)}');
+    expect(source).toContain('onFocus={() => setSelectedId(feature.key)}');
+    expect(source).toContain('onPress={() => setSelectedId(feature.key)}');
+    expect(source).toContain('featureBand(selectedId)');
+    expect(source).toContain('bandFeature(next)');
+    expect(source).not.toContain('initialBand');
   });
 
   it('uses the product palette on both bands, defined on the section', () => {

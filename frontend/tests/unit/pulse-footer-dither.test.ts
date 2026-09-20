@@ -26,7 +26,7 @@ describe('FOOTER_DITHER', () => {
     expect(FOOTER_DITHER.fit).toBe('cover');
     expect(FOOTER_DITHER.originX).toBe(0.68);
     expect(FOOTER_DITHER.originY).toBe(0.32);
-    expect(FOOTER_DITHER.scale).toBe(2.4);
+    expect(FOOTER_DITHER.scale).toBe(1.8);
     expect(FOOTER_DITHER.rotation).toBe(28);
     expect(FOOTER_DITHER.originX).not.toBe(FEATURE_DITHER.originX);
     expect(FOOTER_DITHER.originY).not.toBe(FEATURE_DITHER.originY);

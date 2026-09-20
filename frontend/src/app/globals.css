@@ -10,6 +10,8 @@
 :root {
   color-scheme: light;
   --site-gutter: clamp(1rem, 6vw, 4.5rem);
+  /* Copy inset inside a landing column; media stays flush to the frame. */
+  --landing-inset: 1.5rem;
 
   --surface-page: #ffffff;
   --surface-deep: #f7f8fa;
@@ -67,6 +69,12 @@
   --border: var(--border-subtle);
   --separator: var(--border-subtle);
   --focus: var(--focus-ring);
+}
+
+@media (width >= 40rem) {
+  :root {
+    --landing-inset: 2.5rem;
+  }
 }
 
 /*

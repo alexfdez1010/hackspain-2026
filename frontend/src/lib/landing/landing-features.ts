@@ -1,6 +1,7 @@
 import { companySections, type NavSection } from '@/lib/company/sections';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 import type { CompanySection } from '@/lib/routes';
+import { SCORE_BANDS, type ScoreBandKey } from '@/lib/score';
 
 /** One cell in the landing feature grid. */
 export type LandingFeatureId = CompanySection;
@@ -23,10 +24,13 @@ export const LANDING_FEATURE_KEYS: readonly CompanySection[] = [
 
 /** What each shown page answers, in one line. */
 const LEADS: Readonly<Record<string, string>> = {
-  pulse: 'Score 0-100 del último cierre, mes a mes.',
-  diagnosis: 'Qué variables sostienen el score y cuáles lo hunden.',
-  signals: 'Baches y caídas del score, con su mes.',
-  advisor: 'Producto que encaja, importe y precio.',
+  pulse:
+    'Cuánta caja puedes usar hoy y hasta cuándo, sin comprometer tus pagos.',
+  diagnosis:
+    'Qué cobros, pagos y vencimientos explican tu margen de seguridad.',
+  signals: 'Qué cambio reduce ese margen y acerca una posible tensión de caja.',
+  advisor:
+    'Qué facturas puedes adelantar para convertir caja ociosa en ahorro.',
 };
 
 /**
@@ -55,4 +59,28 @@ export function landingFeature(id: string): LandingFeature {
     LANDING_FEATURES.find((feature) => feature.key === id) ??
     LANDING_FEATURES[0]
   );
+}
+
+/**
+ * Score band of a landing cell, in reading order: the four pages sit on
+ * the four sparkles, worst band first. Unknown ids fall back to Crítico.
+ *
+ * @param id - Cell identifier.
+ * @returns The matching band key.
+ */
+export function featureBand(id: string): ScoreBandKey {
+  const index = LANDING_FEATURE_KEYS.indexOf(id as CompanySection);
+  return SCORE_BANDS[index]?.key ?? SCORE_BANDS[0].key;
+}
+
+/**
+ * Landing cell of a score band, the inverse of {@link featureBand}.
+ * Unknown bands fall back to PULSE.
+ *
+ * @param band - Score level.
+ * @returns The matching cell id.
+ */
+export function bandFeature(band: string): LandingFeatureId {
+  const index = SCORE_BANDS.findIndex((level) => level.key === band);
+  return LANDING_FEATURE_KEYS[index] ?? LANDING_FEATURE_KEYS[0];
 }
