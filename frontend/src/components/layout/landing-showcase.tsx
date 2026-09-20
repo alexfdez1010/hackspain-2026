@@ -3,16 +3,13 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { PulseBandShowcase } from '@/components/layout/pulse-band-showcase';
+import { LandingFeaturePreview } from '@/components/layout/landing-feature-preview';
 import { PulseFeatureDither } from '@/components/layout/pulse-feature-dither';
 import {
-  bandFeature,
-  featureBand,
   LANDING_FEATURES,
   landingFeature,
   type LandingFeatureId,
 } from '@/lib/landing/landing-features';
-import type { ScoreBandKey } from '@/lib/score';
 
 /** Rows of the feature grid: the four pages in two columns. */
 const ROWS = Math.ceil(LANDING_FEATURES.length / 2);
@@ -22,33 +19,23 @@ const ROWS = Math.ceil(LANDING_FEATURES.length / 2);
  *
  * The pane is already boxed by the site frame. The left column splits at
  * mid-band: the title sits at nav height, the lead rests on the plus, and
- * the chart fills the lower half. The right column is a 2×2 of the four
- * pages of the landing with 1px rules between the rows. Copy uses the same
- * `px-4 sm:px-8` as the product chrome; the 2×2 stays flush. One dither
- * field sits behind the cells so the sparkle continues under the rules,
- * one sparkle per cell in the colour of one score level.
+ * the figure of that page fills the lower half. The right column is a 2×2
+ * of the four pages of the landing with 1px rules between the rows. Copy
+ * uses the same `px-4 sm:px-8` as the product chrome; the 2×2 stays flush.
+ * One dither field sits behind the cells so the sparkle continues under
+ * the rules, one sparkle per cell in the colour of one score level.
  *
  * Every cell is a `next/link` to its page of the demo company. Hover or
- * focus previews it on the left: title, lead and the trajectory of that
- * cell's band. The same `selectedId` drives the level strip, so a chip
- * and a cell cannot disagree. The previewed cell is marked with
- * `data-selected`, never with a pressed state: a link is not a toggle.
+ * focus previews it on the left: title, lead and the figure of that page
+ * (trajectory, diagnosis notice, alert or approved line). The previewed
+ * cell is marked with `data-selected`, never with a pressed state: a link
+ * is not a toggle.
  *
  * @returns The middle landing section.
  */
 export function LandingShowcase() {
   const [selectedId, setSelectedId] = useState<LandingFeatureId>('pulse');
   const selected = landingFeature(selectedId);
-  const band = featureBand(selectedId);
-
-  /**
-   * Selects the cell that belongs to a score level.
-   *
-   * @param next - Band chosen from the level strip.
-   */
-  function selectBand(next: ScoreBandKey) {
-    setSelectedId(bandFeature(next));
-  }
 
   return (
     <section
@@ -70,7 +57,7 @@ export function LandingShowcase() {
           </p>
         </div>
         <div className="flex h-full min-h-0 flex-col px-4 py-2 sm:px-8 lg:py-4">
-          <PulseBandShowcase band={band} onBandChange={selectBand} />
+          <LandingFeaturePreview featureId={selectedId} />
         </div>
       </div>
       <div className="relative col-start-2 min-h-0 lg:col-start-3 lg:h-full">

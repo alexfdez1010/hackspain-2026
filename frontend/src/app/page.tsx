@@ -15,9 +15,9 @@ import { PULSE_HERO_DITHER_IMAGE } from '@/lib/landing/pulse-hero-dither';
  * The hero carries the product bar, a dithered sparkle field and product
  * access: PULSE is the `h1` and the monthly line sits under the links. The
  * webp is `preload`ed here so the fetch starts with the document; Paper still
- * owns the canvas. The middle band lists the product pages and plays the
- * PULSE trajectory of the selected cell, opening on PULSE. The footer is
- * heatmap and lists.
+ * owns the canvas. The middle band lists the product pages and shows the
+ * figure of the selected cell, opening on PULSE. The footer is heatmap
+ * and lists.
  *
  * @returns The framed landing page.
  */

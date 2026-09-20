@@ -46,7 +46,7 @@ describe('the landing hero', () => {
     expect(html).toContain('text-ink-secondary');
     expect(html).toContain('aria-label="Embat Pulse, inicio"');
     expect(html).toContain(PRODUCT_TAGLINE);
-    expect(html).toContain('aria-label="Niveles del score"');
+    expect(html).toContain('data-preview="pulse"');
     expect(html).not.toContain('>Pulse<');
     expect(html).not.toContain('text-ink-muted');
     expect(html).not.toContain(PULSE_MARK_VIEWBOX);

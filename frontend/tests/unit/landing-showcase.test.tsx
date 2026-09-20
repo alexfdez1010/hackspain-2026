@@ -7,9 +7,9 @@ import { LandingShowcase } from '@/components/layout/landing-showcase';
 import { FEATURE_DITHER } from '@/lib/landing/landing-feature-dither';
 import { LANDING_FEATURES } from '@/lib/landing/landing-features';
 
-vi.mock('@/components/layout/pulse-band-showcase', () => ({
-  PulseBandShowcase: ({ band }: { band: string }) => (
-    <div data-band-showcase={band} />
+vi.mock('@/components/layout/landing-feature-preview', () => ({
+  LandingFeaturePreview: ({ featureId }: { featureId: string }) => (
+    <div data-feature-preview={featureId} />
   ),
 }));
 
@@ -25,7 +25,7 @@ vi.mock('@paper-design/shaders-react', () => ({
 }));
 
 describe('LandingShowcase', () => {
-  it('links every product page, previews PULSE first and draws the band chart', () => {
+  it('links every product page, previews PULSE first and draws its figure', () => {
     const html = renderToStaticMarkup(<LandingShowcase />);
 
     for (const feature of LANDING_FEATURES) {
@@ -34,7 +34,7 @@ describe('LandingShowcase', () => {
       expect(html).toContain(`data-feature="${feature.key}"`);
       expect(html).toContain(`href="${feature.href}"`);
     }
-    expect(html).toContain('data-band-showcase="critical"');
+    expect(html).toContain('data-feature-preview="pulse"');
     expect(html).not.toContain('aria-pressed');
     expect(html).not.toContain('<button');
     expect(html.split('data-selected="true"').length - 1).toBe(1);
@@ -104,7 +104,7 @@ describe('LandingShowcase', () => {
     expect(inkBlock).toContain('mix-blend-mode: screen');
   });
 
-  it('wires hover and focus so the chart follows the selected cell', () => {
+  it('wires hover and focus so the figure follows the selected cell', () => {
     const source = readFileSync(
       resolve(process.cwd(), 'src/components/layout/landing-showcase.tsx'),
       'utf8',
@@ -112,8 +112,12 @@ describe('LandingShowcase', () => {
     expect(source).toContain('onMouseEnter={() => setSelectedId(feature.key)}');
     expect(source).toContain('onFocus={() => setSelectedId(feature.key)}');
     expect(source).toContain('data-selected={selected}');
-    expect(source).toContain('featureBand(selectedId)');
-    expect(source).toContain('bandFeature(next)');
+    expect(source).toContain(
+      '<LandingFeaturePreview featureId={selectedId} />',
+    );
+    expect(source).not.toContain('featureBand(selectedId)');
+    expect(source).not.toContain('bandFeature(next)');
+    expect(source).not.toContain('PulseBandShowcase');
     expect(source).not.toContain('initialBand');
     expect(source).not.toContain('aria-pressed');
   });
