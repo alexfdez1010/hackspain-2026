@@ -3,13 +3,11 @@ import { notFound } from 'next/navigation';
 
 import { AdvisorDetail } from '@/components/advisor/advisor-detail';
 import { ApprovedPanel } from '@/components/advisor/approved-panel';
-import { SoftActionPanel } from '@/components/advisor/soft-action-panel';
+import { OutOfScopePanel } from '@/components/advisor/out-of-scope-panel';
 import { PageShell } from '@/components/layout/page-shell';
 import { companyName } from '@/lib/company/names';
 import { formatNumber } from '@/lib/format';
 import { loadCompanyPage } from '@/lib/pulse/company-page';
-import { largestPulseGap } from '@/lib/pulse/gap';
-import { buildPulseMosaic } from '@/lib/pulse/mosaic';
 
 interface AdvisorPageProps {
   params: Promise<{ id: string }>;
@@ -55,14 +53,15 @@ function buildLead(fitting: number, declined: number): string {
 }
 
 /**
- * What the company can do about its financing this month: the operational
- * measure that costs nothing first, then the products it can sign today with
- * their price and fit, and the argument behind them folded away. The written
- * actions live on the Acción page, so they are not repeated here.
+ * What the company can contract this month: the products it can sign today
+ * with their amount, their price and their fit, then the ones the rules leave
+ * out with the rule that stops each of them, and finally the argument behind
+ * the whole answer folded away.
  *
- * The free measure comes before the catalogue on purpose: the largest gap of
- * the last close is worth points of PULSE that no product buys, so it has to
- * be dismissed before an offer is read.
+ * The page no longer opens with the operational measure that costs nothing:
+ * that measure is an action, not an offer, so it lives on the Acción page and
+ * the summary links to it. Whoever lands here has already decided to look at
+ * financing, and the catalogue is what answers that.
  *
  * @param props - Route parameters carrying the company identifier.
  * @returns The advisor page, or a 404 when the identifier is unknown.
@@ -73,30 +72,27 @@ export default async function CompanyAdvisorPage({ params }: AdvisorPageProps) {
   const company = data?.advisor;
   if (!data || !company) notFound();
 
-  const { meta, company: scored } = data;
+  const { meta } = data;
   const variableLabels = Object.fromEntries(
     meta.variables.map((variable) => [variable.key, variable.label]),
   );
   const pillarLabels = Object.fromEntries(
     meta.pillars.map((pillar) => [pillar.key, pillar.label]),
   );
-  const mosaic = buildPulseMosaic(
-    meta.pillars,
-    meta.variables,
-    scored.series.at(-1) ?? null,
-  );
-  const gap = largestPulseGap(mosaic.cells);
 
   return (
     <PageShell
       title={companyName(company.companyId)}
       lead={buildLead(company.recommendations.length, company.declined.length)}
     >
-      {gap && <SoftActionPanel gap={gap} />}
       <ApprovedPanel
         company={company}
         pillarLabels={pillarLabels}
         variableLabels={variableLabels}
+      />
+      <OutOfScopePanel
+        declined={company.declined}
+        disclaimer={company.disclaimer}
       />
       <AdvisorDetail company={company} />
     </PageShell>

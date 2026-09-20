@@ -31,7 +31,12 @@ const COLUMNS: readonly DataTableColumn<Row>[] = [
     sortBy: (row) => row.score,
     cell: (row) => (row.score === null ? 'sin datos' : String(row.score)),
   },
-  { id: 'note', header: 'Nota', cell: () => 'fija' },
+  {
+    id: 'note',
+    header: 'Nota',
+    headerTip: 'Lo que mide la columna, en una frase.',
+    cell: () => 'fija',
+  },
 ];
 
 const order = (markup: string) =>
@@ -79,5 +84,18 @@ describe('DataTable', () => {
     );
     expect(markup.match(/data-allows-sorting="true"/g)).toHaveLength(2);
     expect(markup).toContain('Nota');
+  });
+
+  it('opens the definition of a column from an info button in its header', () => {
+    const markup = renderToStaticMarkup(
+      <DataTable
+        aria-label="Prueba"
+        columns={COLUMNS}
+        rows={ROWS}
+        rowId={(row) => row.id}
+      />,
+    );
+    expect(markup.match(/aria-label="Qué significa /g)).toHaveLength(1);
+    expect(markup).not.toContain('title="Lo que mide');
   });
 });

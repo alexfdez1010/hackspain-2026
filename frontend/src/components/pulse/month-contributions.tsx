@@ -1,3 +1,5 @@
+import { VariableInfoMark } from '@/components/charts/variable-info-mark';
+import { bandTint } from '@/lib/pulse/band';
 import type { PulseVariableRow } from '@/lib/pulse/company-view';
 import { formatNumber } from '@/lib/format';
 import { scoreColor } from '@/lib/score';
@@ -15,6 +17,11 @@ interface MonthContributionsProps {
  * keeps a name and says «sin datos» instead of drawing a zero-length bar that
  * would read as a bad result.
  *
+ * The bars are what separates one reading from the next, so no hairline is
+ * drawn between rows: the track is washed with the band of the variable and the
+ * fill is that band at full strength, which keeps eleven rows legible on ten
+ * pixels of rhythm without eleven lines of chrome.
+ *
  * @param props - The variable rows of the month.
  * @returns One row per variable, with its bar, its points and its weight.
  */
@@ -25,15 +32,23 @@ export function MonthContributions({ rows }: MonthContributionsProps) {
       {rows.map((row) => (
         <li
           key={row.key}
-          className="grid grid-cols-[minmax(0,1fr)_76px_76px] items-center gap-4 border-b border-hairline py-2.5 last:border-b-0"
+          className="grid grid-cols-[minmax(0,1fr)_76px_76px] items-center gap-4 py-2.5"
         >
           <span className="min-w-0">
             <b
-              className={`block text-sm font-medium leading-snug ${row.known ? 'text-ink' : 'text-ink-secondary'}`}
+              className={`flex items-center gap-1.5 text-sm font-medium leading-snug ${row.known ? 'text-ink' : 'text-ink-secondary'}`}
             >
               {row.label}
+              <VariableInfoMark
+                variableKey={row.key}
+                label={row.label}
+                weight={row.weight}
+              />
             </b>
-            <span className="mt-2 block h-1.5 rounded bg-surface-secondary">
+            <span
+              className={`mt-2 block h-1.5 rounded ${row.score === null ? 'bg-surface-secondary' : ''}`}
+              style={{ background: bandTint(row.score, 18) }}
+            >
               {row.contribution !== null && (
                 <span
                   className="block h-full rounded"

@@ -25,7 +25,7 @@ vi.mock('@paper-design/shaders-react', () => ({
 }));
 
 describe('LandingShowcase', () => {
-  it('renders every product page with a pressed PULSE cell and the band chart', () => {
+  it('links every product page, previews PULSE first and draws the band chart', () => {
     const html = renderToStaticMarkup(
       <LandingShowcase initialBand="fragile" />,
     );
@@ -34,10 +34,13 @@ describe('LandingShowcase', () => {
       expect(html).toContain(feature.label);
       expect(html).toContain(feature.lead);
       expect(html).toContain(`data-feature="${feature.key}"`);
+      expect(html).toContain(`href="${feature.href}"`);
     }
     expect(html).toContain('data-band-showcase="fragile"');
-    expect(html).toContain('aria-pressed="true"');
-    expect(html.split('aria-pressed="false"').length - 1).toBe(
+    expect(html).not.toContain('aria-pressed');
+    expect(html).not.toContain('<button');
+    expect(html.split('data-selected="true"').length - 1).toBe(1);
+    expect(html.split('data-selected="false"').length - 1).toBe(
       LANDING_FEATURES.length - 1,
     );
     expect(html).toContain('aria-label="Producto"');
@@ -66,13 +69,11 @@ describe('LandingShowcase', () => {
     expect(html).toContain('feature-dither');
   });
 
-  it('keeps hover and selected as type, not an accent fill', () => {
+  it('keeps hover and selected as type, and hovers every cell alike', () => {
     const html = renderToStaticMarkup(
       <LandingShowcase initialBand="critical" />,
     );
     expect(html).toContain('feature-lead');
-    expect(html).toContain('[--button-bg-hover:transparent]');
-    expect(html).toContain('[--button-bg-pressed:transparent]');
     expect(html).toContain('text-foreground');
     expect(html).toContain('text-muted');
 
@@ -83,9 +84,10 @@ describe('LandingShowcase', () => {
     expect(css).toContain('.feature-dither');
     expect(css).toContain('opacity: 0.45');
     expect(css).toContain('.feature-lead');
-    expect(css).toContain(":hover:not(:has([aria-pressed='true']))");
+    expect(css).toContain('.feature-cell:hover {');
+    expect(css).not.toContain(":hover:not(:has([aria-pressed='true']))");
     expect(css).toContain('color-mix(in srgb, var(--foreground) 4%');
-    expect(css).toContain("[aria-pressed='true']) .feature-lead");
+    expect(css).toContain("[data-selected='true']) .feature-lead");
     expect(css).not.toContain('.feature-cell::after');
     expect(css).not.toContain('background: var(--accent)');
     const featureBlock = css.slice(

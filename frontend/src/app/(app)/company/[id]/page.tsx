@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { CompanyActionsSection } from '@/components/actions/company-actions-panel';
 import { PulseTrajectoryChart } from '@/components/charts/pulse-trajectory';
 import { PageShell, Section } from '@/components/layout/page-shell';
+import { PulseActionLead } from '@/components/pulse/action-lead';
 import { PulseCompanyHeader } from '@/components/pulse/company-header';
 import { GroupPill } from '@/components/pulse/group-pill';
 import { PulseSignalAlert } from '@/components/pulse/signal-alert';
@@ -53,9 +54,13 @@ function buildLead(
 
 /**
  * Summary of one company: the score of the last close on the band scale, the
- * alert when the score really moved, the trajectory with its forecast and
- * what to do now. Where the score is decided and the month-level detail
- * live on their own pages.
+ * points still on the table with the way out to «Acción», the alert when the
+ * score really moved, the trajectory with its forecast and what to do now.
+ * Where the score is decided and the month-level detail live on their own
+ * pages.
+ *
+ * The group hangs under the company name as a badge, not beside the lead: it
+ * qualifies the name, so the prototype reads it as part of the title block.
  *
  * @param props - Route parameters carrying the company identifier.
  * @returns The summary page, or a 404 when the identifier is unknown.
@@ -64,7 +69,7 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
   const { id } = await params;
   const data = await loadCompanyPage(id, true, true);
   if (!data) notFound();
-  const { company, advisor, details } = data;
+  const { company, meta, advisor, details } = data;
   const { points, boundaryIndex } = buildTrajectory(
     company.series,
     company.forecast,
@@ -77,13 +82,20 @@ export default async function CompanyPulsePage({ params }: CompanyPageProps) {
     <PageShell
       title={companyName(company.companyId)}
       lead={buildLead(company.monthsObserved, company.month, horizonMonth)}
-      aside={<GroupPill groupId={company.groupId} />}
+      badge={<GroupPill groupId={company.groupId} />}
     >
       <PulseCompanyHeader
         company={company}
         clientHealth={clientHealth(details)}
         cashEnd={advisor?.inputs.cashEnd ?? lastPoint?.cashEnd ?? null}
-      />
+      >
+        <PulseActionLead
+          companyId={company.companyId}
+          pillars={meta.pillars}
+          variables={meta.variables}
+          point={lastPoint}
+        />
+      </PulseCompanyHeader>
       <PulseSignalAlert
         company={company}
         href={companyRoutes(company.companyId).signals}

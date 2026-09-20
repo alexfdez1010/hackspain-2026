@@ -7,9 +7,11 @@ import { PulseForecastTable } from '@/components/pulse/forecast-table';
 import { GroupPill } from '@/components/pulse/group-pill';
 import { PulseMonthExplorer } from '@/components/pulse/month-explorer';
 import { PulseMonthTable } from '@/components/pulse/month-table';
+import { PulsePointsExample } from '@/components/pulse/points-example';
 import { Panel } from '@/components/ui/panel';
 import { companyName } from '@/lib/company/names';
 import { companyPageTitle, loadCompanyPage } from '@/lib/pulse/company-page';
+import { getPulseDataSource } from '@/lib/pulse/data';
 import { buildForecastRows, buildMonthRows } from '@/lib/pulse/history';
 import { formatNumber } from '@/lib/format';
 
@@ -34,6 +36,11 @@ export async function generateMetadata({
  * The numbers behind the summary: any observed month opened in full, the
  * predicted months with their decomposition and the tables of every month.
  *
+ * The page ends with the arithmetic of the score worked through on the heaviest
+ * contributor of the last close, which is the only step the tables above cannot
+ * show: it needs the size of the reference portfolio, read from the summary the
+ * loader has already memoised.
+ *
  * @param props - Route parameters carrying the company identifier.
  * @returns The detail page, or a 404 when the identifier is unknown.
  */
@@ -44,12 +51,14 @@ export default async function CompanyDetailPage({ params }: DetailPageProps) {
   const { company, meta } = data;
   const monthRows = buildMonthRows(company.series);
   const forecastRows = buildForecastRows(company.forecast, company.pulse);
+  const { companies } = await getPulseDataSource().getSummary();
+  const lastClose = company.series[company.series.length - 1] ?? null;
 
   return (
     <PageShell
       title={companyName(company.companyId)}
       lead={`${formatNumber(monthRows.length)} cierres observados y ${formatNumber(forecastRows.length)} meses previstos, uno a uno.`}
-      aside={<GroupPill groupId={company.groupId} />}
+      badge={<GroupPill groupId={company.groupId} />}
     >
       <Section title="Detalle de un mes">
         <PulseMonthExplorer
@@ -77,6 +86,11 @@ export default async function CompanyDetailPage({ params }: DetailPageProps) {
             Meses previstos, aún sin cerrar
           </h3>
           <PulseForecastTable rows={forecastRows} baseMonth={company.month} />
+          <PulsePointsExample
+            variables={meta.variables}
+            point={lastClose}
+            companies={companies.length}
+          />
         </Panel>
       </Section>
     </PageShell>

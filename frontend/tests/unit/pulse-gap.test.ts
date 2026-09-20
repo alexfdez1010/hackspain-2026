@@ -28,7 +28,7 @@ function cell(
     score,
     known: score !== null,
     band: scoreBand(score),
-    rawValue: null,
+    rawValue: score === null ? null : weight,
     unit: 'días',
     contribution: null,
   };
@@ -79,6 +79,12 @@ describe('buildPulseGaps', () => {
   it('gives nothing back when no variable was measured', () => {
     expect(buildPulseGaps([cell('loc_util', 6, null)])).toEqual([]);
     expect(largestPulseGap([])).toBeNull();
+  });
+
+  it('carries the real reading of the cell so the table can print it', () => {
+    const gaps = buildPulseGaps(CELLS);
+    expect(gaps.map((gap) => gap.rawValue)).toEqual([12, 14, 12]);
+    expect(gaps.every((gap) => gap.unit === 'días')).toBe(true);
   });
 
   it('names the variable worth acting on', () => {

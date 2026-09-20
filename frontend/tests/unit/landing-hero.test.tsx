@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import LandingPage from '@/app/page';
 import { HeroAccess } from '@/components/layout/hero-access';
-import { LANDING_TAGLINE } from '@/components/layout/landing-bar';
+import { PRODUCT_TAGLINE } from '@/lib/brand';
 import { PulseHeroDither } from '@/components/layout/pulse-hero-dither';
 import { PULSE_MARK_VIEWBOX } from '@/components/layout/pulse-mark';
 import { PULSE_HERO_DITHER_IMAGE } from '@/lib/landing/pulse-hero-dither';
@@ -42,7 +42,7 @@ describe('the landing hero', () => {
     expect(html).toContain('aria-label="Dashboard"');
     expect(html).toContain('>Embat Pulse<');
     expect(html).toContain('aria-label="Embat Pulse, inicio"');
-    expect(html).toContain(LANDING_TAGLINE);
+    expect(html).toContain(PRODUCT_TAGLINE);
     expect(html).toContain('aria-label="Niveles del score"');
     expect(html).not.toContain(PULSE_MARK_VIEWBOX);
     expect(html).not.toContain('hero-grain');

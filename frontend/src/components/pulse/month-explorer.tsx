@@ -14,7 +14,6 @@ import {
   buildMonthOptions,
   findMonth,
   sortByContribution,
-  sumVariableContributions,
 } from '@/lib/pulse/month-view';
 import type {
   PulsePillarMeta,
@@ -37,7 +36,9 @@ interface PulseMonthExplorerProps {
  * of the page refers to; choosing an earlier one re-reads the four pillars and
  * the points each variable contributed that month, so a fall can be traced to
  * the variable that caused it. The contributions add up to the PULSE of the
- * month, and the footnote says so with the figure.
+ * month, which the heading of the block names; the arithmetic itself is shown
+ * once, with numbers, at the foot of «Mes a mes», so it is not repeated as a
+ * footnote under every reading.
  *
  * @param props - The observed months and the score metadata.
  * @returns The month chips with the pillars and the contributions of the
@@ -115,10 +116,6 @@ export function PulseMonthExplorer({
             Aporte de cada variable, en puntos de PULSE
           </h3>
           <MonthContributions rows={byContribution} />
-          <p className="mt-4 text-[13px] text-ink-secondary">
-            Suman {formatNumber(sumVariableContributions(rows), 2)}, el PULSE de{' '}
-            {label}.
-          </p>
         </div>
       </div>
     </Panel>

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { InfoTip } from '@/components/ui/info-tip';
+
 /** One headline figure with the context needed to read it. */
 export interface StatItem {
   key: string;
@@ -7,6 +9,12 @@ export interface StatItem {
   value: ReactNode;
   /** Optional qualifier: a unit, a share or the comparison base. */
   hint?: string;
+  /**
+   * Optional plain-language definition of the figure, opened from a small
+   * info button beside the label. It answers «what is this number» without
+   * adding a third line of copy to a strip that must stay scannable.
+   */
+  tip?: string;
 }
 
 interface StatGridProps {
@@ -30,6 +38,10 @@ const COLUMN_CLASS: Record<number, string> = {
  * rounded border and the count of columns can change with the viewport
  * without any cell needing to know where it sits.
  *
+ * A figure with a `tip` gets an {@link InfoTip} beside its label: an icon
+ * that opens the definition on hover and pins it on press, which reaches a
+ * finger and a keyboard where a `title` attribute never would.
+ *
  * @param props - The figures and the wide-screen column count.
  * @returns A bordered strip of figures.
  */
@@ -42,8 +54,9 @@ export function StatGrid({ items, columns = 4 }: StatGridProps) {
             key={item.key}
             className="flex flex-col border-l border-t border-hairline px-6 py-5"
           >
-            <dt className="order-2 mt-2 text-sm font-medium leading-[1.2]">
+            <dt className="order-2 mt-2 flex items-center gap-1.5 text-sm font-medium leading-[1.2]">
               {item.label}
+              {item.tip && <InfoTip label={item.label}>{item.tip}</InfoTip>}
             </dt>
             <dd className="order-1 text-[32px] font-semibold leading-[1.1] tracking-[-0.01em] tabular-nums">
               {item.value}

@@ -38,6 +38,21 @@ describe('StatGrid', () => {
     expect(markup).toContain('cierre de mayo');
   });
 
+  it('hangs the definition of a figure on its whole cell', () => {
+    const markup = renderToStaticMarkup(
+      <StatGrid
+        items={[{ ...ITEMS[3], tip: 'Días que aguantas sin cobrar.' }]}
+      />,
+    );
+    expect(markup).toContain('aria-label="Qué significa Días de caja"');
+    expect(markup).not.toContain('title="Días que aguantas');
+  });
+
+  it('omits the info button when the figure carries no definition', () => {
+    const markup = renderToStaticMarkup(<StatGrid items={ITEMS} />);
+    expect(markup).not.toContain('Qué significa');
+  });
+
   it('omits the hint when the figure carries no qualifier', () => {
     const markup = renderToStaticMarkup(<StatGrid items={[ITEMS[1]]} />);
     expect(markup).not.toContain('text-[13px]');

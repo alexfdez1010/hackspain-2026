@@ -11,6 +11,9 @@ interface OutOfScopeListProps {
  * the page shows until the reader opens it; the rule that stopped it waits
  * inside, so a refusal is auditable without taking room from the decision.
  *
+ * The hairline above each row is the only line drawn, because it is the only
+ * place two readings meet; the open rule is set apart by its wash alone.
+ *
  * @param props - Products left out with their reasons.
  * @returns The collapsible list.
  */
@@ -32,7 +35,7 @@ export function OutOfScopeList({ declined }: OutOfScopeListProps) {
               <Disclosure.Indicator className="text-ink-secondary shrink-0" />
             </Disclosure.Trigger>
             <Disclosure.Content>
-              <Disclosure.Body className="border-hairline bg-deep text-ink-secondary mb-3.5 flex max-w-[720px] flex-col gap-1 rounded-lg border px-4 py-3.5 text-[15px] leading-[1.55]">
+              <Disclosure.Body className="bg-deep text-ink-secondary mb-3.5 flex max-w-[720px] flex-col gap-1 rounded-lg px-4 py-3.5 text-[15px] leading-[1.55]">
                 {item.reasons.map((reason) => (
                   <span key={reason}>{reason}</span>
                 ))}

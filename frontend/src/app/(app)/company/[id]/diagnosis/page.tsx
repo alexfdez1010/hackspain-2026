@@ -51,7 +51,7 @@ export default async function CompanyDiagnosisPage({
     <PageShell
       title={companyName(company.companyId)}
       lead={`Diagnóstico del cierre de ${formatMonth(company.month)}: qué variables sostienen el PULSE y cuáles lo hunden.`}
-      aside={<GroupPill groupId={company.groupId} />}
+      badge={<GroupPill groupId={company.groupId} />}
     >
       <Section title="Dónde se decide">
         <PulseVariableMosaic mosaic={mosaic} companyId={company.companyId} />

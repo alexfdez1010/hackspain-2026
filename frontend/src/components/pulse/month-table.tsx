@@ -62,6 +62,7 @@ function buildColumns(
     {
       id: 'month',
       header: 'Mes observado',
+      headerTip: 'Cierre mensual ya calculado con datos reales.',
       isRowHeader: true,
       cellClassName: 'whitespace-nowrap',
       sortBy: (row) => row.month,
@@ -70,12 +71,14 @@ function buildColumns(
     {
       id: 'pulse',
       header: 'PULSE',
+      headerTip: 'Nota de 0 a 100 de ese mes.',
       sortBy: (row) => row.pulse,
       cell: (row) => <ScoreBadge score={row.pulse} />,
     },
     {
       id: 'change',
       header: 'Δ mes',
+      headerTip: 'Diferencia en puntos con el mes anterior.',
       cellClassName: 'tabular-nums',
       sortBy: (row) => row.change,
       cell: (row) =>
@@ -88,6 +91,7 @@ function buildColumns(
     {
       id: 'confidence',
       header: 'Confianza',
+      headerTip: 'Porcentaje del peso del modelo con dato ese mes.',
       cellClassName: 'tabular-nums',
       sortBy: (row) => row.confidence,
       cell: (row) => (
@@ -120,6 +124,10 @@ function buildColumns(
  * the newest month and the history is read as context. The change of each row
  * is still measured against the month before it in time, so a positive figure
  * always means the company improved that month.
+ *
+ * Every column of the reading carries its definition in the `title` of its
+ * header, because «Δ mes» or «Confianza» cannot say in two words what they
+ * measure and the brand does not allow a note under each one.
  *
  * @param props - The month rows and the pillar metadata.
  * @returns The month-by-month table, or an empty state.

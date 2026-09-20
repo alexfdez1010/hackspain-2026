@@ -335,7 +335,7 @@ html:has([data-landing-snap]) .bg-separator {
   transition: background-color 120ms ease-out;
 }
 
-.feature-cell:hover:not(:has([aria-pressed='true'])) {
+.feature-cell:hover {
   background-color: color-mix(in srgb, var(--foreground) 4%, transparent);
 }
 
@@ -344,7 +344,7 @@ html:has([data-landing-snap]) .bg-separator {
 }
 
 .feature-cell:hover .feature-lead,
-.feature-cell:has([aria-pressed='true']) .feature-lead {
+.feature-cell:has([data-selected='true']) .feature-lead {
   color: var(--foreground);
 }
 

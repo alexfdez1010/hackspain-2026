@@ -7,10 +7,7 @@ import { ForecastDrivers } from '@/components/pulse/forecast-drivers';
 import { PlainFact } from '@/components/pulse/plain-fact';
 import { ScoreHeadline } from '@/components/pulse/score-headline';
 import { Panel } from '@/components/ui/panel';
-import {
-  buildContributionItems,
-  sumContributions,
-} from '@/lib/pulse/company-view';
+import { buildContributionItems } from '@/lib/pulse/company-view';
 import { formatBand, formatHorizon } from '@/lib/pulse/format';
 import type { PulseForecastPoint, PulseVariableMeta } from '@/lib/pulse/types';
 import { formatMonth, formatNumber, formatSigned } from '@/lib/format';
@@ -29,8 +26,8 @@ interface PulseForecastPanelProps {
  *
  * The horizon is a chip because the mix changes with distance: the nearest
  * months are carried by the company's own variables, the farthest by the model
- * base. The bars always sum to the predicted change, and the footnote prints
- * that sum so the decomposition can be checked rather than believed.
+ * base. The bars always sum to the predicted change, which the figures above
+ * them already state, so the sum is not printed again underneath.
  *
  * @param props - Forecast horizons, variable labels and today's score.
  * @returns The horizon chips, the predicted score with its band and the
@@ -98,11 +95,6 @@ export function PulseForecastPanel({
         De dónde sale el cambio previsto
       </h3>
       <ForecastDrivers items={items} />
-      <p className="mt-4 text-[13px] text-ink-secondary">
-        Las {formatNumber(items.length)} barras suman{' '}
-        {formatSigned(sumContributions(point), 2)} puntos, el cambio previsto a{' '}
-        {formatHorizon(point.horizon)}.
-      </p>
     </Panel>
   );
 }

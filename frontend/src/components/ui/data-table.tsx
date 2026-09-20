@@ -1,6 +1,8 @@
 'use client';
 
 import { Table } from '@heroui/react';
+
+import { InfoTip } from '@/components/ui/info-tip';
 import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import type { SortDescriptor } from 'react-aria-components';
@@ -14,6 +16,12 @@ export interface DataTableColumn<Row extends object> {
   id: string;
   /** Header content. */
   header: ReactNode;
+  /**
+   * Plain-language definition of the column, opened from an info button
+   * beside the header text. It reaches a finger and a keyboard where a
+   * `title` attribute never would, and it keeps the header to two words.
+   */
+  headerTip?: string;
   /** Renders the cell of one row. */
   cell: (row: Row) => ReactNode;
   /**
@@ -139,15 +147,22 @@ export function DataTable<Row extends object>({
                 allowsSorting={column.sortBy !== undefined}
                 className={`${HEADER_BASE} ${isEndAligned(column) ? END_CLASS : START_CLASS}`}
               >
-                {({ sortDirection }) =>
-                  column.sortBy ? (
-                    <Table.SortableColumnHeader sortDirection={sortDirection}>
-                      {column.header}
-                    </Table.SortableColumnHeader>
-                  ) : (
-                    column.header
-                  )
-                }
+                {({ sortDirection }) => (
+                  <span className="inline-flex items-center gap-1.5">
+                    {column.sortBy ? (
+                      <Table.SortableColumnHeader sortDirection={sortDirection}>
+                        {column.header}
+                      </Table.SortableColumnHeader>
+                    ) : (
+                      column.header
+                    )}
+                    {column.headerTip && typeof column.header === 'string' && (
+                      <InfoTip label={column.header}>
+                        {column.headerTip}
+                      </InfoTip>
+                    )}
+                  </span>
+                )}
               </Table.Column>
             )}
           </Table.Header>

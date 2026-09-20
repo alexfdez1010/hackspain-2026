@@ -63,7 +63,11 @@ describe('an offer row', () => {
     expect(markup).toContain('a 12 meses');
     expect(markup).toContain('Ver detalle');
     expect(markup).toContain('9,17 %');
-    expect(markup).toContain('+707 pb sobre Euríbor 12 m');
+    expect(markup).toContain('+707 pb');
+    expect(markup).toContain('aria-label="Qué significa Tipo"');
+    expect(markup).toContain('aria-label="Qué significa Importe"');
+    expect(markup).not.toContain('title="+707');
+    expect(markup).toContain('Solicitar propuesta');
     expect(markup).toContain('encaje /100');
     expect(markup).toContain('Prima de riesgo');
     expect(markup).not.toContain('NaN');
@@ -248,25 +252,38 @@ describe('the advisor page', () => {
     return renderToStaticMarkup(element);
   }
 
-  it('opens COMP_0001 with the free measure, then what it can sign today', async () => {
+  it('opens COMP_0001 with what it can sign, then what the rules leave out', async () => {
     const markup = await renderPage('COMP_0001');
     expect(markup).toContain('<h1');
     expect(markup).toContain('3 productos encajan hoy');
     expect(markup).toContain('4 quedan fuera');
     expect(markup).not.toContain('Qué hacer ahora');
-    expect(markup).toContain('Antes de financiar · sin coste');
-    expect(markup).toContain('Efecto en el PULSE si la variable llega a 100');
-    expect(markup).toContain('Coste financiero de la medida');
-    expect(markup).toContain('Cuándo se ve en el PULSE');
-    expect(markup).toContain('Si necesitas financiación');
+    expect(markup).not.toContain('Antes de financiar · sin coste');
+    expect(markup).not.toContain(
+      'Efecto en el PULSE si la variable llega a 100',
+    );
+    expect(markup).not.toContain('Coste financiero de la medida');
+    expect(markup).not.toContain('Cuándo se ve en el PULSE');
+    const approved = markup.indexOf('Si necesitas financiación');
+    const outOfScope = markup.indexOf('Fuera de alcance hoy');
+    const detail = markup.indexOf('Más detalle');
+    expect(approved).toBeGreaterThan(-1);
+    expect(approved).toBeLessThan(outOfScope);
+    expect(outOfScope).toBeLessThan(detail);
     expect(markup).not.toContain('Aprobado con tu PULSE de hoy');
     expect(markup).toContain('Tu pilar más débil es deuda y servicio, en 34.');
     expect(markup).toContain('Línea de crédito');
     expect(markup).toContain('Anticipo de facturas');
+    expect(markup.split('Solicitar propuesta').length - 1).toBe(3);
+    expect(markup).toContain('+500 equipos financieros confían en nosotros');
+    expect(markup.match(/aria-label="Qué significa Importe"/g)).toHaveLength(3);
+    expect(markup).toContain('aria-label="Qué significa Tipo"');
+    expect(markup).toContain('aria-label="Qué significa Encaje"');
     expect(markup).toContain('Ver detalle');
     expect(markup).toContain('Por qué encaja');
-    expect(markup).toContain('Fuera de alcance hoy');
-    expect(markup).toContain('Más detalle');
+    expect(markup).toContain(
+      'Abre cualquiera para ver la regla que lo deja fuera.',
+    );
     expect(markup).toContain('Plan de mejora');
     expect(markup).toContain('Datos usados');
     expect(markup).toContain('Riesgo');
@@ -286,5 +303,6 @@ describe('the advisor page', () => {
     expect(markup).toContain('Fuera de alcance hoy');
     expect(markup).toContain('Más detalle');
     expect(markup).not.toContain('encaje /100');
+    expect(markup).not.toContain('Solicitar propuesta');
   });
 });

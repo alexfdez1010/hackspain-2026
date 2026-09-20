@@ -53,6 +53,13 @@ describe('PLANS', () => {
     expect(planFor('loc_util')).toBe(PLANS[FALLBACK_PLAN_KEY]);
     expect(planFor('cash_days').title).toContain('días de caja');
   });
+
+  it('asks the debt calendar for the maturities the model cannot see', () => {
+    expect(PLANS.maturities.title).toBe('Conecta tu calendario de deuda');
+    expect(PLANS.maturities.steps[0]).toContain('cuadro de amortización');
+    expect(PLANS.maturities.cost).toBe('0 €');
+    expect(PLANS.maturities.horizon).toBe('Próximo cierre');
+  });
 });
 
 describe('buildPulsePlanView', () => {
@@ -60,10 +67,18 @@ describe('buildPulsePlanView', () => {
     const view = buildPulsePlanView(makeCell(), 82);
     expect(view.points).toBeCloseTo((14 * 60) / 82, 6);
     expect(view.why).toBe(
-      'Mínimo intramensual de caja está en 40 sobre 100 y pesa 14 de 82 puntos con dato. ' +
-        'Su valor medido hoy es 8,2 días.',
+      'Mínimo intramensual de caja: hoy son 8,2 días. Eso puntúa 40 sobre 100 ' +
+        'y la variable pesa 14 de 82 puntos con dato.',
     );
+    expect(view.figures.map((figure) => figure.label)).toEqual([
+      'Valor real de hoy',
+      'Score de hoy, sobre 100',
+      'Si la variable llega a 100',
+      'Coste de la medida',
+      'Cuándo se ve en el PULSE',
+    ]);
     expect(view.figures.map((figure) => figure.value)).toEqual([
+      '8,2 días',
       '40',
       '+10,24 pts',
       PLANS.cash_min.cost,
@@ -84,6 +99,7 @@ describe('buildPulsePlanView', () => {
     expect(view.plan).toBe(PLANS[FALLBACK_PLAN_KEY]);
     expect(view.why).toContain('no tiene dato este mes');
     expect(view.figures[0].value).toBe('sin datos');
-    expect(view.figures[1].value).toBe('+0,00 pts');
+    expect(view.figures[1].value).toBe('sin datos');
+    expect(view.figures[2].value).toBe('+0,00 pts');
   });
 });

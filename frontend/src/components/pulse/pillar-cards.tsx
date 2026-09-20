@@ -23,7 +23,10 @@ function PillarCard({ series }: PillarCardProps) {
   const band = scoreBand(series.last);
   const first = series.points[0]?.month ?? '';
   return (
-    <Panel className="min-w-0" style={bandSurfaceStyle(series.last)}>
+    <Panel
+      className={`min-w-0 ${series.last === null ? '' : 'border-transparent'}`.trim()}
+      style={bandSurfaceStyle(series.last)}
+    >
       <div className="flex items-baseline justify-between gap-3">
         <b className="min-w-0 text-[15px] font-semibold leading-snug">
           {series.label}

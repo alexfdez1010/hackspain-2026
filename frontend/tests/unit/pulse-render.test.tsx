@@ -57,20 +57,27 @@ describe('PULSE views render on the server', () => {
     expect(markup).toContain('Desde 17,9 puntos en jul 2026');
     expect(markup).toContain('82 de 100 puntos de peso con datos');
     expect(markup).not.toContain('Tensión a 6 meses');
-    expect(markup).toContain('Salud de los clientes');
+    expect(markup).toContain('Salud de tus clientes');
     expect(markup).toContain('71,3');
     expect(markup).toContain('Sólido · 3 clientes por facturación');
     expect(markup).toContain('Días de caja');
+    expect(markup).toContain('en caja');
+    expect(markup).toContain('aria-label="Qué significa PULSE"');
+    expect(markup).toContain('aria-label="Qué significa Días de caja"');
+    expect(markup).not.toContain('title="PULSE');
     expect(markup).not.toContain('NaN');
   });
 
-  it('shows each pillar as a bar on the same scale', () => {
+  it('shows each pillar as a washed card with its bar on the same scale', () => {
     const markup = renderToStaticMarkup(
       <PulsePillarList pillars={PILLARS} scores={COMPANY.pillars} />,
     );
     expect(markup).toContain('Calidad de cobro');
     expect(markup).toContain('>54,6</b>');
     expect(markup).toContain('width:54.58%');
+    expect(markup).toContain('color-mix(in oklab, var(--score-neutral) 10%');
+    expect(markup).toContain('color-mix(in oklab, var(--score-neutral) 20%');
+    expect(markup).not.toContain('border-hairline');
   });
 
   it('decomposes the default horizon of the forecast', () => {
@@ -85,8 +92,11 @@ describe('PULSE views render on the server', () => {
     expect(markup).toContain('20,0-55,0');
     expect(markup).toContain('Frente a los 32,8 de hoy');
     expect(markup).toContain('Base del modelo');
-    expect(markup).toContain('Las 4 barras suman −1,50 puntos');
-    expect(markup).toContain('el cambio previsto a +6 m');
+    expect(markup).toContain(
+      'color-mix(in oklab, var(--feedback-danger) 65%, transparent)',
+    );
+    expect(markup).not.toContain('Las 4 barras suman');
+    expect(markup).not.toContain('el cambio previsto a +6 m');
   });
 });
 
@@ -103,6 +113,9 @@ describe('the month-by-month view renders on the server', () => {
     expect(markup).toContain('primer mes');
     expect(markup).toContain('2 sin datos');
     expect(markup).toContain('Caja fin de mes');
+    expect(markup).toContain('aria-label="Qué significa Mes observado"');
+    expect(markup).toContain('aria-label="Qué significa Confianza"');
+    expect(markup).not.toContain('title="Cierre mensual');
     expect(markup).not.toContain('NaN');
   });
 
@@ -121,6 +134,8 @@ describe('the month-by-month view renders on the server', () => {
     expect(markup).toContain('PULSE previsto');
     expect(markup).toContain('20,0-55,0');
     expect(markup).toContain('+5,2');
+    expect(markup).toContain('aria-label="Qué significa Mes previsto"');
+    expect(markup).toContain('aria-label="Qué significa Banda p10-p90"');
     expect(markup).not.toContain('Δ previsto');
   });
 
@@ -139,7 +154,8 @@ describe('the month-by-month view renders on the server', () => {
     expect(markup.match(/role="img"/g)).toHaveLength(4);
     expect(markup).toContain('36 de 100 puntos');
     expect(markup).toContain('Comportamiento de pago');
-    expect(markup.match(/color-mix\(in oklab, var\(--score-/g)).toHaveLength(8);
+    expect(markup.match(/color-mix\(in oklab, var\(--score-/g)).toHaveLength(4);
+    expect(markup).not.toContain('border-color');
     expect(markup).not.toContain('NaN');
   });
 
@@ -158,7 +174,10 @@ describe('the month-by-month view renders on the server', () => {
     expect(markup).toContain('Variables sin dato en ago 2026');
     expect(markup).toContain('Tramo +90 días');
     expect(markup).toContain('10,51');
-    expect(markup).toContain('45,64');
+    expect(markup).toContain('Aporte de cada variable, en puntos de PULSE');
+    expect(markup).toContain('color-mix(in oklab, var(--score-critical) 18%');
+    expect(markup.match(/aria-label="Qué mide /g)).toHaveLength(11);
+    expect(markup).not.toContain('el PULSE de ago 2026');
   });
 
   it('draws the mosaic of the last close and opens its heaviest variable', async () => {
@@ -176,7 +195,12 @@ describe('the month-by-month view renders on the server', () => {
     expect(markup).toContain('Tramo +90 días');
     expect(markup).toContain('2 sin datos');
     expect(markup).toContain('color-mix(in oklab, var(--score-critical) 12%');
-    expect(markup).toContain('Peso en el modelo');
+    expect(markup.match(/aria-label="Qué mide /g)).toHaveLength(11);
+    expect(markup).toContain('Valor de hoy');
+    expect(markup).toContain('>Peso</small>');
+    expect(markup).not.toContain('Peso en el modelo');
+    expect(markup).not.toContain('Pulsa cualquier celda');
+    expect(markup).toContain('minmax(280px,');
     expect(markup).toContain('Ver la variable');
     expect(markup).toMatch(/href="\/company\/COMP_0001\/variable\/\w+"/);
     expect(markup).not.toContain('NaN');
