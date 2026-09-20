@@ -42,7 +42,7 @@ describe('LandingShowcase', () => {
       LANDING_FEATURES.length - 1,
     );
     expect(html).toContain('aria-label="Producto"');
-    expect(html).toContain('>Producto<');
+    expect(html).not.toContain('>Producto<');
     expect(html).toContain('landing-band-light');
     expect(html).toContain('aria-label="Superficies"');
     expect(html).not.toContain('rounded-xl');

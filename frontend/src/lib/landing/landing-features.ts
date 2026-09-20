@@ -6,7 +6,7 @@ import { SCORE_BANDS, type ScoreBandKey } from '@/lib/score';
 /** One cell in the landing feature grid. */
 export type LandingFeatureId = CompanySection;
 
-/** Title, one-line description and route of a landing feature. */
+/** Title, two-line description and route of a landing feature. */
 export interface LandingFeature extends NavSection {
   lead: string;
 }
@@ -22,15 +22,16 @@ export const LANDING_FEATURE_KEYS: readonly CompanySection[] = [
   'advisor',
 ];
 
-/** What each shown page answers, in one line. */
+/** What each shown page answers, in two sentences. */
 const LEADS: Readonly<Record<string, string>> = {
   pulse:
-    'Cuánta caja puedes usar hoy y hasta cuándo, sin comprometer tus pagos.',
+    'Cuánta caja puedes usar hoy y hasta cuándo, sin comprometer tus pagos. El cierre, la previsión y la banda de incertidumbre, en una sola lectura.',
   diagnosis:
-    'Qué cobros, pagos y vencimientos explican tu margen de seguridad.',
-  signals: 'Qué cambio reduce ese margen y acerca una posible tensión de caja.',
+    'Qué cobros, pagos y vencimientos explican tu margen de seguridad. Cada variable con su peso, su score y lo que mueve el PULSE de este mes.',
+  signals:
+    'Qué cambio reduce ese margen y acerca una posible tensión de caja. La fecha, la magnitud y si el movimiento se confirma o se corrige.',
   advisor:
-    'Qué facturas puedes adelantar para convertir caja ociosa en ahorro.',
+    'Qué facturas puedes adelantar para convertir caja ociosa en ahorro. El encaje de cada producto con tu PULSE de hoy, y lo que queda fuera de alcance.',
 };
 
 /**

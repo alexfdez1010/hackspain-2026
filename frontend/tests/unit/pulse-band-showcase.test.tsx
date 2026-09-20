@@ -24,7 +24,9 @@ describe('PulseBandShowcase', () => {
     );
     expect(html.split('aria-pressed="false"').length - 1).toBe(3);
     expect(html).toContain(`stroke="${LIGHT_SCORE.neutral}"`);
-    expect(html).toContain('flex h-full min-h-0 flex-col gap-5');
+    expect(html).toContain('flex h-full min-h-0 flex-col gap-3');
+    expect(html).toContain('grid w-full grid-cols-2 lg:grid-cols-4');
+    expect(html).toContain('w-full justify-start');
   });
 
   it('prints the range of a band from its legend label', () => {

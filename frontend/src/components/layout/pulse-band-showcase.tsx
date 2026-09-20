@@ -29,8 +29,8 @@ export function bandRange(label: string): string {
  *
  * The strip is controlled by the parent so a cell and a level cannot
  * disagree. Hover, focus or press preview; the parent keeps the choice.
- * The column fills its cell: the levels stay at the top and the SVG grows
- * into the remaining height.
+ * The column fills its cell: the four levels span the width of the pane
+ * and the SVG grows into the remaining height.
  *
  * @param props - The band shown and the callback that selects another.
  * @returns The level strip and the animated chart.
@@ -42,11 +42,11 @@ export function PulseBandShowcase({
   const showcase = bandShowcaseFor(band);
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-5">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       <div
         role="group"
         aria-label="Niveles del score"
-        className="flex flex-wrap gap-x-1 gap-y-1"
+        className="grid w-full grid-cols-2 lg:grid-cols-4"
       >
         {SCORE_BANDS.map((level) => {
           const pressed = level.key === band;
@@ -60,7 +60,7 @@ export function PulseBandShowcase({
               onHoverStart={() => onBandChange(level.key)}
               onFocus={() => onBandChange(level.key)}
               onPress={() => onBandChange(level.key)}
-              className={`showcase-level h-auto min-w-0 gap-2 rounded-lg bg-transparent px-2.5 py-1.5 text-[13px] font-medium shadow-none [--button-bg-hover:transparent] [--button-bg-pressed:transparent] hover:bg-transparent ${
+              className={`showcase-level h-auto min-w-0 w-full justify-start gap-2 rounded-lg bg-transparent px-1 py-1.5 text-[13px] font-medium shadow-none [--button-bg-hover:transparent] [--button-bg-pressed:transparent] hover:bg-transparent ${
                 pressed ? 'text-foreground' : 'text-muted'
               }`}
             >

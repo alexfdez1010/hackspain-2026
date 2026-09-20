@@ -39,10 +39,11 @@ describe('LANDING_FEATURES', () => {
     ]);
   });
 
-  it('gives every page a lead that says what it answers', () => {
+  it('gives every page a lead that says what it answers, in two sentences', () => {
     for (const feature of LANDING_FEATURES) {
       expect(feature.lead.length).toBeGreaterThan(10);
       expect(feature.lead).not.toBe(feature.label);
+      expect(feature.lead.split('. ').length).toBeGreaterThanOrEqual(2);
     }
   });
 
