@@ -91,7 +91,6 @@ export function MethodWeightCell({
         height={segment.height}
         rx={6}
         fill={active ? 'var(--text-primary)' : 'var(--surface-deep)'}
-        stroke="var(--border-subtle)"
       />
       {lines.map((line, index) => (
         <text

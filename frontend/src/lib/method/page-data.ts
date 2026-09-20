@@ -6,7 +6,6 @@ import type {
   MethodConfidenceSegment,
   MethodExample,
 } from '@/lib/method/example';
-import { buildModelFacts, type MethodFact } from '@/lib/method/facts';
 import { buildIdeaPanels, type MethodIdeaPanel } from '@/lib/method/idea';
 import { buildPipelineExamples } from '@/lib/method/pipeline';
 import { buildWorkedRow, type MethodWorkedRow } from '@/lib/method/worked';
@@ -26,7 +25,6 @@ export interface MethodPageData {
   example: MethodExample | null;
   coverage: MethodConfidenceSegment[];
   lastHorizon: number;
-  facts: MethodFact[];
   idea: MethodIdeaPanel[];
   worked: MethodWorkedRow | null;
   pipelineExamples: (string | null)[];
@@ -70,12 +68,6 @@ export async function loadMethodPage(
       company?.series[company.series.length - 1] ?? null,
     ),
     lastHorizon,
-    facts: buildModelFacts(meta, {
-      companies: summary.companies.length,
-      lastHorizon,
-      example,
-      observedFrom: company?.series[0]?.month ?? null,
-    }),
     idea: buildIdeaPanels(meta, example, summary.companies.length),
     worked,
     pipelineExamples: buildPipelineExamples(

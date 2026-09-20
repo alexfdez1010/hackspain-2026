@@ -4,7 +4,6 @@ import {
   ArtTag,
   ArtWeather,
 } from '@/components/method/art-steps';
-import { Panel } from '@/components/ui/panel';
 import {
   describeAnticipation,
   describeHits,
@@ -34,7 +33,7 @@ interface MethodOutlookListProps {
  * score warns of declines far better than it promises recoveries.
  *
  * @param props - The evaluated horizons and the furthest one.
- * @returns The four panels.
+ * @returns The four blocks, without borders.
  */
 export function MethodOutlookList({
   forecast,
@@ -75,9 +74,9 @@ export function MethodOutlookList({
     },
   ];
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
       {items.map((item) => (
-        <Panel key={item.key} className="flex gap-5">
+        <div key={item.key} className="flex gap-5">
           {item.art}
           <div className="flex min-w-0 flex-col gap-3">
             <h3 className="text-xl font-semibold leading-[1.3]">
@@ -87,7 +86,7 @@ export function MethodOutlookList({
               {item.text}
             </p>
           </div>
-        </Panel>
+        </div>
       ))}
     </div>
   );

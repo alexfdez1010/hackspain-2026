@@ -1,5 +1,4 @@
 import { MethodPillarArt } from '@/components/method/art-pillars';
-import { Panel } from '@/components/ui/panel';
 import { methodPillarDoc } from '@/lib/method/pillars';
 import type { PulsePillarMeta, PulseVariableMeta } from '@/lib/pulse/types';
 import { formatNumber } from '@/lib/format';
@@ -10,14 +9,15 @@ interface MethodPillarCardsProps {
 }
 
 /**
- * One card per pillar: the question it answers, what it looks at told with an
- * everyday comparison, and the points it is worth.
+ * One block per pillar: the question it answers, what it looks at told with
+ * an everyday comparison, and the points it is worth. The drawing and the
+ * question are the frame; there is no border.
  *
  * Heaviest pillar first, like the map of the 100 points, so both figures
  * read in the same order.
  *
  * @param props - Pillar and variable metadata from the export.
- * @returns The four cards, two per row on a desktop.
+ * @returns The four blocks, two per row on a desktop.
  */
 export function MethodPillarCards({
   pillars,
@@ -28,14 +28,14 @@ export function MethodPillarCards({
   );
   const total = pillars.reduce((sum, pillar) => sum + pillar.weight, 0);
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
       {ordered.map((pillar) => {
         const doc = methodPillarDoc(pillar.key);
         const count = variables.filter(
           (variable) => variable.pillar === pillar.key,
         ).length;
         return (
-          <Panel key={pillar.key} className="flex gap-5">
+          <div key={pillar.key} className="flex gap-5">
             {doc && <MethodPillarArt art={doc.art} />}
             <div className="flex min-w-0 flex-col gap-2">
               <p className="text-sm font-medium leading-[1.2] text-ink-secondary">
@@ -60,7 +60,7 @@ export function MethodPillarCards({
                 </>
               )}
             </div>
-          </Panel>
+          </div>
         );
       })}
     </div>

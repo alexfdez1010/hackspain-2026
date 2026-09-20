@@ -19,7 +19,7 @@ interface MethodExamplePanelProps {
  * the addition and land on the same score the company page shows.
  *
  * @param props - The worked example of the demo company.
- * @returns The table of contributions and the two sentences that close it.
+ * @returns The table of contributions and the sentences that close it.
  */
 export function MethodExamplePanel({ example }: MethodExamplePanelProps) {
   const { rows, pulse, contributionSum, unknownLabels } = example;
@@ -28,24 +28,22 @@ export function MethodExamplePanel({ example }: MethodExamplePanelProps) {
       <MethodExampleTable rows={rows} />
       <div className="flex max-w-[720px] flex-col gap-3 text-[15px] leading-[1.55]">
         <p>
-          Esta es la tabla de la cuenta: cada fila es una variable con datos, su
-          nota y los puntos de PULSE que puso. Los {formatNumber(rows.length)}{' '}
-          aportes suman{' '}
+          Los {formatNumber(rows.length)} aportes suman{' '}
           <span className="font-medium tabular-nums">
             {formatNumber(contributionSum, 2)}
           </span>
-          , que es el PULSE del mes:{' '}
+          : el PULSE del mes,{' '}
           <span className="font-medium tabular-nums">
             {formatNumber(pulse, 1)}
           </span>
-          . No hay nada más que sumar.
+          .
         </p>
         {unknownLabels.length > 0 && (
           <p className="text-ink-secondary">
             Sin datos en {formatMonth(example.month)}:{' '}
             {unknownLabels.join(', ')} — {formatNumber(example.unknownWeight)}{' '}
-            puntos que se quedan fuera de la cuenta, sin sumar ni restar; por
-            eso la confianza es del {formatConfidence(example.confidence)}.
+            puntos fuera de la cuenta; por eso la confianza es del{' '}
+            {formatConfidence(example.confidence)}.
           </p>
         )}
         <Link
