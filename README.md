@@ -16,7 +16,7 @@ machinery between the two beyond a folder of JSON files.
 
 ## 🧭 What the product does
 
-One company per screen, never a portfolio. Each company has seven tabs, in the
+One company per screen. Each company has seven tabs, in the
 order a reader asks questions:
 
 | Tab                         | Question it answers                                                                                                                                                          |
