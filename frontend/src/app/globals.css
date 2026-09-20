@@ -70,43 +70,11 @@
 }
 
 /*
- * HeroUI ships its dark palette behind `.dark` / `[data-theme="dark"]`. The app
- * has no theme switch, so the system preference drives it: only the Embat
- * primitives are redefined here and both the HeroUI tokens above and their
- * derived values (hover, soft, borders) recompute from them.
+ * The product is light only. HeroUI ships a dark palette behind `.dark`, and
+ * the Embat primitives have dark values, but the system preference does not
+ * drive them: `color-scheme: light` on `:root` is the whole theme. The
+ * landing's dark bands below set their own tokens explicitly.
  */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-
-    --surface-page: #050b2c;
-    --surface-deep: #05081c;
-    --surface-raised: #111a46;
-    --surface-brand-subtle: #111a46;
-    --border-subtle: #ffffff1f;
-    --border-strong: #ffffff52;
-    --text-primary: #ffffff;
-    --text-secondary: #c3cada;
-    --text-muted: #8e9ab9;
-    --text-link-accent: #86aef9;
-    --interactive-primary-hover: #5e93f7;
-    --feedback-success: #3dd68c;
-    --feedback-warning: #f7b955;
-    --feedback-danger: #ff8a8e;
-
-    --score-critical: #ff8a8e;
-    --score-fragile: #f7b955;
-    --score-neutral: #8e9ab9;
-    --score-solid: #3dd68c;
-
-    --surface-secondary: #1b2759;
-    --surface-tertiary: #27356e;
-    --default: #1b2759;
-    --accent: #86aef9;
-    --backdrop: #05081ca6;
-  }
-}
-
 /*
  * Landing ignores the system scheme: hero and footer are dark, the middle
  * band is light. `html:has` tints body and SiteFrame chrome as the scroller

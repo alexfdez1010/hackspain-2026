@@ -30,6 +30,11 @@ running.
 | `/company/[id]/recommendations` | Financing: "Si necesitas financiación" with the approved products one per row (amount, rate, fit, a "Solicitar propuesta" button that confirms the request in a dialog, and their argument folded into "Ver detalle"), the navy lever block ("Con el pilar de X en Y en vez de Z, tu prima de riesgo baja N puntos básicos" with the stress probability, the fit count and the best rate), then "Fuera de alcance hoy" with the rule that leaves each product out and the disclaimer, and "Más detalle" with the improvement plan, risk and inputs used, all folded. The free operational measure lives on the Action pages. |
 | `/method?company=[id]`          | Method: how the month's PULSE is computed in plain words (scale, 100 points, four steps, confidence and one real month added by hand); forecast, signals, pricing and limits in four sentences.                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
+Every product route streams a `loading.tsx` (the `PageSkeleton`, under
+`company/[id]` and `method`) while its data is read, so a slow navigation shows
+the shape of the page at once instead of a frozen screen; the `company/[id]`
+layout answers 404 for an unknown company before that boundary flushes.
+
 Companies and groups in the export are anonymous (`COMP_0001`, `GROUP_0147`).
 The interface shows them under the name of a well-known company or group picked
 by a deterministic hash of the identifier (`src/lib/company/names.ts`,
