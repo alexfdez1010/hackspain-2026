@@ -3,6 +3,8 @@ export type MethodDirection = 'alto' | 'bajo';
 
 /** Static documentation of one of the eleven variables of the score. */
 export interface MethodVariableDoc {
+  /** The question the variable answers, in words that need no finance. */
+  plain: string;
   /** What the components of the variable measure, in one sentence. */
   measures: string;
   /** `alto` when a higher raw figure is healthier. */
@@ -14,7 +16,7 @@ export interface MethodVariableDoc {
 }
 
 /**
- * What each variable measures, its direction and its data source.
+ * What each variable asks, what it measures, its direction and its source.
  *
  * Weights, labels and units are never written here: they come from the export
  * (`meta.variables`), so a change of the specification in the backend cannot be
@@ -22,6 +24,8 @@ export interface MethodVariableDoc {
  */
 export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
   cash_days: {
+    plain:
+      'Si mañana dejara de cobrar, ¿cuántos días podría seguir pagando con lo que hay en el banco?',
     measures:
       'Caja a fin de mes dividida entre la salida operativa diaria de los últimos 90 días, con tope en 365 días.',
     better: 'alto',
@@ -29,6 +33,8 @@ export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
     proxy: null,
   },
   cash_min: {
+    plain:
+      '¿Cómo de vacía se quedó la hucha en el peor día del mes, comparado con lo que gasta al mes?',
     measures:
       'Mínimo diario de caja del mes dividido entre la salida mensual media: mide el peor día, no el cierre.',
     better: 'alto',
@@ -36,6 +42,8 @@ export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
     proxy: null,
   },
   loc_util: {
+    plain:
+      '¿Cuánto tiene gastado de lo que el banco le deja usar, como una tarjeta de crédito?',
     measures:
       'Dispuesto entre límite de las líneas de crédito, junto con su variación a 3 meses.',
     better: 'bajo',
@@ -43,6 +51,7 @@ export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
     proxy: null,
   },
   loc_accel: {
+    plain: '¿Tira de esa tarjeta cada vez más deprisa?',
     measures:
       'Variación a 3 meses de la propia variación a 3 meses de la utilización: distingue tirar de la línea de acelerar el tirón.',
     better: 'bajo',
@@ -50,6 +59,8 @@ export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
     proxy: null,
   },
   dpo: {
+    plain:
+      '¿Cuántos días tarda en pagar a sus proveedores, y va a más o a menos?',
     measures:
       'Días entre emisión y pago de las facturas de proveedor, ponderados a 3 meses, y su variación a 3 meses.',
     better: 'bajo',
@@ -57,6 +68,7 @@ export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
     proxy: null,
   },
   terms: {
+    plain: '¿Cuántos días de plazo le dan sus proveedores para pagar?',
     measures:
       'Días entre emisión y vencimiento en las facturas de proveedor a 6 meses, y su variación a 6 meses.',
     better: 'alto',
@@ -64,6 +76,7 @@ export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
     proxy: null,
   },
   dso: {
+    plain: '¿Cuántos días tarda en cobrar lo que vende?',
     measures:
       'Días entre emisión y cobro de las facturas de cliente, ponderados a 3 meses.',
     better: 'bajo',
@@ -71,6 +84,8 @@ export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
     proxy: null,
   },
   ar90: {
+    plain:
+      '¿Qué parte de lo que le deben lleva más de tres meses sin cobrarse?',
     measures:
       'Cartera de clientes vencida más de 90 días entre cartera abierta, y su variación a 3 meses.',
     better: 'bajo',
@@ -78,6 +93,8 @@ export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
     proxy: 'Devoluciones de cobros en el extracto bancario',
   },
   top_client: {
+    plain:
+      '¿Su cliente más importante le compra más o menos que el trimestre anterior?',
     measures:
       'Crecimiento de la facturación al cliente principal, 3 meses contra los 3 anteriores, acotado a ±1.',
     better: 'alto',
@@ -85,6 +102,8 @@ export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
     proxy: 'Cobros atribuidos a ese pagador en el extracto bancario',
   },
   maturities: {
+    plain:
+      '¿Cuánto tiene que devolver de deuda pronto, comparado con el dinero que hay en caja?',
     measures:
       'Dos veces el servicio de deuda de los próximos 3 meses entre la caja a fin de mes; el óptimo es 0.',
     better: 'bajo',
@@ -92,6 +111,7 @@ export const METHOD_VARIABLES: Readonly<Record<string, MethodVariableDoc>> = {
     proxy: null,
   },
   network: {
+    plain: '¿Sus clientes andan bien de dinero y pagan mejor o peor que antes?',
     measures:
       'Suma del peso de cada cliente por la variación a 3 meses de su puntualidad de pago.',
     better: 'alto',

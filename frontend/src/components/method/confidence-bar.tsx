@@ -1,3 +1,4 @@
+import { ArtPuzzle } from '@/components/method/art';
 import type {
   MethodConfidenceSegment,
   MethodCoverage,
@@ -14,10 +15,10 @@ const FILL: Record<MethodCoverage, string> = {
 };
 
 const LEGEND: readonly { coverage: MethodCoverage; text: string }[] = [
-  { coverage: 'known', text: 'Con datos: cuenta con todo su peso' },
+  { coverage: 'known', text: 'Con datos: la pieza está y cuenta entera' },
   {
     coverage: 'proxy',
-    text: 'Solo proxy bancario: cuenta la mitad de su peso',
+    text: 'Solo con lo que dice el banco: cuenta la mitad',
   },
   {
     coverage: 'unknown',
@@ -34,7 +35,8 @@ interface MethodConfidenceBarProps {
 }
 
 /**
- * Draws the 100 points of one month split by the evidence behind them.
+ * Draws the 100 points of one month split by the evidence behind them, told
+ * as a puzzle with missing pieces.
  *
  * This is what the confidence figure means: the score is the weighted mean of
  * the variables that had data, so a missing variable shrinks the base instead
@@ -58,41 +60,49 @@ export function MethodConfidenceBar({
   }
   const covered = segments.filter((segment) => segment.coverage !== 'unknown');
   return (
-    <figure className="flex max-w-[720px] flex-col gap-4">
-      <div
-        className="flex h-8 w-full gap-0.5"
-        role="img"
-        aria-label={`${formatNumber(covered.length)} de ${formatNumber(segments.length)} variables con datos, ${formatConfidencePoints(confidence)}`}
-      >
-        {segments.map((segment) => (
-          <div
-            key={segment.key}
-            className="h-full rounded-[2px]"
-            style={{
-              width: `${(segment.weight / total) * 100}%`,
-              background: FILL[segment.coverage],
-            }}
-            title={`${segment.label} · ${formatNumber(segment.weight)} pts`}
-          />
-        ))}
-      </div>
-      <p className="text-xl font-semibold leading-[1.3] tabular-nums">
-        {formatConfidencePoints(confidence)}
-      </p>
-      <ul className="flex flex-col gap-2 text-[13px] leading-[1.45] text-ink-secondary">
-        {LEGEND.map((item) => (
-          <li key={item.coverage} className="flex items-center gap-2">
-            <span
-              className="h-3 w-6 shrink-0 rounded-[2px]"
-              style={{ background: FILL[item.coverage] }}
+    <div className="flex flex-col gap-5 md:flex-row md:gap-8">
+      <ArtPuzzle />
+      <figure className="flex max-w-[720px] flex-1 flex-col gap-4">
+        <p className="text-[15px] leading-[1.55] text-ink-secondary">
+          Piensa en un puzle de 100 piezas. Si faltan piezas, no las contamos
+          como piezas malas: hacemos la nota con las que hay y decimos cuántas
+          faltaban. Eso es la confianza.
+        </p>
+        <div
+          className="flex h-8 w-full gap-0.5"
+          role="img"
+          aria-label={`${formatNumber(covered.length)} de ${formatNumber(segments.length)} variables con datos, ${formatConfidencePoints(confidence)}`}
+        >
+          {segments.map((segment) => (
+            <div
+              key={segment.key}
+              className="h-full rounded-[2px]"
+              style={{
+                width: `${(segment.weight / total) * 100}%`,
+                background: FILL[segment.coverage],
+              }}
+              title={`${segment.label} · ${formatNumber(segment.weight)} pts`}
             />
-            {item.text}
-          </li>
-        ))}
-      </ul>
-      <figcaption className="text-[13px] leading-[1.45] text-ink-secondary">
-        {caption}
-      </figcaption>
-    </figure>
+          ))}
+        </div>
+        <p className="text-xl font-semibold leading-[1.3] tabular-nums">
+          {formatConfidencePoints(confidence)}
+        </p>
+        <ul className="flex flex-col gap-2 text-[13px] leading-[1.45] text-ink-secondary">
+          {LEGEND.map((item) => (
+            <li key={item.coverage} className="flex items-center gap-2">
+              <span
+                className="h-3 w-6 shrink-0 rounded-[2px]"
+                style={{ background: FILL[item.coverage] }}
+              />
+              {item.text}
+            </li>
+          ))}
+        </ul>
+        <figcaption className="text-[13px] leading-[1.45] text-ink-secondary">
+          {caption}
+        </figcaption>
+      </figure>
+    </div>
   );
 }

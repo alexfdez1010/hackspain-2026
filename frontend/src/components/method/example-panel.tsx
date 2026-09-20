@@ -28,7 +28,9 @@ export function MethodExamplePanel({ example }: MethodExamplePanelProps) {
       <MethodExampleTable rows={rows} />
       <div className="flex max-w-[720px] flex-col gap-3 text-[15px] leading-[1.55]">
         <p>
-          Los {formatNumber(rows.length)} aportes suman{' '}
+          Esta es la tabla de la cuenta: cada fila es una variable con datos, su
+          nota y los puntos de PULSE que puso. Los {formatNumber(rows.length)}{' '}
+          aportes suman{' '}
           <span className="font-medium tabular-nums">
             {formatNumber(contributionSum, 2)}
           </span>

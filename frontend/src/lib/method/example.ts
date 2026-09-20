@@ -16,6 +16,10 @@ export interface MethodExampleRow {
   weight: number;
   /** 0-100 score of the variable that month. */
   score: number | null;
+  /** Raw figure behind the score, in `unit`. */
+  rawValue: number | null;
+  /** Unit of the raw figure, as the export declares it. */
+  unit: string;
   /** Points of PULSE the variable added that month. */
   contribution: number;
 }
@@ -68,6 +72,8 @@ export function buildMethodExample(
       pillarLabel: row.pillarLabel,
       weight: row.weight,
       score: row.score,
+      rawValue: row.rawValue,
+      unit: row.unit,
       contribution: row.contribution ?? 0,
     }))
     .sort((a, b) => b.contribution - a.contribution);

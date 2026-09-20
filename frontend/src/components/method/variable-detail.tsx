@@ -10,8 +10,9 @@ interface MethodVariableDetailProps {
 }
 
 /**
- * Explains the selected variable: what it measures, which way it reads, in
- * what unit and on which data it rests.
+ * Explains the selected variable: the question it answers in plain words,
+ * what it measures, which way it reads, in what unit and on which data it
+ * rests.
  *
  * @param props - Selected variable and the total points of the score.
  * @returns The detail panel of the treemap.
@@ -46,9 +47,13 @@ export function MethodVariableDetail({
         </p>
       </div>
       {doc && (
-        <p className="text-[15px] leading-[1.55] text-ink-secondary">
-          {doc.measures}
-        </p>
+        <>
+          <p className="text-[17px] leading-[1.6]">{doc.plain}</p>
+          <p className="text-[15px] leading-[1.55] text-ink-secondary">
+            <span className="font-medium text-ink">En detalle: </span>
+            {doc.measures}
+          </p>
+        </>
       )}
       <dl>
         {rows.map(([term, value]) => (
