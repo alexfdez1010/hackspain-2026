@@ -276,6 +276,16 @@ describe('the advisor page', () => {
     expect(markup).toContain('Anticipo de facturas');
     expect(markup.split('Solicitar propuesta').length - 1).toBe(3);
     expect(markup).toContain('+500 equipos financieros confían en nosotros');
+    expect(markup).toContain('aria-label="Palanca del precio"');
+    expect(markup).toContain('tu prima de riesgo baja 395 puntos básicos.');
+    expect(markup).toContain('Probabilidad de tensión a 6 meses');
+    expect(markup).toContain('Cómo se calcula');
+    expect(markup.indexOf('Palanca del precio')).toBeGreaterThan(
+      markup.indexOf('Si necesitas financiación'),
+    );
+    expect(markup.indexOf('Palanca del precio')).toBeLessThan(
+      markup.indexOf('Fuera de alcance hoy'),
+    );
     expect(markup.match(/aria-label="Qué significa Importe"/g)).toHaveLength(3);
     expect(markup).toContain('aria-label="Qué significa Tipo"');
     expect(markup).toContain('aria-label="Qué significa Encaje"');

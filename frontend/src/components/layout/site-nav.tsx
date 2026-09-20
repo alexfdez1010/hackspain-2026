@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -104,16 +103,9 @@ export function SiteNav({ companies }: SiteNavProps) {
             <Link
               href="/"
               aria-label="Embat Pulse, inicio"
-              className="flex h-11 shrink-0 items-center gap-2 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              className="flex h-11 shrink-0 items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
-              <Image
-                src="/icon.svg"
-                alt=""
-                width={40}
-                height={40}
-                unoptimized
-              />
-              <PulseWordmark className="h-3.5" />
+              <PulseWordmark className="h-6" />
             </Link>
             <p className="hidden border-l border-hairline pl-4 text-[15px] leading-none text-ink-secondary lg:block">
               {PRODUCT_TAGLINE}

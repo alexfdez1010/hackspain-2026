@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { AdvisorDetail } from '@/components/advisor/advisor-detail';
 import { ApprovedPanel } from '@/components/advisor/approved-panel';
+import { LeverHeadline } from '@/components/advisor/lever-headline';
 import { OutOfScopePanel } from '@/components/advisor/out-of-scope-panel';
 import { PageShell } from '@/components/layout/page-shell';
 import { companyName } from '@/lib/company/names';
@@ -90,6 +91,7 @@ export default async function CompanyAdvisorPage({ params }: AdvisorPageProps) {
         pillarLabels={pillarLabels}
         variableLabels={variableLabels}
       />
+      <LeverHeadline company={company} />
       <OutOfScopePanel
         declined={company.declined}
         disclaimer={company.disclaimer}
