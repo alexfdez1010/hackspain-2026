@@ -134,8 +134,6 @@ describe('the worked month feeds the drawings and the steps', () => {
 
     const none = await loadMethodPage(null);
     expect(none.companyId).toBe(PULSE_DEMO_COMPANY_ID);
-    expect(
-      none.facts.some((fact) => fact.label === 'Cartera de referencia'),
-    ).toBe(true);
+    expect(none.idea).toHaveLength(3);
   });
 });

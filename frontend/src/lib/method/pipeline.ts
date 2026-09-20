@@ -32,21 +32,20 @@ export const METHOD_PIPELINE: readonly MethodPipelineStep[] = [
     number: 2,
     title: 'Cada variable recibe una nota',
     detail:
-      'De 0 a 100, comparando con las demás empresas: como en una carrera, 100 es ir la primera y 0 la última. Más alto siempre es más sano, aunque la cifra de detrás sea «menos días».',
+      'De 0 a 100, comparando con las demás empresas. Más alto siempre es más sano, aunque la cifra de detrás sea «menos días».',
     art: 'podium',
   },
   {
     number: 3,
     title: 'Cada nota vale sus puntos',
-    detail:
-      'Como la nota final de un curso: el examen pesa más que los deberes. Una variable de 12 puntos cuenta el doble que una de 6.',
+    detail: 'Una variable de 12 puntos cuenta el doble que una de 6.',
     art: 'balance',
   },
   {
     number: 4,
     title: 'Sumamos y decimos con cuántos datos',
     detail:
-      'La suma de los aportes es el PULSE. Si falta un dato no cuenta como un cero: se saca de la cuenta y la confianza avisa de que faltaba.',
+      'La suma de los aportes es el PULSE. Si falta un dato no cuenta como un cero: sale de la cuenta y la confianza avisa.',
     art: 'calculator',
   },
 ];

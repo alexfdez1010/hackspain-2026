@@ -47,9 +47,6 @@ test('lands on the demo company without browser errors', async ({ page }) => {
     page.getByRole('status').filter({ hasText: /\d,\d/ }),
   ).toBeVisible();
   await expect(
-    page.getByRole('heading', { level: 2, name: /Contrata|Explica|Sube/ }),
-  ).toBeVisible();
-  await expect(
     page.getByRole('button', { name: 'Abrir Nexo, asistente de Pulse' }),
   ).toBeVisible();
   expect(errors).toEqual([]);

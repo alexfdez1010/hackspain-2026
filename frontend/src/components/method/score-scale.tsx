@@ -9,27 +9,23 @@ export interface MethodScaleMarker {
 }
 
 interface MethodScoreScaleProps {
-  /** What the scale is measured on and when; printed under the bar. */
-  caption: string;
   /** Optional score drawn on the bar. */
   marker?: MethodScaleMarker | null;
 }
 
 /**
  * Draws the 0-100 scale of PULSE with its four bands, what each one means in
- * plain words and, when there is one, the worked month on the bar.
+ * plain words and, when there is one, the worked month on the bar. The marker
+ * already names the company and the month, so there is no caption.
  *
  * The colours are the ones every other figure of the product uses for the same
  * score, and each band carries its name and its range in text, so the reading
  * never depends on the colour alone.
  *
- * @param props - The base of the figure and the optional marker.
- * @returns The band bar, the marker, the legend and the caption.
+ * @param props - The optional marker.
+ * @returns The band bar, the marker and the legend.
  */
-export function MethodScoreScale({
-  caption,
-  marker = null,
-}: MethodScoreScaleProps) {
+export function MethodScoreScale({ marker = null }: MethodScoreScaleProps) {
   const spans = buildBandSpans();
   const description = spans
     .map((span) => `${span.name} ${span.range}`)
@@ -95,9 +91,6 @@ export function MethodScoreScale({
           </li>
         ))}
       </ul>
-      <figcaption className="text-[13px] leading-[1.45] text-ink-secondary">
-        {caption}
-      </figcaption>
     </figure>
   );
 }
