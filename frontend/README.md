@@ -487,7 +487,7 @@ No environment variable is required. `AI_GATEWAY_API_KEY` is read from
 
 `src/app/opengraph-image.jpg` is the Open Graph image shared by the routes of
 the application (1200 × 630). It shows Embat Pulse, the header icon and Nexo.
-It was generated with ImageGen using `src/app/icon.svg` and
+It was generated with ImageGen using the former pulse icon (now replaced by the wordmark favicon in `src/app/icon.svg`) and
 `public/mascot/nexo-suit.png` as identity references. Its alternative text lives
 in `src/app/opengraph-image.alt.txt`.
 
