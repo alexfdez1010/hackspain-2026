@@ -78,3 +78,34 @@ test('fits a phone: one-row bar, a menu drawer, no sideways scroll and stacked m
     }),
   ).toHaveCount(1);
 });
+
+test('opens a figure note on tap and closes it on a tap outside or on the button', async ({
+  page,
+}) => {
+  await page.goto('/company/COMP_0001', { waitUntil: 'networkidle' });
+  const tip = page.getByRole('button', { name: 'Qué significa PULSE' });
+  const note = page.getByRole('dialog', { name: 'PULSE' });
+  await expect(tip).toBeVisible();
+  await expect(note).toBeHidden();
+
+  await tip.tap();
+  await expect(note).toBeVisible();
+  await expect(note).toContainText('nota de 0 a 100');
+
+  await page.touchscreen.tap(200, 30);
+  await expect(note).toBeHidden();
+
+  await tip.tap();
+  await expect(note).toBeVisible();
+  // The open note is modal: the second tap lands on its underlay, so the
+  // ordinary tap would wait for the button to become reachable.
+  await tip.tap({ force: true });
+  await expect(note).toBeHidden();
+
+  const cash = page.getByRole('button', { name: 'Qué significa Días de caja' });
+  await cash.scrollIntoViewIfNeeded();
+  await cash.tap();
+  await expect(
+    page.getByRole('dialog', { name: 'Días de caja' }),
+  ).toBeVisible();
+});
