@@ -20,18 +20,18 @@ interface PlanPanelProps {
  * The plan of one variable: the five figures of the month, why it is the one,
  * the three moves, and where to go if the operating measure is not enough.
  *
- * Everything lives in one panel and reads top to bottom — figures, reason,
- * moves, ways out — so the page holds a single surface instead of stacking a
- * strip, a section title and a card. Only the strip of figures carries
- * hairlines, because there two readings meet; the steps are separated by
- * space, and the footer by space alone.
+ * Everything reads top to bottom on the page itself — figures, reason, moves,
+ * ways out — with no panel around it, so the page holds no boxed surface at
+ * all. Only the strip of figures carries hairlines, because there two
+ * readings meet; the steps are separated by space, and the footer by space
+ * alone.
  *
  * The steps are numbered because they are ordered — the calendar before the
  * cushion, the cushion before the renegotiation — and they carry no bullet,
  * no icon and no colour: the number is the only mark they need.
  *
  * @param props - The figures, the reason, the steps and the two routes out.
- * @returns The panel content of the recommendation page.
+ * @returns The body of the recommendation page.
  */
 export function PulsePlanPanel({
   figures,
