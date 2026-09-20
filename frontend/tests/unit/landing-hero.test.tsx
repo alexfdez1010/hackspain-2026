@@ -34,7 +34,7 @@ describe('PulseHeroDither', () => {
 });
 
 describe('the landing hero', () => {
-  it('puts the dither in the left pane, not under HeroAccess, without the mark', async () => {
+  it('puts the dither behind HeroAccess below lg, and in the left pane from lg', async () => {
     const html = renderToStaticMarkup(await LandingPage());
     expect(html).toContain('landing-band-dark');
     expect(html).toContain('hero-dither');
@@ -51,6 +51,12 @@ describe('the landing hero', () => {
     expect(html).not.toContain('text-ink-muted');
     expect(html).not.toContain(PULSE_MARK_VIEWBOX);
     expect(html).not.toContain('hero-grain');
+    expect(html).toContain(
+      'pointer-events-none absolute inset-0 max-lg:z-0 lg:relative lg:inset-auto lg:col-start-2',
+    );
+    expect(html).toContain(
+      'relative z-[1] col-start-2 flex h-full items-center px-[var(--landing-inset)] pt-20 pb-8 lg:col-start-3',
+    );
 
     const barAt = html.indexOf('aria-label="Embat Pulse, inicio"');
     const ditherAt = html.indexOf('hero-dither');
@@ -83,6 +89,12 @@ describe('the landing hero', () => {
     expect(css).toContain("[data-landing-snap][data-band='1'] .hero-dither");
     expect(css).toContain("[data-landing-snap][data-band='2'] .hero-dither");
     expect(css).not.toContain('.hero-grain');
+    expect(css).toContain('@media (width < 64rem)');
+    const mobileHero = css.slice(
+      css.indexOf('@media (width < 64rem)'),
+      css.indexOf('.hero-dither-canvas'),
+    );
+    expect(mobileHero).toContain('opacity: 0.5');
 
     const page = readFileSync(
       resolve(process.cwd(), 'src/app/page.tsx'),

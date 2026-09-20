@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { HERO_SECTIONS } from '@/lib/landing/product-sections';
 
 const HERO_ACCESS_LINK =
-  'hero-access-link font-display text-2xl font-normal tracking-tight text-foreground transition-colors duration-[120ms] ease-out hover:text-muted sm:text-3xl';
+  'hero-access-link font-display text-xl font-normal tracking-tight text-foreground transition-colors duration-[120ms] ease-out hover:text-muted lg:text-3xl';
 
 /**
  * One destination in the hero grid, with the shared underline treatment.
@@ -29,8 +29,9 @@ function HeroAccessLink({
 /**
  * Direct access to the company-scoped product from the landing hero.
  *
- * Every demo company page in a 2-column grid. PULSE is the page `h1` so the
- * name is written once. Not a folder tab.
+ * Every demo company page in a 2-column grid. Type and row gap stay compact
+ * below `lg` so seven destinations fit a phone viewport. PULSE is the page
+ * `h1` so the name is written once. Not a folder tab.
  *
  * @returns A labelled grid of large underlined product links.
  */
@@ -39,7 +40,7 @@ export function HeroAccess() {
 
   return (
     <nav aria-label="Dashboard" className="w-full">
-      <ul className="grid w-full grid-cols-2 gap-x-10 gap-y-8">
+      <ul className="grid w-full grid-cols-2 gap-x-6 gap-y-4 lg:gap-x-10 lg:gap-y-8">
         <li>
           <h1 className="m-0 font-normal">
             <HeroAccessLink href={pulse.href}>{pulse.label}</HeroAccessLink>

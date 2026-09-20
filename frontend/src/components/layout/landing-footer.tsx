@@ -29,12 +29,12 @@ function FooterLinkGroup({
       <p className="text-[13px] font-semibold uppercase leading-[1.2] tracking-[0.06em] text-muted">
         {title}
       </p>
-      <ul className="mt-3 flex flex-col gap-2">
+      <ul className="mt-2.5 flex flex-col gap-1.5 lg:mt-3 lg:gap-2">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="text-[15px] text-foreground transition-colors hover:text-muted"
+              className="text-[14px] text-foreground transition-colors hover:text-muted lg:text-[15px]"
             >
               {link.label}
             </Link>
@@ -48,7 +48,9 @@ function FooterLinkGroup({
 /**
  * Full-viewport footer: Heatmap in the left pane, dithered lists on the right.
  *
- * The left inner column is desktop-only. No product mark as a heading here.
+ * The left inner column is desktop-only. Below `lg` the lists fill the
+ * band with tighter type and gaps so six platform links plus Método and
+ * the signature fit one viewport. No product mark as a heading here.
  * The bottom line is the copyright and the same signature as the product
  * footer, with no hairline and no description of the model.
  *
@@ -64,7 +66,7 @@ export function LandingFooter() {
       <div className="footer-heatmap relative col-start-2 hidden h-full min-h-0 overflow-hidden lg:block">
         <PulseFooterHeatmap />
       </div>
-      <div className="relative col-start-2 flex h-full flex-col px-[var(--landing-inset)] py-10 lg:col-start-3">
+      <div className="relative col-start-2 flex h-full flex-col px-[var(--landing-inset)] py-8 lg:col-start-3 lg:py-10">
         <div className="footer-dither pointer-events-none absolute inset-0 overflow-hidden">
           <PulseFooterDither />
         </div>
@@ -72,12 +74,12 @@ export function LandingFooter() {
           aria-label="Pie"
           className="relative z-[1] flex flex-1 items-center"
         >
-          <div className="grid w-full grid-cols-2 gap-x-10">
+          <div className="grid w-full grid-cols-2 gap-x-6 lg:gap-x-10">
             <FooterLinkGroup title="Producto" links={PLATFORM} />
             <FooterLinkGroup title="Documentación" links={DOCS} />
           </div>
         </nav>
-        <p className="relative z-[1] mt-auto flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 pt-6 text-[13px] leading-[1.45] text-muted">
+        <p className="relative z-[1] mt-auto flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 pt-4 text-[13px] leading-[1.45] text-muted lg:gap-x-6 lg:pt-6">
           <span>© 2026 Pulse</span>
           <span>By humans for humans.</span>
         </p>

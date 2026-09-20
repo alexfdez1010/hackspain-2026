@@ -67,15 +67,16 @@ These rules apply to every product task. Keep them when updating this document.
 - La landing son tres bandas `h-dvh`. **Hero**: `LandingBar` (wordmark, alto y
   claim de la nav, fila 1240), dither de destellos a la izquierda y
   `HeroAccess` a la derecha (PULSE es el `h1`); el copy usa `--landing-inset`.
-  **Producto** (clara): título a padding de nav, lead de dos frases sobre el
-  plus y la figura de la página seleccionada (trayectoria PULSE, aviso de
-  Diagnóstico, una señal, importe y desplazamiento de pilar); a la derecha un
-  2×2 de cuatro `next/link` con el eje del marco y una regla de 1px por fila.
-  Hover o foco de una celda selecciona título, lead y figura (`selectedId`).
-  **Pie**: heatmap a la izquierda;
-  grano dither (`scale` 1.8)
-  detrás de Producto / Documentación, con la firma y el ©, sin hairline ni
-  descripción del modelo.
+  Bajo `lg` el dither queda detrás de los accesos (`pointer-events-none`,
+  opacidad 0,5) y `HeroAccess` compacta a `text-xl` / `gap-y-4`. **Producto**
+  (clara): en `lg` título a padding de nav, lead de dos frases sobre el plus y
+  la figura de la página seleccionada (trayectoria PULSE, aviso de Diagnóstico,
+  una señal, importe y desplazamiento de pilar); a la derecha un 2×2 de cuatro
+  `next/link` con el eje del marco y una regla de 1px por fila. Hover o foco
+  de una celda selecciona título, lead y figura (`selectedId`). Bajo `lg` la
+  figura se oculta y el 2×2 ocupa la banda. **Pie**: heatmap a la izquierda
+  en `lg+`; grano dither (`scale` 1.8) detrás de Producto / Documentación, con
+  la firma y el ©, sin hairline ni descripción del modelo.
 - `/` es marketing. El producto empieza en `/company/[id]`.
 
 ## 3. Foundations
@@ -212,39 +213,39 @@ el nombre de la banda en texto, y las alertas llevan etiqueta de severidad.
 Use HeroUI v3 components first. Document any wrapper or new primitive before
 adding it to the codebase.
 
-| Component/pattern | HeroUI primitive                          | Approved variants                 | Usage guidance                                                                                                                                      |
-| ----------------- | ----------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Button            | `Button`                                  | `secondary`, `tertiary`           | Sólo acciones de la propia vista (cambiar mes u horizonte).                                                                                         |
-| Link              | `Link` / `next/link`                      | por defecto                       | `next/link` para navegación interna; `Link` de HeroUI cuando lleva icono.                                                                           |
-| Form field        | `ComboBox`, `Select` + `ListBox`          | por defecto                       | Buscador de empresa en la nav; mes y horizonte en la empresa. Cada control lleva `aria-label`.                                                      |
-| Feedback          | `Chip`                                    | `soft` con `color` semántico      | Familia de producto, tipo de señal y estado de un producto descartado.                                                                              |
-| Plegado           | `Disclosure`, `Accordion`                 | por defecto                       | «Ver detalle» de una oferta y el acordeón «Más detalle» de Financiación.                                                                            |
-| Data              | `Table` vía `DataTable`                   | por defecto                       | Toda tabla usa `DataTable`: cabeceras ordenables, `headerTip` y «sin datos» siempre al final.                                                       |
-| Panel             | `Panel` (`ui/panel`)                      | `padding` `default` / `none`      | Contenedor único: hairline, radio 12 e inset 24. `none` cuando el contenido pone su propio inset.                                                   |
-| KPI               | `StatGrid` (`ui/stat-grid`)               | 3, 4 o 5 columnas                 | Tira de cabecera con hairline entre celdas, valor 32 y etiqueta debajo; `tip` con la definición llana.                                              |
-| Hechos            | `FactGrid` (`pulse/fact-grid`)            | `2` o `auto` columnas             | Tira de filetes dentro de un panel (explorador de mes, plan de variable), cifra 24.                                                                 |
-| Estado del score  | `ScoreBadge` (`ui/score-badge`)           | `score` (def.), `pill`, `lg`      | `score` es punto + cifra en tinta; `pill` es la píldora con el nombre de la banda.                                                                  |
-| Nota de info      | `InfoTip` (`ui/info-tip`)                 | icono 20 px                       | Junto a una cifra o cabecera: abre en hover y se fija al pulsar; sustituye a cualquier `title`.                                                     |
-| Pie de producto   | `SiteFooter` (`layout/site-footer`)       | por defecto                       | Hairline superior, 13 px secundario; sólo la firma, centrada.                                                                                       |
-| Asistente Nexo    | `Modal`, `Button`, `TextArea`             | `primary`, `secondary`, `ghost`   | Diálogo lateral de 440 px; hoja inferior en móvil. Sólo en rutas de producto.                                                                       |
-| Menú móvil        | `Drawer` (`layout/mobile-nav`)            | `min(360px, 88vw)`                | Bajo `lg`: buscador arriba y las siete secciones en columna, con objetivos de 48 px.                                                                |
-| Marca             | `PulseWordmark` + `src/app/icon.svg`      | wordmark sobre navy               | Nav y landing muestran sólo el wordmark; el favicon es el wordmark blanco sobre un cuadrado navy.                                                   |
-| Site frame        | `SiteFrame`                               | `split`, `pulse`                  | Gutters y eje; `pulse` sólo en `/`, sobre la línea derecha existente.                                                                               |
-| Landing scroll    | `LandingScroll`                           | paging 900 ms                     | Un gesto, una banda; tween propio, no snap nativo.                                                                                                  |
-| Landing bar       | `LandingBar`                              | sobre el hero                     | Marca, alto y claim de la nav, fila 1240 (`px-4 sm:px-8`); hairline; sólo banda 0.                                                                  |
-| Carga de página   | `PageSkeleton` (`layout/page-skeleton`)   | `loading.tsx` de empresa y método | Esqueleto con el ritmo de `PageShell` (título, lead, tira de KPI, un panel), pulso sólo con `motion-safe`.                                          |
-| Hero access       | `HeroAccess`                              | cuadrícula 2 columnas             | Todas las páginas de la empresa demo (`HERO_SECTIONS`); PULSE es el `h1`; subrayado animado.                                                        |
-| Landing showcase  | `LandingShowcase`                         | 2×2 + figura de página            | Cuatro `next/link`; título a padding de nav, lead sobre el plus; `selectedId` elige la figura.                                                       |
-| Landing footer    | `LandingFooter`                           | cuadrante derecho                 | Producto / Documentación desde `companySections`; firma y ©, sin hairline; heatmap en `lg+`.                                                        |
-| Canvases de Paper | `ImageDithering`, `Heatmap`               | hero, 2×2, pie                    | Un canvas por superficie, `aria-hidden`, sin `next/image` ni tokens. Pie a `scale` 1.8.                                                             |
-| Preview de página | `LandingFeaturePreview`                   | 4 figuras, no 4 colores           | PULSE: trayectoria crítica; Diagnóstico: aviso lavado; Alertas: una señal; Financiación: importe + `PillarShift`.                                   |
-| Marca del hero    | `PulseHeroMark`                           | tokens de score + accent          | Geometría compartida del pulso; hoy no se monta en ninguna página.                                                                                  |
-| Cifra de cabecera | `PulseHeadlineTotal` (`pulse/…`)          | 52 px (40 en móvil)               | Cifra que contesta al `h1` en Acción, con la leyenda de qué cuenta a su derecha.                                                                    |
-| Tabla de Acción   | `PulseGapTable` (`pulse/gap-table`)       | 4 columnas, apretadas bajo `md`   | Los tres pasos: variable con su valor real y barra de puntos, puntos y enlace al plan.                                                              |
-| Plan de variable  | `PulsePlanPanel` (`pulse/plan-panel`)     | 5 cifras + 3 pasos                | Un solo panel: `FactGrid`, el por qué con las cifras del mes, «Qué hacer» y las dos salidas.                                                        |
-| Dibujos de Método | `Art` + `Art*` (`method/art*.tsx`)        | 64 px, trazo 2,5 en tinta         | SVG inline de 96 unidades, `aria-hidden`: superficie `--surface-deep` y un solo acento; el dial usa los colores de banda y apunta al mes trabajado. |
-| Celda del mosaico | `MosaicCell` (`pulse/mosaic-cell`)        | lavado de banda 12 % / 22 %       | Alto = 13 px por punto de peso; el detalle se abre dentro de la celda con «Ver la variable →».                                                      |
-| Fila de oferta    | `OfferRow` (`advisor/offer-row`)          | 5 columnas                        | Nombre, importe, tipo, encaje y CTA; la razón se pliega en «Ver detalle».                                                                           |
+| Component/pattern | HeroUI primitive                        | Approved variants                 | Usage guidance                                                                                                                                      |
+| ----------------- | --------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Button            | `Button`                                | `secondary`, `tertiary`           | Sólo acciones de la propia vista (cambiar mes u horizonte).                                                                                         |
+| Link              | `Link` / `next/link`                    | por defecto                       | `next/link` para navegación interna; `Link` de HeroUI cuando lleva icono.                                                                           |
+| Form field        | `ComboBox`, `Select` + `ListBox`        | por defecto                       | Buscador de empresa en la nav; mes y horizonte en la empresa. Cada control lleva `aria-label`.                                                      |
+| Feedback          | `Chip`                                  | `soft` con `color` semántico      | Familia de producto, tipo de señal y estado de un producto descartado.                                                                              |
+| Plegado           | `Disclosure`, `Accordion`               | por defecto                       | «Ver detalle» de una oferta y el acordeón «Más detalle» de Financiación.                                                                            |
+| Data              | `Table` vía `DataTable`                 | por defecto                       | Toda tabla usa `DataTable`: cabeceras ordenables, `headerTip` y «sin datos» siempre al final.                                                       |
+| Panel             | `Panel` (`ui/panel`)                    | `padding` `default` / `none`      | Contenedor único: hairline, radio 12 e inset 24. `none` cuando el contenido pone su propio inset.                                                   |
+| KPI               | `StatGrid` (`ui/stat-grid`)             | 3, 4 o 5 columnas                 | Tira de cabecera con hairline entre celdas, valor 32 y etiqueta debajo; `tip` con la definición llana.                                              |
+| Hechos            | `FactGrid` (`pulse/fact-grid`)          | `2` o `auto` columnas             | Tira de filetes dentro de un panel (explorador de mes, plan de variable), cifra 24.                                                                 |
+| Estado del score  | `ScoreBadge` (`ui/score-badge`)         | `score` (def.), `pill`, `lg`      | `score` es punto + cifra en tinta; `pill` es la píldora con el nombre de la banda.                                                                  |
+| Nota de info      | `InfoTip` (`ui/info-tip`)               | icono 20 px                       | Junto a una cifra o cabecera: abre en hover y se fija al pulsar; sustituye a cualquier `title`.                                                     |
+| Pie de producto   | `SiteFooter` (`layout/site-footer`)     | por defecto                       | Hairline superior, 13 px secundario; sólo la firma, centrada.                                                                                       |
+| Asistente Nexo    | `Modal`, `Button`, `TextArea`           | `primary`, `secondary`, `ghost`   | Diálogo lateral de 440 px; hoja inferior en móvil. Sólo en rutas de producto.                                                                       |
+| Menú móvil        | `Drawer` (`layout/mobile-nav`)          | `min(360px, 88vw)`                | Bajo `lg`: buscador arriba y las siete secciones en columna, con objetivos de 48 px.                                                                |
+| Marca             | `PulseWordmark` + `src/app/icon.svg`    | wordmark sobre navy               | Nav y landing muestran sólo el wordmark; el favicon es el wordmark blanco sobre un cuadrado navy.                                                   |
+| Site frame        | `SiteFrame`                             | `split`, `pulse`                  | Gutters y eje; `pulse` sólo en `/`, sobre la línea derecha existente.                                                                               |
+| Landing scroll    | `LandingScroll`                         | paging 900 ms                     | Un gesto, una banda; tween propio, no snap nativo.                                                                                                  |
+| Landing bar       | `LandingBar`                            | sobre el hero                     | Marca, alto y claim de la nav, fila 1240 (`px-4 sm:px-8`); hairline; sólo banda 0.                                                                  |
+| Carga de página   | `PageSkeleton` (`layout/page-skeleton`) | `loading.tsx` de empresa y método | Esqueleto con el ritmo de `PageShell` (título, lead, tira de KPI, un panel), pulso sólo con `motion-safe`.                                          |
+| Hero access       | `HeroAccess`                            | cuadrícula 2 columnas             | Todas las páginas de la empresa demo (`HERO_SECTIONS`); PULSE es el `h1`; subrayado animado.                                                        |
+| Landing showcase  | `LandingShowcase`                       | 2×2 + figura de página            | Cuatro `next/link`; título a padding de nav, lead sobre el plus; `selectedId` elige la figura.                                                      |
+| Landing footer    | `LandingFooter`                         | cuadrante derecho                 | Producto / Documentación desde `companySections`; firma y ©, sin hairline; heatmap en `lg+`; bajo `lg` listas densas a banda completa.              |
+| Canvases de Paper | `ImageDithering`, `Heatmap`             | hero, 2×2, pie                    | Un canvas por superficie, `aria-hidden`, sin `next/image` ni tokens. Pie a `scale` 1.8.                                                             |
+| Preview de página | `LandingFeaturePreview`                 | 4 figuras, no 4 colores           | PULSE: trayectoria crítica; Diagnóstico: aviso lavado; Alertas: una señal; Financiación: importe + `PillarShift`.                                   |
+| Marca del hero    | `PulseHeroMark`                         | tokens de score + accent          | Geometría compartida del pulso; hoy no se monta en ninguna página.                                                                                  |
+| Cifra de cabecera | `PulseHeadlineTotal` (`pulse/…`)        | 52 px (40 en móvil)               | Cifra que contesta al `h1` en Acción, con la leyenda de qué cuenta a su derecha.                                                                    |
+| Tabla de Acción   | `PulseGapTable` (`pulse/gap-table`)     | 4 columnas, apretadas bajo `md`   | Los tres pasos: variable con su valor real y barra de puntos, puntos y enlace al plan.                                                              |
+| Plan de variable  | `PulsePlanPanel` (`pulse/plan-panel`)   | 5 cifras + 3 pasos                | Un solo panel: `FactGrid`, el por qué con las cifras del mes, «Qué hacer» y las dos salidas.                                                        |
+| Dibujos de Método | `Art` + `Art*` (`method/art*.tsx`)      | 64 px, trazo 2,5 en tinta         | SVG inline de 96 unidades, `aria-hidden`: superficie `--surface-deep` y un solo acento; el dial usa los colores de banda y apunta al mes trabajado. |
+| Celda del mosaico | `MosaicCell` (`pulse/mosaic-cell`)      | lavado de banda 12 % / 22 %       | Alto = 13 px por punto de peso; el detalle se abre dentro de la celda con «Ver la variable →».                                                      |
+| Fila de oferta    | `OfferRow` (`advisor/offer-row`)        | 5 columnas                        | Nombre, importe, tipo, encaje y CTA; la razón se pliega en «Ver detalle».                                                                           |
 
 ### Marca
 
@@ -320,9 +321,13 @@ adding it to the codebase.
 - Ancho de contenido: 1240 px en páginas de producto (`PageShell`) y `max-w-3xl`
   en texto corrido. La landing usa el `SiteFrame` a viewport completo.
 - Breakpoints: los de Tailwind (`sm` 640, `md` 768, `lg` 1024).
-- En `/` no hay `SiteNav`: el acceso es `HeroAccess`. En `lg` el hero es 50/50 y el
-  pie ocupa el cuadrante derecho; por debajo, dither, accesos y pie se apilan
-  dentro de los gutters y el dither no cubre `HeroAccess`.
+- En `/` no hay `SiteNav`: el acceso es `HeroAccess`. En `lg` cada banda es 50/50
+  (dither | accesos; figura | 2×2; heatmap | listas). Bajo `lg` las tres bandas
+  siguen `h-dvh` y el pager no cambia: el dither del hero queda detrás de los
+  accesos (opacidad 0,5, `pointer-events-none`); la banda Producto muestra sólo
+  el 2×2 a altura completa (la figura es `hidden` hasta `lg`, porque en táctil
+  no hay hover); el pie es listas y firma, heatmap oculto. `HeroAccess` baja a
+  `text-xl` / `gap-y-4`.
 - En producto la cabecera es estática, no fija, y desde `lg` tiene dos filas: la
   primera (92 px) con la marca, un hairline vertical y el claim a la izquierda y el
   buscador de empresa (256 px) a la derecha; la segunda con las siete pestañas
@@ -419,6 +424,7 @@ anterior, la fecha lo dice.
 | 2026-09-20 (revisa 09-19) | Pie de landing sin Condiciones ni Privacidad: sólo © y la firma de producto, sin hairline ni «11 variables»; `LandingBar` en la fila 1240 (`px-4 sm:px-8`)                                                                                                                                                                                                                                                                                                                                                | El filete repetía Método; pegar la barra al gutter no coincidía con el dither                                                                                                                                                                           |
 | 2026-09-20                | El `h1` de `/` es el enlace PULSE de `HeroAccess`; la línea mensual va debajo                                                                                                                                                                                                                                                                                                                                                                                                                             | Pulse ya estaba en la retícula; el caption partido competía con los enlaces                                                                                                                                                                             |
 | 2026-09-20                | Banda Producto: una figura por página (trayectoria, aviso de diagnóstico, una alerta, importe y `PillarShift`); se retira la tira de cuatro niveles del mismo chart                                                                                                                                                                                                                                                                                                                                       | Cuatro colores de la misma gráfica no decían qué hace cada página                                                                                                                                                                                       |
+| 2026-09-20                | Landing bajo `lg`: dither del hero detrás de `HeroAccess`; 2×2 a banda completa sin figura; pie sin heatmap, tipo y huecos más densos. Las tres bandas siguen `h-dvh` y el pager no se desactiva                                                                                                                                                                                                                                                                                                          | En un teléfono las dos columnas internas caían en el mismo hueco y el contenido se recortaba; el hover de la figura no aplica en táctil                                                                                                                 |
 
 - 2026-09-18: Require informative copy, purposeful borders, and deliberate spacing
   for every product task. Keep these permanent rules in this document and enforce

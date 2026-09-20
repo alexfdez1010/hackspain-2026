@@ -67,6 +67,8 @@ describe('LandingShowcase', () => {
     expect(html).toContain('feature-dither');
     expect(html).toContain('px-4 py-2 sm:px-8');
     expect(html).toContain('flex-col justify-between px-4');
+    expect(html).toContain('hidden min-h-0 lg:grid lg:h-full lg:grid-rows-2');
+    expect(html).toContain('h-full min-h-0 lg:col-start-3');
     expect(html).not.toContain('px-[var(--landing-inset)]');
     expect(html).not.toContain('sm:px-10');
   });

@@ -64,6 +64,10 @@ describe('LandingFooter', () => {
     expect(html).not.toContain('href="/radar"');
     expect(html).toContain('px-[var(--landing-inset)]');
     expect(html).not.toContain('sm:px-10');
+    expect(html).toContain(
+      'col-start-2 flex h-full flex-col px-[var(--landing-inset)] py-8 lg:col-start-3',
+    );
+    expect(html).toContain('grid-cols-2 gap-x-6 lg:gap-x-10');
   });
 
   it('puts the Heatmap in the desktop-only left pane', () => {

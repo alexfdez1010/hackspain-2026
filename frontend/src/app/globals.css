@@ -276,6 +276,12 @@ html:has([data-landing-snap]) .bg-separator {
   mix-blend-mode: screen;
 }
 
+@media (width < 64rem) {
+  .hero-dither {
+    opacity: 0.5;
+  }
+}
+
 .hero-dither-canvas {
   position: relative;
   isolation: isolate;

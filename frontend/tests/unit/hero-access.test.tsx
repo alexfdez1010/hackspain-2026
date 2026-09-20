@@ -14,6 +14,10 @@ describe('HeroAccess', () => {
     expect(html).toContain('grid-cols-2');
     expect(html).toContain('hero-access-link');
     expect(html).toContain('font-normal');
+    expect(html).toContain('text-xl');
+    expect(html).toContain('lg:text-3xl');
+    expect(html).toContain('gap-y-4');
+    expect(html).toContain('lg:gap-y-8');
     for (const section of companySections(PULSE_DEMO_COMPANY_ID)) {
       expect(html).toContain(`href="${section.href}"`);
       expect(html).toContain(`>${section.label}<`);
