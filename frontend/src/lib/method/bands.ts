@@ -15,7 +15,19 @@ export interface MethodBandSpan {
   width: number;
   /** CSS colour of the band. */
   color: string;
+  /** What being in the band means, in everyday words. */
+  meaning: string;
 }
+
+/** What each band means for the company, in one plain sentence. */
+export const BAND_MEANINGS: Readonly<Record<ScoreBandKey, string>> = {
+  critical:
+    'Hay problemas ya: falta dinero en el banco o hay deudas que aprietan.',
+  fragile: 'Aguanta, pero con poco margen: un mes malo le hace daño.',
+  neutral: 'Va bien, sin que sobre ni falte.',
+  solid:
+    'Sobra tranquilidad: dinero en el banco, deudas a raya y clientes que pagan.',
+};
 
 /**
  * Places the four score bands on the drawn scale.
@@ -45,6 +57,7 @@ export function buildBandSpans(min = 0, max = 100): MethodBandSpan[] {
       to,
       width: span > 0 ? ((to - from) / span) * 100 : 0,
       color: band.color,
+      meaning: BAND_MEANINGS[band.key],
     };
   });
 }

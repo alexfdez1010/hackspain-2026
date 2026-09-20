@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { PageShell } from '@/components/layout/page-shell';
 import { PulseHeadlineTotal } from '@/components/pulse/headline-total';
 import { PulsePlanPanel } from '@/components/pulse/plan-panel';
-import { Panel } from '@/components/ui/panel';
 import { companyPageTitle, loadCompanyPage } from '@/lib/pulse/company-page';
 import { knownWeight } from '@/lib/pulse/gap';
 import { buildPulseMosaic } from '@/lib/pulse/mosaic';
@@ -37,10 +36,11 @@ export async function generateMetadata({
  * exactly as they are ranked there; nothing on it depends on financing, which
  * is one link away for the case where the operating measure is not enough.
  *
- * Everything under the headline lives in a single `Panel`: the strip of five
- * figures, the reason, the moves and the two ways out are one reading of one
- * variable, so the page no longer splits them into a KPI strip plus a titled
- * section — the «Qué hacer» heading sits inside the panel with the moves.
+ * Everything under the headline is one reading of one variable: the strip of
+ * five figures, the reason, the moves and the two ways out follow each other
+ * on the page itself, without a panel around them — the hairlines of the
+ * strip are the only lines drawn, and the «Qué hacer» heading sits with the
+ * moves instead of opening a titled section.
  *
  * @param props - Route parameters carrying the company and the variable.
  * @returns The recommendation page, or a 404 when either key is unknown.
@@ -70,15 +70,13 @@ export default async function CompanyPlanPage({ params }: PlanPageProps) {
         />
       }
     >
-      <Panel>
-        <PulsePlanPanel
-          figures={view.figures}
-          why={view.why}
-          steps={view.plan.steps}
-          actionHref={routes.action}
-          advisorHref={routes.advisor}
-        />
-      </Panel>
+      <PulsePlanPanel
+        figures={view.figures}
+        why={view.why}
+        steps={view.plan.steps}
+        actionHref={routes.action}
+        advisorHref={routes.advisor}
+      />
     </PageShell>
   );
 }

@@ -127,7 +127,7 @@ export function PulseGapTable({ board, companyId }: GapTableProps) {
   return (
     <div>
       <div
-        className={`border-hairline text-ink-secondary mb-3 hidden items-end border-b px-6 pb-3 text-sm leading-[1.2] font-medium md:grid ${COLUMNS}`}
+        className={`border-hairline text-ink-secondary mb-3 hidden items-end border-b px-6 pt-2 pb-3 text-sm leading-[1.2] font-medium md:grid ${COLUMNS}`}
       >
         <span className="flex items-center gap-1.5">
           Variable

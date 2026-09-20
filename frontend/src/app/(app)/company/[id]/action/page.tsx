@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { PageShell, Section } from '@/components/layout/page-shell';
 import { PulseGapTable } from '@/components/pulse/gap-table';
 import { PulseHeadlineTotal } from '@/components/pulse/headline-total';
-import { Panel } from '@/components/ui/panel';
 import { companyName } from '@/lib/company/names';
 import { companyPageTitle, loadCompanyPage } from '@/lib/pulse/company-page';
 import { buildPulseGapBoard } from '@/lib/pulse/gap';
@@ -36,6 +35,10 @@ export async function generateMetadata({
  * `peso · (100 − score) / peso con dato`, so the page answers «where are the
  * missing points», which is a different question from «which score is lowest».
  *
+ * The ranking sits directly on the page: each step is already a card washed
+ * with its band, so a panel around the three would draw a border around
+ * borders and add nothing the wash does not say.
+ *
  * @param props - Route parameters carrying the company identifier.
  * @returns The action page, or a 404 when the identifier is unknown.
  */
@@ -63,9 +66,7 @@ export default async function CompanyActionPage({ params }: ActionPageProps) {
         title="Dónde están los puntos"
         note={`${companyName(company.companyId)} · cierre de ${formatMonth(company.month)}`}
       >
-        <Panel>
-          <PulseGapTable board={board} companyId={company.companyId} />
-        </Panel>
+        <PulseGapTable board={board} companyId={company.companyId} />
       </Section>
     </PageShell>
   );

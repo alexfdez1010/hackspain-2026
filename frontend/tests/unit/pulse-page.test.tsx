@@ -66,12 +66,10 @@ describe('the company summary page', () => {
     );
   });
 
-  it('keeps only the trajectory and the actions, in that order', async () => {
+  it('closes with the trajectory and nothing else', async () => {
     const markup = await render(CompanyPulsePage, 'COMP_0001');
     expect(markup).toContain('8 cierres observados y 6 meses de previsión.');
-    expect(markup.indexOf('Trayectoria')).toBeLessThan(
-      markup.indexOf('Qué hacer ahora'),
-    );
+    expect(markup).not.toContain('Qué hacer ahora');
     expect(markup).not.toContain('Dónde se decide');
     expect(markup).not.toContain('Detalle de un mes');
     expect(markup).not.toContain('Cómo se calcula');

@@ -5,6 +5,8 @@ export interface VariableInfo {
   /** Accessible name of the button that opens the explanation. */
   buttonLabel: string;
   title: string;
+  /** The question the variable answers, in everyday words. */
+  plain: string;
   /** What the variable measures, in one sentence. */
   measures: string;
   /** Which way it reads, as `Más alto, más sano`. */
@@ -37,6 +39,7 @@ export function variableInfo(
   return {
     buttonLabel: `Qué mide ${label}`,
     title: `${label} · ${weight} de 100 puntos`,
+    plain: doc.plain,
     measures: doc.measures,
     direction: directionText(doc.better),
     source: doc.source,

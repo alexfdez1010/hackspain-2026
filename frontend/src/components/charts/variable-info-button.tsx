@@ -55,7 +55,8 @@ export function VariableInfoButton({
           <Popover.Heading className="text-sm font-semibold">
             {info.title}
           </Popover.Heading>
-          <p>{info.measures}</p>
+          <p>{info.plain}</p>
+          <p className="text-muted">{info.measures}</p>
           <p className="text-muted">
             {info.direction} · {info.source}
             {info.proxy ? `. Sin ERP: ${info.proxy.toLowerCase()}` : ''}

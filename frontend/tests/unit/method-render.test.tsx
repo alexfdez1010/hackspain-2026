@@ -17,6 +17,7 @@ import {
 import { buildModelFacts } from '@/lib/method/facts';
 import { PULSE_DEMO_COMPANY_ID } from '@/lib/pulse/demo';
 import { StaticPulseSource } from '@/lib/pulse/source/static-json';
+import { formatPercent } from '@/lib/format';
 
 const { meta } = await new StaticPulseSource().getSummary();
 const company = await new StaticPulseSource().getCompany(PULSE_DEMO_COMPANY_ID);
@@ -42,6 +43,16 @@ describe('the method page renders on the server with the real export', () => {
     const markup = renderToStaticMarkup(
       <MethodScoreScale caption="Último cierre: ago 2026." />,
     );
+    expect(markup).not.toContain('border-t-ink');
+    const marked = renderToStaticMarkup(
+      <MethodScoreScale
+        caption="Último cierre: ago 2026."
+        marker={{ value: 45.64, label: 'Atresmedia Labs, ago 2026' }}
+      />,
+    );
+    expect(marked).toContain('left:45.64%');
+    expect(marked).toContain('Atresmedia Labs, ago 2026: 45,6');
+    expect(markup).toContain('Hay problemas ya');
     expect(markup).toContain('Crítico');
     expect(markup).toContain('&lt; 35');
     expect(markup).toContain('35-50');
@@ -58,6 +69,8 @@ describe('the method page renders on the server with the real export', () => {
     expect(markup).toContain('Tramo +90 días');
     expect(markup).toContain('12 de 100 puntos');
     expect(markup).toContain('Más bajo, más sano');
+    expect(markup).toContain('más de tres meses sin cobrarse');
+    expect(markup).toContain('En detalle: </span>Cartera de clientes vencida');
     expect(markup).toContain('ERP, cuentas a cobrar');
     expect(markup).toContain('Proxy bancario');
     expect(markup).toContain('aria-pressed="true"');
@@ -96,8 +109,17 @@ describe('the method page renders on the server with the real export', () => {
   it('lists the pipeline and the coverage of the demo month', () => {
     const steps = renderToStaticMarkup(<MethodPipelineFlow />);
     expect(steps).toContain('Cada nota vale sus puntos');
-    expect(steps).toContain('simplemente no cuenta');
+    expect(steps).toContain('no cuenta como un cero');
     expect(steps).not.toContain('percentil');
+    expect(steps).not.toContain('Ejemplo:');
+
+    const told = renderToStaticMarkup(
+      <MethodPipelineFlow
+        examples={['9 de las 11 variables', null, null, 'PULSE 45,6']}
+      />,
+    );
+    expect(told).toContain('Ejemplo: </span>9 de las 11 variables');
+    expect(told).toContain('PULSE 45,6');
 
     const bar = renderToStaticMarkup(
       <MethodConfidenceBar
@@ -107,6 +129,7 @@ describe('the method page renders on the server with the real export', () => {
       />,
     );
     expect(bar).toContain('82 de 100 puntos con datos');
+    expect(bar).toContain('puzle de 100 piezas');
     expect(bar).toContain('no cuenta, y tampoco resta como un cero');
   });
 
@@ -148,12 +171,32 @@ describe('the method page renders on the server with the real export', () => {
   it('opens the route with the acronym, the scale and every section', async () => {
     const markup = await renderPage();
     expect(markup).toContain('Payment, Underwriting, Liquidity &amp; Solvency');
-    expect(markup).toContain('Los 100 puntos');
-    expect(markup).toContain('Cómo se calcula');
+    expect(markup).toContain('como en el colegio');
+    expect(markup).toContain('La idea en tres dibujos');
+    expect(markup).toContain(
+      'Por ejemplo: </span>En ago 2026, Atresmedia Labs',
+    );
+    expect(markup).toContain('Qué significa el número');
+    expect(markup).toContain('Atresmedia Labs, ago 2026: 45,6');
+    expect(markup).toContain('Aguanta, pero con poco margen');
+    expect(markup).toContain('Los 4 temas que miramos');
+    expect(markup).toContain('¿Hay dinero en el banco?');
+    expect(markup).toContain('36 de 100 puntos');
+    expect(markup).toContain('Los 100 puntos, uno a uno');
+    expect(markup).toContain('paso a paso');
+    expect(markup).toContain('¿Y si falta algún dato?');
+    expect(markup).toContain('Un mes real, sumado a mano');
+    expect(markup).toContain('Una variable, hecha con calculadora');
+    expect(markup).toContain(`12 ÷ 82 = ${formatPercent(12 / 82, 1)}`);
+    expect(markup).toContain('Y después del mes');
+    expect(markup).toContain('como el parte del tiempo');
+    expect(markup).toContain('La fórmula, para quien la quiera');
     expect(markup).toContain('Ficha del modelo');
     expect(markup).toContain('Σ(pesos con dato)');
-    expect(markup).toContain('Un mes real, sumado a mano');
-    expect(markup).toContain('Previsión, precio y límites');
+    expect(markup).toContain('Palabras raras, traducidas');
+    expect(markup).toContain(
+      'Días que tarda la empresa en cobrar lo que vende.',
+    );
     expect(markup).not.toContain('AUROC');
     expect(markup).not.toContain('Catálogo');
     expect(markup).toContain('Ver un PULSE: Atresmedia Labs');
